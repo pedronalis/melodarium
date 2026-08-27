@@ -191,7 +191,7 @@ Lê `~/.config/noctalia/colors.json`. Se o arquivo não existir, estiver ilegív
 cada cor cai no valor de fábrica do Noctalia — é isso que faz o app rodar em máquina sem
 Noctalia e, depois, no Windows.
 
-- [ ] Criar `src/colorschemeprovider.h`:
+- [x] Criar `src/colorschemeprovider.h`:
 
 ```cpp
 #pragma once
@@ -269,7 +269,7 @@ private:
 };
 ```
 
-- [ ] Criar `src/colorschemeprovider.cpp`:
+- [x] Criar `src/colorschemeprovider.cpp`:
 
 ```cpp
 #include "colorschemeprovider.h"
@@ -318,7 +318,7 @@ void ColorSchemeProvider::reload()
 }
 ```
 
-- [ ] Acrescentar ao fim de `src/colorschemeprovider.cpp` o construtor delegado privado e a
+- [x] Acrescentar ao fim de `src/colorschemeprovider.cpp` o construtor delegado privado e a
       conexão do watcher (o corpo real do construtor de dois argumentos):
 
 ```cpp
@@ -337,14 +337,14 @@ ColorSchemeProvider::ColorSchemeProvider(QObject *parent, const QString &path)
 }
 ```
 
-- [ ] Declarar esse construtor no header, na seção `private:`, logo antes de `void reload();`:
+- [x] Declarar esse construtor no header, na seção `private:`, logo antes de `void reload();`:
 
 ```cpp
     ColorSchemeProvider(QObject *parent, const QString &path);
 ```
 
-- [ ] verificação mecânica da task: `cmake --build build` → exit 0
-- [ ] commit:
+- [x] verificação mecânica da task: `cmake --build build` → exit 0
+- [x] commit:
 
 ```bash
 git add src/colorschemeprovider.h src/colorschemeprovider.cpp CMakeLists.txt
