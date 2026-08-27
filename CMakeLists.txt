@@ -5,7 +5,7 @@ set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_AUTOMOC ON)
 
-find_package(Qt6 REQUIRED COMPONENTS Concurrent Core Qml Quick Sql)
+find_package(Qt6 REQUIRED COMPONENTS Concurrent Core Qml Quick QuickDialogs2 Sql)
 find_package(PkgConfig REQUIRED)
 pkg_check_modules(MPV REQUIRED IMPORTED_TARGET mpv)
 pkg_check_modules(TAGLIB REQUIRED IMPORTED_TARGET taglib)
@@ -47,6 +47,7 @@ qt_add_qml_module(appmelodia
         src/MelodiaButton.qml
         src/TrackRow.qml
         src/PlayerBar.qml
+        src/LibraryEmptyState.qml
     RESOURCES
         assets/fonts/noctalia-tabler-icons.ttf
     SOURCES
@@ -66,7 +67,7 @@ qt_add_qml_module(appmelodia
 target_include_directories(appmelodia PRIVATE src)
 
 target_link_libraries(appmelodia PRIVATE
-    Qt6::Concurrent Qt6::Core Qt6::Qml Qt6::Quick Qt6::Sql
+    Qt6::Concurrent Qt6::Core Qt6::Qml Qt6::Quick Qt6::QuickDialogs2 Qt6::Sql
     PkgConfig::MPV PkgConfig::TAGLIB)
 
 enable_testing()
