@@ -70,7 +70,7 @@ git commit -m "feat(library): migration 4 adds liked_at to tracks"
 
 ### Task 2: Teste da migração (roda antes da API existir)
 
-- [ ] Em `tests/tst_library.cpp`, acrescentar ao slot de testes de schema:
+- [x] Em `tests/tst_library.cpp`, acrescentar ao slot de testes de schema:
 
 ```cpp
 void TestLibrary::migration4AddsLikedColumn()
@@ -101,12 +101,12 @@ void TestLibrary::migration4AddsLikedColumn()
 }
 ```
 
-- [ ] Declarar o slot no bloco `private slots:` da classe de teste:
+- [x] Declarar o slot no bloco `private slots:` da classe de teste:
       `void migration4AddsLikedColumn();`
-- [ ] verificação mecânica da task:
+- [x] verificação mecânica da task:
       `./build/tests/tst_library -functions | grep -c migration4AddsLikedColumn` → `1`
       e `./build/tests/tst_library` → exit 0
-- [ ] commit:
+- [x] commit:
 
 ```bash
 git add tests/tst_library.cpp
