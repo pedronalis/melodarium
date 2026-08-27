@@ -25,6 +25,8 @@ qt_add_executable(appmelodia
     src/libraryscanner.cpp
     src/covercache.h
     src/covercache.cpp
+    src/tracklistmodel.h
+    src/tracklistmodel.cpp
 )
 
 # Theme.qml e Icons.qml usam `pragma Singleton`. O qt_add_qml_module NAO detecta o pragma
@@ -52,6 +54,8 @@ qt_add_qml_module(appmelodia
         src/database.cpp
         src/covercache.h
         src/covercache.cpp
+        src/tracklistmodel.h
+        src/tracklistmodel.cpp
 )
 
 # OBRIGATORIO: sem isto o build quebra com erros de template que nao apontam a causa.

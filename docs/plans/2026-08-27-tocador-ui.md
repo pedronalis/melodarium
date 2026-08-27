@@ -221,7 +221,7 @@ git commit -m "feat(ui): extract embedded covers into an on-disk cache"
 O `Q_ENUM(Roles)` não é decoração: sem ele, `TrackListModel.TitleRole` resolve para `undefined`
 no QML sem erro de compilação — só um aviso de runtime fácil de não ver.
 
-- [ ] Criar `src/tracklistmodel.h`:
+- [x] Criar `src/tracklistmodel.h`:
 
 ```cpp
 #pragma once
@@ -301,7 +301,7 @@ private:
 };
 ```
 
-- [ ] Criar `src/tracklistmodel.cpp`:
+- [x] Criar `src/tracklistmodel.cpp`:
 
 ```cpp
 #include "tracklistmodel.h"
@@ -471,10 +471,10 @@ void TrackListModel::setRowsForTesting(const QList<TrackRow> &rows)
 }
 ```
 
-- [ ] Acrescentar `#include <QFileInfo>` ao topo de `src/tracklistmodel.cpp` (usado no
+- [x] Acrescentar `#include <QFileInfo>` ao topo de `src/tracklistmodel.cpp` (usado no
       `TitleRole`).
-- [ ] verificação mecânica da task: `cmake --build build` → exit 0
-- [ ] commit:
+- [x] verificação mecânica da task: `cmake --build build` → exit 0
+- [x] commit:
 
 ```bash
 git add src/tracklistmodel.h src/tracklistmodel.cpp CMakeLists.txt
