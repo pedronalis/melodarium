@@ -27,6 +27,21 @@ Rectangle {
         anchors.margins: Theme.marginS
         spacing: Theme.marginXXS
 
+        // The spec puts collections at the top: they are the differentiator of the product.
+        CollectionsSection {
+            Layout.fillWidth: true
+            currentCollectionId: root.currentSection === "collection" ? root.currentId : 0
+            onCollectionChosen: function (id) { root.choose("collection", id) }
+        }
+
+        Rectangle {
+            Layout.fillWidth: true
+            Layout.topMargin: Theme.marginS
+            Layout.bottomMargin: Theme.marginS
+            Layout.preferredHeight: Theme.borderS
+            color: Theme.mOutline
+        }
+
         SidebarItem {
             Layout.fillWidth: true
             icon: "microphone"; label: qsTr("Artistas")
@@ -41,9 +56,15 @@ Rectangle {
         }
         SidebarItem {
             Layout.fillWidth: true
-            icon: "tags"; label: qsTr("Gêneros")
+            icon: "music"; label: qsTr("Gêneros")
             selected: root.currentSection === "genres"
             onClicked: root.choose("genres", 0)
+        }
+        SidebarItem {
+            Layout.fillWidth: true
+            icon: "tags"; label: qsTr("Tags")
+            selected: root.currentSection === "tags"
+            onClicked: root.choose("tags", 0)
         }
         SidebarItem {
             Layout.fillWidth: true

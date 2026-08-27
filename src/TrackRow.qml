@@ -11,8 +11,11 @@ Item {
     property int durationMs: 0
     property string coverUrl: ""
     property bool isCurrent: false
+    property int trackId: 0
+    property bool showCollectButton: false
 
     signal activated
+    signal collectRequested
 
     implicitHeight: Theme.marginXL * 3
 
@@ -35,6 +38,17 @@ Item {
 
         Behavior on color {
             ColorAnimation { duration: Theme.animationFast; easing.type: Theme.easingType }
+        }
+
+        // Declared before the row content on purpose: the collect button sits inside the
+        // RowLayout and has to receive its own clicks, which a MouseArea stacked on top
+        // of it would swallow.
+        MouseArea {
+            id: mouse
+            anchors.fill: parent
+            hoverEnabled: true
+            cursorShape: Qt.PointingHandCursor
+            onClicked: root.activated()
         }
 
         RowLayout {
@@ -93,20 +107,26 @@ Item {
                 }
             }
 
+            // The one manual gesture of the whole product. Always visible when enabled —
+            // a control that only appears on hover is a control the user never finds.
+            IconButton {
+                icon: "plus"
+                size: Theme.fontSizeS
+                visible: root.showCollectButton
+                opacity: mouse.containsMouse ? 1.0 : 0.45
+                onClicked: root.collectRequested()
+
+                Behavior on opacity {
+                    NumberAnimation { duration: Theme.animationFast; easing.type: Theme.easingType }
+                }
+            }
+
             Text {
                 text: root.formatDuration(root.durationMs)
                 font.family: Theme.fontFamilyFixed
                 font.pointSize: Theme.fontSizeS
                 color: mouse.containsMouse ? Theme.mOnHover : Theme.mOnSurfaceVariant
             }
-        }
-
-        MouseArea {
-            id: mouse
-            anchors.fill: parent
-            hoverEnabled: true
-            cursorShape: Qt.PointingHandCursor
-            onClicked: root.activated()
         }
     }
 }
