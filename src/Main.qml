@@ -290,6 +290,8 @@ Window {
                 Rectangle {
                     Layout.fillWidth: true
                     Layout.fillHeight: true
+                    // The track list is the point of the screen: it never gives up its space.
+                    Layout.minimumWidth: 360
                     radius: Theme.radiusM
                     color: Theme.mSurfaceVariant
                     border.width: Theme.borderS
@@ -399,6 +401,11 @@ Window {
                 }
 
                 ColumnLayout {
+                    // A nested layout defaults to Layout.fillWidth: true (a plain Item defaults
+                    // to false). Without this line the queue column ate 834 of 1100 px and left
+                    // 2 px for the track list — no error, no warning, just an invisible list.
+                    Layout.fillWidth: false
+                    Layout.maximumWidth: 340
                     Layout.fillHeight: true
                     Layout.preferredWidth: 300
                     spacing: Theme.marginM
