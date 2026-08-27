@@ -46,6 +46,7 @@ signals:
 
 private:
     int ensureShow(const QString &folderPath, const QString &title);
+    void autoMarkPlayed(int episodeId);
 
     QString m_podcastPath;
     bool m_scanning = false;
