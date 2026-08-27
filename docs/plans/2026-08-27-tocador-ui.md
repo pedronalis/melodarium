@@ -1,7 +1,7 @@
 ---
 slug: tocador-ui
 feature: melodia
-status: aprovado
+status: em-execucao
 depende-de: [motor-audio, scan-biblioteca]
 decisao-humana: sim
 spec: docs/specs/2026-08-27-player-musica-podcast.md
@@ -96,7 +96,7 @@ Bytes de imagem não cruzam a ponte para o QML a cada scroll: a capa é extraíd
 no cache e servida por URL. O nome do arquivo é o hash do caminho da faixa, então o cache
 sobrevive a mudança de tags.
 
-- [ ] Criar `src/covercache.h`:
+- [x] Criar `src/covercache.h`:
 
 ```cpp
 #pragma once
@@ -125,7 +125,7 @@ private:
 };
 ```
 
-- [ ] Criar `src/covercache.cpp`:
+- [x] Criar `src/covercache.cpp`:
 
 ```cpp
 #include "covercache.h"
@@ -208,8 +208,8 @@ QString CoverCache::coverUrlForTrack(const QString &trackPath, int albumId)
 }
 ```
 
-- [ ] verificação mecânica da task: `cmake --build build` → exit 0
-- [ ] commit:
+- [x] verificação mecânica da task: `cmake --build build` → exit 0
+- [x] commit:
 
 ```bash
 git add src/covercache.h src/covercache.cpp CMakeLists.txt
