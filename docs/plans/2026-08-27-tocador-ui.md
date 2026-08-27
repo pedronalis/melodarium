@@ -727,7 +727,7 @@ git commit -m "feat(ui): reusable Noctalia-styled button, icon button and track 
 
 ### Task 4: PlayerBar — a barra de transporte
 
-- [ ] Criar `src/PlayerBar.qml`:
+- [x] Criar `src/PlayerBar.qml`:
 
 ```qml
 import QtQuick
@@ -885,9 +885,9 @@ Rectangle {
 }
 ```
 
-- [ ] Acrescentar `src/PlayerBar.qml` ao bloco `QML_FILES`.
-- [ ] verificação mecânica da task: `cmake --build build` → exit 0
-- [ ] commit:
+- [x] Acrescentar `src/PlayerBar.qml` ao bloco `QML_FILES`.
+- [x] verificação mecânica da task: `cmake --build build` → exit 0
+- [x] commit:
 
 ```bash
 git add src/PlayerBar.qml CMakeLists.txt
