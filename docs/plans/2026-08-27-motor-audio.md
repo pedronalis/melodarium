@@ -84,21 +84,21 @@ void engineUnavailable(const QString &message);  // mpv could not initialise at 
 
 ### Task 1: Ligar o libmpv ao build
 
-- [ ] Acrescentar a `CMakeLists.txt`, logo após `find_package(Qt6 ...)`:
+- [x] Acrescentar a `CMakeLists.txt`, logo após `find_package(Qt6 ...)`:
 
 ```cmake
 find_package(PkgConfig REQUIRED)
 pkg_check_modules(MPV REQUIRED IMPORTED_TARGET mpv)
 ```
 
-- [ ] Acrescentar `src/audioengine.h` e `src/audioengine.cpp` à lista de
+- [x] Acrescentar `src/audioengine.h` e `src/audioengine.cpp` à lista de
       `qt_add_executable(appmelodia ...)` **e** ao bloco `SOURCES` de `qt_add_qml_module`.
-- [ ] Acrescentar `PkgConfig::MPV` ao `target_link_libraries(appmelodia PRIVATE ...)` e
+- [x] Acrescentar `PkgConfig::MPV` ao `target_link_libraries(appmelodia PRIVATE ...)` e
       `Qt6::Qml` à lista de componentes do `find_package(Qt6 ...)`.
-- [ ] verificação mecânica da task: `pkg-config --exists mpv && echo OK` → `OK`
+- [x] verificação mecânica da task: `pkg-config --exists mpv && echo OK` → `OK`
       (nota: `pkg-config --modversion mpv` devolve `2.5.0` — é a versão da **API cliente**,
       não a do programa mpv 0.40.0; não use essa string para inferir quais funções existem)
-- [ ] commit:
+- [x] commit:
 
 ```bash
 git add CMakeLists.txt
