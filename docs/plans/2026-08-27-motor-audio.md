@@ -229,7 +229,7 @@ formato mudar — o oposto do requisito de qualidade. Em `weak` o gapless aconte
 de parâmetros idênticos (que é exatamente o caso de um álbum contínuo) e nunca há resample
 escondido. `setGaplessAggressive(true)` liga o `yes` para quem sabe o que está fazendo.
 
-- [ ] Criar `src/audioengine.cpp`:
+- [x] Criar `src/audioengine.cpp`:
 
 ```cpp
 #include "audioengine.h"
@@ -510,8 +510,8 @@ void AudioEngine::handleEvent(mpv_event *event)
 }
 ```
 
-- [ ] verificação mecânica da task: `cmake --build build` → exit 0
-- [ ] commit:
+- [x] verificação mecânica da task: `cmake --build build` → exit 0
+- [x] commit:
 
 ```bash
 git add src/audioengine.cpp CMakeLists.txt
