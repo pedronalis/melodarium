@@ -7,6 +7,7 @@
 #include <QSqlDatabase>
 #include <QSqlQuery>
 #include <QVariant>
+#include <utility>
 
 namespace {
 constexpr const char *kSelect =
@@ -148,6 +149,7 @@ void TrackListModel::loadFromQuery(const QString &whereClause, const QVariantLis
 
     beginResetModel();
     m_rows = std::move(rows);
+    recomputeTotalDuration();
     endResetModel();
     emit countChanged();
 }
@@ -178,6 +180,15 @@ void TrackListModel::setRowsForTesting(const QList<TrackRow> &rows)
 {
     beginResetModel();
     m_rows = rows;
+    recomputeTotalDuration();
     endResetModel();
     emit countChanged();
+}
+
+void TrackListModel::recomputeTotalDuration()
+{
+    qint64 total = 0;
+    for (const TrackRow &row : std::as_const(m_rows))
+        total += row.durationMs;
+    m_totalDurationMs = total;
 }

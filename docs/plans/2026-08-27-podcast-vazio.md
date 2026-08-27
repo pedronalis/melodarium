@@ -1,7 +1,7 @@
 ---
 slug: podcast-vazio
 feature: melodia-capa-manda
-status: aprovado
+status: concluido
 depende-de: [moldura-capa]
 decisao-humana: sim
 spec: design/Podcast.dc.html e design/SemMusica.dc.html (telas 4 e 5 aprovadas em 2026-08-27)
@@ -55,7 +55,7 @@ segundo.
 
 ### Task 1: Migração 5 — a posição de onde a faixa parou
 
-- [ ] Em `src/database.cpp`, acrescentar ao fim da lista `migrations()` (sem `#` dentro do
+- [x] Em `src/database.cpp`, acrescentar ao fim da lista `migrations()` (sem `#` dentro do
       literal cru — `docs/solutions/build-errors/2026-08-27-moc-raw-string-url-vazio.md`):
 
 ```cpp
@@ -64,7 +64,7 @@ ALTER TABLE track_stats ADD COLUMN last_position_ms INTEGER NOT NULL DEFAULT 0;
 )SQL"),
 ```
 
-- [ ] Em `tests/tst_library.cpp`, acrescentar e declarar em `private slots:`:
+- [x] Em `tests/tst_library.cpp`, acrescentar e declarar em `private slots:`:
 
 ```cpp
 void TestLibrary::migration5AddsLastPosition()
@@ -89,8 +89,8 @@ void TestLibrary::migration5AddsLastPosition()
 }
 ```
 
-- [ ] verificação mecânica da task: `cmake --build build && ./build/tests/tst_library` → exit 0
-- [ ] commit:
+- [x] verificação mecânica da task: `cmake --build build && ./build/tests/tst_library` → exit 0
+- [x] commit:
 
 ```bash
 git add src/database.cpp tests/tst_library.cpp
@@ -99,13 +99,13 @@ git commit -m "feat(library): migration 5 remembers where a track stopped"
 
 ### Task 2: Gravar e ler a posição
 
-- [ ] Em `src/playstatsrecorder.h`, acrescentar ao bloco público:
+- [x] Em `src/playstatsrecorder.h`, acrescentar ao bloco público:
 
 ```cpp
     Q_INVOKABLE void savePosition(const QString &path, int positionMs);
 ```
 
-- [ ] Em `src/playstatsrecorder.cpp`, acrescentar (siga o padrão de conexão dos métodos
+- [x] Em `src/playstatsrecorder.cpp`, acrescentar (siga o padrão de conexão dos métodos
       vizinhos — `QSqlDatabase::database(QLatin1String(Database::kUiConnection))`):
 
 ```cpp
@@ -125,7 +125,7 @@ void PlayStatsRecorder::savePosition(const QString &path, int positionMs)
 }
 ```
 
-- [ ] Em `src/librarybrowser.h`, acrescentar `Q_INVOKABLE QVariantMap lastPlayed();` e, em
+- [x] Em `src/librarybrowser.h`, acrescentar `Q_INVOKABLE QVariantMap lastPlayed();` e, em
       `src/librarybrowser.cpp`:
 
 ```cpp
@@ -154,9 +154,9 @@ QVariantMap LibraryBrowser::lastPlayed()
 }
 ```
 
-- [ ] verificação mecânica da task: `cmake --build build` → exit 0 e
+- [x] verificação mecânica da task: `cmake --build build` → exit 0 e
       `grep -c "savePosition" src/playstatsrecorder.cpp` → `1`
-- [ ] commit:
+- [x] commit:
 
 ```bash
 git add src/playstatsrecorder.h src/playstatsrecorder.cpp src/librarybrowser.h src/librarybrowser.cpp
@@ -165,7 +165,7 @@ git commit -m "feat(library): save and read the position a track stopped at"
 
 ### Task 3: `SpeedControl.qml` e o podcast na moldura nova
 
-- [ ] Criar `src/SpeedControl.qml`:
+- [x] Criar `src/SpeedControl.qml`:
 
 ```qml
 import QtQuick
@@ -223,7 +223,7 @@ Rectangle {
 }
 ```
 
-- [ ] Substituir o conteúdo do stub `src/PodcastPane.qml` por:
+- [x] Substituir o conteúdo do stub `src/PodcastPane.qml` por:
 
 ```qml
 import QtQuick
@@ -292,13 +292,13 @@ Rectangle {
 }
 ```
 
-- [ ] Em `src/PodcastSection.qml`, REMOVER os três `IconButton` de transporte (as linhas
+- [x] Em `src/PodcastSection.qml`, REMOVER os três `IconButton` de transporte (as linhas
       119-133 do arquivo atual, o bloco de play/pause/velocidade que ficava no cabeçalho da
       seção): eles agora vivem no painel e no `PodcastPane`. Não mexa em mais nada do arquivo.
-- [ ] Registrar `src/SpeedControl.qml` em `QML_FILES` no `CMakeLists.txt`.
-- [ ] verificação mecânica da task:
+- [x] Registrar `src/SpeedControl.qml` em `QML_FILES` no `CMakeLists.txt`.
+- [x] verificação mecânica da task:
       `cmake --build build && test "$(QT_QPA_PLATFORM=offscreen timeout 8 ./build/appmelodia 2>&1 | grep -Ec 'is not a type|Unable to assign|ReferenceError')" -eq 0` → exit 0
-- [ ] commit:
+- [x] commit:
 
 ```bash
 git add src/SpeedControl.qml src/PodcastPane.qml src/PodcastSection.qml CMakeLists.txt
@@ -307,7 +307,7 @@ git commit -m "feat(ui): podcast pane with speed and 30-second jumps"
 
 ### Task 4: `EmptyPane.qml` — o convite no lugar do vazio
 
-- [ ] Substituir o conteúdo do stub `src/EmptyPane.qml` por:
+- [x] Substituir o conteúdo do stub `src/EmptyPane.qml` por:
 
 ```qml
 import QtQuick
@@ -446,7 +446,7 @@ Rectangle {
 }
 ```
 
-- [ ] Acrescentar o contador que o pane usa — em `src/librarybrowser.h`,
+- [x] Acrescentar o contador que o pane usa — em `src/librarybrowser.h`,
       `Q_INVOKABLE int neverPlayedCount();` e em `src/librarybrowser.cpp`:
 
 ```cpp
@@ -464,9 +464,9 @@ int LibraryBrowser::neverPlayedCount()
 }
 ```
 
-- [ ] verificação mecânica da task: `cmake --build build` → exit 0 e
+- [x] verificação mecânica da task: `cmake --build build` → exit 0 e
       `grep -c 'signal playRequested' src/EmptyPane.qml` → `1`
-- [ ] commit:
+- [x] commit:
 
 ```bash
 git add src/EmptyPane.qml src/librarybrowser.h src/librarybrowser.cpp
@@ -475,7 +475,7 @@ git commit -m "feat(ui): the empty state invites instead of showing a blank cove
 
 ### Task 5: Ligar os dois panes ao `Main.qml`
 
-- [ ] Em `src/Main.qml`, substituir os filhos stub do `StackLayout` por:
+- [x] Em `src/Main.qml`, substituir os filhos stub do `StackLayout` por:
 
 ```qml
             PodcastPane {
@@ -488,7 +488,7 @@ git commit -m "feat(ui): the empty state invites instead of showing a blank cove
             }
 ```
 
-- [ ] Acrescentar a função a `Main.qml`:
+- [x] Acrescentar a função a `Main.qml`:
 
 ```qml
     function startFromEmpty(mode) {
@@ -523,7 +523,7 @@ git commit -m "feat(ui): the empty state invites instead of showing a blank cove
     }
 ```
 
-- [ ] Gravar a posição da faixa enquanto ela toca — acrescentar a `Main.qml`:
+- [x] Gravar a posição da faixa enquanto ela toca — acrescentar a `Main.qml`:
 
 ```qml
     // Cinco segundos: escrever a cada positionChanged bateria no SQLite dezenas de vezes
@@ -546,9 +546,9 @@ git commit -m "feat(ui): the empty state invites instead of showing a blank cove
     }
 ```
 
-- [ ] verificação mecânica da task:
+- [x] verificação mecânica da task:
       `cmake --build build && test "$(QT_QPA_PLATFORM=offscreen timeout 8 ./build/appmelodia 2>&1 | grep -Ec 'is not a type|Unable to assign|ReferenceError')" -eq 0` → exit 0
-- [ ] commit:
+- [x] commit:
 
 ```bash
 git add src/Main.qml
@@ -557,7 +557,7 @@ git commit -m "feat(ui): wire podcast and empty panes, remember playback positio
 
 ### Task 6: Teste da posição salva
 
-- [ ] Em `tests/tst_library.cpp`, acrescentar e declarar em `private slots:`:
+- [x] Em `tests/tst_library.cpp`, acrescentar e declarar em `private slots:`:
 
 ```cpp
 void TestLibrary::savePositionRoundTrips()
@@ -580,9 +580,9 @@ void TestLibrary::savePositionRoundTrips()
 }
 ```
 
-- [ ] verificação mecânica da task: `./build/tests/tst_library` → exit 0 e
+- [x] verificação mecânica da task: `./build/tests/tst_library` → exit 0 e
       `./build/tests/tst_library -functions | grep -c savePositionRoundTrips` → `1`
-- [ ] commit:
+- [x] commit:
 
 ```bash
 git add tests/tst_library.cpp
@@ -608,3 +608,34 @@ git commit -m "test(library): playback position round-trips and ignores unknown 
   semântica diferente (por episódio, não por arquivo).
 - Fila visível nesta direção: ela saiu da tela; a única pista é a ordem tocando. Trazer uma
   gaveta de fila é fatia nova.
+
+## Divergências entre o plano e o desenho (2026-08-27, execução)
+
+- **Os controles de fala foram para o painel, não para o miolo.** O plano os punha no
+  cabeçalho do `PodcastPane`; `design/Podcast.dc.html` os mostra no transporte do painel, no
+  lugar do aleatório e do repetir: `[1x] [◀30] [play] [30▶] [30s]`. É lá que eles estão.
+- **`SpeedControl` virou pílula com menu.** A versão anterior era uma fileira de seis botões,
+  que não caberia no transporte. A API é a do plano (`speed`, `speedPicked`).
+- **`PodcastSection.qml` foi removido, não modificado.** O desenho do podcast é UMA coluna com
+  os episódios de todos os programas, com o nome do programa em cada linha; a seção antiga era
+  duas colunas (programas à esquerda). Escolher um programa virou um chip com menu, na mesma
+  gramática da linha de filtros da biblioteca. Assinar feed, escolher pasta, procurar
+  episódios novos, baixar, marcar ouvido e o erro de download continuam todos lá.
+  `ContinueListening.qml` foi removido junto: ele só era usado por essa seção, e o chip
+  "Começados" faz o mesmo trabalho dentro do desenho.
+- **`PodcastLibrary::allEpisodes(showId, limit)`** foi acrescentado (não estava no plano)
+  porque a lista única do desenho precisa dos episódios de todos os programas com o nome do
+  programa junto. `episodeForPath` passou a devolver também `showTitle`, `publishedAt` e
+  `coverPath`: sem eles o painel dizia "nada tocando" com um episódio no ar.
+- **`EmptyPane` é o painel, não o miolo.** Em `design/SemMusica.dc.html` o miolo continua
+  sendo a biblioteca; quem muda é a coluna da capa — moldura tracejada com "nada tocando" e,
+  embaixo, o convite. O mesmo componente serve nos dois lugares (`framed: true` no miolo,
+  usado quando não há pasta de música escolhida).
+- **Um quarto atalho: "Esquecidas".** Está no desenho e não estava no plano; entrou junto de
+  `LibraryBrowser::forgottenCount()`.
+- **Ícone de "Nunca ouvi" é uma estrela, não um coração.** O desenho usa coração, mas no resto
+  do app coração quer dizer "curtida" — usar o mesmo símbolo para duas coisas custaria mais do
+  que a diferença de ícone.
+- **`AudioEngine::isAvailable()` virou `Q_INVOKABLE` e ganhou `MELODIA_NULL_AO`.** O sinal
+  `engineUnavailable` é emitido dentro do construtor, quando ainda não existe nenhum
+  `Connections` para ouvi-lo: um motor morto falhava calado. O gate agora mede `motor=ok`.

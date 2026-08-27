@@ -1,7 +1,7 @@
 ---
 slug: busca-overlay
 feature: melodia-capa-manda
-status: aprovado
+status: concluido
 depende-de: [moldura-capa]
 decisao-humana: nao
 spec: design/Busca.dc.html (tela 3 aprovada em 2026-08-27)
@@ -51,13 +51,13 @@ tecla digitada: `Timer` de 180 ms segura o texto antes de ir ao banco.
 
 ### Task 1: `searchGrouped` no LibraryBrowser
 
-- [ ] Em `src/librarybrowser.h`, junto dos outros `Q_INVOKABLE`:
+- [x] Em `src/librarybrowser.h`, junto dos outros `Q_INVOKABLE`:
 
 ```cpp
     Q_INVOKABLE QVariantList searchGrouped(const QString &text, int limitPerKind = 4);
 ```
 
-- [ ] Em `src/librarybrowser.cpp`, acrescentar ao fim:
+- [x] Em `src/librarybrowser.cpp`, acrescentar ao fim:
 
 ```cpp
 QVariantList LibraryBrowser::searchGrouped(const QString &text, int limitPerKind)
@@ -158,8 +158,8 @@ QVariantList LibraryBrowser::searchGrouped(const QString &text, int limitPerKind
       use o nome real — confira com
       `grep -n "CREATE TABLE podcast_episodes" -A 14 src/database.cpp` ANTES de compilar.
 
-- [ ] verificação mecânica da task: `cmake --build build` → exit 0
-- [ ] commit:
+- [x] verificação mecânica da task: `cmake --build build` → exit 0
+- [x] commit:
 
 ```bash
 git add src/librarybrowser.h src/librarybrowser.cpp
@@ -168,7 +168,7 @@ git commit -m "feat(library): one grouped search across tracks, albums, artists 
 
 ### Task 2: Teste da busca agrupada
 
-- [ ] Em `tests/tst_librarybrowser.cpp`, acrescentar e declarar em `private slots:`:
+- [x] Em `tests/tst_librarybrowser.cpp`, acrescentar e declarar em `private slots:`:
 
 ```cpp
 void TestLibraryBrowser::searchGroupedReturnsKindsAndRespectsLimit()
@@ -203,8 +203,8 @@ void TestLibraryBrowser::searchGroupedReturnsKindsAndRespectsLimit()
       `seededArtistName()` é um helper novo: devolve o nome do artista que a fixture semeia.
       Acrescente-o ao lado dos outros helpers da fixture.
 
-- [ ] verificação mecânica da task: `./build/tests/tst_librarybrowser` → exit 0
-- [ ] commit:
+- [x] verificação mecânica da task: `./build/tests/tst_librarybrowser` → exit 0
+- [x] commit:
 
 ```bash
 git add tests/tst_librarybrowser.cpp
@@ -213,7 +213,7 @@ git commit -m "test(library): grouped search shape, empty input and per-kind lim
 
 ### Task 3: `SearchOverlay.qml`
 
-- [ ] Criar `src/SearchOverlay.qml`:
+- [x] Criar `src/SearchOverlay.qml`:
 
 ```qml
 import QtQuick
@@ -445,10 +445,10 @@ Popup {
 }
 ```
 
-- [ ] Registrar `src/SearchOverlay.qml` em `QML_FILES` no `CMakeLists.txt`.
-- [ ] verificação mecânica da task: `cmake --build build` → exit 0 e
+- [x] Registrar `src/SearchOverlay.qml` em `QML_FILES` no `CMakeLists.txt`.
+- [x] verificação mecânica da task: `cmake --build build` → exit 0 e
       `grep -c 'searchGrouped' src/SearchOverlay.qml` → `1`
-- [ ] commit:
+- [x] commit:
 
 ```bash
 git add src/SearchOverlay.qml CMakeLists.txt
@@ -457,7 +457,7 @@ git commit -m "feat(ui): search overlay across the whole library"
 
 ### Task 4: Ligar o overlay à lupa e ao teclado
 
-- [ ] Em `src/Main.qml`, instanciar o overlay como filho do `Window` (fora do `RowLayout`):
+- [x] Em `src/Main.qml`, instanciar o overlay como filho do `Window` (fora do `RowLayout`):
 
 ```qml
     SearchOverlay {
@@ -475,7 +475,7 @@ git commit -m "feat(ui): search overlay across the whole library"
     }
 ```
 
-- [ ] Em `showPane(name)`, substituir o `console.log` deixado pela fatia `moldura-capa` pela
+- [x] Em `showPane(name)`, substituir o `console.log` deixado pela fatia `moldura-capa` pela
       chamada real:
 
 ```qml
@@ -485,10 +485,10 @@ git commit -m "feat(ui): search overlay across the whole library"
         }
 ```
 
-- [ ] verificação mecânica da task:
+- [x] verificação mecânica da task:
       `test "$(QT_QPA_PLATFORM=offscreen timeout 8 ./build/appmelodia 2>&1 | grep -Ec 'is not a type|Unable to assign|ReferenceError')" -eq 0` → exit 0
       e `test "$(grep -c 'busca ainda não implementada' src/Main.qml)" -eq 0` → exit 0
-- [ ] commit:
+- [x] commit:
 
 ```bash
 git add src/Main.qml
@@ -511,3 +511,27 @@ git commit -m "feat(ui): open search from the rail and from Ctrl+K"
   e essa decisão não está no desenho aprovado.
 - Histórico de buscas recentes.
 - Busca dentro do texto de tags — as tags já têm eixo próprio na barra de filtros.
+
+## Divergências entre o plano e o desenho (2026-08-27, execução)
+
+- **Resultados agrupados com cabeçalho.** O plano listava tudo corrido com um rótulo de tipo
+  em cada linha; `design/Busca.dc.html` mostra grupos ("FAIXAS", "ÁLBUNS", "ARTISTAS",
+  "EPISÓDIOS") com cabeçalho pequeno em caixa alta. O `searchGrouped` já devolvia os tipos em
+  ordem, então o QML só intercala os cabeçalhos.
+- **O painel não é centralizado.** O desenho o põe a 74 px do topo, com a tela escurecida
+  (62 %) atrás — foi assim que ficou.
+- **Álbum e artista abrem.** O plano os deixava explicitamente sem ação. Como a fatia
+  `biblioteca-densa` acabou trazendo a lista de grupos para o pane, abrir um álbum passou a
+  ter um destino óbvio: o overlay emite `albumChosen`/`artistChosen` com o título junto, e a
+  biblioteca abre aquele grupo. Sem isso, dois dos quatro tipos de resultado seriam mortos.
+- **`property bool opened` foi retirada.** No Qt 6.10 o `Popup` já tem uma propriedade FINAL
+  com esse nome; redeclarar fazia o tipo inteiro não carregar, e o único sinal disso era uma
+  linha `Cannot override FINAL property` no log do disk cache. O `tools/check-layout.sh`
+  agora falha nessas mensagens, e o modo `--measure` abre o overlay de propósito — conteúdo
+  de `Popup` só é construído na primeira abertura.
+- **"⇧↵ pôr na fila" ficou de fora do rodapé.** O desenho mostra o atalho, mas não existe
+  fila nesta direção (o `AudioEngine` não tem enfileirar) e um atalho que não faz nada é pior
+  do que a ausência dele.
+- **Subtítulos e plural.** Os subtítulos seguem o desenho (artista · álbum · duração para
+  faixa; artista · ano · faixas para álbum; contagens para artista; programa · data · minutos
+  para episódio), e contam em português: "1 álbum", não "1 álbuns".

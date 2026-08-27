@@ -65,6 +65,9 @@ qt_add_qml_module(appmelodia
         src/TrackRow.qml
         src/NowPlayingPanel.qml
         src/LibraryPane.qml
+        src/Chip.qml
+        src/FilterChips.qml
+        src/SearchOverlay.qml
         src/PodcastPane.qml
         src/EmptyPane.qml
         src/LibraryEmptyState.qml
@@ -76,10 +79,8 @@ qt_add_qml_module(appmelodia
         src/NewCollectionDialog.qml
         src/TagChip.qml
         src/TagEditor.qml
-        src/PodcastSection.qml
         src/EpisodeRow.qml
         src/SpeedControl.qml
-        src/ContinueListening.qml
         src/SubscribeDialog.qml
         src/FeedStatusRow.qml
         src/AddFromLinkDialog.qml
