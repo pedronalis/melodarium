@@ -1,39 +1,37 @@
 # Handoff — melodia
 
-> Atualizado: 2026-08-27 15:54 · branch: `main` · via /fecho · contexto: ~27% consumido
+> Atualizado: 2026-08-27 20:20 · branch: `main` · via /fecho · contexto: ~27% consumido
 
 ## Estado
 
-- **As 9 fatias estão concluídas e integradas em `main`.** Suíte de 9 alvos, 100% passando na
-  `main` depois do último merge. O código do lote acabou.
-- O app sobe com tudo: abas Música/Podcast, busca, barra lateral (coleções, artistas, álbuns,
-  gêneros, tags, listas automáticas), fila, editor de tags, barra de transporte, assinatura de
-  feed RSS e download do YouTube.
-- A janela tem o **OK visual do Pedro** (fatia 1), com o ajuste da moldura (`970904d`).
-- **Faltam os dois gates humanos** — som ao clicar numa faixa (fatia 4) e a mesma faixa em duas
-  coleções (fatia 6). Nenhum foi conferido: os runs são cegos e não há pasta de música apontada.
-  Há MP3s em `/media/Backup HD/Torrents/` para o teste.
-- Worktrees de execução removidos; as branches `exec/fatias-*` continuam no repo, já mergeadas.
+- **As 14 fatias do produto estão prontas e integradas em `main`** — as 9 originais mais as 5
+  do redesenho. Suíte de 9 alvos, 100% passando depois do último merge.
+- O app é a direção "capa manda" de ponta a ponta: barra de ícones, painel do que toca com
+  capa grande e like, biblioteca densa com filtros numa linha, busca por cima (Ctrl+K),
+  podcast com velocidade e pulos de 30 s, e o convite no lugar da capa vazia.
+- **A fidelidade virou verificação mecânica:** `tools/check-layout.sh` roda o app com
+  `--measure` e reprova se a barra sair de 56px, o painel de 392, o miolo cair de 360 ou a
+  capa perder o esquadro. Está no gate.
+- Conferido por mim em tela virtual (`Xvfb` + `import`), nos dois formatos que o Hyprland dá à
+  janela: 2540×686 e 1264×1384. Capturas do app real em `docs/telas/`.
+- **O que nenhum teste cobre e ninguém fez ainda: ouvir.** Clicar numa faixa e o som sair pelo
+  alto-falante é o único item que exige o Pedro.
 
 ## Alvo
 
 - **Frente:** melodia — player de música local com a estética do Noctalia
-- **Plano-fonte:** `docs/specs/2026-08-27-player-musica-podcast.md` — decomposto no lote de
-  9 planos de fatia em `docs/plans/` (**9/9 concluídas**)
-- **PRONTA quando:** as 9 fatias com `status: concluido` **e** os três gates humanos confirmados
-  na tela: a janela com a cara certa (✓ 27/08), o som saindo ao clicar numa faixa, a mesma faixa
-  em duas coleções com um clique
-- **Restante:** só os dois gates humanos das fatias 4 e 6 — nenhum código pendente
+- **Plano-fonte:** `docs/specs/2026-08-27-player-musica-podcast.md` — 9 fatias do produto +
+  5 do redesenho `melodia-capa-manda`, todas `concluido` (14/14)
+- **PRONTA quando:** as fatias concluídas **e** o Pedro ouvindo o som sair ao clicar numa faixa
+- **Restante:** só a confirmação de áudio — nenhum código pendente
 
 ## Fila da sessão
 
-1. **[S]** Os dois gates humanos, que fecham a frente: apontar uma pasta de música (há MP3s em
-   `/media/Backup HD/Torrents/`), clicar numa faixa e ouvir; depois jogar a mesma faixa em duas
-   coleções · done: som saindo e a faixa nas duas coleções · `./build/appmelodia`
-2. **[S]** Passar o nome pelo `/batiza` antes de publicar — "melodia" é provisório e o spec manda
-   (item do Estacionamento, agora que o app existe) · done: nome decidido e registrado
-3. **[M]** Publicar o repo no GitHub, como o spec pede ("aberto, sem instalador nem suporte") ·
-   done: `git remote -v` com o remoto e `git push` feito
+1. **[S]** Ouvir: apontar a pasta de música, clicar numa faixa e confirmar que sai som ·
+   done: som saindo · `./build/appmelodia`
+2. **[S]** Passar o nome pelo `/batiza` antes de publicar — "melodia" é provisório ·
+   done: nome decidido e registrado
+3. **[M]** Publicar o repo no GitHub, como o spec pede · done: `git remote -v` com o remoto
 
 ## Estacionamento (derivas)
 
@@ -50,30 +48,16 @@
 
 ## Em voo
 
-**Tipo 1 — run headless · redesenho, fatias 3-5** (`biblioteca-densa` → `busca-overlay` →
-`podcast-vazio`, 15 tasks + a task do `--measure`) · despachado **2026-08-27 19:30** · cwd:
-`/home/pedro/dev/active/.melodia-worktrees/redesign-3-5` (branch `exec/redesign-3-5`)
-· estimado ~900k-1,1M tok novos / ~45-60 min / teto 300 turnos · gate de 19 linhas
-· **vigia armado**.
-
-conferir: RUN_GATE ausente = verde · `.run_gate_count` presente = FAIL (ver `RESUMO_RUN.md`/transcript)
-· RUN_GATE presente sem count = em voo
-
-**O Pedro dispensou os gates humanos intermediários** (27/08, verbatim: "Despacha e me traz
-pronto, é isso que eu quero"). A conferência visual passou a ser MINHA: rodar o app numa tela
-virtual (`Xvfb :99` + `import -window root`, validado nesta sessão — não mexe nos workspaces
-dele), comparar com as telas de `design/*.dc.html`, corrigir o que estiver diferente, e só
-então entregar. As fatias `moldura-capa` e `podcast-vazio` continuam com `decisao-humana: sim`
-no frontmatter, mas o gate é meu até ele pedir o contrário.
-
-O run das fatias 1-2 foi colhido: **PASSOU** — 15 commits, integrado em `main`.
+Nada. O run do redesenho (fatias 3-5) foi colhido: **PASSOU** — 9 commits, gate de 19 linhas
+verde, 9/9 alvos de teste, integrado em `main`. As capturas que ele gerou estão em
+`docs/telas/`, e eu re-conferi em tela virtual antes de entregar.
 
 ## Verificação
 
-- `cmake -B build -G Ninja && cmake --build build` → exit 0 · 2026-08-27 15:54 (na `main`, pós-merge)
-- `ctest --test-dir build --output-on-failure` → `100% tests passed, 0 tests failed out of 9` ·
-  2026-08-27 15:54
-- Os três runs do lote fecharam verdes; nenhum gate ficou armado no disco.
+- `cmake -B build -G Ninja && cmake --build build` → exit 0 · 2026-08-27 20:17
+- `ctest --test-dir build --output-on-failure` → `100% tests passed, 0 tests failed out of 9`
+- `bash tools/check-layout.sh` → `ok` nas quatro medidas (rail 56 · painel 392 · miolo ≥360 ·
+  capa quadrada) · 2026-08-27 20:17
 
 ## Calibração de custo
 
@@ -122,6 +106,17 @@ O run das fatias 1-2 foi colhido: **PASSOU** — 15 commits, integrado em `main`
   **−60%** · **PASSOU** — 15 commits. Lição: **a régua da dependência acertou de novo** — três
   estimativas seguidas por "quantas interfaces alheias a fatia consome" (+30%, −1%) contra
   +242% da estimativa por número de tasks. Está calibrada; use.
+
+- 2026-08-27 · /despacha run headless · redesenho fatias 3-5 (`biblioteca-densa` →
+  `busca-overlay` → `podcast-vazio`, 15 tasks + o `--measure`) · modelo Opus 5 · estimado
+  ~900k-1,1M tok novos / 45-60 min · real **~1,18M tok novos (~81,7M com releitura, inflação
+  69×) / ~0,77 h / 292 turnos** · Δ tokens **+18%**, Δ tempo **dentro da faixa** · **PASSOU**
+  — 9 commits. Duas lições:
+  **(1) 292 turnos com teto de 300 — margem de 3%.** Três fatias de UI com fidelidade a
+  desenho é o teto real de um run; a quarta não caberia.
+  **(2) Fidelidade visual vira gate quando o app sabe se medir.** A task do `--measure` +
+  `tools/check-layout.sh` custou pouco e transformou "ficou parecido?" em quatro comparações
+  numéricas que o portão cobra sozinho.
 
 ## Perigos
 
