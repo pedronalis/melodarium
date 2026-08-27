@@ -25,6 +25,10 @@ Rectangle {
 
     readonly property int coverSide: root.compact ? 200 : 340
 
+    // Lidos por `appmelodia --measure`: a capa quadrada é uma das linhas do gate de layout.
+    readonly property alias coverWidth: capaRect.width
+    readonly property alias coverHeight: capaRect.height
+
     // mpv reports pause=false while it is idle, so AudioEngine.playing is true before any file
     // is loaded. Without this guard the transport shows a pause button with nothing playing.
     readonly property bool hasTrack: AudioEngine.currentFile !== ""
