@@ -1,7 +1,7 @@
 ---
 slug: biblioteca-densa
 feature: melodia-capa-manda
-status: em-execucao
+status: concluido
 depende-de: [moldura-capa, like-faixas]
 decisao-humana: nao
 spec: design/Biblioteca.dc.html (tela 2 aprovada em 2026-08-27)
