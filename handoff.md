@@ -51,9 +51,22 @@
 
 ## Em voo
 
-Nada. O run das fatias 4-6 foi colhido: **PASSOU** — 21 commits, gate de 9 linhas verde,
-6/6 alvos de teste. Integrado em `main` por merge (`5e20c9f`), com a verificação re-rodada na
-branch integrada: build limpo e suíte 100%.
+**Tipo 1 — run headless · fatias 7-9** (`podcast-local` → `feed-rss` → `download-youtube`,
+16 tasks) · despachado **2026-08-27 15:21** · cwd do run:
+`/home/pedro/dev/active/.melodia-worktrees/fatias-7-9` (branch `exec/fatias-7-9`, saída de `main`)
+· estimado ~600-700k tok novos / 25-35 min / teto 260 turnos · gate de 15 linhas, com piso de
+9 alvos de teste · **vigia armado** (`scripts/avisa-run.sh`, notifica na tela ao fechar).
+
+conferir: RUN_GATE ausente = verde · `.run_gate_count` presente = FAIL (ver `RESUMO_RUN.md`/transcript)
+· RUN_GATE presente sem count = em voo
+
+As três cadeias finais foram para um run sequencial só, não paralelo: `podcast-local` e
+`download-youtube` são independentes no grafo mas mexem nos mesmos arquivos de tela e no mesmo
+`CMakeLists.txt` — disputa de arquivo tira o lote do modo paralelo (guarda-corpo do /despacha).
+
+O run das fatias 4-6 foi colhido: **PASSOU** — 21 commits, gate de 9 linhas verde, 6/6 alvos de
+teste. Integrado em `main` por merge (`5e20c9f`), com a verificação re-rodada na branch
+integrada: build limpo e suíte 100%.
 
 ## Verificação
 
