@@ -50,9 +50,23 @@
 
 ## Em voo
 
-Nada. O run do redesenho (fatias 1-2) foi colhido: **PASSOU** — 15 commits, gate de 14 linhas
-verde, 9/9 alvos de teste. Integrado em `main`. **Pendente: o gate humano da `moldura-capa`** —
-o Pedro precisa olhar a janela e aprovar antes de as fatias 3-5 serem despachadas.
+**Tipo 1 — run headless · redesenho, fatias 3-5** (`biblioteca-densa` → `busca-overlay` →
+`podcast-vazio`, 15 tasks + a task do `--measure`) · despachado **2026-08-27 19:30** · cwd:
+`/home/pedro/dev/active/.melodia-worktrees/redesign-3-5` (branch `exec/redesign-3-5`)
+· estimado ~900k-1,1M tok novos / ~45-60 min / teto 300 turnos · gate de 19 linhas
+· **vigia armado**.
+
+conferir: RUN_GATE ausente = verde · `.run_gate_count` presente = FAIL (ver `RESUMO_RUN.md`/transcript)
+· RUN_GATE presente sem count = em voo
+
+**O Pedro dispensou os gates humanos intermediários** (27/08, verbatim: "Despacha e me traz
+pronto, é isso que eu quero"). A conferência visual passou a ser MINHA: rodar o app numa tela
+virtual (`Xvfb :99` + `import -window root`, validado nesta sessão — não mexe nos workspaces
+dele), comparar com as telas de `design/*.dc.html`, corrigir o que estiver diferente, e só
+então entregar. As fatias `moldura-capa` e `podcast-vazio` continuam com `decisao-humana: sim`
+no frontmatter, mas o gate é meu até ele pedir o contrário.
+
+O run das fatias 1-2 foi colhido: **PASSOU** — 15 commits, integrado em `main`.
 
 ## Verificação
 
