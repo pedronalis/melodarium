@@ -224,7 +224,7 @@ git commit -m "feat(ui): icon rail replaces the wide sidebar"
 
 ### Task 3: `NowPlayingPanel.qml` — a capa manda
 
-- [ ] Criar `src/NowPlayingPanel.qml`:
+- [x] Criar `src/NowPlayingPanel.qml`:
 
 ```qml
 import QtQuick
@@ -455,8 +455,8 @@ Rectangle {
 }
 ```
 
-- [ ] verificação mecânica da task: `grep -c 'signal likeRequested' src/NowPlayingPanel.qml` → `1`
-- [ ] commit:
+- [x] verificação mecânica da task: `grep -c 'signal likeRequested' src/NowPlayingPanel.qml` → `1`
+- [x] commit:
 
 ```bash
 git add src/NowPlayingPanel.qml
