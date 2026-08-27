@@ -56,7 +56,13 @@ private slots:
         }
     }
 
-    void schemaIsAtVersionThree() { QCOMPARE(scalar(QStringLiteral("PRAGMA user_version")), 3); }
+    // "At least 3", not "exactly 3": what this slice needs is that ITS migration ran. Later
+    // slices append migrations, and an equality here would turn every one of them into a
+    // false failure in a file that has nothing to do with them.
+    void schemaIncludesTheCollectionsMigration()
+    {
+        QVERIFY(scalar(QStringLiteral("PRAGMA user_version")) >= 3);
+    }
 
     void createRejectsDuplicateNameRegardlessOfCase()
     {

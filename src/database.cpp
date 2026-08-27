@@ -132,6 +132,47 @@ CREATE TABLE track_tags (
 CREATE INDEX idx_tags_name    ON tags(name);
 CREATE INDEX idx_tracktags_tag ON track_tags(tag_id);
 )SQL"),
+        QStringLiteral(R"SQL(
+CREATE TABLE podcast_shows (
+    id              INTEGER PRIMARY KEY,
+    title           TEXT NOT NULL,
+    folder_path     TEXT UNIQUE,
+    feed_url        TEXT UNIQUE,
+    etag            TEXT,
+    last_modified   TEXT,
+    last_checked_at INTEGER,
+    cover_path      TEXT
+);
+CREATE TABLE podcast_episodes (
+    id           INTEGER PRIMARY KEY,
+    show_id      INTEGER NOT NULL REFERENCES podcast_shows(id) ON DELETE CASCADE,
+    guid         TEXT NOT NULL,
+    title        TEXT NOT NULL,
+    published_at INTEGER,
+    duration_ms  INTEGER,
+    local_path   TEXT,
+    position_ms  INTEGER NOT NULL DEFAULT 0,
+    played       INTEGER NOT NULL DEFAULT 0 CHECK(played IN (0,1)),
+    last_played_at INTEGER,
+    UNIQUE(show_id, guid)
+);
+CREATE INDEX idx_episodes_show   ON podcast_episodes(show_id, published_at DESC);
+CREATE INDEX idx_episodes_resume ON podcast_episodes(last_played_at DESC) WHERE played = 0;
+CREATE UNIQUE INDEX idx_episodes_path ON podcast_episodes(local_path) WHERE local_path IS NOT NULL;
+)SQL"),
+        QStringLiteral(R"SQL(
+ALTER TABLE podcast_episodes ADD COLUMN remote_url TEXT;
+ALTER TABLE podcast_episodes ADD COLUMN download_state TEXT
+    CHECK(download_state IN ('none','downloading','done','failed')) DEFAULT 'none';
+)SQL"),
+        QStringLiteral(R"SQL(
+ALTER TABLE tracks ADD COLUMN source_kind TEXT
+    CHECK(source_kind IN ('local_file','youtube')) DEFAULT 'local_file';
+ALTER TABLE tracks ADD COLUMN source_url TEXT;
+ALTER TABLE tracks ADD COLUMN source_format_note TEXT;
+ALTER TABLE tracks ADD COLUMN downloaded_at INTEGER;
+CREATE INDEX idx_tracks_source ON tracks(source_kind);
+)SQL"),
     };
     return list;
 }

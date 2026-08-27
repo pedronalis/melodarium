@@ -70,6 +70,24 @@ placa. O que o melodia garante e o que não depende dele:
 - **ReplayGain** nasce desligado; `setReplayGainMode("track")` ou `"album"` liga, e só tem
   efeito quando o arquivo traz as tags.
 
+## Baixar do YouTube
+
+- **O melodia não distribui o baixador.** Ele chama por processo o `yt-dlp` que já estiver
+  instalado na sua máquina, e não faz nada se não houver nenhum — a tela diz isso em vez de
+  falhar em silêncio. Instale pelo gerenciador de pacotes da sua distro.
+- **O áudio do YouTube é comprimido** (Opus, ~160 kbps) e **nunca** será alta qualidade. Ele
+  convive com os arquivos de verdade na mesma biblioteca, e a interface marca a origem com um
+  selo "YouTube" na linha da faixa: o app não finge que as duas qualidades são a mesma coisa.
+  Pela mesma razão o download pede `--audio-format best`, que **não** reencoda — converter para
+  MP3 perderia qualidade uma segunda vez, de graça.
+- **`--embed-thumbnail` exige `ffmpeg`.** Quando o `ffmpeg` não está no `PATH` herdado (o caso
+  típico de um app aberto por atalho `.desktop`), o melodia procura nos lugares usuais e passa
+  `--ffmpeg-location` explicitamente.
+- **Qual `yt-dlp` respondeu.** Esta máquina tem dois instalados — o do `PATH` é o do Homebrew
+  (mais antigo) e o do sistema é o do Fedora, em `/usr/bin`. O melodia usa o do `PATH`, que é o
+  que o usuário espera, e **mostra a versão encontrada** na tela de adicionar link: no dia em
+  que uma das duas quebrar, saber qual respondeu economiza a hora de depuração.
+
 ## Licenças de terceiros
 
 A fonte de ícones Tabler (`assets/fonts/noctalia-tabler-icons.ttf`) é distribuída sob licença

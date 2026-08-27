@@ -1,8 +1,10 @@
 #include "collectionmanager.h"
 
 #include "database.h"
+#include "tagreader.h"
 
 #include <QDateTime>
+#include <QFileInfo>
 #include <QList>
 #include <QPair>
 #include <QSqlDatabase>
@@ -330,4 +332,72 @@ QString CollectionManager::clauseForTag(const QString &)
 QVariantList CollectionManager::bindingsForTag(const QString &tagName)
 {
     return QVariantList{normalise(tagName)};
+}
+
+int CollectionManager::ingestDownloadedFile(const QString &path, int collectionId,
+                                            const QString &sourceUrl, const QString &formatNote)
+{
+    const QFileInfo info(path);
+    if (!info.exists())
+        return 0;
+
+    const TrackRecord rec = TagReader::read(path);
+    if (!rec.valid)
+        return 0;
+
+    QSqlQuery existing(uiDb());
+    existing.prepare(QStringLiteral("SELECT id FROM tracks WHERE path = ?"));
+    existing.addBindValue(path);
+    int trackId = 0;
+    if (existing.exec() && existing.next())
+        trackId = existing.value(0).toInt();
+
+    if (trackId == 0) {
+        QSqlQuery artist(uiDb());
+        artist.prepare(QStringLiteral("INSERT OR IGNORE INTO artists (name) VALUES (?)"));
+        artist.addBindValue(rec.artist);
+        artist.exec();
+
+        QSqlQuery artistId(uiDb());
+        artistId.prepare(QStringLiteral("SELECT id FROM artists WHERE name = ?"));
+        artistId.addBindValue(rec.artist);
+        const int aid = (artistId.exec() && artistId.next()) ? artistId.value(0).toInt() : 0;
+
+        const qint64 now = QDateTime::currentSecsSinceEpoch();
+        QSqlQuery ins(uiDb());
+        ins.prepare(QStringLiteral(
+            "INSERT INTO tracks (path, mtime, size, content_hash, duration_ms, sample_rate, "
+            "channels, bitrate_kbps, codec, title, artist_id, added_at, source_kind, "
+            "source_url, source_format_note, downloaded_at) "
+            "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'youtube', ?, ?, ?)"));
+        ins.addBindValue(path);
+        ins.addBindValue(rec.mtime);
+        ins.addBindValue(rec.size);
+        ins.addBindValue(TagReader::computeContentHash(path));
+        ins.addBindValue(rec.durationMs);
+        ins.addBindValue(rec.sampleRate > 0 ? QVariant(rec.sampleRate) : QVariant());
+        ins.addBindValue(rec.channels > 0 ? QVariant(rec.channels) : QVariant());
+        ins.addBindValue(rec.bitrateKbps > 0 ? QVariant(rec.bitrateKbps) : QVariant());
+        ins.addBindValue(rec.codec);
+        ins.addBindValue(rec.title.isEmpty() ? info.completeBaseName() : rec.title);
+        ins.addBindValue(aid > 0 ? QVariant(aid) : QVariant());
+        ins.addBindValue(now);
+        ins.addBindValue(sourceUrl);
+        ins.addBindValue(formatNote);
+        ins.addBindValue(now);
+        if (!ins.exec())
+            return 0;
+        trackId = ins.lastInsertId().toInt();
+
+        QSqlQuery stats(uiDb());
+        stats.prepare(QStringLiteral(
+            "INSERT OR IGNORE INTO track_stats (track_id, first_seen_at) VALUES (?, ?)"));
+        stats.addBindValue(trackId);
+        stats.addBindValue(now);
+        stats.exec();
+    }
+
+    if (collectionId > 0)
+        addTrackToCollection(collectionId, trackId);
+    return trackId;
 }
