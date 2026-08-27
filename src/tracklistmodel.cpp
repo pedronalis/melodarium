@@ -104,8 +104,13 @@ void TrackListModel::loadFromQuery(const QString &whereClause, const QVariantLis
 {
     QSqlDatabase db = QSqlDatabase::database(QLatin1String(Database::kUiConnection));
     QSqlQuery q(db);
+    // A clause that carries its own ORDER BY (the automatic lists do) keeps it: appending the
+    // default ordering after it would be a syntax error.
+    const bool clauseHasOrder = whereClause.contains(QStringLiteral("ORDER BY"));
     q.prepare(QLatin1String(kSelect) + QStringLiteral("WHERE ") + whereClause
-              + QStringLiteral(" ORDER BY IFNULL(al.title,''), t.disc_no, t.track_no, t.title"));
+              + (clauseHasOrder
+                     ? QString()
+                     : QStringLiteral(" ORDER BY IFNULL(al.title,''), t.disc_no, t.track_no, t.title")));
     for (const QVariant &b : bindings)
         q.addBindValue(b);
 

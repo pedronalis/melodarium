@@ -139,7 +139,7 @@ git commit -m "feat(library): add FTS5 search index as schema migration 2"
 
 ### Task 2: LibraryBrowser — as consultas de navegação
 
-- [ ] Criar `src/librarybrowser.h`:
+- [x] Criar `src/librarybrowser.h`:
 
 ```cpp
 #pragma once
@@ -184,7 +184,7 @@ public:
 };
 ```
 
-- [ ] Criar `src/librarybrowser.cpp`:
+- [x] Criar `src/librarybrowser.cpp`:
 
 ```cpp
 #include "librarybrowser.h"
@@ -348,7 +348,7 @@ QString LibraryBrowser::clauseNeverPlayed()
 }
 ```
 
-- [ ] **Ajuste necessário em `TrackListModel::loadFromQuery`** (fatia `tocador-ui`): a cláusula
+- [x] **Ajuste necessário em `TrackListModel::loadFromQuery`** (fatia `tocador-ui`): a cláusula
       de "Recentes" precisa da própria ordenação. Trocar a montagem da query para respeitar uma
       cláusula que já traga `ORDER BY`:
 
@@ -360,8 +360,8 @@ QString LibraryBrowser::clauseNeverPlayed()
                      : QStringLiteral(" ORDER BY IFNULL(al.title,''), t.disc_no, t.track_no, t.title")));
 ```
 
-- [ ] verificação mecânica da task: `cmake --build build` → exit 0
-- [ ] commit:
+- [x] verificação mecânica da task: `cmake --build build` → exit 0
+- [x] commit:
 
 ```bash
 git add src/librarybrowser.h src/librarybrowser.cpp src/tracklistmodel.cpp CMakeLists.txt
