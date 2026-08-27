@@ -5,7 +5,7 @@ set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_AUTOMOC ON)
 
-find_package(Qt6 REQUIRED COMPONENTS Concurrent Core Qml Quick Sql)
+find_package(Qt6 REQUIRED COMPONENTS Concurrent Core Qml Quick QuickControls2 QuickDialogs2 Sql)
 find_package(PkgConfig REQUIRED)
 pkg_check_modules(MPV REQUIRED IMPORTED_TARGET mpv)
 pkg_check_modules(TAGLIB REQUIRED IMPORTED_TARGET taglib)
@@ -23,6 +23,16 @@ qt_add_executable(appmelodia
     src/database.cpp
     src/libraryscanner.h
     src/libraryscanner.cpp
+    src/covercache.h
+    src/covercache.cpp
+    src/tracklistmodel.h
+    src/tracklistmodel.cpp
+    src/librarybrowser.h
+    src/librarybrowser.cpp
+    src/playstatsrecorder.h
+    src/playstatsrecorder.cpp
+    src/collectionmanager.h
+    src/collectionmanager.cpp
 )
 
 # Theme.qml e Icons.qml usam `pragma Singleton`. O qt_add_qml_module NAO detecta o pragma
@@ -39,6 +49,19 @@ qt_add_qml_module(appmelodia
         src/Main.qml
         src/Theme.qml
         src/Icons.qml
+        src/IconButton.qml
+        src/MelodiaButton.qml
+        src/TrackRow.qml
+        src/PlayerBar.qml
+        src/LibraryEmptyState.qml
+        src/Sidebar.qml
+        src/SidebarItem.qml
+        src/SearchField.qml
+        src/QueuePanel.qml
+        src/CollectionsSection.qml
+        src/NewCollectionDialog.qml
+        src/TagChip.qml
+        src/TagEditor.qml
     RESOURCES
         assets/fonts/noctalia-tabler-icons.ttf
     SOURCES
@@ -48,13 +71,23 @@ qt_add_qml_module(appmelodia
         src/audioengine.cpp
         src/database.h
         src/database.cpp
+        src/covercache.h
+        src/covercache.cpp
+        src/tracklistmodel.h
+        src/tracklistmodel.cpp
+        src/librarybrowser.h
+        src/librarybrowser.cpp
+        src/playstatsrecorder.h
+        src/playstatsrecorder.cpp
+        src/collectionmanager.h
+        src/collectionmanager.cpp
 )
 
 # OBRIGATORIO: sem isto o build quebra com erros de template que nao apontam a causa.
 target_include_directories(appmelodia PRIVATE src)
 
 target_link_libraries(appmelodia PRIVATE
-    Qt6::Concurrent Qt6::Core Qt6::Qml Qt6::Quick Qt6::Sql
+    Qt6::Concurrent Qt6::Core Qt6::Qml Qt6::Quick Qt6::QuickControls2 Qt6::QuickDialogs2 Qt6::Sql
     PkgConfig::MPV PkgConfig::TAGLIB)
 
 enable_testing()

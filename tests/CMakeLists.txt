@@ -35,3 +35,48 @@ target_link_libraries(tst_library PRIVATE
 
 add_test(NAME tst_library COMMAND tst_library)
 set_tests_properties(tst_library PROPERTIES ENVIRONMENT "QT_QPA_PLATFORM=offscreen" TIMEOUT 120)
+
+qt_add_executable(tst_tracklistmodel
+    tst_tracklistmodel.cpp
+    ../src/tracklistmodel.h ../src/tracklistmodel.cpp
+    ../src/covercache.h ../src/covercache.cpp
+    ../src/tagreader.h ../src/tagreader.cpp
+    ../src/database.h ../src/database.cpp
+    ../src/libraryscanner.h ../src/libraryscanner.cpp
+)
+target_include_directories(tst_tracklistmodel PRIVATE ../src)
+target_link_libraries(tst_tracklistmodel PRIVATE
+    Qt6::Core Qt6::Test Qt6::Qml Qt6::Sql PkgConfig::TAGLIB PkgConfig::MPV)
+
+add_test(NAME tst_tracklistmodel COMMAND tst_tracklistmodel)
+set_tests_properties(tst_tracklistmodel PROPERTIES ENVIRONMENT "QT_QPA_PLATFORM=offscreen")
+
+qt_add_executable(tst_librarybrowser
+    tst_librarybrowser.cpp
+    ../src/database.h ../src/database.cpp
+    ../src/tagreader.h ../src/tagreader.cpp
+    ../src/libraryscanner.h ../src/libraryscanner.cpp
+    ../src/librarybrowser.h ../src/librarybrowser.cpp
+    ../src/playstatsrecorder.h ../src/playstatsrecorder.cpp
+)
+target_include_directories(tst_librarybrowser PRIVATE ../src)
+target_link_libraries(tst_librarybrowser PRIVATE
+    Qt6::Core Qt6::Test Qt6::Qml Qt6::Sql PkgConfig::TAGLIB)
+
+add_test(NAME tst_librarybrowser COMMAND tst_librarybrowser)
+set_tests_properties(tst_librarybrowser PROPERTIES ENVIRONMENT "QT_QPA_PLATFORM=offscreen")
+
+qt_add_executable(tst_collections
+    tst_collections.cpp
+    ../src/database.h ../src/database.cpp
+    ../src/tagreader.h ../src/tagreader.cpp
+    ../src/libraryscanner.h ../src/libraryscanner.cpp
+    ../src/librarybrowser.h ../src/librarybrowser.cpp
+    ../src/collectionmanager.h ../src/collectionmanager.cpp
+)
+target_include_directories(tst_collections PRIVATE ../src)
+target_link_libraries(tst_collections PRIVATE
+    Qt6::Core Qt6::Test Qt6::Qml Qt6::Sql PkgConfig::TAGLIB)
+
+add_test(NAME tst_collections COMMAND tst_collections)
+set_tests_properties(tst_collections PROPERTIES ENVIRONMENT "QT_QPA_PLATFORM=offscreen")
