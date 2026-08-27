@@ -90,7 +90,7 @@ sinal `signal collectRequested()`.
 
 ### Task 1: Migração 3 — coleções e tags
 
-- [ ] Acrescentar ao vetor `migrations()` em `src/database.cpp`, como terceira entrada:
+- [x] Acrescentar ao vetor `migrations()` em `src/database.cpp`, como terceira entrada:
 
 ```cpp
         QStringLiteral(R"SQL(
@@ -121,10 +121,10 @@ CREATE INDEX idx_tracktags_tag ON track_tags(tag_id);
 )SQL"),
 ```
 
-- [ ] verificação mecânica da task:
+- [x] verificação mecânica da task:
       `QT_QPA_PLATFORM=offscreen timeout 8 ./build/appmelodia; sqlite3 ~/.local/share/melodia/melodia.db "PRAGMA user_version;"`
       → `3`
-- [ ] commit:
+- [x] commit:
 
 ```bash
 git add src/database.cpp
