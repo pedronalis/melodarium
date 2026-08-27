@@ -1,40 +1,39 @@
 # Handoff — melodia
 
-> Atualizado: 2026-08-27 15:15 · branch: `main` · via /fecho · contexto: ~24% consumido
+> Atualizado: 2026-08-27 15:54 · branch: `main` · via /fecho · contexto: ~27% consumido
 
 ## Estado
 
-- **6 das 9 fatias concluídas e integradas em `main`**: esqueleto, motor de áudio, varredura,
-  tocador, navegação e coleções/tags. Suíte de 6 alvos, 100% passando na `main` depois do merge.
-- A janela recebeu o **OK visual do Pedro**, com um ajuste: a tela era um card com moldura dentro
-  da janela e virou superfície única (`970904d`). O gate humano da fatia 1 está fechado.
-- A paleta lida é a real do usuário (`~/.config/noctalia/colors.json`), não o fallback de fábrica.
-- A UI completa já sobe: busca no topo, barra lateral (coleções, artistas, álbuns, gêneros, tags,
-  listas automáticas), painel de fila, editor de tags e barra de transporte.
-- **Faltam os dois gates humanos das fatias 4 e 6** — som ao clicar numa faixa e a mesma faixa em
-  duas coleções. Nenhum dos dois foi conferido: o run é cego e não há pasta de música apontada.
+- **As 9 fatias estão concluídas e integradas em `main`.** Suíte de 9 alvos, 100% passando na
+  `main` depois do último merge. O código do lote acabou.
+- O app sobe com tudo: abas Música/Podcast, busca, barra lateral (coleções, artistas, álbuns,
+  gêneros, tags, listas automáticas), fila, editor de tags, barra de transporte, assinatura de
+  feed RSS e download do YouTube.
+- A janela tem o **OK visual do Pedro** (fatia 1), com o ajuste da moldura (`970904d`).
+- **Faltam os dois gates humanos** — som ao clicar numa faixa (fatia 4) e a mesma faixa em duas
+  coleções (fatia 6). Nenhum foi conferido: os runs são cegos e não há pasta de música apontada.
   Há MP3s em `/media/Backup HD/Torrents/` para o teste.
+- Worktrees de execução removidos; as branches `exec/fatias-*` continuam no repo, já mergeadas.
 
 ## Alvo
 
 - **Frente:** melodia — player de música local com a estética do Noctalia
 - **Plano-fonte:** `docs/specs/2026-08-27-player-musica-podcast.md` — decomposto no lote de
-  9 planos de fatia em `docs/plans/` (6/9 concluídas)
+  9 planos de fatia em `docs/plans/` (**9/9 concluídas**)
 - **PRONTA quando:** as 9 fatias com `status: concluido` **e** os três gates humanos confirmados
   na tela: a janela com a cara certa (✓ 27/08), o som saindo ao clicar numa faixa, a mesma faixa
   em duas coleções com um clique
-- **Restante:** 3 fatias — `podcast-local`, `feed-rss`, `download-youtube` (aprovadas, não
-  despachadas) — mais os dois gates humanos das fatias 4 e 6
+- **Restante:** só os dois gates humanos das fatias 4 e 6 — nenhum código pendente
 
 ## Fila da sessão
 
-1. **[S]** Os dois gates humanos: apontar uma pasta de música (há MP3s em
+1. **[S]** Os dois gates humanos, que fecham a frente: apontar uma pasta de música (há MP3s em
    `/media/Backup HD/Torrents/`), clicar numa faixa e ouvir; depois jogar a mesma faixa em duas
-   coleções · done: som saindo e a faixa aparecendo nas duas coleções · `./build/appmelodia`
-2. **[M]** Despachar as 3 fatias finais (`podcast-local` → `feed-rss`, e `download-youtube`) ·
-   done: `RUN_GATE` armado no cwd do run novo e sessão headless viva
-3. **[S]** Limpar o worktree `fatias-4-6` depois de conferir que nada ficou lá ·
-   done: `git worktree list` sem `.melodia-worktrees/fatias-4-6`
+   coleções · done: som saindo e a faixa nas duas coleções · `./build/appmelodia`
+2. **[S]** Passar o nome pelo `/batiza` antes de publicar — "melodia" é provisório e o spec manda
+   (item do Estacionamento, agora que o app existe) · done: nome decidido e registrado
+3. **[M]** Publicar o repo no GitHub, como o spec pede ("aberto, sem instalador nem suporte") ·
+   done: `git remote -v` com o remoto e `git push` feito
 
 ## Estacionamento (derivas)
 
@@ -51,29 +50,16 @@
 
 ## Em voo
 
-**Tipo 1 — run headless · fatias 7-9** (`podcast-local` → `feed-rss` → `download-youtube`,
-16 tasks) · despachado **2026-08-27 15:21** · cwd do run:
-`/home/pedro/dev/active/.melodia-worktrees/fatias-7-9` (branch `exec/fatias-7-9`, saída de `main`)
-· estimado ~600-700k tok novos / 25-35 min / teto 260 turnos · gate de 15 linhas, com piso de
-9 alvos de teste · **vigia armado** (`scripts/avisa-run.sh`, notifica na tela ao fechar).
-
-conferir: RUN_GATE ausente = verde · `.run_gate_count` presente = FAIL (ver `RESUMO_RUN.md`/transcript)
-· RUN_GATE presente sem count = em voo
-
-As três cadeias finais foram para um run sequencial só, não paralelo: `podcast-local` e
-`download-youtube` são independentes no grafo mas mexem nos mesmos arquivos de tela e no mesmo
-`CMakeLists.txt` — disputa de arquivo tira o lote do modo paralelo (guarda-corpo do /despacha).
-
-O run das fatias 4-6 foi colhido: **PASSOU** — 21 commits, gate de 9 linhas verde, 6/6 alvos de
-teste. Integrado em `main` por merge (`5e20c9f`), com a verificação re-rodada na branch
-integrada: build limpo e suíte 100%.
+Nada. O run das fatias 7-9 foi colhido: **PASSOU** — 19 commits, gate de 15 linhas verde,
+9/9 alvos de teste. Integrado em `main` (`50381f4`), com a verificação re-rodada na branch
+integrada: build limpo e suíte 100%. O vigia do /despacha estreou aqui e avisou na tela.
 
 ## Verificação
 
-- `cmake -B build -G Ninja && cmake --build build` → exit 0 · 2026-08-27 15:14 (na `main`, pós-merge)
-- `ctest --test-dir build --output-on-failure` → `100% tests passed, 0 tests failed out of 6` ·
-  2026-08-27 15:14
-- Gate do run 4-6: 9 linhas, todas verdes (o run desarmou o `RUN_GATE` sozinho)
+- `cmake -B build -G Ninja && cmake --build build` → exit 0 · 2026-08-27 15:54 (na `main`, pós-merge)
+- `ctest --test-dir build --output-on-failure` → `100% tests passed, 0 tests failed out of 9` ·
+  2026-08-27 15:54
+- Os três runs do lote fecharam verdes; nenhum gate ficou armado no disco.
 
 ## Calibração de custo
 
@@ -105,6 +91,16 @@ integrada: build limpo e suíte 100%.
   interface de ninguém) custaram 138k novos; estas 18 tasks custaram **5×** isso, porque cada uma
   lê o código das anteriores antes de escrever. Ao estimar, contar quantas interfaces alheias a
   fatia consome, não quantas tasks ela tem. O tempo, esse, bateu: ~27 min contra 20-40 previstos.
+
+- 2026-08-27 · /despacha run headless · fatias 7-9 (`podcast-local` → `feed-rss` →
+  `download-youtube`, 16 tasks, consumindo `CollectionManager`/`Database`/`AudioEngine`) · modelo
+  Opus 5 · estimado ~600-700k tok novos / 25-35 min · real **~872k tok novos (~45,3M com
+  releitura, inflação 52×) / ~0,50 h / 228 turnos** · Δ tokens **+30%**, Δ tempo **dentro da
+  faixa** · **PASSOU** — 19 commits, 9/9 alvos de teste. Duas lições:
+  **(1) A régua da dependência funcionou.** Estimar por "quantas interfaces alheias a fatia
+  consome" (lição do run 4-6) errou 30%, contra 242% da estimativa por número de tasks.
+  **(2) 228 turnos contra teto de 260 — margem de 12%.** Três fatias consumidoras é o teto real
+  de um run; a quarta não caberia.
 
 ## Perigos
 
