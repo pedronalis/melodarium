@@ -64,6 +64,9 @@ qt_add_qml_module(appmelodia
         src/MelodiaButton.qml
         src/TrackRow.qml
         src/NowPlayingPanel.qml
+        src/LibraryPane.qml
+        src/PodcastPane.qml
+        src/EmptyPane.qml
         src/LibraryEmptyState.qml
         src/Sidebar.qml
         src/SidebarItem.qml

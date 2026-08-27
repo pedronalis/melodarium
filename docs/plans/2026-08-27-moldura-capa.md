@@ -488,7 +488,7 @@ git commit -m "build(ui): register the rail and panel, retire the transport bar"
 
 ### Task 5: A moldura nova em `Main.qml`
 
-- [ ] Substituir em `src/Main.qml` a raiz visual — o `ColumnLayout` que hoje contém
+- [x] Substituir em `src/Main.qml` a raiz visual — o `ColumnLayout` que hoje contém
       `RowLayout` (topo), `StackLayout` e `PlayerBar` — por esta estrutura, PRESERVANDO todo o
       bloco de `property`, `function` e `Connections` que já existe acima dela (o roteamento
       de seções, o tratamento de `scanFinished`, `trackFinished` e `episodePlayRequested`
@@ -561,9 +561,9 @@ Rectangle {
       comentário do topo. O `searchOverlay` citado em `showPane` é da fatia `busca-overlay`;
       até ela existir, troque a chamada por `console.log("busca ainda não implementada")`.
 
-- [ ] verificação mecânica da task:
+- [x] verificação mecânica da task:
       `cmake --build build && QT_QPA_PLATFORM=offscreen timeout 8 ./build/appmelodia 2>&1 | grep -Ec "is not a type|Unable to assign|ReferenceError"` → `0`
-- [ ] commit:
+- [x] commit:
 
 ```bash
 git add src/Main.qml src/LibraryPane.qml src/PodcastPane.qml src/EmptyPane.qml CMakeLists.txt
