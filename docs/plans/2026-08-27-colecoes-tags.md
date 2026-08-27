@@ -137,7 +137,7 @@ git commit -m "feat(collections): add collections and free tags as schema migrat
 faixa for apagada de verdade — mas o scanner faz soft delete, então a coleção **sobrevive** a
 um disco desmontado. Essa combinação é intencional.
 
-- [ ] Criar `src/collectionmanager.h`:
+- [x] Criar `src/collectionmanager.h`:
 
 ```cpp
 #pragma once
@@ -189,7 +189,7 @@ private:
 };
 ```
 
-- [ ] Criar `src/collectionmanager.cpp`:
+- [x] Criar `src/collectionmanager.cpp`:
 
 ```cpp
 #include "collectionmanager.h"
@@ -412,8 +412,8 @@ bool CollectionManager::moveTrackInCollection(int collectionId, int trackId, int
 }
 ```
 
-- [ ] verificação mecânica da task: `cmake --build build` → exit 0
-- [ ] commit:
+- [x] verificação mecânica da task: `cmake --build build` → exit 0
+- [x] commit:
 
 ```bash
 git add src/collectionmanager.h src/collectionmanager.cpp CMakeLists.txt
@@ -426,7 +426,7 @@ git commit -m "feat(collections): create, fill and order context collections"
 tag. O autocomplete por prefixo usa o índice B-tree (`LIKE 'prefixo%'` — o `%` no fim usa
 índice; no começo não usaria).
 
-- [ ] Acrescentar ao fim de `src/collectionmanager.cpp`:
+- [x] Acrescentar ao fim de `src/collectionmanager.cpp`:
 
 ```cpp
 QVariantList CollectionManager::allTags()
@@ -543,8 +543,8 @@ QVariantList CollectionManager::bindingsForTag(const QString &tagName)
 }
 ```
 
-- [ ] verificação mecânica da task: `cmake --build build` → exit 0
-- [ ] commit:
+- [x] verificação mecânica da task: `cmake --build build` → exit 0
+- [x] commit:
 
 ```bash
 git add src/collectionmanager.cpp

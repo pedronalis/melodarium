@@ -31,6 +31,8 @@ qt_add_executable(appmelodia
     src/librarybrowser.cpp
     src/playstatsrecorder.h
     src/playstatsrecorder.cpp
+    src/collectionmanager.h
+    src/collectionmanager.cpp
 )
 
 # Theme.qml e Icons.qml usam `pragma Singleton`. O qt_add_qml_module NAO detecta o pragma
@@ -73,6 +75,8 @@ qt_add_qml_module(appmelodia
         src/librarybrowser.cpp
         src/playstatsrecorder.h
         src/playstatsrecorder.cpp
+        src/collectionmanager.h
+        src/collectionmanager.cpp
 )
 
 # OBRIGATORIO: sem isto o build quebra com erros de template que nao apontam a causa.
