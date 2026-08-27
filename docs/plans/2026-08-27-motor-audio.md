@@ -660,15 +660,15 @@ git commit -m "test(audio): headless playback, auto-advance and speed clamping"
 O que o app pode e o que não pode garantir precisa estar escrito — prometer bit-perfect que
 depende da config do PipeWire do usuário seria mentira.
 
-- [ ] Acrescentar ao `README.md` uma seção "Qualidade de áudio" registrando:
+- [x] Acrescentar ao `README.md` uma seção "Qualidade de áudio" registrando:
       que `audio-samplerate`/`audio-format` não são setados de propósito (é isso que evita
       conversão); que `gapless-audio` fica em `weak` por padrão e `yes` resampleia faixas de
       formato diferente; que `audio-exclusive` silencia todo o resto do sistema e por isso
       não é padrão; e o limite honesto — mesmo com modo exclusivo, se o grafo do PipeWire
       estiver fixo em 48 kHz (`default.clock.rate` no `pipewire.conf`), quem reamostra pode
       ser o próprio PipeWire, e isso é configuração do sistema, não do melodia.
-- [ ] verificação mecânica da task: `grep -c "audio-exclusive" README.md` → `1` ou mais
-- [ ] commit:
+- [x] verificação mecânica da task: `grep -c "audio-exclusive" README.md` → `1` ou mais
+- [x] commit:
 
 ```bash
 git add README.md
