@@ -38,6 +38,11 @@ public:
     Q_INVOKABLE QString clauseForTag(const QString &tagName);
     Q_INVOKABLE QVariantList bindingsForTag(const QString &tagName);
 
+    // Registers an already-downloaded file as a track and puts it in the collection.
+    // Returns the track id, or 0 on failure.
+    Q_INVOKABLE int ingestDownloadedFile(const QString &path, int collectionId,
+                                         const QString &sourceUrl, const QString &formatNote);
+
 signals:
     void collectionsChanged();
     void tagsChanged(int trackId);
