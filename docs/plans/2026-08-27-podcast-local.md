@@ -453,7 +453,7 @@ git commit -m "feat(podcast): scan shows by folder and persist listening positio
 
 ### Task 3: Modelo de episódios
 
-- [ ] Criar `src/podcastepisodemodel.h`:
+- [x] Criar `src/podcastepisodemodel.h`:
 
 ```cpp
 #pragma once
@@ -525,7 +525,7 @@ private:
 };
 ```
 
-- [ ] Criar `src/podcastepisodemodel.cpp`:
+- [x] Criar `src/podcastepisodemodel.cpp`:
 
 ```cpp
 #include "podcastepisodemodel.h"
@@ -656,8 +656,8 @@ void PodcastEpisodeModel::setRowsForTesting(const QList<EpisodeRowData> &rows)
 }
 ```
 
-- [ ] verificação mecânica da task: `cmake --build build` → exit 0
-- [ ] commit:
+- [x] verificação mecânica da task: `cmake --build build` → exit 0
+- [x] commit:
 
 ```bash
 git add src/podcastepisodemodel.h src/podcastepisodemodel.cpp CMakeLists.txt
