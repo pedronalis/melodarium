@@ -1,5 +1,5 @@
 # Gui is required for QColor, which colorschemeprovider.h exposes.
-find_package(Qt6 REQUIRED COMPONENTS Core Gui Test)
+find_package(Qt6 REQUIRED COMPONENTS Core Gui Network Test)
 
 qt_add_executable(tst_colorscheme
     tst_colorscheme.cpp
@@ -88,10 +88,12 @@ qt_add_executable(tst_podcast
     ../src/libraryscanner.h ../src/libraryscanner.cpp
     ../src/podcastlibrary.h ../src/podcastlibrary.cpp
     ../src/podcastepisodemodel.h ../src/podcastepisodemodel.cpp
+    ../src/podcastfeedfetcher.h ../src/podcastfeedfetcher.cpp
+    ../src/episodedownloader.h ../src/episodedownloader.cpp
 )
 target_include_directories(tst_podcast PRIVATE ../src)
 target_link_libraries(tst_podcast PRIVATE
-    Qt6::Core Qt6::Test Qt6::Qml Qt6::Sql PkgConfig::TAGLIB)
+    Qt6::Core Qt6::Network Qt6::Test Qt6::Qml Qt6::Sql PkgConfig::TAGLIB)
 
 add_test(NAME tst_podcast COMMAND tst_podcast)
 set_tests_properties(tst_podcast PROPERTIES ENVIRONMENT "QT_QPA_PLATFORM=offscreen")

@@ -160,6 +160,11 @@ CREATE INDEX idx_episodes_show   ON podcast_episodes(show_id, published_at DESC)
 CREATE INDEX idx_episodes_resume ON podcast_episodes(last_played_at DESC) WHERE played = 0;
 CREATE UNIQUE INDEX idx_episodes_path ON podcast_episodes(local_path) WHERE local_path IS NOT NULL;
 )SQL"),
+        QStringLiteral(R"SQL(
+ALTER TABLE podcast_episodes ADD COLUMN remote_url TEXT;
+ALTER TABLE podcast_episodes ADD COLUMN download_state TEXT
+    CHECK(download_state IN ('none','downloading','done','failed')) DEFAULT 'none';
+)SQL"),
     };
     return list;
 }
