@@ -50,3 +50,18 @@ target_link_libraries(tst_tracklistmodel PRIVATE
 
 add_test(NAME tst_tracklistmodel COMMAND tst_tracklistmodel)
 set_tests_properties(tst_tracklistmodel PROPERTIES ENVIRONMENT "QT_QPA_PLATFORM=offscreen")
+
+qt_add_executable(tst_librarybrowser
+    tst_librarybrowser.cpp
+    ../src/database.h ../src/database.cpp
+    ../src/tagreader.h ../src/tagreader.cpp
+    ../src/libraryscanner.h ../src/libraryscanner.cpp
+    ../src/librarybrowser.h ../src/librarybrowser.cpp
+    ../src/playstatsrecorder.h ../src/playstatsrecorder.cpp
+)
+target_include_directories(tst_librarybrowser PRIVATE ../src)
+target_link_libraries(tst_librarybrowser PRIVATE
+    Qt6::Core Qt6::Test Qt6::Qml Qt6::Sql PkgConfig::TAGLIB)
+
+add_test(NAME tst_librarybrowser COMMAND tst_librarybrowser)
+set_tests_properties(tst_librarybrowser PROPERTIES ENVIRONMENT "QT_QPA_PLATFORM=offscreen")
