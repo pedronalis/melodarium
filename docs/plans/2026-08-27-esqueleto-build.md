@@ -357,7 +357,7 @@ Valores literais extraídos de `Commons/Style.qml` do Noctalia com todos os rati
 (research §2-4). Não portamos o sistema de `radiusRatio`/`uiScaleRatio` configurável: o
 melodia não tem UI-scale ajustável nesta versão.
 
-- [ ] Criar `src/Theme.qml`:
+- [x] Criar `src/Theme.qml`:
 
 ```qml
 pragma Singleton
@@ -432,11 +432,11 @@ QtObject {
 }
 ```
 
-- [ ] verificação mecânica da task: o qmldir gerado precisa marcar `singleton` — sem isso o
+- [x] verificação mecânica da task: o qmldir gerado precisa marcar `singleton` — sem isso o
       Theme resolve para `undefined` em silêncio:
       `cmake --build build && grep -h "singleton Theme" build/Melodia/App/qmldir` →
       `singleton Theme 1.0 src/Theme.qml`
-- [ ] commit:
+- [x] commit:
 
 ```bash
 git add src/Theme.qml CMakeLists.txt
