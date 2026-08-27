@@ -753,7 +753,7 @@ Regras que esta task tem de honrar, todas verificadas no research:
 - Arquivo cujo caminho é novo mas cujo `content_hash` bate com um sumido é um **move**: o
   `id` é preservado, e com ele `track_stats` e (na fatia `colecoes-tags`) as coleções.
 
-- [ ] Criar `src/libraryscanner.h`:
+- [x] Criar `src/libraryscanner.h`:
 
 ```cpp
 #pragma once
@@ -784,7 +784,7 @@ private:
 };
 ```
 
-- [ ] Criar `src/libraryscanner.cpp`:
+- [x] Criar `src/libraryscanner.cpp`:
 
 ```cpp
 #include "libraryscanner.h"
@@ -1061,8 +1061,8 @@ void LibraryScanner::run(const QString &rootPath, const QString &dbPath)
 }
 ```
 
-- [ ] verificação mecânica da task: `cmake --build build` → exit 0
-- [ ] commit:
+- [x] verificação mecânica da task: `cmake --build build` → exit 0
+- [x] commit:
 
 ```bash
 git add src/libraryscanner.h src/libraryscanner.cpp CMakeLists.txt
