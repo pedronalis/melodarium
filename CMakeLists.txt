@@ -10,6 +10,8 @@ qt_standard_project_setup(REQUIRES 6.5)
 
 qt_add_executable(appmelodia
     src/main.cpp
+    src/colorschemeprovider.h
+    src/colorschemeprovider.cpp
 )
 
 qt_add_qml_module(appmelodia
@@ -17,6 +19,9 @@ qt_add_qml_module(appmelodia
     VERSION 1.0
     QML_FILES
         src/Main.qml
+    SOURCES
+        src/colorschemeprovider.h
+        src/colorschemeprovider.cpp
 )
 
 # OBRIGATORIO: sem isto o build quebra com erros de template que nao apontam a causa.
