@@ -847,10 +847,10 @@ git commit -m "feat(ui): three-column library navigation with search and queue"
 
 ### Task 6: Testes das consultas e das estatísticas
 
-- [ ] Acrescentar a `tests/CMakeLists.txt` um alvo `tst_librarybrowser` com as mesmas fontes de
+- [x] Acrescentar a `tests/CMakeLists.txt` um alvo `tst_librarybrowser` com as mesmas fontes de
       `tst_library` mais `../src/librarybrowser.*` e `../src/playstatsrecorder.*`, registrado
       com `add_test` e `QT_QPA_PLATFORM=offscreen`.
-- [ ] Criar `tests/tst_librarybrowser.cpp`:
+- [x] Criar `tests/tst_librarybrowser.cpp`:
 
 ```cpp
 #include <QtTest/QtTest>
@@ -969,11 +969,11 @@ QTEST_MAIN(TstLibraryBrowser)
 #include "tst_librarybrowser.moc"
 ```
 
-- [ ] Acrescentar `#include <QSqlError>` ao topo do teste (usado no `QVERIFY2`).
-- [ ] verificação mecânica da task:
+- [x] Acrescentar `#include <QSqlError>` ao topo do teste (usado no `QVERIFY2`).
+- [x] verificação mecânica da task:
       `cmake --build build && ctest --test-dir build -R tst_librarybrowser --output-on-failure`
       → `100% tests passed`
-- [ ] commit:
+- [x] commit:
 
 ```bash
 git add tests/tst_librarybrowser.cpp tests/CMakeLists.txt
