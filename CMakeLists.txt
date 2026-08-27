@@ -66,6 +66,10 @@ qt_add_qml_module(appmelodia
         src/NewCollectionDialog.qml
         src/TagChip.qml
         src/TagEditor.qml
+        src/PodcastSection.qml
+        src/EpisodeRow.qml
+        src/SpeedControl.qml
+        src/ContinueListening.qml
     RESOURCES
         assets/fonts/noctalia-tabler-icons.ttf
     SOURCES

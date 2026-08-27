@@ -666,7 +666,7 @@ git commit -m "feat(podcast): episode list model with listening progress"
 
 ### Task 4: Interface do podcast
 
-- [ ] Criar `src/SpeedControl.qml` — velocidade em passos, direto no `AudioEngine`:
+- [x] Criar `src/SpeedControl.qml` — velocidade em passos, direto no `AudioEngine`:
 
 ```qml
 import QtQuick
@@ -720,17 +720,17 @@ RowLayout {
 }
 ```
 
-- [ ] Criar `src/EpisodeRow.qml`: título, data, barra fina de progresso de escuta, tempo
+- [x] Criar `src/EpisodeRow.qml`: título, data, barra fina de progresso de escuta, tempo
       restante e um botão de "marcar ouvido" (ícone `heart` quando ouvido, contorno quando não).
       Reusa o padrão visual de `TrackRow.qml`, trocando a capa por um indicador de progresso.
       Sinais: `signal activated()` e `signal playedToggled()`.
-- [ ] Criar `src/ContinueListening.qml`: faixa horizontal no topo da aba Podcast, alimentada
+- [x] Criar `src/ContinueListening.qml`: faixa horizontal no topo da aba Podcast, alimentada
       por `PodcastLibrary.continueListening()`, cada cartão com programa, título, quanto falta
       e a barra de progresso; clicar emite `episodeChosen(id)`.
-- [ ] Criar `src/PodcastSection.qml`: a aba inteira — lista de programas à esquerda,
+- [x] Criar `src/PodcastSection.qml`: a aba inteira — lista de programas à esquerda,
       `ContinueListening` no topo do conteúdo, `PodcastEpisodeModel` na lista de episódios,
       `SpeedControl` na barra inferior quando o que está tocando é um episódio.
-- [ ] Em `src/Main.qml`: acrescentar as abas **Música | Podcast** no topo (o spec desenha
+- [x] Em `src/Main.qml`: acrescentar as abas **Música | Podcast** no topo (o spec desenha
       exatamente isso), com a barra lateral e o conteúdo trocando conforme a aba. Ligar:
 
 ```qml
@@ -772,14 +772,14 @@ RowLayout {
     }
 ```
 
-- [ ] Ainda em `src/Main.qml`: manter `currentEpisodeId` sincronizado — quando
+- [x] Ainda em `src/Main.qml`: manter `currentEpisodeId` sincronizado — quando
       `AudioEngine.currentFile` mudar, chamar `PodcastLibrary.episodeForPath(path)` e guardar o
       `id` (0 quando o arquivo não é episódio). Ao pausar, gravar a posição uma vez a mais.
-- [ ] Acrescentar os quatro `.qml` ao `QML_FILES`.
-- [ ] verificação mecânica da task:
+- [x] Acrescentar os quatro `.qml` ao `QML_FILES`.
+- [x] verificação mecânica da task:
       `cmake --build build && QT_QPA_PLATFORM=offscreen timeout 8 ./build/appmelodia 2>&1 | grep -Ec "is not a type|ReferenceError"`
       → `0`
-- [ ] commit:
+- [x] commit:
 
 ```bash
 git add src/PodcastSection.qml src/EpisodeRow.qml src/SpeedControl.qml src/ContinueListening.qml src/Main.qml CMakeLists.txt
