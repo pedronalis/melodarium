@@ -47,6 +47,29 @@ journald — sem as duas variáveis abaixo, todo log de debug some sem erro nenh
 QT_LOGGING_RULES="*.debug=true" QT_FORCE_STDERR_LOGGING=1 ./build/appmelodia
 ```
 
+## Qualidade de áudio
+
+O motor é o libmpv, e as opções abaixo existem para manter o sinal intacto do arquivo até a
+placa. O que o melodia garante e o que não depende dele:
+
+- **Nenhuma conversão de taxa ou de formato de amostra é forçada.** As opções do mpv que
+  fixariam taxa e formato ficam deliberadamente sem valor: basta setar qualquer uma delas
+  para o `swresample` passar a converter *todas* as faixas para aquele valor. É isso que faz
+  um FLAC 24 bit/192 kHz chegar ao dispositivo como está no arquivo.
+- **`gapless-audio` fica em `weak`,** o padrão do mpv. Nesse modo o dispositivo continua
+  aberto entre faixas de mesmo formato — o caso do álbum contínuo — e nunca há resample
+  escondido. `setGaplessAggressive(true)` troca para `yes`, que mantém o dispositivo aberto
+  também quando o formato muda e, para conseguir isso, **reamostra** as faixas seguintes.
+  Por isso `yes` não é padrão.
+- **`audio-exclusive` não é padrão.** Ligado (`setExclusiveOutput(true)`), o melodia toma o
+  dispositivo para si e **silencia todo o resto do sistema** enquanto houver arquivo
+  carregado. É uma escolha do usuário, nunca um default.
+- **Limite honesto:** mesmo em modo exclusivo, quem reamostra pode ser o PipeWire. Se o grafo
+  estiver fixo numa taxa (`default.clock.rate` no `pipewire.conf`), a conversão acontece fora
+  do melodia, e nenhuma opção daqui a evita — é configuração do sistema.
+- **ReplayGain** nasce desligado; `setReplayGainMode("track")` ou `"album"` liga, e só tem
+  efeito quando o arquivo traz as tags.
+
 ## Licenças de terceiros
 
 A fonte de ícones Tabler (`assets/fonts/noctalia-tabler-icons.ttf`) é distribuída sob licença
