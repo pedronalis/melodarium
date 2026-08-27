@@ -1,7 +1,7 @@
 ---
 slug: like-faixas
 feature: melodia-capa-manda
-status: em-execucao
+status: concluido
 depende-de: []
 decisao-humana: nao
 spec: design/Main.dc.html (telas aprovadas em 2026-08-27; não há spec textual)
