@@ -524,7 +524,7 @@ Usa `ao=null`: nunca abre PipeWire/ALSA, roda sem placa de som e sem tela. As fi
 geradas pelo próprio teste com ffmpeg — dois FLACs curtos de parâmetros idênticos, que é a
 condição em que o gapless `weak` de fato emenda.
 
-- [ ] Acrescentar a `tests/CMakeLists.txt`:
+- [x] Acrescentar a `tests/CMakeLists.txt`:
 
 ```cmake
 qt_add_executable(tst_audioengine
@@ -539,7 +539,7 @@ add_test(NAME tst_audioengine COMMAND tst_audioengine)
 set_tests_properties(tst_audioengine PROPERTIES ENVIRONMENT "QT_QPA_PLATFORM=offscreen" TIMEOUT 60)
 ```
 
-- [ ] Criar `tests/tst_audioengine.cpp`:
+- [x] Criar `tests/tst_audioengine.cpp`:
 
 ```cpp
 #include <QtTest/QtTest>
@@ -645,10 +645,10 @@ QTEST_MAIN(TstAudioEngine)
 #include "tst_audioengine.moc"
 ```
 
-- [ ] verificação mecânica da task:
+- [x] verificação mecânica da task:
       `cmake --build build && ctest --test-dir build -R tst_audioengine --output-on-failure`
       → `100% tests passed`
-- [ ] commit:
+- [x] commit:
 
 ```bash
 git add tests/tst_audioengine.cpp tests/CMakeLists.txt
