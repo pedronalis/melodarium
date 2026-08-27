@@ -50,21 +50,9 @@
 
 ## Em voo
 
-**Tipo 1 — run headless · redesenho, fatias 1-2** (`like-faixas` → `moldura-capa`, 11 tasks)
-· despachado **2026-08-27 19:05** · cwd do run:
-`/home/pedro/dev/active/.melodia-worktrees/redesign-1-2` (branch `exec/redesign-1-2`)
-· estimado ~500-600k tok novos / ~30-40 min / teto 260 turnos · gate de 14 linhas
-· **vigia armado** (notifica na tela ao fechar).
-
-conferir: RUN_GATE ausente = verde · `.run_gate_count` presente = FAIL (ver `RESUMO_RUN.md`/transcript)
-· RUN_GATE presente sem count = em voo
-
-**Por que só 2 das 5 fatias:** as fatias 3-5 preenchem o miolo da moldura que a fatia 2 cria.
-Se a conferência visual do Pedro mudar a moldura, o trabalho delas seria refeito — então elas
-esperam o OK da tela, não só a colheita do gate.
-
-O run das fatias 7-9 (lote anterior) foi colhido: **PASSOU** — 19 commits, 9/9 alvos de teste,
-integrado em `main` (`50381f4`).
+Nada. O run do redesenho (fatias 1-2) foi colhido: **PASSOU** — 15 commits, gate de 14 linhas
+verde, 9/9 alvos de teste. Integrado em `main`. **Pendente: o gate humano da `moldura-capa`** —
+o Pedro precisa olhar a janela e aprovar antes de as fatias 3-5 serem despachadas.
 
 ## Verificação
 
@@ -113,6 +101,13 @@ integrado em `main` (`50381f4`).
   consome" (lição do run 4-6) errou 30%, contra 242% da estimativa por número de tasks.
   **(2) 228 turnos contra teto de 260 — margem de 12%.** Três fatias consumidoras é o teto real
   de um run; a quarta não caberia.
+
+- 2026-08-27 · /despacha run headless · redesenho fatias 1-2 (`like-faixas` → `moldura-capa`,
+  11 tasks) · modelo Opus 5 · estimado ~500-600k tok novos / 30-40 min · real **~497k tok novos
+  (~20,95M com releitura, inflação 42×) / ~0,23 h / 140 turnos** · Δ tokens **−1%**, Δ tempo
+  **−60%** · **PASSOU** — 15 commits. Lição: **a régua da dependência acertou de novo** — três
+  estimativas seguidas por "quantas interfaces alheias a fatia consome" (+30%, −1%) contra
+  +242% da estimativa por número de tasks. Está calibrada; use.
 
 ## Perigos
 
