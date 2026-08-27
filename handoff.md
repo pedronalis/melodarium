@@ -50,9 +50,21 @@
 
 ## Em voo
 
-Nada. O run das fatias 7-9 foi colhido: **PASSOU** — 19 commits, gate de 15 linhas verde,
-9/9 alvos de teste. Integrado em `main` (`50381f4`), com a verificação re-rodada na branch
-integrada: build limpo e suíte 100%. O vigia do /despacha estreou aqui e avisou na tela.
+**Tipo 1 — run headless · redesenho, fatias 1-2** (`like-faixas` → `moldura-capa`, 11 tasks)
+· despachado **2026-08-27 19:05** · cwd do run:
+`/home/pedro/dev/active/.melodia-worktrees/redesign-1-2` (branch `exec/redesign-1-2`)
+· estimado ~500-600k tok novos / ~30-40 min / teto 260 turnos · gate de 14 linhas
+· **vigia armado** (notifica na tela ao fechar).
+
+conferir: RUN_GATE ausente = verde · `.run_gate_count` presente = FAIL (ver `RESUMO_RUN.md`/transcript)
+· RUN_GATE presente sem count = em voo
+
+**Por que só 2 das 5 fatias:** as fatias 3-5 preenchem o miolo da moldura que a fatia 2 cria.
+Se a conferência visual do Pedro mudar a moldura, o trabalho delas seria refeito — então elas
+esperam o OK da tela, não só a colheita do gate.
+
+O run das fatias 7-9 (lote anterior) foi colhido: **PASSOU** — 19 commits, 9/9 alvos de teste,
+integrado em `main` (`50381f4`).
 
 ## Verificação
 
