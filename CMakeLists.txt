@@ -41,3 +41,4 @@ target_include_directories(appmelodia PRIVATE src)
 target_link_libraries(appmelodia PRIVATE Qt6::Core Qt6::Quick)
 
 enable_testing()
+add_subdirectory(tests)

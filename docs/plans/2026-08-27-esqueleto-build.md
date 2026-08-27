@@ -588,7 +588,7 @@ git commit -m "feat(theme): load Tabler icon font and apply Noctalia look to the
 
 Prova que o app não quebra sem Noctalia — o cenário do Windows e o de qualquer outra máquina.
 
-- [ ] Criar `tests/CMakeLists.txt`:
+- [x] Criar `tests/CMakeLists.txt`:
 
 ```cmake
 find_package(Qt6 REQUIRED COMPONENTS Core Test)
@@ -605,7 +605,7 @@ add_test(NAME tst_colorscheme COMMAND tst_colorscheme)
 set_tests_properties(tst_colorscheme PROPERTIES ENVIRONMENT "QT_QPA_PLATFORM=offscreen")
 ```
 
-- [ ] Criar `tests/tst_colorscheme.cpp`:
+- [x] Criar `tests/tst_colorscheme.cpp`:
 
 ```cpp
 #include <QtTest/QtTest>
@@ -666,9 +666,9 @@ QTEST_MAIN(TstColorScheme)
 #include "tst_colorscheme.moc"
 ```
 
-- [ ] verificação mecânica da task:
+- [x] verificação mecânica da task:
       `cmake --build build && ctest --test-dir build --output-on-failure` → `100% tests passed`
-- [ ] commit:
+- [x] commit:
 
 ```bash
 git add tests/ CMakeLists.txt
