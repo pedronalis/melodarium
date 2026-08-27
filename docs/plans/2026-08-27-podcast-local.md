@@ -135,7 +135,7 @@ git commit -m "feat(podcast): add shows and episodes as schema migration 4"
 
 ### Task 2: PodcastLibrary — varredura por pasta e posição de escuta
 
-- [ ] Criar `src/podcastlibrary.h`:
+- [x] Criar `src/podcastlibrary.h`:
 
 ```cpp
 #pragma once
@@ -189,7 +189,7 @@ private:
 };
 ```
 
-- [ ] Criar `src/podcastlibrary.cpp`:
+- [x] Criar `src/podcastlibrary.cpp`:
 
 ```cpp
 #include "podcastlibrary.h"
@@ -443,8 +443,8 @@ QVariantMap PodcastLibrary::episodeForPath(const QString &path)
 }
 ```
 
-- [ ] verificação mecânica da task: `cmake --build build` → exit 0
-- [ ] commit:
+- [x] verificação mecânica da task: `cmake --build build` → exit 0
+- [x] commit:
 
 ```bash
 git add src/podcastlibrary.h src/podcastlibrary.cpp CMakeLists.txt
