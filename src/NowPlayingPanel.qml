@@ -37,6 +37,8 @@ Rectangle {
 
     Component.onCompleted: root.refresh()
 
+
+
     Connections {
         target: AudioEngine
         function onCurrentFileChanged() { root.refresh() }
@@ -60,13 +62,23 @@ Rectangle {
     }
 
     ColumnLayout {
+        id: col
         anchors.fill: parent
         anchors.margins: Theme.marginXL + Theme.marginS
         spacing: Theme.marginXL
 
         Rectangle {
-            Layout.preferredWidth: root.coverSide
-            Layout.preferredHeight: root.coverSide
+            id: capaRect
+
+            // O resto da coluna (título, progresso, controles, tags) ocupa ~330px. Quando a
+            // janela é mais baixa que isso + 340, a capa cede espaço — mas cede QUADRADA:
+            // sem amarrar largura à altura, o Layout encolheria só a altura e a arte sairia
+            // deformada. Salvaguarda: numa janela de 1384 a medida confirma 340x340.
+            readonly property int lado: Math.max(120, Math.min(root.coverSide, root.height - 330))
+
+            Layout.preferredWidth: capaRect.lado
+            Layout.preferredHeight: capaRect.lado
+            Layout.maximumHeight: capaRect.lado
             Layout.alignment: Qt.AlignHCenter
             radius: Theme.radiusM
             color: Theme.mSurfaceVariant
@@ -80,7 +92,7 @@ Rectangle {
                 fillMode: Image.PreserveAspectCrop
                 asynchronous: true
                 visible: status === Image.Ready
-                sourceSize.width: root.coverSide
+                sourceSize.width: capaRect.lado
             }
 
             Text {
@@ -223,6 +235,7 @@ Rectangle {
         }
 
         TagEditor {
+            id: tagEd
             Layout.fillWidth: true
             visible: root.trackId > 0
             trackId: root.trackId
