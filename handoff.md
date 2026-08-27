@@ -1,37 +1,40 @@
 # Handoff — melodia
 
-> Atualizado: 2026-08-27 14:46 · branch: `main` · via /fecho · contexto: ~15% consumido
+> Atualizado: 2026-08-27 15:15 · branch: `main` · via /fecho · contexto: ~24% consumido
 
 ## Estado
 
-- As três primeiras fatias (esqueleto, motor de áudio, varredura da biblioteca) estão prontas,
-  testadas e **integradas em `main`** (fast-forward de 20 commits).
+- **6 das 9 fatias concluídas e integradas em `main`**: esqueleto, motor de áudio, varredura,
+  tocador, navegação e coleções/tags. Suíte de 6 alvos, 100% passando na `main` depois do merge.
 - A janela recebeu o **OK visual do Pedro**, com um ajuste: a tela era um card com moldura dentro
   da janela e virou superfície única (`970904d`). O gate humano da fatia 1 está fechado.
-- A paleta lida é a real do usuário (`~/.config/noctalia/colors.json`), não o fallback de fábrica
-  — conferido pelas cores na captura: cinza sobre preto, não o azul/amarelo do padrão.
-- **Run das fatias 4-6 em voo** (tocador → navegação → coleções), num worktree isolado.
-- Suíte: 3 alvos, 20 casos, 100% passando em 2026-08-27 14:46.
+- A paleta lida é a real do usuário (`~/.config/noctalia/colors.json`), não o fallback de fábrica.
+- A UI completa já sobe: busca no topo, barra lateral (coleções, artistas, álbuns, gêneros, tags,
+  listas automáticas), painel de fila, editor de tags e barra de transporte.
+- **Faltam os dois gates humanos das fatias 4 e 6** — som ao clicar numa faixa e a mesma faixa em
+  duas coleções. Nenhum dos dois foi conferido: o run é cego e não há pasta de música apontada.
+  Há MP3s em `/media/Backup HD/Torrents/` para o teste.
 
 ## Alvo
 
 - **Frente:** melodia — player de música local com a estética do Noctalia
-- **Plano-fonte:** `docs/plans/` — lote de 9 fatias (3/9 concluídas, 3 em execução, 3 aprovadas)
+- **Plano-fonte:** `docs/specs/2026-08-27-player-musica-podcast.md` — decomposto no lote de
+  9 planos de fatia em `docs/plans/` (6/9 concluídas)
 - **PRONTA quando:** as 9 fatias com `status: concluido` **e** os três gates humanos confirmados
   na tela: a janela com a cara certa (✓ 27/08), o som saindo ao clicar numa faixa, a mesma faixa
   em duas coleções com um clique
-- **Restante:** 6 fatias — `tocador-ui`, `navegacao-biblioteca`, `colecoes-tags` (no run em voo);
-  `podcast-local`, `download-youtube`, `feed-rss` (aprovadas, não despachadas)
+- **Restante:** 3 fatias — `podcast-local`, `feed-rss`, `download-youtube` (aprovadas, não
+  despachadas) — mais os dois gates humanos das fatias 4 e 6
 
 ## Fila da sessão
 
-1. **[S]** Colher o run das fatias 4-6 e integrar `exec/fatias-4-6` em `main` se vier verde ·
-   done: `ls /home/pedro/dev/active/.melodia-worktrees/fatias-4-6/RUN_GATE` → ausente = passou
-2. **[S]** Os dois gates humanos que o run deixa pendentes: clicar numa faixa e sair som; a mesma
-   faixa em duas coleções — **bloqueado pelo vagão 1** · done: `./build/appmelodia` numa sessão
-   gráfica, com uma pasta de música apontada
-3. **[M]** Despachar as 3 fatias finais (`podcast-local` → `feed-rss`, e `download-youtube`) ·
+1. **[S]** Os dois gates humanos: apontar uma pasta de música (há MP3s em
+   `/media/Backup HD/Torrents/`), clicar numa faixa e ouvir; depois jogar a mesma faixa em duas
+   coleções · done: som saindo e a faixa aparecendo nas duas coleções · `./build/appmelodia`
+2. **[M]** Despachar as 3 fatias finais (`podcast-local` → `feed-rss`, e `download-youtube`) ·
    done: `RUN_GATE` armado no cwd do run novo e sessão headless viva
+3. **[S]** Limpar o worktree `fatias-4-6` depois de conferir que nada ficou lá ·
+   done: `git worktree list` sem `.melodia-worktrees/fatias-4-6`
 
 ## Estacionamento (derivas)
 
@@ -42,28 +45,22 @@
 - [ ] 2026-08-27 · Bit-perfect real depende do grafo do PipeWire (`default.clock.rate`), não só
       das opções do mpv. O plano documenta o limite; medir de verdade exige um FLAC 96 kHz e uma
       sonda no ponto ALSA.
+- [ ] 2026-08-27 · Sobrou um `melodia.db` de 0 byte em `~/.local/share/melodia/` (o banco de
+      verdade é `~/.local/share/melodia/melodia/melodia.db`). Sem efeito observável, origem não
+      identificada — os testes usam pasta temporária. Apagar se não voltar.
 
 ## Em voo
 
-**Tipo 1 — run headless · fatias 4-6** (`tocador-ui` → `navegacao-biblioteca` → `colecoes-tags`,
-18 tasks) · despachado **2026-08-27 14:45** · cwd do run:
-`/home/pedro/dev/active/.melodia-worktrees/fatias-4-6` (branch `exec/fatias-4-6`, saída de `main`)
-· estimado ~150-200k tok novos / ~20-40 min / teto 260 turnos · gate de 9 linhas, com piso de
-6 alvos de teste.
-
-conferir: RUN_GATE ausente = verde · `.run_gate_count` presente = FAIL (ver `RESUMO_RUN.md`/transcript)
-· RUN_GATE presente sem count = em voo
-
-Duas dessas fatias têm `decisao-humana: sim` e foram para o headless mesmo assim, por decisão do
-Pedro ("despacha o restante e deixa trabalhar"): a conferência na tela fica pendente para a
-colheita (é o vagão 2 da fila).
+Nada. O run das fatias 4-6 foi colhido: **PASSOU** — 21 commits, gate de 9 linhas verde,
+6/6 alvos de teste. Integrado em `main` por merge (`5e20c9f`), com a verificação re-rodada na
+branch integrada: build limpo e suíte 100%.
 
 ## Verificação
 
-- `cmake -B build -G Ninja && cmake --build build` → exit 0 · 2026-08-27 14:36
-- `ctest --test-dir build --output-on-failure` → `100% tests passed, 0 tests failed out of 3` ·
-  2026-08-27 14:46
-- Gate do run em voo: 9 linhas em `.melodia-worktrees/fatias-4-6/RUN_GATE`
+- `cmake -B build -G Ninja && cmake --build build` → exit 0 · 2026-08-27 15:14 (na `main`, pós-merge)
+- `ctest --test-dir build --output-on-failure` → `100% tests passed, 0 tests failed out of 6` ·
+  2026-08-27 15:14
+- Gate do run 4-6: 9 linhas, todas verdes (o run desarmou o `RUN_GATE` sozinho)
 
 ## Calibração de custo
 
@@ -86,6 +83,16 @@ colheita (é o vagão 2 da fila).
   instalados pagou: 4 armadilhas achadas rodando código (singleton QML silencioso, locale do
   mpv, log do Qt no Fedora, dois yt-dlp) que teriam travado a execução.
 
+- 2026-08-27 · /despacha run headless · fatias 4-6 (`tocador-ui` → `navegacao-biblioteca` →
+  `colecoes-tags`, 18 tasks, UI QML + consultas SQL sobre as interfaces das fatias 1-3) · modelo
+  Opus 5 · estimado ~150-200k tok novos / 20-40 min · real **~684k tok novos (~33,6M com
+  releitura, inflação 49×) / ~0,45 h / 184 turnos** · Δ tokens **+242%**, Δ tempo **dentro da
+  faixa** · **PASSOU** — 21 commits, 6/6 alvos de teste. Lição:
+  **task não é unidade de custo — dependência é.** As fatias 1-3 (16 tasks, folhas, sem consumir
+  interface de ninguém) custaram 138k novos; estas 18 tasks custaram **5×** isso, porque cada uma
+  lê o código das anteriores antes de escrever. Ao estimar, contar quantas interfaces alheias a
+  fatia consome, não quantas tasks ela tem. O tempo, esse, bateu: ~27 min contra 20-40 previstos.
+
 ## Perigos
 
 - [ ] 2026-08-27 · **`qt_add_qml_module` não honra `pragma Singleton`** — sem
@@ -97,7 +104,7 @@ colheita (é o vagão 2 da fila).
       antes dele.
 - [ ] 2026-08-27 · **O Fedora silencia `qDebug`/`console.log`** (`/usr/share/qt6/qtlogging.ini`
       manda tudo para o journald). Religar com `QT_LOGGING_RULES="*.debug=true"
-    QT_FORCE_STDERR_LOGGING=1` — mas o log fica enorme (845 KB num único start).
+QT_FORCE_STDERR_LOGGING=1` — mas o log fica enorme (845 KB num único start).
 - [ ] 2026-08-27 · **`target_include_directories(appmelodia PRIVATE src)` é obrigatório** — sem
       ele o build morre numa cascata de ~15 erros de template que não apontam a causa.
 - [ ] 2026-08-27 · **Há dois `yt-dlp`** — o do PATH é o do Homebrew (2026.01.31), o do Fedora é
@@ -119,7 +126,7 @@ mpv 0.40, taglib 1.13.1, sqlite 3.53 (FTS5 ativo), yt-dlp, fonte Inter.
 ```
 esqueleto-build ✓
    ├─ motor-audio ✓ ─────┐
-   └─ scan-biblioteca ✓ ─┴─ tocador-ui ─ navegacao-biblioteca
-                                            ├─ colecoes-tags ─ download-youtube
-                                            └─ podcast-local ─ feed-rss
+   └─ scan-biblioteca ✓ ─┴─ tocador-ui ✓ ─ navegacao-biblioteca ✓
+                                              ├─ colecoes-tags ✓ ─ download-youtube
+                                              └─ podcast-local ─ feed-rss
 ```
