@@ -60,9 +60,10 @@ qt_add_qml_module(appmelodia
         src/Theme.qml
         src/Icons.qml
         src/IconButton.qml
+        src/IconRail.qml
         src/MelodiaButton.qml
         src/TrackRow.qml
-        src/PlayerBar.qml
+        src/NowPlayingPanel.qml
         src/LibraryEmptyState.qml
         src/Sidebar.qml
         src/SidebarItem.qml

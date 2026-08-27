@@ -465,7 +465,7 @@ git commit -m "feat(ui): now-playing panel with the large cover and transport"
 
 ### Task 4: Registrar os componentes no build
 
-- [ ] Em `CMakeLists.txt`, acrescentar à lista `QML_FILES` do `qt_add_qml_module`, em ordem
+- [x] Em `CMakeLists.txt`, acrescentar à lista `QML_FILES` do `qt_add_qml_module`, em ordem
       alfabética junto dos existentes:
 
 ```cmake
@@ -475,11 +475,11 @@ git commit -m "feat(ui): now-playing panel with the large cover and transport"
 
       e REMOVER a linha `src/PlayerBar.qml`.
 
-- [ ] Apagar o arquivo: `git rm src/PlayerBar.qml`
-- [ ] verificação mecânica da task:
+- [x] Apagar o arquivo: `git rm src/PlayerBar.qml`
+- [x] verificação mecânica da task:
       `cmake -B build -G Ninja && cmake --build build` → exit 0 e
       `test "$(grep -c 'PlayerBar' CMakeLists.txt)" -eq 0` → exit 0
-- [ ] commit:
+- [x] commit:
 
 ```bash
 git add CMakeLists.txt
