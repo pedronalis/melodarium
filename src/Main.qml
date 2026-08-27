@@ -14,11 +14,7 @@ Window {
 
     Rectangle {
         anchors.fill: parent
-        anchors.margins: Theme.marginXL
-        radius: Theme.radiusM
-        color: Theme.mSurfaceVariant
-        border.width: Theme.borderS
-        border.color: Theme.mOutline
+        color: Theme.mSurface
 
         Behavior on color {
             ColorAnimation { duration: Theme.animationSlowest; easing.type: Theme.easingType }
