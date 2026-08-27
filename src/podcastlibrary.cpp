@@ -145,7 +145,8 @@ QVariantList PodcastLibrary::shows()
     QVariantList out;
     if (!q.exec(QStringLiteral(
             "SELECT s.id, s.title, IFNULL(s.cover_path,''), COUNT(e.id), "
-            "SUM(CASE WHEN e.played = 0 THEN 1 ELSE 0 END) "
+            "SUM(CASE WHEN e.played = 0 THEN 1 ELSE 0 END), "
+            "IFNULL(s.last_checked_at,0), IFNULL(s.feed_url,'') "
             "FROM podcast_shows s LEFT JOIN podcast_episodes e ON e.show_id = s.id "
             "GROUP BY s.id ORDER BY s.title COLLATE NOCASE")))
         return out;
@@ -154,7 +155,9 @@ QVariantList PodcastLibrary::shows()
                                {QStringLiteral("title"), q.value(1).toString()},
                                {QStringLiteral("coverPath"), q.value(2).toString()},
                                {QStringLiteral("episodeCount"), q.value(3).toInt()},
-                               {QStringLiteral("unplayedCount"), q.value(4).toInt()}});
+                               {QStringLiteral("unplayedCount"), q.value(4).toInt()},
+                               {QStringLiteral("lastCheckedAt"), q.value(5).toLongLong()},
+                               {QStringLiteral("feedUrl"), q.value(6).toString()}});
     }
     return out;
 }
