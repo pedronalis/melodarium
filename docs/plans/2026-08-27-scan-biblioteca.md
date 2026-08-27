@@ -145,7 +145,7 @@ git commit -m "build(library): link TagLib and Qt Sql"
 por `dynamic_cast` que se chega nelas. Opus/Vorbis/MP3 não expõem (são lossy) — fica 0, que
 o banco grava como NULL.
 
-- [ ] Criar `src/tagreader.h`:
+- [x] Criar `src/tagreader.h`:
 
 ```cpp
 #pragma once
@@ -187,7 +187,7 @@ QByteArray readCover(const QString &absolutePath, QString *mimeTypeOut);
 } // namespace TagReader
 ```
 
-- [ ] Criar `src/tagreader.cpp`:
+- [x] Criar `src/tagreader.cpp`:
 
 ```cpp
 #include "tagreader.h"
@@ -430,8 +430,8 @@ QByteArray TagReader::readCover(const QString &absolutePath, QString *mimeTypeOu
 }
 ```
 
-- [ ] verificação mecânica da task: `cmake --build build` → exit 0
-- [ ] commit:
+- [x] verificação mecânica da task: `cmake --build build` → exit 0
+- [x] commit:
 
 ```bash
 git add src/tagreader.h src/tagreader.cpp CMakeLists.txt
