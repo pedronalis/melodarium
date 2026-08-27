@@ -960,10 +960,10 @@ git commit -m "feat(collections): tag editor with prefix suggestions"
 
 ### Task 6: Testes de coleções e tags
 
-- [ ] Acrescentar a `tests/CMakeLists.txt` o alvo `tst_collections` (fontes de `tst_library`
+- [x] Acrescentar a `tests/CMakeLists.txt` o alvo `tst_collections` (fontes de `tst_library`
       mais `../src/collectionmanager.*` e `../src/librarybrowser.*`), com `add_test` e
       `QT_QPA_PLATFORM=offscreen`.
-- [ ] Criar `tests/tst_collections.cpp`:
+- [x] Criar `tests/tst_collections.cpp`:
 
 ```cpp
 #include <QtTest/QtTest>
@@ -1097,10 +1097,10 @@ QTEST_MAIN(TstCollections)
 #include "tst_collections.moc"
 ```
 
-- [ ] verificação mecânica da task:
+- [x] verificação mecânica da task:
       `cmake --build build && ctest --test-dir build -R tst_collections --output-on-failure`
       → `100% tests passed`
-- [ ] commit:
+- [x] commit:
 
 ```bash
 git add tests/tst_collections.cpp tests/CMakeLists.txt
