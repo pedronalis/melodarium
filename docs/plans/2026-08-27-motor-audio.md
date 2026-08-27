@@ -107,7 +107,7 @@ git commit -m "build(audio): link libmpv through pkg-config"
 
 ### Task 2: AudioEngine — header
 
-- [ ] Criar `src/audioengine.h`:
+- [x] Criar `src/audioengine.h`:
 
 ```cpp
 #pragma once
@@ -199,10 +199,10 @@ private:
 };
 ```
 
-- [ ] verificação mecânica da task: o header compila isolado —
+- [x] verificação mecânica da task: o header compila isolado —
       `g++ -fsyntax-only -std=c++20 $(pkg-config --cflags Qt6Core Qt6Qml Qt6QmlIntegration mpv) -x c++ src/audioengine.h`
       → exit 0
-- [ ] commit:
+- [x] commit:
 
 ```bash
 git add src/audioengine.h
