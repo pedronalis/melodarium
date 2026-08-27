@@ -232,7 +232,7 @@ git commit -m "feat(library): expose liked state as a model role"
 
 ### Task 5: Teste da API de like
 
-- [ ] Em `tests/tst_librarybrowser.cpp`, acrescentar (a fixture desse arquivo já cria banco
+- [x] Em `tests/tst_librarybrowser.cpp`, acrescentar (a fixture desse arquivo já cria banco
       temporário e faixas; siga o padrão dela para semear):
 
 ```cpp
@@ -274,11 +274,11 @@ void TestLibraryBrowser::toggleLikeOnMissingTrackIsHarmless()
 }
 ```
 
-- [ ] Declarar os três slots em `private slots:` e garantir `#include <QSignalSpy>` e
+- [x] Declarar os três slots em `private slots:` e garantir `#include <QSignalSpy>` e
       `#include "tracklistmodel.h"` no topo do arquivo de teste.
-- [ ] verificação mecânica da task: `./build/tests/tst_librarybrowser` → exit 0 e
+- [x] verificação mecânica da task: `./build/tests/tst_librarybrowser` → exit 0 e
       `./build/tests/tst_librarybrowser -functions | grep -c toggleLike` → `2`
-- [ ] commit:
+- [x] commit:
 
 ```bash
 git add tests/tst_librarybrowser.cpp
