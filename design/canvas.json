@@ -1,7 +1,13 @@
 {
   "pages": [
-    { "id": "page-1", "name": "Direção escolhida" },
-    { "id": "page-2", "name": "Não escolhidas" }
+    {
+      "id": "page-1",
+      "name": "Direção escolhida"
+    },
+    {
+      "id": "page-2",
+      "name": "Não escolhidas"
+    }
   ],
   "artboards": [
     {
@@ -10,7 +16,34 @@
       "y": 0,
       "w": 1100,
       "h": 700,
-      "title": "C · A capa manda",
+      "title": "1 · Tocando um álbum",
+      "page": "page-1"
+    },
+    {
+      "file": "Biblioteca.dc.html",
+      "x": 1220,
+      "y": 0,
+      "w": 1100,
+      "h": 700,
+      "title": "2 · Biblioteca inteira",
+      "page": "page-1"
+    },
+    {
+      "file": "Podcast.dc.html",
+      "x": 0,
+      "y": 1040,
+      "w": 1100,
+      "h": 700,
+      "title": "3 · Podcast",
+      "page": "page-1"
+    },
+    {
+      "file": "SemMusica.dc.html",
+      "x": 1220,
+      "y": 1040,
+      "w": 1100,
+      "h": 700,
+      "title": "4 · Nada tocando",
       "page": "page-1"
     },
     {
@@ -36,26 +69,52 @@
     {
       "id": "escolhida",
       "x": 0,
-      "y": -260,
+      "y": -240,
       "w": 460,
-      "text": "ESCOLHIDA em 27/08.\n\nO que está tocando vira um painel de verdade: capa grande, título em 26px, controles maiores, tags logo abaixo. A barra lateral encolhe para ícones.\n\nO que ela ainda não responde: esta tela mostra um ÁLBUM aberto. Falta desenhar como se navega a biblioteca inteira aqui (as 1.204 faixas), a aba Podcast, e o estado com nada tocando — a capa grande fica vazia."
+      "text": "DIREÇÃO C — escolhida em 27/08.\n\nAs quatro telas são a MESMA moldura: barra de ícones, painel do que está tocando à esquerda, conteúdo à direita. Só o miolo troca. Isso é o que torna a direção implementável sem virar quatro telas separadas no código."
+    },
+    {
+      "id": "nota-biblioteca",
+      "x": 1220,
+      "y": -240,
+      "w": 460,
+      "text": "A tela que faltava. O painel do que toca fica; o miolo vira lista densa com busca e filtros em chips — a densidade da direção B, dentro da moldura da C.\n\nDecisão embutida: a busca fica no miolo, não no topo, porque o topo não existe mais nesta direção."
+    },
+    {
+      "id": "nota-podcast",
+      "x": 0,
+      "y": 790,
+      "w": 460,
+      "page": "page-1",
+      "text": "PODCAST. Mesma moldura, com o que muda de verdade num player de fala: velocidade (1.5x), pular 30s para frente e para trás, e cada episódio mostrando se foi ouvido, quanto falta ou se está baixado.\n\nO download em curso vive no rodapé do miolo."
+    },
+    {
+      "id": "nota-vazio",
+      "x": 1220,
+      "y": 790,
+      "w": 460,
+      "page": "page-1",
+      "text": "NADA TOCANDO — o furo que a direção C tinha: uma capa gigante vazia.\n\nEm vez de retângulo cinza, o painel vira o convite: continuar de onde parou (com o minuto exato), tocar tudo embaralhado, ou atacar as 312 que você nunca ouviu."
     },
     {
       "id": "nota-a",
       "x": 0,
-      "y": -260,
+      "y": -240,
       "w": 420,
       "page": "page-2",
-      "text": "A · HIERARQUIA POR CONTRASTE\n\nMesmo layout de hoje, com a escada de cinzas fazendo o trabalho.\n\nNão escolhida — mexia em cor e peso, não no que a tela faz."
+      "text": "A · HIERARQUIA POR CONTRASTE\n\nNão escolhida — mexia em cor e peso, não no que a tela faz."
     },
     {
       "id": "nota-b",
       "x": 1220,
-      "y": -260,
+      "y": -240,
       "w": 420,
       "page": "page-2",
-      "text": "B · DENSA E TABULAR\n\nA biblioteca como planilha: 18 faixas por tela, colunas alinhadas, fila fora da tela.\n\nNão escolhida — mas a densidade dela é a resposta natural para a tela de biblioteca que falta na C."
+      "text": "B · DENSA E TABULAR\n\nNão escolhida, mas não descartada: a densidade dela virou a tela de biblioteca da direção C."
     }
   ],
-  "launch": { "view": "canvas", "page": "page-1" }
+  "launch": {
+    "view": "canvas",
+    "page": "page-1"
+  }
 }
