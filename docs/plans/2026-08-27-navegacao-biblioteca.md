@@ -91,7 +91,7 @@ Componentes QML publicados: `Sidebar { currentSection; signal sectionChosen(stri
 Cada migração é uma entrada nova no vetor; a de índice 0 fica intocada. O FTS5 usa
 `content=''` (índice sem cópia dos dados) e triggers para nunca ficar desatualizado.
 
-- [ ] Acrescentar ao vetor `migrations()` em `src/database.cpp`, **depois** da entrada
+- [x] Acrescentar ao vetor `migrations()` em `src/database.cpp`, **depois** da entrada
       existente, uma segunda entrada:
 
 ```cpp
@@ -127,10 +127,10 @@ LEFT JOIN albums al ON al.id = t.album_id;
 )SQL"),
 ```
 
-- [ ] verificação mecânica da task: rodar o app uma vez e conferir a versão do schema —
+- [x] verificação mecânica da task: rodar o app uma vez e conferir a versão do schema —
       `QT_QPA_PLATFORM=offscreen timeout 8 ./build/appmelodia; sqlite3 "$(ls ~/.local/share/melodia/melodia.db)" "PRAGMA user_version; SELECT COUNT(*) FROM sqlite_master WHERE name='tracks_fts';"`
       → `2` e `1`
-- [ ] commit:
+- [x] commit:
 
 ```bash
 git add src/database.cpp
