@@ -157,3 +157,49 @@ QString LibraryBrowser::clauseNeverPlayed()
                "SELECT track_id FROM track_stats WHERE play_count = 0 LIMIT %1)")
         .arg(kAutoListLimit);
 }
+
+bool LibraryBrowser::toggleLike(int trackId)
+{
+    QSqlDatabase db = QSqlDatabase::database(QLatin1String(Database::kUiConnection));
+    QSqlQuery q(db);
+    // A single UPDATE decides and applies: read-then-write would leave a window for two quick
+    // clicks to store the same state.
+    q.prepare(QStringLiteral(
+        "UPDATE tracks SET liked_at = CASE WHEN liked_at IS NULL "
+        "THEN CAST(strftime('%s','now') AS INTEGER) ELSE NULL END WHERE id = ?"));
+    q.addBindValue(trackId);
+    if (!q.exec() || q.numRowsAffected() <= 0)
+        return false;
+
+    const bool nowLiked = isLiked(trackId);
+    emit likedChanged(trackId, nowLiked);
+    return nowLiked;
+}
+
+bool LibraryBrowser::isLiked(int trackId)
+{
+    QSqlDatabase db = QSqlDatabase::database(QLatin1String(Database::kUiConnection));
+    QSqlQuery q(db);
+    q.prepare(QStringLiteral("SELECT liked_at IS NOT NULL FROM tracks WHERE id = ?"));
+    q.addBindValue(trackId);
+    if (!q.exec() || !q.next())
+        return false;
+    return q.value(0).toBool();
+}
+
+QString LibraryBrowser::clauseForLiked()
+{
+    return QStringLiteral("t.removed_at IS NULL AND t.liked_at IS NOT NULL "
+                          "ORDER BY t.liked_at DESC");
+}
+
+int LibraryBrowser::likedCount()
+{
+    QSqlDatabase db = QSqlDatabase::database(QLatin1String(Database::kUiConnection));
+    QSqlQuery q(db);
+    if (!q.exec(QStringLiteral("SELECT COUNT(*) FROM tracks "
+                               "WHERE removed_at IS NULL AND liked_at IS NOT NULL"))
+        || !q.next())
+        return 0;
+    return q.value(0).toInt();
+}

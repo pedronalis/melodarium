@@ -35,6 +35,16 @@ public:
     Q_INVOKABLE QString clauseForgotten();
     Q_INVOKABLE QString clauseNeverPlayed();
 
+    Q_INVOKABLE bool toggleLike(int trackId);
+    Q_INVOKABLE bool isLiked(int trackId);
+    Q_INVOKABLE QString clauseForLiked();
+    Q_INVOKABLE int likedCount();
+
+signals:
+    void likedChanged(int trackId, bool liked);
+
+public:
+
     // Turns free user input into a safe FTS5 prefix query: "jo mal" -> "jo* mal*".
     static QString toFtsPrefixQuery(const QString &text);
 };

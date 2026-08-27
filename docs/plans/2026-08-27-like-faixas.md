@@ -115,7 +115,7 @@ git commit -m "test(library): migration 4 creates the liked column and its index
 
 ### Task 3: API de like no LibraryBrowser
 
-- [ ] Em `src/librarybrowser.h`, dentro da classe, acrescentar depois de
+- [x] Em `src/librarybrowser.h`, dentro da classe, acrescentar depois de
       `Q_INVOKABLE QString clauseNeverPlayed();`:
 
 ```cpp
@@ -130,7 +130,7 @@ signals:
 public:
 ```
 
-- [ ] Em `src/librarybrowser.cpp`, acrescentar ao fim do arquivo (antes de nenhum namespace
+- [x] Em `src/librarybrowser.cpp`, acrescentar ao fim do arquivo (antes de nenhum namespace
       fechado — o `namespace { }` anônimo termina no topo do arquivo):
 
 ```cpp
@@ -181,9 +181,9 @@ int LibraryBrowser::likedCount()
 }
 ```
 
-- [ ] verificação mecânica da task: `cmake --build build` → exit 0 e
+- [x] verificação mecânica da task: `cmake --build build` → exit 0 e
       `grep -c "toggleLike" src/librarybrowser.cpp` → `1`
-- [ ] commit:
+- [x] commit:
 
 ```bash
 git add src/librarybrowser.h src/librarybrowser.cpp
