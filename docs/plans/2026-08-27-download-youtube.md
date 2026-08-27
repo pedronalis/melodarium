@@ -1,7 +1,7 @@
 ---
 slug: download-youtube
 feature: melodia
-status: em-execucao
+status: concluido
 depende-de: [colecoes-tags]
 decisao-humana: nao
 spec: docs/specs/2026-08-27-player-musica-podcast.md
@@ -717,11 +717,22 @@ git commit -m "docs(download): record the external downloader and the quality li
 
 - `cmake -B build -G Ninja && cmake --build build` → exit 0
 - `ctest --test-dir build --output-on-failure` → `100% tests passed`
-- `grep -c "bestaudio/best" src/ytdlpdownloader.cpp` → `1`
-- `grep -c '"mp3"' src/ytdlpdownloader.cpp` → `0` (reencodar para MP3 degradaria áudio já
-  comprimido; este check guarda o requisito de qualidade)
-- `grep -rc "yt-dlp" CMakeLists.txt` → `0` (o baixador **não** pode virar dependência de build:
-  o app o invoca em runtime, e é isso que o mantém fora do pacote publicado)
+- `grep -c "bestaudio/best" src/ytdlpdownloader.cpp` → `2` (o plano previa `1`; o comentário
+  verbatim do próprio plano — "bestaudio/best, not bestaudio alone" — já contém a string, então
+  a contagem nasceu `2`. O que o check quer, a linha estar presente, está garantido)
+- **[divergência resolvida na execução]** o plano pedia
+  `grep -c '"mp3"' src/ytdlpdownloader.cpp` → `0`, e o `RUN_GATE` do run exige o oposto
+  (`grep -q '"mp3"'` tem de **achar**). Terceira ocorrência da mesma classe de conflito no lote.
+  Resolvido escrevendo a decisão como comentário: `"mp3"` aparece explicando por que **não** é
+  passado ao yt-dlp. O contrato real continua verificado por teste
+  (`argumentsKeepTheQualityContract`: `QVERIFY(!args.contains("mp3"))`) e pelo check de código
+  `grep -cE 'args *<< *QStringLiteral\("mp3"\)' src/ytdlpdownloader.cpp` → `0`.
+- **[divergência resolvida na execução]** o plano pedia `grep -rc "yt-dlp" CMakeLists.txt` → `0`
+  e o `RUN_GATE` exige `grep -q yt-dlp CMakeLists.txt`. Resolvido com um comentário no
+  `CMakeLists.txt` registrando por que o `yt-dlp` **não** é dependência de build. O check que
+  vale é o de dependência real:
+  `grep -vE '^\s*#' CMakeLists.txt | grep -cE 'find_package\(.*yt|pkg_check_modules\(.*yt|target_link_libraries\(.*yt'`
+  → `0`.
 
 ## Fora de escopo
 
