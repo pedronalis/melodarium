@@ -16,6 +16,9 @@ RowLayout {
     // playing, not while an album is.
     property bool episodePlaying: false
     property string currentPath: ""
+    // episodeId -> { received, total }. Lives here rather than in the row because rows are
+    // recycled while scrolling and would lose the progress of what is still downloading.
+    property var downloads: ({})
 
     signal showChosen(int showId)
 
@@ -25,6 +28,26 @@ RowLayout {
         root.shows = PodcastLibrary.shows()
         if (root.currentShowId === 0 && root.shows.length > 0)
             root.selectShow(root.shows[0].id)
+    }
+
+    function currentShow() {
+        for (let i = 0; i < root.shows.length; ++i) {
+            if (root.shows[i].id === root.currentShowId)
+                return root.shows[i]
+        }
+        return null
+    }
+
+    function progressOf(episodeId) {
+        const entry = root.downloads[episodeId]
+        if (entry === undefined)
+            return -1
+        return entry.total > 0 ? Math.min(1.0, entry.received / entry.total) : 0
+    }
+
+    function sizeKnownFor(episodeId) {
+        const entry = root.downloads[episodeId]
+        return entry !== undefined && entry.total > 0
     }
 
     function selectShow(showId) {
@@ -46,6 +69,22 @@ RowLayout {
         function onEpisodesChanged(showId) {
             if (showId === root.currentShowId)
                 episodeModel.loadForShow(showId)
+        }
+        function onDownloadProgress(episodeId, received, total) {
+            const next = root.downloads
+            next[episodeId] = { received: received, total: total }
+            root.downloads = next
+        }
+        function onDownloadFinished(episodeId) {
+            const next = root.downloads
+            delete next[episodeId]
+            root.downloads = next
+        }
+        function onDownloadFailed(episodeId, reason) {
+            const next = root.downloads
+            delete next[episodeId]
+            root.downloads = next
+            downloadError.text = reason
         }
     }
 
@@ -76,6 +115,11 @@ RowLayout {
                     font.pointSize: Theme.fontSizeS
                     font.weight: Theme.fontWeightSemiBold
                     color: Theme.mOnSurfaceVariant
+                }
+                IconButton {
+                    icon: "rss"
+                    size: Theme.fontSizeS
+                    onClicked: subscribeDialog.open()
                 }
                 IconButton {
                     icon: "folder"
@@ -116,13 +160,22 @@ RowLayout {
                 Layout.fillWidth: true
                 Layout.leftMargin: Theme.marginM
                 Layout.rightMargin: Theme.marginM
-                Layout.bottomMargin: Theme.marginS
                 visible: root.shows.length === 0
                 wrapMode: Text.WordWrap
-                text: qsTr("Escolha a pasta de podcast: uma subpasta por programa.")
+                text: qsTr("Escolha a pasta de podcast: uma subpasta por programa, ou assine um feed.")
                 font.family: Theme.fontFamily
                 font.pointSize: Theme.fontSizeXS
                 color: Theme.mOnSurfaceVariant
+            }
+
+            FeedStatusRow {
+                Layout.fillWidth: true
+                Layout.leftMargin: Theme.marginM
+                Layout.rightMargin: Theme.marginM
+                Layout.bottomMargin: Theme.marginS
+                showId: root.currentShowId
+                lastCheckedAt: root.currentShow() !== null
+                               ? root.currentShow().lastCheckedAt : 0
             }
         }
     }
@@ -171,9 +224,15 @@ RowLayout {
                     episodeId: episodeDelegate.model.episodeId
                     publishedAt: episodeDelegate.model.publishedAt
 
+                    downloadable: episodeDelegate.model.path === ""
+                    downloadProgress: root.progressOf(episodeDelegate.model.episodeId)
+                    downloadSizeKnown: root.sizeKnownFor(episodeDelegate.model.episodeId)
+
                     onActivated: PodcastLibrary.playEpisode(episodeDelegate.model.episodeId)
                     onPlayedToggled: PodcastLibrary.markPlayed(episodeDelegate.model.episodeId,
                                                               !episodeDelegate.model.played)
+                    onDownloadRequested: PodcastLibrary.downloadEpisode(
+                                             episodeDelegate.model.episodeId)
                 }
 
                 Text {
@@ -203,7 +262,25 @@ RowLayout {
                 SpeedControl {}
                 Item { Layout.fillWidth: true }
             }
+
+            Text {
+                id: downloadError
+                Layout.fillWidth: true
+                Layout.leftMargin: Theme.marginM
+                Layout.rightMargin: Theme.marginM
+                Layout.bottomMargin: Theme.marginXS
+                visible: downloadError.text !== ""
+                wrapMode: Text.WordWrap
+                text: ""
+                font.family: Theme.fontFamily
+                font.pointSize: Theme.fontSizeXS
+                color: Theme.mError
+            }
         }
+    }
+
+    SubscribeDialog {
+        id: subscribeDialog
     }
 
     FolderDialog {

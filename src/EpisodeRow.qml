@@ -15,6 +15,12 @@ Item {
     property bool isCurrent: false
     property int episodeId: 0
     property double publishedAt: 0
+    // Not on disk yet: the episode came from a feed and still lives on the server.
+    property bool downloadable: false
+    // -1 when idle, 0..1 while downloading. The server does not always declare a size, so an
+    // in-flight download with no known total shows movement without a percentage.
+    property real downloadProgress: -1
+    property bool downloadSizeKnown: true
 
     readonly property real progress: durationMs > 0
                                      ? Math.min(1.0, positionMs / durationMs)
@@ -22,6 +28,7 @@ Item {
 
     signal activated
     signal playedToggled
+    signal downloadRequested
 
     implicitHeight: Theme.marginXL * 3
 
@@ -126,6 +133,26 @@ Item {
                     font.pointSize: Theme.fontSizeS
                     color: mouse.containsMouse ? Theme.mOnHover : Theme.mOnSurfaceVariant
                 }
+            }
+
+            // Downloading is only offered for what is not on disk; once it is local the
+            // button has nothing left to do and disappears.
+            IconButton {
+                icon: "download"
+                size: Theme.fontSizeS
+                visible: root.downloadable && root.downloadProgress < 0
+                opacity: mouse.containsMouse ? 1.0 : 0.45
+                onClicked: root.downloadRequested()
+            }
+
+            Text {
+                visible: root.downloadProgress >= 0
+                text: root.downloadSizeKnown
+                      ? Math.round(root.downloadProgress * 100) + "%"
+                      : qsTr("baixando…")
+                font.family: Theme.fontFamilyFixed
+                font.pointSize: Theme.fontSizeXS
+                color: Theme.mPrimary
             }
 
             // Marking played by hand is the podcast equivalent of the collection plus: the

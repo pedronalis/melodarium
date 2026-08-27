@@ -74,6 +74,8 @@ qt_add_qml_module(appmelodia
         src/EpisodeRow.qml
         src/SpeedControl.qml
         src/ContinueListening.qml
+        src/SubscribeDialog.qml
+        src/FeedStatusRow.qml
     RESOURCES
         assets/fonts/noctalia-tabler-icons.ttf
     SOURCES
