@@ -1,7 +1,7 @@
 ---
 slug: navegacao-biblioteca
 feature: melodia
-status: em-execucao
+status: concluido
 depende-de: [tocador-ui]
 decisao-humana: nao
 spec: docs/specs/2026-08-27-player-musica-podcast.md
