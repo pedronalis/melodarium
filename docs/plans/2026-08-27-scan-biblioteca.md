@@ -1,7 +1,7 @@
 ---
 slug: scan-biblioteca
 feature: melodia
-status: aprovado
+status: concluido
 depende-de: [esqueleto-build]
 decisao-humana: nao
 spec: docs/specs/2026-08-27-player-musica-podcast.md
