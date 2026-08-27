@@ -135,7 +135,7 @@ git commit -m "feat(library): look up the playing track by its file path"
 
 ### Task 2: `IconRail.qml` — a barra de ícones
 
-- [ ] Criar `src/IconRail.qml`:
+- [x] Criar `src/IconRail.qml`:
 
 ```qml
 import QtQuick
@@ -214,8 +214,8 @@ Rectangle {
 }
 ```
 
-- [ ] verificação mecânica da task: `grep -c 'signal chosen' src/IconRail.qml` → `1`
-- [ ] commit:
+- [x] verificação mecânica da task: `grep -c 'signal chosen' src/IconRail.qml` → `1`
+- [x] commit:
 
 ```bash
 git add src/IconRail.qml
