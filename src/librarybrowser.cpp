@@ -392,3 +392,58 @@ QVariantList LibraryBrowser::searchGrouped(const QString &text, int limitPerKind
 
     return out;
 }
+
+QVariantMap LibraryBrowser::lastPlayed()
+{
+    QVariantMap out;
+    QSqlDatabase db = QSqlDatabase::database(QLatin1String(Database::kUiConnection));
+    QSqlQuery q(db);
+    if (!q.exec(QStringLiteral(
+            "SELECT t.path, IFNULL(t.title,''), IFNULL(ar.name,''), "
+            "IFNULL(ts.last_position_ms,0), IFNULL(t.album_id,0), IFNULL(t.duration_ms,0) "
+            "FROM track_stats ts "
+            "JOIN tracks t ON t.id = ts.track_id AND t.removed_at IS NULL "
+            "LEFT JOIN artists ar ON ar.id = t.artist_id "
+            "WHERE ts.last_played_at IS NOT NULL "
+            "ORDER BY ts.last_played_at DESC LIMIT 1"))
+        || !q.next())
+        return out;
+
+    out.insert(QStringLiteral("path"), q.value(0).toString());
+    out.insert(QStringLiteral("title"), q.value(1).toString());
+    out.insert(QStringLiteral("artist"), q.value(2).toString());
+    out.insert(QStringLiteral("positionMs"), q.value(3).toInt());
+    out.insert(QStringLiteral("albumId"), q.value(4).toInt());
+    out.insert(QStringLiteral("durationMs"), q.value(5).toInt());
+    return out;
+}
+
+int LibraryBrowser::neverPlayedCount()
+{
+    QSqlDatabase db = QSqlDatabase::database(QLatin1String(Database::kUiConnection));
+    QSqlQuery q(db);
+    if (!q.exec(QStringLiteral(
+            "SELECT COUNT(*) FROM tracks t "
+            "LEFT JOIN track_stats ts ON ts.track_id = t.id "
+            "WHERE t.removed_at IS NULL AND IFNULL(ts.play_count, 0) = 0"))
+        || !q.next())
+        return 0;
+    return q.value(0).toInt();
+}
+
+int LibraryBrowser::forgottenCount()
+{
+    // Mesma definição de "esquecida" da clauseForgotten(): tocada o bastante para ter gostado,
+    // e sem ser tocada há tempo demais.
+    QSqlDatabase db = QSqlDatabase::database(QLatin1String(Database::kUiConnection));
+    QSqlQuery q(db);
+    q.prepare(QStringLiteral(
+        "SELECT COUNT(*) FROM tracks t JOIN track_stats ts ON ts.track_id = t.id "
+        "WHERE t.removed_at IS NULL AND ts.play_count >= ? "
+        "AND IFNULL(ts.last_played_at, 0) < CAST(strftime('%s','now') AS INTEGER) - ?"));
+    q.addBindValue(kForgottenMinPlays);
+    q.addBindValue(qint64(kForgottenDays) * 86400);
+    if (!q.exec() || !q.next())
+        return 0;
+    return q.value(0).toInt();
+}

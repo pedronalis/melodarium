@@ -177,6 +177,9 @@ CREATE INDEX idx_tracks_source ON tracks(source_kind);
 ALTER TABLE tracks ADD COLUMN liked_at INTEGER;
 CREATE INDEX idx_tracks_liked ON tracks(liked_at) WHERE liked_at IS NOT NULL;
 )SQL"),
+        QStringLiteral(R"SQL(
+ALTER TABLE track_stats ADD COLUMN last_position_ms INTEGER NOT NULL DEFAULT 0;
+)SQL"),
     };
     return list;
 }

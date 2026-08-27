@@ -112,6 +112,31 @@ private slots:
         QSqlDatabase::removeDatabase(QStringLiteral("m4"));
     }
 
+    // Retomar do minuto exato exige guardar onde a faixa parou; o plano chama esta de
+    // "migração 5", mas o que vale é a posição real dela na lista (a oitava).
+    void migrationAddsLastPositionColumn()
+    {
+        QTemporaryDir dir;
+        const QString path = dir.filePath(QStringLiteral("m5.db"));
+        QVERIFY(Database::openConnection(QStringLiteral("m5"), path));
+        {
+            QSqlDatabase db = QSqlDatabase::database(QStringLiteral("m5"));
+            QVERIFY(Database::migrate(db));
+
+            QSqlQuery v(db);
+            QVERIFY(v.exec(QStringLiteral("PRAGMA user_version")));
+            QVERIFY(v.next());
+            QVERIFY(v.value(0).toInt() >= 8);
+
+            QSqlQuery c(db);
+            QVERIFY(c.exec(QStringLiteral("SELECT COUNT(*) FROM pragma_table_info('track_stats') "
+                                          "WHERE name = 'last_position_ms'")));
+            QVERIFY(c.next());
+            QCOMPARE(c.value(0).toInt(), 1);
+        }
+        QSqlDatabase::removeDatabase(QStringLiteral("m5"));
+    }
+
     void tagReaderReadsUtf8Metadata()
     {
         const TrackRecord r = TagReader::read(m_music.filePath(QStringLiteral("one.flac")));
