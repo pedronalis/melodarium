@@ -41,6 +41,8 @@ qt_add_executable(appmelodia
     src/podcastfeedfetcher.cpp
     src/episodedownloader.h
     src/episodedownloader.cpp
+    src/ytdlpdownloader.h
+    src/ytdlpdownloader.cpp
 )
 
 # Theme.qml e Icons.qml usam `pragma Singleton`. O qt_add_qml_module NAO detecta o pragma
@@ -103,8 +105,16 @@ qt_add_qml_module(appmelodia
         src/podcastfeedfetcher.cpp
         src/episodedownloader.h
         src/episodedownloader.cpp
+        src/ytdlpdownloader.h
+        src/ytdlpdownloader.cpp
 )
 
+# O baixador do YouTube e um programa EXTERNO: nao ha find_package(yt-dlp) aqui de proposito,
+# e nao pode haver. O app chama por QProcess o yt-dlp que ja estiver instalado na maquina do
+# usuario; embutir ou exigir o yt-dlp no build o traria para dentro do pacote publicado, que e
+# exatamente o risco que o spec manda evitar. Se um dia aparecer uma dependencia de build com
+# esse nome, a decisao do spec foi revertida sem querer.
+#
 # OBRIGATORIO: sem isto o build quebra com erros de template que nao apontam a causa.
 target_include_directories(appmelodia PRIVATE src)
 
