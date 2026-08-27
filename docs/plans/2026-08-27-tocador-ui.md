@@ -485,7 +485,7 @@ git commit -m "feat(ui): expose library tracks as a QML list model"
 
 Estes três são a base visual de todas as telas seguintes. Todo valor de estilo vem do `Theme`.
 
-- [ ] Criar `src/IconButton.qml`:
+- [x] Criar `src/IconButton.qml`:
 
 ```qml
 import QtQuick
@@ -539,7 +539,7 @@ Item {
 }
 ```
 
-- [ ] Criar `src/MelodiaButton.qml`:
+- [x] Criar `src/MelodiaButton.qml`:
 
 ```qml
 import QtQuick
@@ -597,7 +597,7 @@ Item {
 }
 ```
 
-- [ ] Criar `src/TrackRow.qml`:
+- [x] Criar `src/TrackRow.qml`:
 
 ```qml
 import QtQuick
@@ -714,11 +714,11 @@ Item {
 }
 ```
 
-- [ ] Acrescentar os três arquivos ao bloco `QML_FILES` de `qt_add_qml_module`.
-- [ ] verificação mecânica da task:
+- [x] Acrescentar os três arquivos ao bloco `QML_FILES` de `qt_add_qml_module`.
+- [x] verificação mecânica da task:
       `cmake --build build && /usr/lib64/qt6/bin/qmllint src/IconButton.qml src/MelodiaButton.qml src/TrackRow.qml -I build`
       → sem linha contendo `Error`
-- [ ] commit:
+- [x] commit:
 
 ```bash
 git add src/IconButton.qml src/MelodiaButton.qml src/TrackRow.qml CMakeLists.txt
