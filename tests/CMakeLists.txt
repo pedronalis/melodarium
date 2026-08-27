@@ -58,6 +58,8 @@ qt_add_executable(tst_librarybrowser
     ../src/libraryscanner.h ../src/libraryscanner.cpp
     ../src/librarybrowser.h ../src/librarybrowser.cpp
     ../src/playstatsrecorder.h ../src/playstatsrecorder.cpp
+    ../src/tracklistmodel.h ../src/tracklistmodel.cpp
+    ../src/covercache.h ../src/covercache.cpp
 )
 target_include_directories(tst_librarybrowser PRIVATE ../src)
 target_link_libraries(tst_librarybrowser PRIVATE

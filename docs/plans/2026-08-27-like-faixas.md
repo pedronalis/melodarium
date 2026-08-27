@@ -1,7 +1,7 @@
 ---
 slug: like-faixas
 feature: melodia-capa-manda
-status: aprovado
+status: concluido
 depende-de: []
 decisao-humana: nao
 spec: design/Main.dc.html (telas aprovadas em 2026-08-27; não há spec textual)
@@ -48,7 +48,7 @@ pelo scanner: curtir é ato do usuário, e uma re-varredura não pode apagar iss
 
 ### Task 1: Migração 4 — a coluna e o índice
 
-- [ ] Em `src/database.cpp`, acrescentar ao fim da lista `migrations()` (depois do último
+- [x] Em `src/database.cpp`, acrescentar ao fim da lista `migrations()` (depois do último
       elemento, antes do `};`) o novo script. **Não use `#` em nenhum lugar dentro do
       `R"SQL(...)"`**: no Qt 6.10.3 isso faz o gerador de código produzir arquivo vazio, sem
       erro (`docs/solutions/build-errors/2026-08-27-moc-raw-string-url-vazio.md`).
@@ -60,8 +60,8 @@ CREATE INDEX idx_tracks_liked ON tracks(liked_at) WHERE liked_at IS NOT NULL;
 )SQL"),
 ```
 
-- [ ] verificação mecânica da task: `cmake --build build && ./build/tests/tst_library` → exit 0
-- [ ] commit:
+- [x] verificação mecânica da task: `cmake --build build && ./build/tests/tst_library` → exit 0
+- [x] commit:
 
 ```bash
 git add src/database.cpp
@@ -70,7 +70,7 @@ git commit -m "feat(library): migration 4 adds liked_at to tracks"
 
 ### Task 2: Teste da migração (roda antes da API existir)
 
-- [ ] Em `tests/tst_library.cpp`, acrescentar ao slot de testes de schema:
+- [x] Em `tests/tst_library.cpp`, acrescentar ao slot de testes de schema:
 
 ```cpp
 void TestLibrary::migration4AddsLikedColumn()
@@ -101,12 +101,12 @@ void TestLibrary::migration4AddsLikedColumn()
 }
 ```
 
-- [ ] Declarar o slot no bloco `private slots:` da classe de teste:
+- [x] Declarar o slot no bloco `private slots:` da classe de teste:
       `void migration4AddsLikedColumn();`
-- [ ] verificação mecânica da task:
+- [x] verificação mecânica da task:
       `./build/tests/tst_library -functions | grep -c migration4AddsLikedColumn` → `1`
       e `./build/tests/tst_library` → exit 0
-- [ ] commit:
+- [x] commit:
 
 ```bash
 git add tests/tst_library.cpp
@@ -115,7 +115,7 @@ git commit -m "test(library): migration 4 creates the liked column and its index
 
 ### Task 3: API de like no LibraryBrowser
 
-- [ ] Em `src/librarybrowser.h`, dentro da classe, acrescentar depois de
+- [x] Em `src/librarybrowser.h`, dentro da classe, acrescentar depois de
       `Q_INVOKABLE QString clauseNeverPlayed();`:
 
 ```cpp
@@ -130,7 +130,7 @@ signals:
 public:
 ```
 
-- [ ] Em `src/librarybrowser.cpp`, acrescentar ao fim do arquivo (antes de nenhum namespace
+- [x] Em `src/librarybrowser.cpp`, acrescentar ao fim do arquivo (antes de nenhum namespace
       fechado — o `namespace { }` anônimo termina no topo do arquivo):
 
 ```cpp
@@ -181,9 +181,9 @@ int LibraryBrowser::likedCount()
 }
 ```
 
-- [ ] verificação mecânica da task: `cmake --build build` → exit 0 e
+- [x] verificação mecânica da task: `cmake --build build` → exit 0 e
       `grep -c "toggleLike" src/librarybrowser.cpp` → `1`
-- [ ] commit:
+- [x] commit:
 
 ```bash
 git add src/librarybrowser.h src/librarybrowser.cpp
@@ -192,10 +192,10 @@ git commit -m "feat(library): toggle, query and count liked tracks"
 
 ### Task 4: O papel `liked` no modelo de lista
 
-- [ ] Em `src/tracklistmodel.h`, acrescentar `bool liked = false;` ao struct `TrackRow`
+- [x] Em `src/tracklistmodel.h`, acrescentar `bool liked = false;` ao struct `TrackRow`
       (depois de `QString sourceNote;`) e `LikedRole,` ao enum `Roles` (depois de
       `SourceNoteRole,`).
-- [ ] Em `src/tracklistmodel.cpp`, acrescentar `t.liked_at IS NOT NULL` ao `kSelect`, como
+- [x] Em `src/tracklistmodel.cpp`, acrescentar `t.liked_at IS NOT NULL` ao `kSelect`, como
       última coluna antes do `FROM`:
 
 ```cpp
@@ -210,20 +210,20 @@ constexpr const char *kSelect =
     "LEFT JOIN albums al ON al.id = t.album_id ";
 ```
 
-- [ ] No `switch` de `data()`, acrescentar antes do `default:`:
+- [x] No `switch` de `data()`, acrescentar antes do `default:`:
 
 ```cpp
     case LikedRole:
         return r.liked;
 ```
 
-- [ ] Em `roleNames()`, acrescentar `{LikedRole, "liked"},` ao mapa.
-- [ ] Em `loadFromQuery()`, onde as colunas são lidas para o `TrackRow`, acrescentar a
+- [x] Em `roleNames()`, acrescentar `{LikedRole, "liked"},` ao mapa.
+- [x] Em `loadFromQuery()`, onde as colunas são lidas para o `TrackRow`, acrescentar a
       leitura da coluna nova (índice 15, a que foi acrescentada ao `kSelect`):
       `row.liked = q.value(15).toBool();`
-- [ ] verificação mecânica da task:
+- [x] verificação mecânica da task:
       `cmake --build build && ./build/tests/tst_tracklistmodel` → exit 0
-- [ ] commit:
+- [x] commit:
 
 ```bash
 git add src/tracklistmodel.h src/tracklistmodel.cpp
@@ -232,7 +232,7 @@ git commit -m "feat(library): expose liked state as a model role"
 
 ### Task 5: Teste da API de like
 
-- [ ] Em `tests/tst_librarybrowser.cpp`, acrescentar (a fixture desse arquivo já cria banco
+- [x] Em `tests/tst_librarybrowser.cpp`, acrescentar (a fixture desse arquivo já cria banco
       temporário e faixas; siga o padrão dela para semear):
 
 ```cpp
@@ -274,11 +274,11 @@ void TestLibraryBrowser::toggleLikeOnMissingTrackIsHarmless()
 }
 ```
 
-- [ ] Declarar os três slots em `private slots:` e garantir `#include <QSignalSpy>` e
+- [x] Declarar os três slots em `private slots:` e garantir `#include <QSignalSpy>` e
       `#include "tracklistmodel.h"` no topo do arquivo de teste.
-- [ ] verificação mecânica da task: `./build/tests/tst_librarybrowser` → exit 0 e
+- [x] verificação mecânica da task: `./build/tests/tst_librarybrowser` → exit 0 e
       `./build/tests/tst_librarybrowser -functions | grep -c toggleLike` → `2`
-- [ ] commit:
+- [x] commit:
 
 ```bash
 git add tests/tst_librarybrowser.cpp

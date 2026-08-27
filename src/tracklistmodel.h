@@ -24,6 +24,7 @@ struct TrackRow {
     // pass itself off as the lossless files sitting next to it.
     QString sourceKind = QStringLiteral("local_file");
     QString sourceNote;
+    bool liked = false;
 };
 
 class TrackListModel : public QAbstractListModel
@@ -51,6 +52,7 @@ public:
         IsCurrentRole,
         SourceKindRole,
         SourceNoteRole,
+        LikedRole,
     };
     Q_ENUM(Roles)
 

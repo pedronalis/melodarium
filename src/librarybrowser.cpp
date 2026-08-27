@@ -157,3 +157,82 @@ QString LibraryBrowser::clauseNeverPlayed()
                "SELECT track_id FROM track_stats WHERE play_count = 0 LIMIT %1)")
         .arg(kAutoListLimit);
 }
+
+bool LibraryBrowser::toggleLike(int trackId)
+{
+    QSqlDatabase db = QSqlDatabase::database(QLatin1String(Database::kUiConnection));
+    QSqlQuery q(db);
+    // A single UPDATE decides and applies: read-then-write would leave a window for two quick
+    // clicks to store the same state.
+    q.prepare(QStringLiteral(
+        "UPDATE tracks SET liked_at = CASE WHEN liked_at IS NULL "
+        "THEN CAST(strftime('%s','now') AS INTEGER) ELSE NULL END WHERE id = ?"));
+    q.addBindValue(trackId);
+    if (!q.exec() || q.numRowsAffected() <= 0)
+        return false;
+
+    const bool nowLiked = isLiked(trackId);
+    emit likedChanged(trackId, nowLiked);
+    return nowLiked;
+}
+
+bool LibraryBrowser::isLiked(int trackId)
+{
+    QSqlDatabase db = QSqlDatabase::database(QLatin1String(Database::kUiConnection));
+    QSqlQuery q(db);
+    q.prepare(QStringLiteral("SELECT liked_at IS NOT NULL FROM tracks WHERE id = ?"));
+    q.addBindValue(trackId);
+    if (!q.exec() || !q.next())
+        return false;
+    return q.value(0).toBool();
+}
+
+QString LibraryBrowser::clauseForLiked()
+{
+    return QStringLiteral("t.removed_at IS NULL AND t.liked_at IS NOT NULL "
+                          "ORDER BY t.liked_at DESC");
+}
+
+int LibraryBrowser::likedCount()
+{
+    QSqlDatabase db = QSqlDatabase::database(QLatin1String(Database::kUiConnection));
+    QSqlQuery q(db);
+    if (!q.exec(QStringLiteral("SELECT COUNT(*) FROM tracks "
+                               "WHERE removed_at IS NULL AND liked_at IS NOT NULL"))
+        || !q.next())
+        return 0;
+    return q.value(0).toInt();
+}
+
+QVariantMap LibraryBrowser::trackForPath(const QString &path)
+{
+    QVariantMap out;
+    if (path.isEmpty())
+        return out;
+
+    QSqlDatabase db = QSqlDatabase::database(QLatin1String(Database::kUiConnection));
+    QSqlQuery q(db);
+    q.prepare(QStringLiteral(
+        "SELECT t.id, IFNULL(t.title,''), IFNULL(ar.name,''), IFNULL(al.title,''), "
+        "IFNULL(t.album_id,0), IFNULL(t.year,0), IFNULL(t.codec,''), "
+        "IFNULL(t.sample_rate,0), IFNULL(t.bits_per_sample,0), t.liked_at IS NOT NULL "
+        "FROM tracks t "
+        "LEFT JOIN artists ar ON ar.id = t.artist_id "
+        "LEFT JOIN albums al ON al.id = t.album_id "
+        "WHERE t.path = ?"));
+    q.addBindValue(path);
+    if (!q.exec() || !q.next())
+        return out;
+
+    out.insert(QStringLiteral("id"), q.value(0).toInt());
+    out.insert(QStringLiteral("title"), q.value(1).toString());
+    out.insert(QStringLiteral("artist"), q.value(2).toString());
+    out.insert(QStringLiteral("album"), q.value(3).toString());
+    out.insert(QStringLiteral("albumId"), q.value(4).toInt());
+    out.insert(QStringLiteral("year"), q.value(5).toInt());
+    out.insert(QStringLiteral("codec"), q.value(6).toString());
+    out.insert(QStringLiteral("sampleRate"), q.value(7).toInt());
+    out.insert(QStringLiteral("bitsPerSample"), q.value(8).toInt());
+    out.insert(QStringLiteral("liked"), q.value(9).toBool());
+    return out;
+}

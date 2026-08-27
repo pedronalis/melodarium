@@ -1,7 +1,7 @@
 ---
 slug: moldura-capa
 feature: melodia-capa-manda
-status: aprovado
+status: concluido
 depende-de: [like-faixas]
 decisao-humana: sim
 spec: design/Main.dc.html (tela 1 aprovada em 2026-08-27)
@@ -59,7 +59,7 @@ seconds)`, `next()`, `previous()`, `setVolume(double)`, `setSpeed(double)`.
 
 ### Task 1: `trackForPath` — do arquivo tocando para os dados da faixa
 
-- [ ] Em `src/librarybrowser.h`, acrescentar junto dos outros `Q_INVOKABLE`:
+- [x] Em `src/librarybrowser.h`, acrescentar junto dos outros `Q_INVOKABLE`:
 
 ```cpp
     Q_INVOKABLE QVariantMap trackForPath(const QString &path);
@@ -67,7 +67,7 @@ seconds)`, `next()`, `previous()`, `setVolume(double)`, `setSpeed(double)`.
 
       e `#include <QVariantMap>` no topo, se ainda não estiver.
 
-- [ ] Em `src/librarybrowser.cpp`, acrescentar ao fim:
+- [x] Em `src/librarybrowser.cpp`, acrescentar ao fim:
 
 ```cpp
 QVariantMap LibraryBrowser::trackForPath(const QString &path)
@@ -104,7 +104,7 @@ QVariantMap LibraryBrowser::trackForPath(const QString &path)
 }
 ```
 
-- [ ] Em `tests/tst_librarybrowser.cpp`, acrescentar o slot e declará-lo em `private slots:`:
+- [x] Em `tests/tst_librarybrowser.cpp`, acrescentar o slot e declará-lo em `private slots:`:
 
 ```cpp
 void TestLibraryBrowser::trackForPathReturnsFieldsOrEmpty()
@@ -125,8 +125,8 @@ void TestLibraryBrowser::trackForPathReturnsFieldsOrEmpty()
       Se a fixture não tiver `firstTrackPath()`, acrescente-o ao lado de `firstTrackId()`,
       devolvendo o `path` da mesma faixa.
 
-- [ ] verificação mecânica da task: `cmake --build build && ./build/tests/tst_librarybrowser` → exit 0
-- [ ] commit:
+- [x] verificação mecânica da task: `cmake --build build && ./build/tests/tst_librarybrowser` → exit 0
+- [x] commit:
 
 ```bash
 git add src/librarybrowser.h src/librarybrowser.cpp tests/tst_librarybrowser.cpp
@@ -135,7 +135,7 @@ git commit -m "feat(library): look up the playing track by its file path"
 
 ### Task 2: `IconRail.qml` — a barra de ícones
 
-- [ ] Criar `src/IconRail.qml`:
+- [x] Criar `src/IconRail.qml`:
 
 ```qml
 import QtQuick
@@ -214,8 +214,8 @@ Rectangle {
 }
 ```
 
-- [ ] verificação mecânica da task: `grep -c 'signal chosen' src/IconRail.qml` → `1`
-- [ ] commit:
+- [x] verificação mecânica da task: `grep -c 'signal chosen' src/IconRail.qml` → `1`
+- [x] commit:
 
 ```bash
 git add src/IconRail.qml
@@ -224,7 +224,7 @@ git commit -m "feat(ui): icon rail replaces the wide sidebar"
 
 ### Task 3: `NowPlayingPanel.qml` — a capa manda
 
-- [ ] Criar `src/NowPlayingPanel.qml`:
+- [x] Criar `src/NowPlayingPanel.qml`:
 
 ```qml
 import QtQuick
@@ -455,8 +455,8 @@ Rectangle {
 }
 ```
 
-- [ ] verificação mecânica da task: `grep -c 'signal likeRequested' src/NowPlayingPanel.qml` → `1`
-- [ ] commit:
+- [x] verificação mecânica da task: `grep -c 'signal likeRequested' src/NowPlayingPanel.qml` → `1`
+- [x] commit:
 
 ```bash
 git add src/NowPlayingPanel.qml
@@ -465,7 +465,7 @@ git commit -m "feat(ui): now-playing panel with the large cover and transport"
 
 ### Task 4: Registrar os componentes no build
 
-- [ ] Em `CMakeLists.txt`, acrescentar à lista `QML_FILES` do `qt_add_qml_module`, em ordem
+- [x] Em `CMakeLists.txt`, acrescentar à lista `QML_FILES` do `qt_add_qml_module`, em ordem
       alfabética junto dos existentes:
 
 ```cmake
@@ -475,11 +475,11 @@ git commit -m "feat(ui): now-playing panel with the large cover and transport"
 
       e REMOVER a linha `src/PlayerBar.qml`.
 
-- [ ] Apagar o arquivo: `git rm src/PlayerBar.qml`
-- [ ] verificação mecânica da task:
+- [x] Apagar o arquivo: `git rm src/PlayerBar.qml`
+- [x] verificação mecânica da task:
       `cmake -B build -G Ninja && cmake --build build` → exit 0 e
       `test "$(grep -c 'PlayerBar' CMakeLists.txt)" -eq 0` → exit 0
-- [ ] commit:
+- [x] commit:
 
 ```bash
 git add CMakeLists.txt
@@ -488,7 +488,7 @@ git commit -m "build(ui): register the rail and panel, retire the transport bar"
 
 ### Task 5: A moldura nova em `Main.qml`
 
-- [ ] Substituir em `src/Main.qml` a raiz visual — o `ColumnLayout` que hoje contém
+- [x] Substituir em `src/Main.qml` a raiz visual — o `ColumnLayout` que hoje contém
       `RowLayout` (topo), `StackLayout` e `PlayerBar` — por esta estrutura, PRESERVANDO todo o
       bloco de `property`, `function` e `Connections` que já existe acima dela (o roteamento
       de seções, o tratamento de `scanFinished`, `trackFinished` e `episodePlayRequested`
@@ -561,9 +561,9 @@ Rectangle {
       comentário do topo. O `searchOverlay` citado em `showPane` é da fatia `busca-overlay`;
       até ela existir, troque a chamada por `console.log("busca ainda não implementada")`.
 
-- [ ] verificação mecânica da task:
+- [x] verificação mecânica da task:
       `cmake --build build && QT_QPA_PLATFORM=offscreen timeout 8 ./build/appmelodia 2>&1 | grep -Ec "is not a type|Unable to assign|ReferenceError"` → `0`
-- [ ] commit:
+- [x] commit:
 
 ```bash
 git add src/Main.qml src/LibraryPane.qml src/PodcastPane.qml src/EmptyPane.qml CMakeLists.txt
@@ -572,7 +572,7 @@ git commit -m "feat(ui): rebuild the window around the now-playing panel"
 
 ### Task 6: A janela não pode espremer a lista
 
-- [ ] Conferir com medição, não com o olho — o mesmo método que pegou o painel de 2px:
+- [x] Conferir com medição, não com o olho — o mesmo método que pegou o painel de 2px:
       acrescentar temporariamente a `Main.qml`, dentro do `RowLayout`:
 
 ```qml
@@ -584,13 +584,13 @@ git commit -m "feat(ui): rebuild the window around the now-playing panel"
         }
 ```
 
-- [ ] Rodar e ler a medida:
+- [x] Rodar e ler a medida:
       `QT_LOGGING_RULES="*.debug=true" QT_FORCE_STDERR_LOGGING=1 QT_QPA_PLATFORM=offscreen timeout 6 ./build/appmelodia 2>&1 | grep -a MEDIDA`
       → o miolo tem de ficar ≥ 360 (numa janela de 1100: rail 56 + painel 392 + miolo ~652).
-- [ ] Remover o `Timer` depois de ler a medida.
-- [ ] verificação mecânica da task:
+- [x] Remover o `Timer` depois de ler a medida.
+- [x] verificação mecânica da task:
       `test "$(grep -c 'MEDIDA' src/Main.qml)" -eq 0` → exit 0 e `cmake --build build` → exit 0
-- [ ] commit:
+- [x] commit:
 
 ```bash
 git add src/Main.qml

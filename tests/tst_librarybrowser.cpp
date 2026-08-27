@@ -1,4 +1,5 @@
 #include <QtTest/QtTest>
+#include <QSignalSpy>
 #include <QSqlError>
 #include <QSqlQuery>
 #include <QTemporaryDir>
@@ -6,6 +7,7 @@
 #include "database.h"
 #include "librarybrowser.h"
 #include "playstatsrecorder.h"
+#include "tracklistmodel.h"
 
 class TstLibraryBrowser : public QObject
 {
@@ -27,6 +29,11 @@ private:
         QSqlQuery q(db);
         return (q.exec(sql) && q.next()) ? q.value(0).toInt() : -1;
     }
+
+    // The two seeded tracks are inserted with fixed ids; the first one is the fixture's
+    // guinea pig for anything that needs one concrete track.
+    static int firstTrackId() { return 1; }
+    static QString firstTrackPath() { return QStringLiteral("/m/a.flac"); }
 
 private slots:
     void initTestCase()
@@ -113,6 +120,59 @@ private slots:
         const QString sql = QStringLiteral("SELECT COUNT(*) FROM tracks t WHERE ")
                             + browser.clauseForgotten();
         QCOMPARE(scalar(sql), 1); // track 2: many plays, none recently
+    }
+
+    void toggleLikeFlipsAndPersists()
+    {
+        LibraryBrowser browser;
+        const int id = firstTrackId();
+        QVERIFY(!browser.isLiked(id));
+
+        QSignalSpy spy(&browser, &LibraryBrowser::likedChanged);
+        QCOMPARE(browser.toggleLike(id), true);
+        QVERIFY(browser.isLiked(id));
+        QCOMPARE(spy.count(), 1);
+        QCOMPARE(spy.at(0).at(1).toBool(), true);
+
+        QCOMPARE(browser.toggleLike(id), false);
+        QVERIFY(!browser.isLiked(id));
+        QCOMPARE(browser.likedCount(), 0);
+    }
+
+    void likedClauseOrdersByMostRecent()
+    {
+        LibraryBrowser browser;
+        QVERIFY(browser.clauseForLiked().contains(QStringLiteral("liked_at IS NOT NULL")));
+        QVERIFY(browser.clauseForLiked().contains(QStringLiteral("ORDER BY t.liked_at DESC")));
+
+        TrackListModel model;
+        browser.toggleLike(firstTrackId());
+        model.loadFromQuery(browser.clauseForLiked(), {});
+        QCOMPARE(model.rowCount(), 1);
+        QCOMPARE(model.data(model.index(0), TrackListModel::LikedRole).toBool(), true);
+
+        // Hand the shared fixture back unliked: the slots that follow assume a clean slate.
+        browser.toggleLike(firstTrackId());
+    }
+
+    void toggleLikeOnMissingTrackIsHarmless()
+    {
+        LibraryBrowser browser;
+        QCOMPARE(browser.toggleLike(999999), false);
+        QCOMPARE(browser.likedCount(), 0);
+    }
+
+    void trackForPathReturnsFieldsOrEmpty()
+    {
+        LibraryBrowser browser;
+        const QVariantMap none = browser.trackForPath(QStringLiteral("/nao/existe.flac"));
+        QVERIFY(none.isEmpty());
+
+        const QVariantMap m = browser.trackForPath(firstTrackPath());
+        QVERIFY(!m.isEmpty());
+        QCOMPARE(m.value(QStringLiteral("id")).toInt(), firstTrackId());
+        QVERIFY(m.contains(QStringLiteral("codec")));
+        QCOMPARE(m.value(QStringLiteral("liked")).toBool(), false);
     }
 };
 

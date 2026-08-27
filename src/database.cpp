@@ -173,6 +173,10 @@ ALTER TABLE tracks ADD COLUMN source_format_note TEXT;
 ALTER TABLE tracks ADD COLUMN downloaded_at INTEGER;
 CREATE INDEX idx_tracks_source ON tracks(source_kind);
 )SQL"),
+        QStringLiteral(R"SQL(
+ALTER TABLE tracks ADD COLUMN liked_at INTEGER;
+CREATE INDEX idx_tracks_liked ON tracks(liked_at) WHERE liked_at IS NOT NULL;
+)SQL"),
     };
     return list;
 }
