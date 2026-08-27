@@ -455,7 +455,7 @@ git commit -m "feat(library): record play and skip counts per track"
 
 ### Task 4: Barra lateral, busca e fila
 
-- [ ] Criar `src/SidebarItem.qml`:
+- [x] Criar `src/SidebarItem.qml`:
 
 ```qml
 import QtQuick
@@ -529,7 +529,7 @@ Item {
 }
 ```
 
-- [ ] Criar `src/Sidebar.qml` — a ordem das seções segue o desenho do spec (§Como fica
+- [x] Criar `src/Sidebar.qml` — a ordem das seções segue o desenho do spec (§Como fica
       organizado): as coleções vêm no topo (a fatia `colecoes-tags` preenche esse espaço),
       depois Artistas, Álbuns, Gêneros, Todas as faixas, e por fim as automáticas:
 
@@ -626,7 +626,7 @@ Rectangle {
 }
 ```
 
-- [ ] Criar `src/SearchField.qml`:
+- [x] Criar `src/SearchField.qml`:
 
 ```qml
 import QtQuick
@@ -705,7 +705,7 @@ Rectangle {
 }
 ```
 
-- [ ] Criar `src/QueuePanel.qml` — mostra a playlist viva do mpv, com a entrada atual
+- [x] Criar `src/QueuePanel.qml` — mostra a playlist viva do mpv, com a entrada atual
       destacada por `AudioEngine.playlistPos`:
 
 ```qml
@@ -785,9 +785,9 @@ Rectangle {
 }
 ```
 
-- [ ] Acrescentar os quatro `.qml` ao bloco `QML_FILES`.
-- [ ] verificação mecânica da task: `cmake --build build` → exit 0
-- [ ] commit:
+- [x] Acrescentar os quatro `.qml` ao bloco `QML_FILES`.
+- [x] verificação mecânica da task: `cmake --build build` → exit 0
+- [x] commit:
 
 ```bash
 git add src/Sidebar.qml src/SidebarItem.qml src/SearchField.qml src/QueuePanel.qml CMakeLists.txt
