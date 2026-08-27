@@ -11,3 +11,14 @@ target_link_libraries(tst_colorscheme PRIVATE Qt6::Core Qt6::Gui Qt6::Test Qt6::
 
 add_test(NAME tst_colorscheme COMMAND tst_colorscheme)
 set_tests_properties(tst_colorscheme PROPERTIES ENVIRONMENT "QT_QPA_PLATFORM=offscreen")
+
+qt_add_executable(tst_audioengine
+    tst_audioengine.cpp
+    ../src/audioengine.h
+    ../src/audioengine.cpp
+)
+target_include_directories(tst_audioengine PRIVATE ../src)
+target_link_libraries(tst_audioengine PRIVATE Qt6::Core Qt6::Test Qt6::Qml PkgConfig::MPV)
+
+add_test(NAME tst_audioengine COMMAND tst_audioengine)
+set_tests_properties(tst_audioengine PROPERTIES ENVIRONMENT "QT_QPA_PLATFORM=offscreen" TIMEOUT 60)
