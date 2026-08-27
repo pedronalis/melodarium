@@ -165,6 +165,14 @@ ALTER TABLE podcast_episodes ADD COLUMN remote_url TEXT;
 ALTER TABLE podcast_episodes ADD COLUMN download_state TEXT
     CHECK(download_state IN ('none','downloading','done','failed')) DEFAULT 'none';
 )SQL"),
+        QStringLiteral(R"SQL(
+ALTER TABLE tracks ADD COLUMN source_kind TEXT
+    CHECK(source_kind IN ('local_file','youtube')) DEFAULT 'local_file';
+ALTER TABLE tracks ADD COLUMN source_url TEXT;
+ALTER TABLE tracks ADD COLUMN source_format_note TEXT;
+ALTER TABLE tracks ADD COLUMN downloaded_at INTEGER;
+CREATE INDEX idx_tracks_source ON tracks(source_kind);
+)SQL"),
     };
     return list;
 }

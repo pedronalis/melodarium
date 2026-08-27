@@ -1,7 +1,7 @@
 ---
 slug: download-youtube
 feature: melodia
-status: aprovado
+status: em-execucao
 depende-de: [colecoes-tags]
 decisao-humana: nao
 spec: docs/specs/2026-08-27-player-musica-podcast.md
@@ -100,7 +100,7 @@ Componentes QML: `AddFromLinkDialog { collectionId; signal accepted(url) }`,
 
 ### Task 1: Migração 6 — a marca de origem
 
-- [ ] Acrescentar ao vetor `migrations()` em `src/database.cpp`, como sexta entrada:
+- [x] Acrescentar ao vetor `migrations()` em `src/database.cpp`, como sexta entrada:
 
 ```cpp
         QStringLiteral(R"SQL(
@@ -113,13 +113,13 @@ CREATE INDEX idx_tracks_source ON tracks(source_kind);
 )SQL"),
 ```
 
-- [ ] Acrescentar `t.source_kind` e `t.source_format_note` à lista de colunas do `kSelect` em
+- [x] Acrescentar `t.source_kind` e `t.source_format_note` à lista de colunas do `kSelect` em
       `src/tracklistmodel.cpp`, mais os papéis `SourceKindRole` e `SourceNoteRole` no enum
       `Roles`, no `data()` e no `roleNames()` (`"sourceKind"` e `"sourceNote"`).
-- [ ] verificação mecânica da task:
+- [x] verificação mecânica da task:
       `QT_QPA_PLATFORM=offscreen timeout 8 ./build/appmelodia; sqlite3 ~/.local/share/melodia/melodia.db "PRAGMA user_version; SELECT COUNT(*) FROM pragma_table_info('tracks') WHERE name='source_kind';"`
       → `6` e `1`
-- [ ] commit:
+- [x] commit:
 
 ```bash
 git add src/database.cpp src/tracklistmodel.h src/tracklistmodel.cpp
