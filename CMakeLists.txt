@@ -39,6 +39,8 @@ qt_add_executable(appmelodia
     src/podcastepisodemodel.cpp
     src/podcastfeedfetcher.h
     src/podcastfeedfetcher.cpp
+    src/episodedownloader.h
+    src/episodedownloader.cpp
 )
 
 # Theme.qml e Icons.qml usam `pragma Singleton`. O qt_add_qml_module NAO detecta o pragma
@@ -97,6 +99,8 @@ qt_add_qml_module(appmelodia
         src/podcastepisodemodel.cpp
         src/podcastfeedfetcher.h
         src/podcastfeedfetcher.cpp
+        src/episodedownloader.h
+        src/episodedownloader.cpp
 )
 
 # OBRIGATORIO: sem isto o build quebra com erros de template que nao apontam a causa.
