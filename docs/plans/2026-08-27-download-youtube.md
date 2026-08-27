@@ -131,10 +131,10 @@ git commit -m "feat(download): record track origin as schema migration 6"
 As duas funções estáticas (`buildArguments` e `parseProgressLine`) são puras de propósito:
 são elas que os testes cobrem sem tocar a rede.
 
-- [ ] Criar `src/ytdlpdownloader.h` conforme a assinatura da seção Interfaces, com os membros
+- [x] Criar `src/ytdlpdownloader.h` conforme a assinatura da seção Interfaces, com os membros
       privados `bool m_available`, `QString m_toolVersion`, `QHash<QString, QProcess *> m_jobs`,
       `QHash<QString, int> m_collectionForUrl`.
-- [ ] Criar `src/ytdlpdownloader.cpp`:
+- [x] Criar `src/ytdlpdownloader.cpp`:
 
 ```cpp
 #include "ytdlpdownloader.h"
@@ -346,10 +346,10 @@ void YtDlpDownloader::cancel(const QUrl &url)
 }
 ```
 
-- [ ] Acrescentar ao header os membros `QHash<QString, QString> m_lastDestination;` e os
+- [x] Acrescentar ao header os membros `QHash<QString, QString> m_lastDestination;` e os
       `#include <QFile>` / `#include <QFileInfo>` necessários no `.cpp`.
-- [ ] verificação mecânica da task: `cmake --build build` → exit 0
-- [ ] commit:
+- [x] verificação mecânica da task: `cmake --build build` → exit 0
+- [x] commit:
 
 ```bash
 git add src/ytdlpdownloader.h src/ytdlpdownloader.cpp CMakeLists.txt
