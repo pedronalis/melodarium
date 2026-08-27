@@ -896,7 +896,7 @@ git commit -m "feat(ui): transport bar wired to the audio engine"
 
 ### Task 5: A tela — escolher pasta, varrer, listar e tocar
 
-- [ ] Criar `src/LibraryEmptyState.qml`:
+- [x] Criar `src/LibraryEmptyState.qml`:
 
 ```qml
 import QtQuick
@@ -946,7 +946,7 @@ Item {
 }
 ```
 
-- [ ] Substituir `src/Main.qml`:
+- [x] Substituir `src/Main.qml`:
 
 ```qml
 import QtQuick
@@ -1070,12 +1070,12 @@ Window {
 }
 ```
 
-- [ ] Acrescentar `src/LibraryEmptyState.qml` ao `QML_FILES` e `Qt6::QuickDialogs2` ao
+- [x] Acrescentar `src/LibraryEmptyState.qml` ao `QML_FILES` e `Qt6::QuickDialogs2` ao
       `find_package`/`target_link_libraries` (o `FolderDialog` vem de `QtQuick.Dialogs`).
-- [ ] verificação mecânica da task: `cmake --build build` → exit 0 e o app sobe sem erro de
+- [x] verificação mecânica da task: `cmake --build build` → exit 0 e o app sobe sem erro de
       QML: `QT_QPA_PLATFORM=offscreen timeout 8 ./build/appmelodia 2>&1 | grep -c "is not a type"`
       → `0`
-- [ ] commit:
+- [x] commit:
 
 ```bash
 git add src/Main.qml src/LibraryEmptyState.qml CMakeLists.txt
