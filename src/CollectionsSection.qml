@@ -9,6 +9,9 @@ ColumnLayout {
 
     property int currentCollectionId: 0
     property var model: []
+    // url -> { received, total }. Downloads are per link, not per row, so the state cannot
+    // live inside a delegate that scrolling recycles.
+    property var activeDownloads: ({})
 
     signal collectionChosen(int id)
 
@@ -25,6 +28,31 @@ ColumnLayout {
         function onCollectionsChanged() { root.refresh() }
     }
 
+    Connections {
+        target: YtDlpDownloader
+        function onProgress(url, downloaded, total) {
+            const next = root.activeDownloads
+            next[url] = { received: downloaded, total: total }
+            root.activeDownloads = next
+        }
+        function onFinished(url, trackId) {
+            const next = root.activeDownloads
+            delete next[url]
+            root.activeDownloads = next
+            root.refresh()
+        }
+        function onFailed(url, reason) {
+            const next = root.activeDownloads
+            delete next[url]
+            root.activeDownloads = next
+            downloadWarning.text = reason
+        }
+    }
+
+    function downloadKeys() {
+        return Object.keys(root.activeDownloads)
+    }
+
     RowLayout {
         Layout.fillWidth: true
         Layout.leftMargin: Theme.marginM
@@ -38,11 +66,51 @@ ColumnLayout {
             font.weight: Theme.fontWeightSemiBold
             color: Theme.mOnSurfaceVariant
         }
+        // Only offered with a collection open: a downloaded track has to land somewhere,
+        // and "somewhere" is the collection the user is looking at.
+        IconButton {
+            icon: "download"
+            size: Theme.fontSizeS
+            visible: root.currentCollectionId > 0
+            onClicked: {
+                addLinkDialog.collectionId = root.currentCollectionId
+                addLinkDialog.open()
+            }
+        }
         IconButton {
             icon: "plus"
             size: Theme.fontSizeS
             onClicked: newDialog.open()
         }
+    }
+
+    Repeater {
+        model: root.downloadKeys()
+
+        DownloadProgressRow {
+            required property var modelData
+
+            Layout.fillWidth: true
+            Layout.leftMargin: Theme.marginM
+            Layout.rightMargin: Theme.marginM
+            url: modelData
+            received: root.activeDownloads[modelData].received
+            total: root.activeDownloads[modelData].total
+            onCancelRequested: YtDlpDownloader.cancel(modelData)
+        }
+    }
+
+    Text {
+        id: downloadWarning
+        Layout.fillWidth: true
+        Layout.leftMargin: Theme.marginM
+        Layout.rightMargin: Theme.marginM
+        visible: downloadWarning.text !== ""
+        wrapMode: Text.WordWrap
+        text: ""
+        font.family: Theme.fontFamily
+        font.pointSize: Theme.fontSizeXS
+        color: Theme.mError
     }
 
     Repeater {
@@ -71,6 +139,10 @@ ColumnLayout {
         font.family: Theme.fontFamily
         font.pointSize: Theme.fontSizeXS
         color: Theme.mOnSurfaceVariant
+    }
+
+    AddFromLinkDialog {
+        id: addLinkDialog
     }
 
     NewCollectionDialog {
