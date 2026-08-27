@@ -699,14 +699,14 @@ git commit -m "test(download): argument safety, progress parsing and library ing
 
 ### Task 6: Registrar o limite de qualidade no README [sem-código]
 
-- [ ] Acrescentar ao `README.md` uma seção "Baixar do YouTube" registrando: que o app **não
+- [x] Acrescentar ao `README.md` uma seção "Baixar do YouTube" registrando: que o app **não
       distribui** o `yt-dlp` e chama o que estiver instalado; que o áudio do YouTube é
       comprimido e nunca será alta qualidade, convivendo com os arquivos de verdade sem se
       passar por eles (é o que a marca de origem na interface diz); que `--embed-thumbnail`
       exige `ffmpeg`; e o achado desta máquina — dois `yt-dlp` instalados, o do `PATH` sendo o
       mais antigo, e por isso o app mostra a versão que encontrou.
-- [ ] verificação mecânica da task: `grep -c "yt-dlp" README.md` → `2` ou mais
-- [ ] commit:
+- [x] verificação mecânica da task: `grep -c "yt-dlp" README.md` → `2` ou mais
+- [x] commit:
 
 ```bash
 git add README.md
