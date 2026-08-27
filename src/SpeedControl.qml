@@ -1,48 +1,61 @@
 import QtQuick
-import QtQuick.Layouts
+import QtQuick.Controls
 import Melodia.App
 
-RowLayout {
+// A velocidade de fala como o desenho do podcast mostra: uma pílula discreta com o valor
+// atual, e um menu com os passos. Seis botões lado a lado não caberiam no transporte.
+Rectangle {
     id: root
 
-    readonly property var steps: [0.75, 1.0, 1.25, 1.5, 1.75, 2.0]
+    property real speed: 1.0
 
-    spacing: Theme.marginXXS
+    signal speedPicked(real value)
 
-    Repeater {
-        model: root.steps
+    readonly property var opcoes: [0.8, 1.0, 1.25, 1.5, 1.75, 2.0]
 
-        Rectangle {
-            required property real modelData
+    implicitWidth: label.implicitWidth + Theme.marginL * 2
+    implicitHeight: 26
+    radius: Theme.iRadiusS
+    color: area.containsMouse ? Theme.mSurfaceVariant : "transparent"
+    border.width: Theme.borderS
+    border.color: Theme.mSurfaceVariant
 
-            implicitWidth: label.implicitWidth + Theme.marginM
-            implicitHeight: Theme.marginXL * 1.3
-            radius: Theme.iRadiusXS
-            color: Math.abs(AudioEngine.speed - modelData) < 0.01
-                   ? Theme.mPrimary
-                   : (area.containsMouse ? Theme.mHover : "transparent")
+    Behavior on color {
+        ColorAnimation { duration: Theme.animationFast; easing.type: Theme.easingType }
+    }
 
-            Behavior on color {
-                ColorAnimation { duration: Theme.animationFast; easing.type: Theme.easingType }
-            }
+    function formatSpeed(v) {
+        // 1x, 1.5x, 1.25x — nunca 1.00x.
+        return String(Math.round(v * 100) / 100) + "x"
+    }
 
-            Text {
-                id: label
-                anchors.centerIn: parent
-                text: modelData + "×"
-                font.family: Theme.fontFamilyFixed
-                font.pointSize: Theme.fontSizeXS
-                color: Math.abs(AudioEngine.speed - modelData) < 0.01
-                       ? Theme.mOnPrimary
-                       : (area.containsMouse ? Theme.mOnHover : Theme.mOnSurfaceVariant)
-            }
+    Text {
+        id: label
+        anchors.centerIn: parent
+        text: root.formatSpeed(root.speed)
+        font.family: Theme.fontFamilyFixed
+        font.pointSize: Theme.fontSizeS
+        color: Math.abs(root.speed - 1.0) < 0.01 ? Theme.mOnSurfaceVariant : Theme.mOnSurface
+    }
 
-            MouseArea {
-                id: area
-                anchors.fill: parent
-                hoverEnabled: true
-                cursorShape: Qt.PointingHandCursor
-                onClicked: AudioEngine.setSpeed(modelData)
+    MouseArea {
+        id: area
+        anchors.fill: parent
+        hoverEnabled: true
+        cursorShape: Qt.PointingHandCursor
+        onClicked: menu.popup(root, 0, root.height + Theme.marginXS)
+    }
+
+    Menu {
+        id: menu
+
+        Repeater {
+            model: root.opcoes
+
+            MenuItem {
+                required property real modelData
+                text: root.formatSpeed(modelData)
+                onTriggered: root.speedPicked(modelData)
             }
         }
     }

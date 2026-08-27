@@ -52,61 +52,6 @@ RowLayout {
 
     readonly property var menuItens: root.recolhidos.concat(root.automaticas)
 
-    component Chip: Rectangle {
-        id: chip
-
-        property string label: ""
-        property bool selected: false
-        property string glyph: ""
-        // Um chevron deitado vira um chevron para baixo: a fonte de ícones não traz o de
-        // baixo, e girar custa menos que embutir outro glifo.
-        property bool glyphPointsDown: false
-
-        signal clicked
-
-        implicitWidth: chipRow.implicitWidth + Theme.marginM * 2
-        implicitHeight: 24
-        radius: Theme.iRadiusS
-        color: chip.selected ? Theme.mSurfaceVariant
-                             : (chipArea.containsMouse ? Theme.mSurfaceVariant : "transparent")
-        border.width: chip.selected ? 0 : Theme.borderS
-        border.color: Theme.mSurfaceVariant
-
-        Behavior on color {
-            ColorAnimation { duration: Theme.animationFast; easing.type: Theme.easingType }
-        }
-
-        RowLayout {
-            id: chipRow
-            anchors.centerIn: parent
-            spacing: Theme.marginS
-
-            Text {
-                visible: chip.glyph !== ""
-                text: chip.glyph
-                rotation: chip.glyphPointsDown ? 90 : 0
-                font.family: Icons.fontFamily
-                font.pointSize: Theme.fontSizeXS
-                color: chip.selected ? Theme.mOnSurface : Theme.mOnSurfaceVariant
-            }
-            Text {
-                text: chip.label
-                font.family: Theme.fontFamily
-                font.pointSize: Theme.fontSizeS
-                font.weight: chip.selected ? Theme.fontWeightSemiBold : Theme.fontWeightRegular
-                color: chip.selected ? Theme.mOnSurface : Theme.mOnSurfaceVariant
-            }
-        }
-
-        MouseArea {
-            id: chipArea
-            anchors.fill: parent
-            hoverEnabled: true
-            cursorShape: Qt.PointingHandCursor
-            onClicked: chip.clicked()
-        }
-    }
-
     Repeater {
         model: root.eixos
 

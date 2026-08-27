@@ -77,6 +77,15 @@ checa_capa() {
     fi
 }
 
+checa_motor() {
+    if printf '%s\n' "$line" | grep -q 'motor=ok'; then
+        echo "ok:    motor de áudio de pé"
+    else
+        echo "FALHA: o motor de áudio não subiu (mpv)"
+        fail=1
+    fi
+}
+
 checa_busca() {
     local w h
     w=$(arredonda "$(printf '%s\n' "$line" | sed -n 's/.*busca=\([0-9.]*\)x[0-9.]*.*/\1/p')")
@@ -105,6 +114,7 @@ echo "== janela nominal (1100 px) =="
 if medir 1100; then
     esperado "rail" "$(arredonda "$(campo rail)")" 56
     esperado "painel" "$(arredonda "$(campo painel)")" 392
+    checa_motor
     checa_miolo
     checa_capa
     checa_filtros

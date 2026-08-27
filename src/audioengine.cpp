@@ -1,5 +1,6 @@
 #include "audioengine.h"
 
+#include <QtGlobal>
 #include <QMetaObject>
 #include <QVarLengthArray>
 #include <clocale>
@@ -32,7 +33,9 @@ AudioEngine::AudioEngine(QObject *parent, bool headlessAo)
     setOptionString("video", "no");
     setOptionString("vo", "null");
     setOptionString("audio-display", "no");
-    if (headlessAo)
+    // MELODIA_NULL_AO existe para rodar o app inteiro onde não há placa de som (o gate roda
+    // em offscreen): sem isto o mpv falha ao abrir o device e nada chega a tocar.
+    if (headlessAo || qEnvironmentVariableIsSet("MELODIA_NULL_AO"))
         setOptionString("ao", "null");
 
     // Quality contract (spec: no conversion in the path).

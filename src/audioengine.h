@@ -52,7 +52,9 @@ public:
     Q_INVOKABLE void setReplayGainMode(const QString &mode);
     Q_INVOKABLE void setExclusiveOutput(bool on);
 
-    bool isAvailable() const { return m_mpv != nullptr; }
+    // Q_INVOKABLE: o sinal engineUnavailable é emitido dentro do construtor, quando ainda não
+    // existe nenhum Connections para ouvi-lo. Quem quiser saber, pergunta.
+    Q_INVOKABLE bool isAvailable() const { return m_mpv != nullptr; }
 
 signals:
     void positionChanged();
