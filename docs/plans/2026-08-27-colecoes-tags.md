@@ -1,7 +1,7 @@
 ---
 slug: colecoes-tags
 feature: melodia
-status: aprovado
+status: em-execucao
 depende-de: [navegacao-biblioteca]
 decisao-humana: sim
 spec: docs/specs/2026-08-27-player-musica-podcast.md
