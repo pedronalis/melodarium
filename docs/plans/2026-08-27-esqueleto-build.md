@@ -680,19 +680,19 @@ git commit -m "test(theme): cover color scheme fallback for missing and malforme
 Sem isto, cada ajuste de aparência custa um `cmake --build` — e a aparência é o requisito nº 1
 do produto (spec §Pra quê: "Player feio não se abre").
 
-- [ ] Acrescentar a `src/main.cpp`, dentro de `main()` e antes de `engine.loadFromModule(...)`,
+- [x] Acrescentar a `src/main.cpp`, dentro de `main()` e antes de `engine.loadFromModule(...)`,
       o bloco de modo dev, e trocar a chamada de carga por um `if/else` — o código está na
       seção 7 de `docs/plans/research/2026-08-27-qt-ponte.md` (variável de ambiente
       `MELODIA_DEV_QML`, `QFileSystemWatcher` + `engine.clearComponentCache()`).
-- [ ] Criar `README.md` documentando: dependências (`qt6-qtbase-devel qt6-qtdeclarative-devel`),
+- [x] Criar `README.md` documentando: dependências (`qt6-qtbase-devel qt6-qtdeclarative-devel`),
       comandos de build e teste, a variável `MELODIA_DEV_QML`, e a linha de debug obrigatória
       nesta máquina — `QT_LOGGING_RULES="*.debug=true" QT_FORCE_STDERR_LOGGING=1 ./build/appmelodia`
       — porque o Fedora instala `/usr/share/qt6/qtlogging.ini` com `*.debug=false` e manda o
       resto para o journald, fazendo todo `qDebug`/`console.log` sumir sem erro.
-- [ ] Registrar no README a licença MIT da fonte Tabler, apontando `assets/fonts/tabler-icons-license.txt`.
-- [ ] verificação mecânica da task:
+- [x] Registrar no README a licença MIT da fonte Tabler, apontando `assets/fonts/tabler-icons-license.txt`.
+- [x] verificação mecânica da task:
       `grep -c "MELODIA_DEV_QML" README.md src/main.cpp` → `README.md:1` e `src/main.cpp:2` ou mais
-- [ ] commit:
+- [x] commit:
 
 ```bash
 git add README.md src/main.cpp
