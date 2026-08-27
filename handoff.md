@@ -25,21 +25,42 @@ clicando numa faixa), **colecoes-tags** (a mesma faixa em duas coleções, com u
 
 ## Em voo
 
-**Tipo 1 — run headless (RUN_GATE)** · despachado 2026-08-27 ~13:45 BRT
-- **Objetivo:** executar em sequência as fatias `esqueleto-build` → `motor-audio` →
-  `scan-biblioteca` (16 tasks), na branch `exec/fatias-1-3`. Teto de 220 turnos.
-- **cwd do run:** `/home/pedro/dev/active/melodia`
-- **conferir:** RUN_GATE ausente = verde · `.run_gate_count` presente = FAIL (ver
-  `RESUMO_RUN.md`/transcript) · RUN_GATE presente sem count = em voo
-- **Pendência que o run NÃO resolve:** a fatia `esqueleto-build` tem `decisao-humana: sim`.
-  Mesmo com o gate verde, falta o Pedro rodar `./build/appmelodia` numa sessão gráfica e
-  confirmar que a janela abre com a cara certa.
+Nada. O run das fatias 1-3 foi colhido: **PASSOU**.
+
+## Calibração de custo
+
+> Só APPEND — histórico estimado-vs-real que o /retoma grava ao colher e o /despacha lê para estimar.
+
+- 2026-08-27 · /despacha run headless · fatias 1-3 (`esqueleto-build` → `motor-audio` →
+  `scan-biblioteca`, 16 tasks, C++/Qt6 do zero) · modelo Opus 5 · estimado ~500-900k tok novos
+  / 30-60 min · real **~138k tok novos (~22,6M com releitura, inflação 164×) / ~0,24 h /
+  186 turnos** · Δ tokens **−78%**, Δ tempo **−77%** · **PASSOU** — 19 commits, gate 12/12,
+  suíte 3 alvos / 20 casos. Três lições:
+  **(1) Terceiro ponto seguido de superestimativa de tempo** (−40% em 24/08, −60% em 27/08 de
+  manhã, −77% aqui): dividir o palpite por 3, não por 2. E os tokens despencaram porque plano
+  com código pronto executa barato — o agente cola e verifica, não projeta.
+  **(2) O piso de contagem de testes no gate se pagou ao vivo:** `ctest` sai 0 com
+  `Total Tests: 0`. Sem a linha `-ge 3`, o gate lia verde num repo sem um único teste.
+  **(3) 186 turnos contra teto de 220 — margem de 15%.** Três fatias por run foi o limite.
+- 2026-08-27 · cadeia `/planeja` (5 agentes Sonnet de research + escrita solo Opus dos 9 planos)
+  · estimado ~5x / ~50-60 min · real **~705k tok de subagente / ~18 min de research** + a sessão
+  de escrita · **VERDE** — 9 planos, lint 0 violações. O research verificado contra os headers
+  instalados pagou: 4 armadilhas achadas rodando código (singleton QML silencioso, locale do
+  mpv, log do Qt no Fedora, dois yt-dlp) que teriam travado a execução.
 
 ## Próximo passo
 
-Executar a fatia `esqueleto-build` numa sessão fresca — contexto zero é o design, o plano
-carrega o código. Ou `/executa` para rodar o lote, ou `/despacha` para background (o RUN_GATE
-de cada fatia é a seção "Verificação da fatia (E2E)" do seu plano).
+**Ação humana pendente:** rodar `./build/appmelodia` numa sessão gráfica e confirmar que a
+janela abre com a cara certa (`esqueleto-build` tem `decisao-humana: sim`; o run não tinha tela).
+
+Depois: fatia `tocador-ui` — as fatias 2 e 3 de que ela depende já estão prontas. Ela também
+pede o seu olho na tela.
+
+Os 19 commits estão na branch `exec/fatias-1-3`, **não integrada em `main`** — o merge é decisão
+sua. `RESUMO_RUN.md` na raiz lista 8 divergências que o run corrigiu, entre elas um bug de perda
+de dados (arquivo movido sumia da biblioteca) e uma armadilha nova do Qt 6.10.3: `#` dentro de
+literal cru (`R"SQL(...)"`) faz o gerador de código produzir arquivo VAZIO, sem erro — vale para
+as 6 fatias restantes, que usam esse formato no SQL.
 
 **Atualize o `status:` no frontmatter ao executar — o plano é o ledger.**
 Os `- [ ]` das tasks são a outra metade: trocar por `- [x]` no mesmo commit do trabalho.
