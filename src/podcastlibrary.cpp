@@ -162,6 +162,40 @@ QVariantList PodcastLibrary::shows()
     return out;
 }
 
+QVariantList PodcastLibrary::allEpisodes(int showId, int limit)
+{
+    QSqlQuery q(uiDb());
+    q.prepare(QStringLiteral(
+        "SELECT e.id, e.title, IFNULL(s.title,''), s.id, IFNULL(e.published_at,0), "
+        "IFNULL(e.duration_ms,0), e.position_ms, e.played, IFNULL(e.local_path,'') "
+        "FROM podcast_episodes e JOIN podcast_shows s ON s.id = e.show_id "
+        "WHERE (? = 0 OR e.show_id = ?) "
+        "ORDER BY e.published_at DESC, e.id DESC LIMIT ?"));
+    q.addBindValue(showId);
+    q.addBindValue(showId);
+    q.addBindValue(limit);
+
+    QVariantList out;
+    if (!q.exec())
+        return out;
+    while (q.next()) {
+        const int position = q.value(6).toInt();
+        const int duration = q.value(5).toInt();
+        out.append(QVariantMap{
+            {QStringLiteral("id"), q.value(0).toInt()},
+            {QStringLiteral("title"), q.value(1).toString()},
+            {QStringLiteral("showTitle"), q.value(2).toString()},
+            {QStringLiteral("showId"), q.value(3).toInt()},
+            {QStringLiteral("publishedAt"), q.value(4).toLongLong()},
+            {QStringLiteral("durationMs"), duration},
+            {QStringLiteral("positionMs"), position},
+            {QStringLiteral("played"), q.value(7).toBool()},
+            {QStringLiteral("progress"), duration > 0 ? double(position) / duration : 0.0},
+            {QStringLiteral("path"), q.value(8).toString()}});
+    }
+    return out;
+}
+
 QVariantList PodcastLibrary::continueListening(int limit)
 {
     QSqlQuery q(uiDb());
@@ -275,9 +309,13 @@ void PodcastLibrary::markPlayed(int episodeId, bool played)
 QVariantMap PodcastLibrary::episodeForPath(const QString &path)
 {
     QSqlQuery q(uiDb());
+    // O painel mostra o episódio inteiro (programa e data), então o nome do programa vem
+    // junto: sem ele a moldura diria "nada tocando" com um episódio no ar.
     q.prepare(QStringLiteral(
-        "SELECT id, show_id, title, position_ms, duration_ms, played "
-        "FROM podcast_episodes WHERE local_path = ?"));
+        "SELECT e.id, e.show_id, e.title, e.position_ms, e.duration_ms, e.played, "
+        "IFNULL(s.title,''), IFNULL(e.published_at,0), IFNULL(s.cover_path,'') "
+        "FROM podcast_episodes e LEFT JOIN podcast_shows s ON s.id = e.show_id "
+        "WHERE e.local_path = ?"));
     q.addBindValue(path);
     if (!q.exec() || !q.next())
         return {};
@@ -286,7 +324,10 @@ QVariantMap PodcastLibrary::episodeForPath(const QString &path)
                        {QStringLiteral("title"), q.value(2).toString()},
                        {QStringLiteral("positionMs"), q.value(3).toInt()},
                        {QStringLiteral("durationMs"), q.value(4).toInt()},
-                       {QStringLiteral("played"), q.value(5).toInt() == 1}};
+                       {QStringLiteral("played"), q.value(5).toInt() == 1},
+                       {QStringLiteral("showTitle"), q.value(6).toString()},
+                       {QStringLiteral("publishedAt"), q.value(7).toLongLong()},
+                       {QStringLiteral("coverPath"), q.value(8).toString()}};
 }
 
 // --- Feeds -------------------------------------------------------------------------------

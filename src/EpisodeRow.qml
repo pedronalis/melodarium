@@ -2,13 +2,14 @@ import QtQuick
 import QtQuick.Layouts
 import Melodia.App
 
-// Same visual grammar as TrackRow, with one deliberate swap: podcast has no cover per
-// episode, so the artwork slot carries the listening progress instead. Podcast is the one
-// place where "where did I stop" matters more than "what does it look like".
+// Uma linha da lista de episódios do desenho aprovado (design/Podcast.dc.html): arte, título
+// com "programa · data · duração" embaixo e, à direita, a única informação que muda de
+// episódio para episódio — quanto falta, se precisa baixar, ou se já foi ouvido.
 Item {
     id: root
 
     property string title: ""
+    property string showTitle: ""
     property int durationMs: 0
     property int positionMs: 0
     property bool played: false
@@ -30,28 +31,28 @@ Item {
     signal playedToggled
     signal downloadRequested
 
-    implicitHeight: Theme.marginXL * 3
+    implicitHeight: 58
 
-    function formatRemaining(total, done) {
-        const left = Math.max(0, Math.floor((total - done) / 1000))
-        if (total <= 0)
-            return "--:--"
-        const minutes = Math.floor(left / 60)
-        const seconds = left % 60
-        return minutes + ":" + (seconds < 10 ? "0" : "") + seconds
+    function formatLength(ms) {
+        if (ms <= 0)
+            return ""
+        const minutes = Math.round(ms / 60000)
+        if (minutes < 60)
+            return minutes + qsTr(" min")
+        return Math.floor(minutes / 60) + " h " + ("0" + (minutes % 60)).slice(-2)
     }
 
     function formatDate(secs) {
         if (secs <= 0)
             return ""
-        return new Date(secs * 1000).toLocaleDateString(Qt.locale(), Locale.ShortFormat)
+        return new Date(secs * 1000).toLocaleDateString(Qt.locale(), "dd MMM")
     }
 
     Rectangle {
         anchors.fill: parent
-        anchors.leftMargin: Theme.marginS
-        anchors.rightMargin: Theme.marginS
-        radius: Theme.radiusXS
+        anchors.leftMargin: Theme.marginXS
+        anchors.rightMargin: Theme.marginXS
+        radius: Theme.iRadiusS
         color: mouse.containsMouse ? Theme.mHover
                                    : (root.isCurrent ? Theme.mSurfaceVariant : "transparent")
 
@@ -69,45 +70,28 @@ Item {
 
         RowLayout {
             anchors.fill: parent
-            anchors.leftMargin: Theme.marginM
-            anchors.rightMargin: Theme.marginM
-            spacing: Theme.marginM
+            anchors.leftMargin: Theme.marginL
+            anchors.rightMargin: Theme.marginL
+            spacing: Theme.marginL
 
-            // Progress ring stand-in: a filled arc would need Shapes, and a bar reads the
-            // same at this size.
             Rectangle {
-                Layout.preferredWidth: root.height - Theme.marginS * 2
-                Layout.preferredHeight: root.height - Theme.marginS * 2
-                radius: Theme.radiusXXS
-                color: Theme.mSurface
-                clip: true
+                Layout.preferredWidth: 40
+                Layout.preferredHeight: 40
+                radius: Theme.radiusXS
+                color: Theme.mSurfaceVariant
 
                 Text {
                     anchors.centerIn: parent
-                    text: Icons.get(root.played ? "heart" : "playlist")
+                    text: Icons.get(root.played ? "playlist" : "microphone")
                     font.family: Icons.fontFamily
                     font.pointSize: Theme.fontSizeM
-                    color: root.played ? Theme.mPrimary : Theme.mOnSurfaceVariant
-                }
-
-                Rectangle {
-                    anchors.left: parent.left
-                    anchors.right: parent.right
-                    anchors.bottom: parent.bottom
-                    height: Theme.borderM
-                    color: Theme.mSurface
-
-                    Rectangle {
-                        height: parent.height
-                        width: parent.width * root.progress
-                        color: Theme.mPrimary
-                    }
+                    color: Theme.mOnSurfaceVariant
                 }
             }
 
             ColumnLayout {
                 Layout.fillWidth: true
-                spacing: 0
+                spacing: Theme.marginXXS
 
                 Text {
                     Layout.fillWidth: true
@@ -115,34 +99,39 @@ Item {
                     elide: Text.ElideRight
                     font.family: Theme.fontFamily
                     font.pointSize: Theme.fontSizeM
-                    font.weight: Theme.fontWeightMedium
+                    font.weight: root.isCurrent ? Theme.fontWeightSemiBold
+                                                : Theme.fontWeightMedium
                     color: mouse.containsMouse
                            ? Theme.mOnHover
-                           : (root.isCurrent ? Theme.mPrimary
-                                             : (root.played ? Theme.mOnSurfaceVariant
-                                                            : Theme.mOnSurface))
+                           : (root.isCurrent ? Theme.mOnSurface : Theme.mOnSurfaceVariant)
                 }
                 Text {
                     Layout.fillWidth: true
-                    text: root.progress > 0 && !root.played
-                          ? qsTr("faltam %1").arg(root.formatRemaining(root.durationMs,
-                                                                      root.positionMs))
-                          : root.formatDate(root.publishedAt)
+                    text: [root.showTitle, root.formatDate(root.publishedAt),
+                           root.formatLength(root.durationMs)]
+                          .filter(function (p) { return p !== "" }).join(" · ")
                     elide: Text.ElideRight
                     font.family: Theme.fontFamily
                     font.pointSize: Theme.fontSizeS
-                    color: mouse.containsMouse ? Theme.mOnHover : Theme.mOnSurfaceVariant
+                    color: mouse.containsMouse ? Theme.mOnHover : Theme.mOutline
                 }
             }
 
-            // Downloading is only offered for what is not on disk; once it is local the
-            // button has nothing left to do and disappears.
-            IconButton {
-                icon: "download"
-                size: Theme.fontSizeS
-                visible: root.downloadable && root.downloadProgress < 0
-                opacity: mouse.containsMouse ? 1.0 : 0.45
-                onClicked: root.downloadRequested()
+            // Um episódio começado mostra a barra; um que falta baixar mostra a seta; um já
+            // ouvido só diz que foi. Nunca os três juntos.
+            Rectangle {
+                Layout.preferredWidth: 62
+                Layout.preferredHeight: 3
+                visible: root.downloadProgress < 0 && !root.played && root.progress > 0
+                radius: height / 2
+                color: Theme.mSurfaceVariant
+
+                Rectangle {
+                    width: parent.width * root.progress
+                    height: parent.height
+                    radius: parent.radius
+                    color: Theme.mOnSurfaceVariant
+                }
             }
 
             Text {
@@ -152,17 +141,18 @@ Item {
                       : qsTr("baixando…")
                 font.family: Theme.fontFamilyFixed
                 font.pointSize: Theme.fontSizeXS
-                color: Theme.mPrimary
+                color: Theme.mOnSurfaceVariant
             }
 
-            // Marking played by hand is the podcast equivalent of the collection plus: the
-            // one gesture the app cannot infer.
             IconButton {
-                icon: "heart"
+                Layout.preferredWidth: 22
+                Layout.preferredHeight: 22
+                icon: "download"
                 size: Theme.fontSizeS
-                accent: root.played
-                opacity: root.played || mouse.containsMouse ? 1.0 : 0.45
-                onClicked: root.playedToggled()
+                visible: root.downloadable && root.downloadProgress < 0
+                opacity: mouse.containsMouse ? 1.0 : 0.55
+                tooltip: qsTr("baixar")
+                onClicked: root.downloadRequested()
 
                 Behavior on opacity {
                     NumberAnimation { duration: Theme.animationFast; easing.type: Theme.easingType }
@@ -170,10 +160,29 @@ Item {
             }
 
             Text {
-                text: root.formatRemaining(root.durationMs, 0)
-                font.family: Theme.fontFamilyFixed
-                font.pointSize: Theme.fontSizeS
-                color: mouse.containsMouse ? Theme.mOnHover : Theme.mOnSurfaceVariant
+                visible: root.played
+                text: qsTr("ouvido")
+                font.family: Theme.fontFamily
+                font.pointSize: Theme.fontSizeXS
+                font.letterSpacing: 0.6
+                color: Theme.mOutline
+            }
+
+            // Marcar ouvido à mão é o gesto que o app não consegue inferir — e o único jeito
+            // de desfazer um "ouvido" que ele inferiu errado.
+            IconButton {
+                Layout.preferredWidth: 22
+                Layout.preferredHeight: 22
+                icon: "playlist"
+                size: Theme.fontSizeS
+                accent: root.played
+                opacity: mouse.containsMouse ? 1.0 : 0.35
+                tooltip: root.played ? qsTr("marcar como não ouvido") : qsTr("marcar como ouvido")
+                onClicked: root.playedToggled()
+
+                Behavior on opacity {
+                    NumberAnimation { duration: Theme.animationFast; easing.type: Theme.easingType }
+                }
             }
         }
     }

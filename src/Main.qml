@@ -35,6 +35,33 @@ Window {
                ? Qt.application.arguments[i + 1] : ""
     }
 
+    // `--play-episode <id>`: põe um episódio para tocar antes de fotografar, que é o único
+    // jeito de ver o transporte de fala montado.
+    readonly property int measureEpisode: {
+        const i = Qt.application.arguments.indexOf("--play-episode")
+        if (i < 0 || Qt.application.arguments.length <= i + 1)
+            return 0
+        const id = parseInt(Qt.application.arguments[i + 1])
+        return isNaN(id) ? 0 : id
+    }
+
+    // `--delay <ms>`: quanto esperar antes de medir. Abrir um arquivo no mpv leva mais do que
+    // montar a tela.
+    readonly property int measureDelay: {
+        const i = Qt.application.arguments.indexOf("--delay")
+        if (i < 0 || Qt.application.arguments.length <= i + 1)
+            return 1200
+        const ms = parseInt(Qt.application.arguments[i + 1])
+        return isNaN(ms) ? 1200 : ms
+    }
+
+    // `--play-track <caminho>`: mesma ideia do --play-episode, para a tela com música.
+    readonly property string measureTrack: {
+        const i = Qt.application.arguments.indexOf("--play-track")
+        return i >= 0 && Qt.application.arguments.length > i + 1
+               ? Qt.application.arguments[i + 1] : ""
+    }
+
     // `--no-search`: não abre o overlay antes de medir.
     readonly property bool measureSearch: Qt.application.arguments.indexOf("--no-search") < 0
 
@@ -168,6 +195,51 @@ Window {
         AudioEngine.play()
     }
 
+    // As três saídas do estado "nada tocando". Nenhuma delas começa a tocar sozinha: o app
+    // só toca quando alguém pede.
+    function startFromEmpty(mode) {
+        if (mode === "resume") {
+            const info = LibraryBrowser.lastPlayed()
+            if (info.path === undefined || info.path === "")
+                return
+            AudioEngine.loadPlaylist([info.path], 0)
+            AudioEngine.play()
+            if (info.positionMs > 0) {
+                resumeSeek.targetSeconds = Math.floor(info.positionMs / 1000)
+                resumeSeek.restart()
+            }
+            return
+        }
+
+        const clause = mode === "never" ? LibraryBrowser.clauseNeverPlayed()
+                     : (mode === "forgotten" ? LibraryBrowser.clauseForgotten()
+                                             : LibraryBrowser.clauseForAll())
+        trackModel.loadFromQuery(clause, [])
+        root.currentSection = mode === "never" ? "never"
+                            : (mode === "forgotten" ? "forgotten" : "all")
+        root.currentId = 0
+        root.libraryFilter = mode === "shuffle" ? "all" : mode
+        root.groupsTitle = root.filterTitles[root.currentSection] !== undefined
+                           ? root.filterTitles[root.currentSection] : ""
+        root.showingGroups = false
+
+        let paths = trackModel.allPaths()
+        if (paths.length === 0)
+            return
+        if (mode === "shuffle") {
+            // Fisher-Yates: sortear índice a cada passo, não ordenar por número aleatório.
+            for (let i = paths.length - 1; i > 0; --i) {
+                const j = Math.floor(Math.random() * (i + 1))
+                const tmp = paths[i]
+                paths[i] = paths[j]
+                paths[j] = tmp
+            }
+        }
+        root.queuePaths = paths
+        AudioEngine.loadPlaylist(paths, 0)
+        AudioEngine.play()
+    }
+
     function collectTrack(trackId) {
         root.selectedTrackId = trackId
         collectMenu.trackId = trackId
@@ -206,6 +278,14 @@ Window {
 
     Connections {
         target: AudioEngine
+        // Um motor que não sobe, ou um arquivo que não abre, não podem falhar em silêncio: sem
+        // esta linha o sintoma é "clico e não acontece nada".
+        function onEngineUnavailable(message) {
+            console.warn("melodia: motor de áudio indisponível — " + message)
+        }
+        function onPlaybackError(path, message) {
+            console.warn("melodia: não consegui tocar " + path + " — " + message)
+        }
         function onTrackFinished(path) {
             PlayStatsRecorder.recordPlay(path)
         }
@@ -220,6 +300,9 @@ Window {
             if (!AudioEngine.playing && root.currentEpisodeId > 0)
                 PodcastLibrary.savePosition(root.currentEpisodeId,
                                             Math.round(AudioEngine.position * 1000))
+            else if (!AudioEngine.playing && root.currentEpisodeId === 0)
+                PlayStatsRecorder.savePosition(AudioEngine.currentFile,
+                                               Math.round(AudioEngine.position * 1000))
         }
     }
 
@@ -262,6 +345,17 @@ Window {
                                                  Math.round(AudioEngine.position * 1000))
     }
 
+    // Mesma razão do timer do podcast: gravar a cada positionChanged escreveria no SQLite a
+    // cada quadro. Cinco segundos de imprecisão ao retomar não se percebem.
+    Timer {
+        interval: 5000
+        repeat: true
+        running: AudioEngine.playing && root.currentEpisodeId === 0
+                 && AudioEngine.currentFile !== ""
+        onTriggered: PlayStatsRecorder.savePosition(AudioEngine.currentFile,
+                                                    Math.round(AudioEngine.position * 1000))
+    }
+
     Connections {
         target: YtDlpDownloader
         // The freshly downloaded track only shows up in the list if the list is asked again.
@@ -281,6 +375,12 @@ Window {
                 running: true
                 interval: 600
                 onTriggered: {
+                    if (root.measureEpisode > 0)
+                        PodcastLibrary.playEpisode(root.measureEpisode)
+                    if (root.measureTrack !== "") {
+                        AudioEngine.loadPlaylist([root.measureTrack], 0)
+                        AudioEngine.play()
+                    }
                     if (!root.measureSearch)
                         return
                     searchOverlay.open()
@@ -291,7 +391,7 @@ Window {
 
             Timer {
             running: true
-            interval: 1200
+            interval: root.measureDelay
             onTriggered: {
                 console.log("MEDIDA rail=" + Math.round(rail.width)
                             + " painel=" + Math.round(nowPlaying.width)
@@ -303,7 +403,8 @@ Window {
                             + " chips=" + Math.round(libraryPane.chipsImplicitWidth)
                             + " chipsvao=" + Math.round(libraryPane.chipsWidth)
                             + " busca=" + Math.round(searchOverlay.width)
-                            + "x" + Math.round(searchOverlay.height))
+                            + "x" + Math.round(searchOverlay.height)
+                            + " motor=" + (AudioEngine.isAvailable() ? "ok" : "MORTO"))
                 if (root.shotPath === "") {
                     Qt.quit()
                     return
@@ -350,7 +451,9 @@ Window {
             Layout.maximumWidth: nowPlaying.implicitWidth
             Layout.fillWidth: false
             compact: root.width < 900
+            episodeMode: root.currentEpisodeId > 0
             onLikeRequested: function (id) { LibraryBrowser.toggleLike(id) }
+            onPlayRequested: function (mode) { root.startFromEmpty(mode) }
         }
 
         StackLayout {
@@ -384,8 +487,15 @@ Window {
                 onSearchRequested: searchOverlay.open()
             }
 
-            PodcastPane { }
-            EmptyPane { }
+            PodcastPane {
+                episodePlaying: root.currentEpisodeId > 0
+                currentPath: AudioEngine.currentFile
+            }
+
+            EmptyPane {
+                framed: true
+                onPlayRequested: function (mode) { root.startFromEmpty(mode) }
+            }
         }
     }
 
