@@ -788,10 +788,10 @@ git commit -m "feat(podcast): podcast tab with continue-listening, speed and pla
 
 ### Task 5: Testes de posição, retomada e marcação
 
-- [ ] Acrescentar a `tests/CMakeLists.txt` o alvo `tst_podcast` (fontes de `tst_library` mais
+- [x] Acrescentar a `tests/CMakeLists.txt` o alvo `tst_podcast` (fontes de `tst_library` mais
       `../src/podcastlibrary.*` e `../src/podcastepisodemodel.*`), com `add_test` e
       `QT_QPA_PLATFORM=offscreen`.
-- [ ] Criar `tests/tst_podcast.cpp`:
+- [x] Criar `tests/tst_podcast.cpp`:
 
 ```cpp
 #include <QtTest/QtTest>
@@ -913,10 +913,10 @@ QTEST_MAIN(TstPodcast)
 #include "tst_podcast.moc"
 ```
 
-- [ ] verificação mecânica da task:
+- [x] verificação mecânica da task:
       `cmake --build build && ctest --test-dir build -R tst_podcast --output-on-failure`
       → `100% tests passed`
-- [ ] commit:
+- [x] commit:
 
 ```bash
 git add tests/tst_podcast.cpp tests/CMakeLists.txt

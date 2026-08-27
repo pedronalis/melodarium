@@ -80,3 +80,18 @@ target_link_libraries(tst_collections PRIVATE
 
 add_test(NAME tst_collections COMMAND tst_collections)
 set_tests_properties(tst_collections PROPERTIES ENVIRONMENT "QT_QPA_PLATFORM=offscreen")
+
+qt_add_executable(tst_podcast
+    tst_podcast.cpp
+    ../src/database.h ../src/database.cpp
+    ../src/tagreader.h ../src/tagreader.cpp
+    ../src/libraryscanner.h ../src/libraryscanner.cpp
+    ../src/podcastlibrary.h ../src/podcastlibrary.cpp
+    ../src/podcastepisodemodel.h ../src/podcastepisodemodel.cpp
+)
+target_include_directories(tst_podcast PRIVATE ../src)
+target_link_libraries(tst_podcast PRIVATE
+    Qt6::Core Qt6::Test Qt6::Qml Qt6::Sql PkgConfig::TAGLIB)
+
+add_test(NAME tst_podcast COMMAND tst_podcast)
+set_tests_properties(tst_podcast PROPERTIES ENVIRONMENT "QT_QPA_PLATFORM=offscreen")

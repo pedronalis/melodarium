@@ -213,8 +213,29 @@ void PodcastLibrary::savePosition(int episodeId, int positionMs)
     if (dur.exec() && dur.next()) {
         const int duration = dur.value(0).toInt();
         if (duration > 0 && double(positionMs) / duration >= kPlayedThreshold)
-            markPlayed(episodeId, true);
+            autoMarkPlayed(episodeId);
     }
+}
+
+// The automatic mark is NOT the manual gesture. When the app decides on its own that the
+// episode is over, it keeps the saved position: un-marking then gives the user back exactly
+// where they were, instead of throwing them to the start of a two-hour episode. markPlayed()
+// is the deliberate "I am done with this", and that one does clear it.
+void PodcastLibrary::autoMarkPlayed(int episodeId)
+{
+    QSqlQuery q(uiDb());
+    q.prepare(QStringLiteral(
+        "UPDATE podcast_episodes SET played = 1 WHERE id = ? AND played = 0"));
+    q.addBindValue(episodeId);
+    if (!q.exec() || q.numRowsAffected() <= 0)
+        return;
+
+    QSqlQuery show(uiDb());
+    show.prepare(QStringLiteral("SELECT show_id FROM podcast_episodes WHERE id = ?"));
+    show.addBindValue(episodeId);
+    if (show.exec() && show.next())
+        emit episodesChanged(show.value(0).toInt());
+    emit showsChanged();
 }
 
 void PodcastLibrary::markPlayed(int episodeId, bool played)
