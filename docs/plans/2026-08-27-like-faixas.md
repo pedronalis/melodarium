@@ -192,10 +192,10 @@ git commit -m "feat(library): toggle, query and count liked tracks"
 
 ### Task 4: O papel `liked` no modelo de lista
 
-- [ ] Em `src/tracklistmodel.h`, acrescentar `bool liked = false;` ao struct `TrackRow`
+- [x] Em `src/tracklistmodel.h`, acrescentar `bool liked = false;` ao struct `TrackRow`
       (depois de `QString sourceNote;`) e `LikedRole,` ao enum `Roles` (depois de
       `SourceNoteRole,`).
-- [ ] Em `src/tracklistmodel.cpp`, acrescentar `t.liked_at IS NOT NULL` ao `kSelect`, como
+- [x] Em `src/tracklistmodel.cpp`, acrescentar `t.liked_at IS NOT NULL` ao `kSelect`, como
       última coluna antes do `FROM`:
 
 ```cpp
@@ -210,20 +210,20 @@ constexpr const char *kSelect =
     "LEFT JOIN albums al ON al.id = t.album_id ";
 ```
 
-- [ ] No `switch` de `data()`, acrescentar antes do `default:`:
+- [x] No `switch` de `data()`, acrescentar antes do `default:`:
 
 ```cpp
     case LikedRole:
         return r.liked;
 ```
 
-- [ ] Em `roleNames()`, acrescentar `{LikedRole, "liked"},` ao mapa.
-- [ ] Em `loadFromQuery()`, onde as colunas são lidas para o `TrackRow`, acrescentar a
+- [x] Em `roleNames()`, acrescentar `{LikedRole, "liked"},` ao mapa.
+- [x] Em `loadFromQuery()`, onde as colunas são lidas para o `TrackRow`, acrescentar a
       leitura da coluna nova (índice 15, a que foi acrescentada ao `kSelect`):
       `row.liked = q.value(15).toBool();`
-- [ ] verificação mecânica da task:
+- [x] verificação mecânica da task:
       `cmake --build build && ./build/tests/tst_tracklistmodel` → exit 0
-- [ ] commit:
+- [x] commit:
 
 ```bash
 git add src/tracklistmodel.h src/tracklistmodel.cpp
