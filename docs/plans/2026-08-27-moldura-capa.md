@@ -1,7 +1,7 @@
 ---
 slug: moldura-capa
 feature: melodia-capa-manda
-status: em-execucao
+status: concluido
 depende-de: [like-faixas]
 decisao-humana: sim
 spec: design/Main.dc.html (tela 1 aprovada em 2026-08-27)
