@@ -33,6 +33,21 @@ Rectangle {
         anchors.topMargin: Theme.marginXL
         spacing: Theme.marginS
 
+        // A marca, no topo da barra: não é botão, é de onde o olho parte (design/Main.dc.html).
+        Item {
+            Layout.preferredWidth: 34
+            Layout.preferredHeight: 34
+            Layout.bottomMargin: Theme.marginXS
+
+            Text {
+                anchors.centerIn: parent
+                text: Icons.get("music")
+                font.family: Icons.fontFamily
+                font.pointSize: Theme.fontSizeL
+                color: Theme.mOutline
+            }
+        }
+
         Repeater {
             model: root.items
 

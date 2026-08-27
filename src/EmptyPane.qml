@@ -20,8 +20,14 @@ Item {
 
     signal playRequested(string mode)
 
+    // O painel dá altura ao convite pelo que ele realmente ocupa.
+    implicitHeight: coluna.implicitHeight
+
     readonly property bool temRetomar: root.resumeInfo.path !== undefined
                                        && root.resumeInfo.path !== ""
+
+    // Sem pasta escolhida não há o que embaralhar nem o que retomar: o convite vira outro.
+    readonly property bool temBiblioteca: Database.libraryPath !== ""
 
     function refresh() {
         root.resumeInfo = LibraryBrowser.lastPlayed()
@@ -134,7 +140,8 @@ Item {
             Text {
                 Layout.fillWidth: true
                 horizontalAlignment: Text.AlignHCenter
-                text: qsTr("Nada tocando")
+                text: root.temBiblioteca ? qsTr("Nada tocando")
+                                         : qsTr("Sua biblioteca ainda está vazia")
                 font.family: Theme.fontFamily
                 font.pointSize: Theme.fontSizeL
                 color: Theme.mOnSurfaceVariant
@@ -274,6 +281,7 @@ Item {
 
             Atalho {
                 Layout.fillWidth: true
+                visible: root.temBiblioteca
                 glyph: Icons.get("shuffle")
                 label: qsTr("Tocar tudo em ordem aleatória")
                 onClicked: root.playRequested("shuffle")
@@ -299,7 +307,7 @@ Item {
         // Sem pasta escolhida não há o que embaralhar: aí o convite é outro.
         Text {
             Layout.fillWidth: true
-            visible: Database.libraryPath === ""
+            visible: !root.temBiblioteca
             horizontalAlignment: root.framed ? Text.AlignHCenter : Text.AlignLeft
             wrapMode: Text.WordWrap
             text: qsTr("Escolha a pasta onde sua música está: o melodia lê os arquivos, nunca escreve neles.")
@@ -310,7 +318,7 @@ Item {
 
         MelodiaButton {
             Layout.alignment: Qt.AlignHCenter
-            visible: Database.libraryPath === ""
+            visible: !root.temBiblioteca
             text: qsTr("Escolher pasta")
             onClicked: folderDialog.open()
         }
