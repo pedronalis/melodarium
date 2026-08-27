@@ -66,6 +66,7 @@ qt_add_qml_module(appmelodia
         src/NowPlayingPanel.qml
         src/LibraryPane.qml
         src/FilterChips.qml
+        src/SearchOverlay.qml
         src/PodcastPane.qml
         src/EmptyPane.qml
         src/LibraryEmptyState.qml
