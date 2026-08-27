@@ -12,7 +12,8 @@ namespace {
 constexpr const char *kSelect =
     "SELECT t.id, t.path, t.title, t.artist_id, t.album_id, t.duration_ms, t.track_no, "
     "t.year, t.codec, t.sample_rate, t.bits_per_sample, "
-    "IFNULL(ar.name,''), IFNULL(al.title,'') "
+    "IFNULL(ar.name,''), IFNULL(al.title,''), "
+    "IFNULL(t.source_kind,'local_file'), IFNULL(t.source_format_note,'') "
     "FROM tracks t "
     "LEFT JOIN artists ar ON ar.id = t.artist_id "
     "LEFT JOIN albums al ON al.id = t.album_id ";
@@ -65,6 +66,10 @@ QVariant TrackListModel::data(const QModelIndex &index, int role) const
     }
     case IsCurrentRole:
         return !m_currentPath.isEmpty() && m_currentPath == r.path;
+    case SourceKindRole:
+        return r.sourceKind;
+    case SourceNoteRole:
+        return r.sourceNote;
     default:
         return {};
     }
@@ -79,7 +84,8 @@ QHash<int, QByteArray> TrackListModel::roleNames() const
         {TrackNoRole, "trackNo"},      {YearRole, "year"},
         {CodecRole, "codec"},          {SampleRateRole, "sampleRate"},
         {BitsPerSampleRole, "bitsPerSample"}, {CoverUrlRole, "coverUrl"},
-        {IsCurrentRole, "isCurrent"},
+        {IsCurrentRole, "isCurrent"}, {SourceKindRole, "sourceKind"},
+        {SourceNoteRole, "sourceNote"},
     };
 }
 
@@ -130,6 +136,8 @@ void TrackListModel::loadFromQuery(const QString &whereClause, const QVariantLis
             r.bitsPerSample = q.value(10).toInt();
             r.artist = q.value(11).toString();
             r.album = q.value(12).toString();
+            r.sourceKind = q.value(13).toString();
+            r.sourceNote = q.value(14).toString();
             rows.append(r);
         }
     }

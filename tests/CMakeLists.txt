@@ -1,5 +1,5 @@
 # Gui is required for QColor, which colorschemeprovider.h exposes.
-find_package(Qt6 REQUIRED COMPONENTS Core Gui Test)
+find_package(Qt6 REQUIRED COMPONENTS Core Gui Network Test)
 
 qt_add_executable(tst_colorscheme
     tst_colorscheme.cpp
@@ -80,3 +80,46 @@ target_link_libraries(tst_collections PRIVATE
 
 add_test(NAME tst_collections COMMAND tst_collections)
 set_tests_properties(tst_collections PROPERTIES ENVIRONMENT "QT_QPA_PLATFORM=offscreen")
+
+qt_add_executable(tst_podcast
+    tst_podcast.cpp
+    ../src/database.h ../src/database.cpp
+    ../src/tagreader.h ../src/tagreader.cpp
+    ../src/libraryscanner.h ../src/libraryscanner.cpp
+    ../src/podcastlibrary.h ../src/podcastlibrary.cpp
+    ../src/podcastepisodemodel.h ../src/podcastepisodemodel.cpp
+    ../src/podcastfeedfetcher.h ../src/podcastfeedfetcher.cpp
+    ../src/episodedownloader.h ../src/episodedownloader.cpp
+)
+target_include_directories(tst_podcast PRIVATE ../src)
+target_link_libraries(tst_podcast PRIVATE
+    Qt6::Core Qt6::Network Qt6::Test Qt6::Qml Qt6::Sql PkgConfig::TAGLIB)
+
+add_test(NAME tst_podcast COMMAND tst_podcast)
+set_tests_properties(tst_podcast PROPERTIES ENVIRONMENT "QT_QPA_PLATFORM=offscreen")
+
+qt_add_executable(tst_feedparser
+    tst_feedparser.cpp
+    ../src/podcastfeedfetcher.h ../src/podcastfeedfetcher.cpp
+)
+target_include_directories(tst_feedparser PRIVATE ../src)
+target_link_libraries(tst_feedparser PRIVATE Qt6::Core Qt6::Test Qt6::Network)
+
+add_test(NAME tst_feedparser COMMAND tst_feedparser)
+set_tests_properties(tst_feedparser PROPERTIES ENVIRONMENT "QT_QPA_PLATFORM=offscreen")
+
+qt_add_executable(tst_ytdlp
+    tst_ytdlp.cpp
+    ../src/database.h ../src/database.cpp
+    ../src/tagreader.h ../src/tagreader.cpp
+    ../src/libraryscanner.h ../src/libraryscanner.cpp
+    ../src/librarybrowser.h ../src/librarybrowser.cpp
+    ../src/collectionmanager.h ../src/collectionmanager.cpp
+    ../src/ytdlpdownloader.h ../src/ytdlpdownloader.cpp
+)
+target_include_directories(tst_ytdlp PRIVATE ../src)
+target_link_libraries(tst_ytdlp PRIVATE
+    Qt6::Core Qt6::Test Qt6::Qml Qt6::Sql PkgConfig::TAGLIB)
+
+add_test(NAME tst_ytdlp COMMAND tst_ytdlp)
+set_tests_properties(tst_ytdlp PROPERTIES ENVIRONMENT "QT_QPA_PLATFORM=offscreen" TIMEOUT 60)
