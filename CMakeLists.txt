@@ -14,11 +14,18 @@ qt_add_executable(appmelodia
     src/colorschemeprovider.cpp
 )
 
+# Theme.qml e Icons.qml usam `pragma Singleton`. O qt_add_qml_module NAO detecta o pragma
+# sozinho: sem esta propriedade o qmldir gerado registra o arquivo como tipo comum, e todo
+# acesso (Theme.mSurface) resolve para `undefined` SEM erro de compilacao nem de runtime.
+# Verificado empiricamente em 2026-08-27 no Qt 6.10.3.
+set_source_files_properties(src/Theme.qml PROPERTIES QT_QML_SINGLETON_TYPE TRUE)
+
 qt_add_qml_module(appmelodia
     URI Melodia.App
     VERSION 1.0
     QML_FILES
         src/Main.qml
+        src/Theme.qml
     SOURCES
         src/colorschemeprovider.h
         src/colorschemeprovider.cpp
