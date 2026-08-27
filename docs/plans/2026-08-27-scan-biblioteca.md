@@ -440,7 +440,7 @@ git commit -m "feat(library): read tags, audio properties, ReplayGain and embedd
 
 ### Task 3: Database — schema, pragmas e migrações
 
-- [ ] Criar `src/database.h`:
+- [x] Criar `src/database.h`:
 
 ```cpp
 #pragma once
@@ -500,7 +500,7 @@ private:
 };
 ```
 
-- [ ] Criar `src/database.cpp` com o DDL completo. As migrações são um vetor indexado por
+- [x] Criar `src/database.cpp` com o DDL completo. As migrações são um vetor indexado por
       versão: cada fatia futura **acrescenta** uma entrada e nunca edita uma já publicada.
 
 ```cpp
@@ -731,8 +731,8 @@ void Database::cancelScan()
 }
 ```
 
-- [ ] verificação mecânica da task: `cmake --build build` → exit 0
-- [ ] commit:
+- [x] verificação mecânica da task: `cmake --build build` → exit 0
+- [x] commit:
 
 ```bash
 git add src/database.h src/database.cpp CMakeLists.txt
