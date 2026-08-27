@@ -572,7 +572,7 @@ git commit -m "feat(ui): rebuild the window around the now-playing panel"
 
 ### Task 6: A janela não pode espremer a lista
 
-- [ ] Conferir com medição, não com o olho — o mesmo método que pegou o painel de 2px:
+- [x] Conferir com medição, não com o olho — o mesmo método que pegou o painel de 2px:
       acrescentar temporariamente a `Main.qml`, dentro do `RowLayout`:
 
 ```qml
@@ -584,13 +584,13 @@ git commit -m "feat(ui): rebuild the window around the now-playing panel"
         }
 ```
 
-- [ ] Rodar e ler a medida:
+- [x] Rodar e ler a medida:
       `QT_LOGGING_RULES="*.debug=true" QT_FORCE_STDERR_LOGGING=1 QT_QPA_PLATFORM=offscreen timeout 6 ./build/appmelodia 2>&1 | grep -a MEDIDA`
       → o miolo tem de ficar ≥ 360 (numa janela de 1100: rail 56 + painel 392 + miolo ~652).
-- [ ] Remover o `Timer` depois de ler a medida.
-- [ ] verificação mecânica da task:
+- [x] Remover o `Timer` depois de ler a medida.
+- [x] verificação mecânica da task:
       `test "$(grep -c 'MEDIDA' src/Main.qml)" -eq 0` → exit 0 e `cmake --build build` → exit 0
-- [ ] commit:
+- [x] commit:
 
 ```bash
 git add src/Main.qml

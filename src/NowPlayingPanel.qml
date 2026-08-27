@@ -11,7 +11,10 @@ Rectangle {
 
     signal likeRequested(int trackId)
 
-    implicitWidth: 392
+    // Compact does not just shrink the cover: the whole panel narrows with it. Leaving the
+    // panel at 392 while the cover drops to 200 would push the frame past a 720 px window and
+    // send the right edge of the pane off screen.
+    implicitWidth: root.coverSide + (Theme.marginXL + Theme.marginS) * 2 + 4
     color: Theme.mSurface
 
     // Um degradê muito sutil separa o painel do miolo sem precisar de borda.
