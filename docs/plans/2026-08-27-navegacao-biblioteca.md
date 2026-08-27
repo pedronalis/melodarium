@@ -372,7 +372,7 @@ git commit -m "feat(library): browse by artist, album and genre plus FTS5 search
 
 Sem esta task, "Mais tocadas", "Esquecidas" e "Nunca ouvi" ficam vazias para sempre.
 
-- [ ] Criar `src/playstatsrecorder.h`:
+- [x] Criar `src/playstatsrecorder.h`:
 
 ```cpp
 #pragma once
@@ -398,7 +398,7 @@ signals:
 };
 ```
 
-- [ ] Criar `src/playstatsrecorder.cpp`:
+- [x] Criar `src/playstatsrecorder.cpp`:
 
 ```cpp
 #include "playstatsrecorder.h"
@@ -445,8 +445,8 @@ void PlayStatsRecorder::recordSkip(const QString &path)
 }
 ```
 
-- [ ] verificação mecânica da task: `cmake --build build` → exit 0
-- [ ] commit:
+- [x] verificação mecânica da task: `cmake --build build` → exit 0
+- [x] commit:
 
 ```bash
 git add src/playstatsrecorder.h src/playstatsrecorder.cpp CMakeLists.txt
