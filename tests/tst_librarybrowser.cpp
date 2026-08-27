@@ -85,6 +85,53 @@ private slots:
                  1);
     }
 
+    // Um resultado por tipo, com o limite valendo POR TIPO e não no total, é o contrato que o
+    // overlay de busca consome: ele desenha os grupos na ordem em que chegam.
+    void searchGroupedReturnsKindsAndRespectsLimit()
+    {
+        LibraryBrowser browser;
+        QCOMPARE(browser.searchGrouped(QString()).size(), 0);
+        QCOMPARE(browser.searchGrouped(QStringLiteral("   ")).size(), 0);
+
+        const QVariantList hits = browser.searchGrouped(QStringLiteral("João"), 4);
+        QVERIFY(!hits.isEmpty());
+
+        QSet<QString> kinds;
+        int artistas = 0;
+        for (const QVariant &v : hits) {
+            const QVariantMap m = v.toMap();
+            QVERIFY(m.contains(QStringLiteral("kind")));
+            QVERIFY(m.contains(QStringLiteral("title")));
+            QVERIFY(m.contains(QStringLiteral("subtitle")));
+            QVERIFY(m.contains(QStringLiteral("path")));
+            const QString kind = m.value(QStringLiteral("kind")).toString();
+            kinds.insert(kind);
+            if (kind == QLatin1String("artist"))
+                ++artistas;
+        }
+        QVERIFY(kinds.contains(QStringLiteral("artist")));
+        QVERIFY(artistas <= 4);
+    }
+
+    // A faixa é o único tipo que toca sozinho: sem caminho, o Enter não teria o que abrir.
+    void searchGroupedGivesTracksAPathAndASubtitle()
+    {
+        LibraryBrowser browser;
+        const QVariantList hits = browser.searchGrouped(QStringLiteral("Canção"), 4);
+
+        bool sawTrack = false;
+        for (const QVariant &v : hits) {
+            const QVariantMap m = v.toMap();
+            if (m.value(QStringLiteral("kind")).toString() != QLatin1String("track"))
+                continue;
+            sawTrack = true;
+            QCOMPARE(m.value(QStringLiteral("path")).toString(), firstTrackPath());
+            QVERIFY(m.value(QStringLiteral("subtitle")).toString()
+                        .contains(QStringLiteral("João Malandro")));
+        }
+        QVERIFY(sawTrack);
+    }
+
     void searchQuerySanitisesUserInput()
     {
         // Raw FTS5 syntax in user input must not reach the engine as syntax.

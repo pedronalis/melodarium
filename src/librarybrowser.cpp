@@ -2,6 +2,8 @@
 
 #include "database.h"
 
+#include <QDateTime>
+#include <QLocale>
 #include <QRegularExpression>
 #include <QSqlDatabase>
 #include <QSqlQuery>
@@ -234,5 +236,149 @@ QVariantMap LibraryBrowser::trackForPath(const QString &path)
     out.insert(QStringLiteral("sampleRate"), q.value(7).toInt());
     out.insert(QStringLiteral("bitsPerSample"), q.value(8).toInt());
     out.insert(QStringLiteral("liked"), q.value(9).toBool());
+    return out;
+}
+
+namespace {
+
+QString formatClock(int ms)
+{
+    if (ms <= 0)
+        return QString();
+    const int total = ms / 1000;
+    return QStringLiteral("%1:%2")
+        .arg(total / 60)
+        .arg(total % 60, 2, 10, QLatin1Char('0'));
+}
+
+// Um episódio é longo: "41 min" diz mais do que "41:07", e é o que o desenho mostra.
+QString formatMinutes(int ms)
+{
+    if (ms <= 0)
+        return QString();
+    const int minutes = ms / 60000;
+    if (minutes < 60)
+        return QStringLiteral("%1 min").arg(minutes);
+    return QStringLiteral("%1 h %2").arg(minutes / 60).arg(minutes % 60, 2, 10, QLatin1Char('0'));
+}
+
+QString formatShortDate(qint64 secs)
+{
+    if (secs <= 0)
+        return QString();
+    return QLocale().toString(QDateTime::fromSecsSinceEpoch(secs).date(),
+                              QStringLiteral("dd MMM"));
+}
+
+QString joinParts(const QStringList &parts)
+{
+    QStringList kept;
+    for (const QString &p : parts) {
+        if (!p.isEmpty())
+            kept.append(p);
+    }
+    return kept.join(QStringLiteral(" · "));
+}
+
+} // namespace
+
+QVariantList LibraryBrowser::searchGrouped(const QString &text, int limitPerKind)
+{
+    QVariantList out;
+    const QString trimmed = text.trimmed();
+    if (trimmed.isEmpty())
+        return out;
+
+    QSqlDatabase db = QSqlDatabase::database(QLatin1String(Database::kUiConnection));
+    const QString like = QStringLiteral("%") + trimmed + QStringLiteral("%");
+
+    auto append = [&out](const QString &kind, int id, const QString &title,
+                         const QString &subtitle, const QString &path) {
+        QVariantMap row;
+        row.insert(QStringLiteral("kind"), kind);
+        row.insert(QStringLiteral("id"), id);
+        row.insert(QStringLiteral("title"), title);
+        row.insert(QStringLiteral("subtitle"), subtitle);
+        row.insert(QStringLiteral("path"), path);
+        out.append(row);
+    };
+
+    // Faixas — pelo FTS5 que a fatia de navegação já montou.
+    QSqlQuery tq(db);
+    tq.prepare(QStringLiteral(
+        "SELECT t.id, IFNULL(t.title,''), IFNULL(ar.name,''), IFNULL(al.title,''), t.path, "
+        "IFNULL(t.duration_ms,0) "
+        "FROM tracks t "
+        "LEFT JOIN artists ar ON ar.id = t.artist_id "
+        "LEFT JOIN albums al ON al.id = t.album_id "
+        "WHERE t.removed_at IS NULL AND t.id IN "
+        "(SELECT rowid FROM tracks_fts WHERE tracks_fts MATCH ?) LIMIT ?"));
+    tq.addBindValue(toFtsPrefixQuery(trimmed));
+    tq.addBindValue(limitPerKind);
+    if (tq.exec()) {
+        while (tq.next()) {
+            append(QStringLiteral("track"), tq.value(0).toInt(), tq.value(1).toString(),
+                   joinParts({tq.value(2).toString(), tq.value(3).toString(),
+                              formatClock(tq.value(5).toInt())}),
+                   tq.value(4).toString());
+        }
+    }
+
+    QSqlQuery alq(db);
+    alq.prepare(QStringLiteral(
+        "SELECT al.id, al.title, IFNULL(ar.name,''), COUNT(t.id), IFNULL(al.year,0) "
+        "FROM albums al "
+        "LEFT JOIN artists ar ON ar.id = al.album_artist_id "
+        "JOIN tracks t ON t.album_id = al.id AND t.removed_at IS NULL "
+        "WHERE al.title LIKE ? GROUP BY al.id ORDER BY al.title COLLATE NOCASE LIMIT ?"));
+    alq.addBindValue(like);
+    alq.addBindValue(limitPerKind);
+    if (alq.exec()) {
+        while (alq.next()) {
+            const int year = alq.value(4).toInt();
+            append(QStringLiteral("album"), alq.value(0).toInt(), alq.value(1).toString(),
+                   joinParts({alq.value(2).toString(),
+                              year > 0 ? QString::number(year) : QString(),
+                              QStringLiteral("%1 faixas").arg(alq.value(3).toInt())}),
+                   QString());
+        }
+    }
+
+    QSqlQuery arq(db);
+    arq.prepare(QStringLiteral(
+        "SELECT ar.id, ar.name, COUNT(t.id), COUNT(DISTINCT t.album_id) "
+        "FROM artists ar JOIN tracks t ON t.artist_id = ar.id AND t.removed_at IS NULL "
+        "WHERE ar.name LIKE ? GROUP BY ar.id ORDER BY ar.name COLLATE NOCASE LIMIT ?"));
+    arq.addBindValue(like);
+    arq.addBindValue(limitPerKind);
+    if (arq.exec()) {
+        while (arq.next()) {
+            const int albums = arq.value(3).toInt();
+            append(QStringLiteral("artist"), arq.value(0).toInt(), arq.value(1).toString(),
+                   joinParts({QStringLiteral("%1 faixas").arg(arq.value(2).toInt()),
+                              albums > 0 ? QStringLiteral("%1 álbuns").arg(albums) : QString()}),
+                   QString());
+        }
+    }
+
+    QSqlQuery eq(db);
+    eq.prepare(QStringLiteral(
+        "SELECT e.id, e.title, IFNULL(s.title,''), IFNULL(e.local_path,''), "
+        "IFNULL(e.published_at,0), IFNULL(e.duration_ms,0) "
+        "FROM podcast_episodes e "
+        "LEFT JOIN podcast_shows s ON s.id = e.show_id "
+        "WHERE e.title LIKE ? ORDER BY e.published_at DESC LIMIT ?"));
+    eq.addBindValue(like);
+    eq.addBindValue(limitPerKind);
+    if (eq.exec()) {
+        while (eq.next()) {
+            append(QStringLiteral("episode"), eq.value(0).toInt(), eq.value(1).toString(),
+                   joinParts({eq.value(2).toString(),
+                              formatShortDate(eq.value(4).toLongLong()),
+                              formatMinutes(eq.value(5).toInt())}),
+                   eq.value(3).toString());
+        }
+    }
+
     return out;
 }
