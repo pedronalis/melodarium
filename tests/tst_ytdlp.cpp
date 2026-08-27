@@ -33,7 +33,15 @@ private slots:
         QVERIFY(Database::migrate(db));
     }
 
-    void schemaIsAtVersionSix() { QCOMPARE(scalar(QStringLiteral("PRAGMA user_version")), 6); }
+    // The YouTube columns arrive in migration 6; later slices append their own, so the exact
+    // number is not the contract — only that this database is at or past that migration.
+    void schemaIsAtLeastAtVersionSix()
+    {
+        QVERIFY(scalar(QStringLiteral("PRAGMA user_version")) >= 6);
+        QCOMPARE(scalar(QStringLiteral("SELECT COUNT(*) FROM pragma_table_info('tracks') "
+                                       "WHERE name = 'source_kind'")),
+                 1);
+    }
 
     void argumentsNeverConcatenateTheUrl()
     {
