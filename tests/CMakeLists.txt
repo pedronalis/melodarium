@@ -107,3 +107,19 @@ target_link_libraries(tst_feedparser PRIVATE Qt6::Core Qt6::Test Qt6::Network)
 
 add_test(NAME tst_feedparser COMMAND tst_feedparser)
 set_tests_properties(tst_feedparser PROPERTIES ENVIRONMENT "QT_QPA_PLATFORM=offscreen")
+
+qt_add_executable(tst_ytdlp
+    tst_ytdlp.cpp
+    ../src/database.h ../src/database.cpp
+    ../src/tagreader.h ../src/tagreader.cpp
+    ../src/libraryscanner.h ../src/libraryscanner.cpp
+    ../src/librarybrowser.h ../src/librarybrowser.cpp
+    ../src/collectionmanager.h ../src/collectionmanager.cpp
+    ../src/ytdlpdownloader.h ../src/ytdlpdownloader.cpp
+)
+target_include_directories(tst_ytdlp PRIVATE ../src)
+target_link_libraries(tst_ytdlp PRIVATE
+    Qt6::Core Qt6::Test Qt6::Qml Qt6::Sql PkgConfig::TAGLIB)
+
+add_test(NAME tst_ytdlp COMMAND tst_ytdlp)
+set_tests_properties(tst_ytdlp PROPERTIES ENVIRONMENT "QT_QPA_PLATFORM=offscreen" TIMEOUT 60)
