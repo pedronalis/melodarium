@@ -104,7 +104,15 @@ TrackRecord TagReader::read(const QString &absolutePath)
     r.trackNo = static_cast<int>(tag->track());
     r.year = static_cast<int>(tag->year());
 
-    if (TagLib::AudioProperties *props = ref.audioProperties()) {
+    TagLib::AudioProperties *props = ref.audioProperties();
+    // TagLib 1.13.1 happily hands back a non-null tag and non-null properties for a file
+    // that merely has an audio extension: garbage named *.mp3 parses with every property
+    // at zero. Decodable audio always reports a rate and a channel count, so that is the
+    // real validity test — without it the scanner would import junk as playable tracks.
+    if (!props || props->sampleRate() <= 0 || props->channels() <= 0)
+        return r; // r.valid stays false: the caller skips this file
+
+    {
         r.durationMs = props->lengthInMilliseconds();
         r.sampleRate = props->sampleRate();
         r.channels = props->channels();

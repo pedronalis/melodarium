@@ -1071,7 +1071,7 @@ git commit -m "feat(library): incremental scanner with soft delete and move dete
 
 ### Task 5: Testes de banco, tags e varredura
 
-- [ ] Acrescentar a `tests/CMakeLists.txt`:
+- [x] Acrescentar a `tests/CMakeLists.txt`:
 
 ```cmake
 qt_add_executable(tst_library
@@ -1088,7 +1088,7 @@ add_test(NAME tst_library COMMAND tst_library)
 set_tests_properties(tst_library PROPERTIES ENVIRONMENT "QT_QPA_PLATFORM=offscreen" TIMEOUT 120)
 ```
 
-- [ ] Criar `tests/tst_library.cpp`:
+- [x] Criar `tests/tst_library.cpp`:
 
 ```cpp
 #include <QtTest/QtTest>
@@ -1260,10 +1260,10 @@ QTEST_MAIN(TstLibrary)
 #include "tst_library.moc"
 ```
 
-- [ ] verificação mecânica da task:
+- [x] verificação mecânica da task:
       `cmake --build build && ctest --test-dir build -R tst_library --output-on-failure`
       → `100% tests passed`
-- [ ] commit:
+- [x] commit:
 
 ```bash
 git add tests/tst_library.cpp tests/CMakeLists.txt
