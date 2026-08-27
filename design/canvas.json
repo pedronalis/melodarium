@@ -1,4 +1,8 @@
 {
+  "pages": [
+    { "id": "page-1", "name": "Direção escolhida" },
+    { "id": "page-2", "name": "Não escolhidas" }
+  ],
   "artboards": [
     {
       "file": "Main.dc.html",
@@ -6,7 +10,17 @@
       "y": 0,
       "w": 1100,
       "h": 700,
-      "title": "A · Hierarquia por contraste"
+      "title": "C · A capa manda",
+      "page": "page-1"
+    },
+    {
+      "file": "HierarquiaContraste.dc.html",
+      "x": 0,
+      "y": 0,
+      "w": 1100,
+      "h": 700,
+      "title": "A · Hierarquia por contraste",
+      "page": "page-2"
     },
     {
       "file": "DensaTabular.dc.html",
@@ -14,46 +28,34 @@
       "y": 0,
       "w": 1100,
       "h": 700,
-      "title": "B · Densa e tabular"
-    },
-    {
-      "file": "CapaManda.dc.html",
-      "x": 2440,
-      "y": 0,
-      "w": 1100,
-      "h": 700,
-      "title": "C · A capa manda"
+      "title": "B · Densa e tabular",
+      "page": "page-2"
     }
   ],
   "annotations": [
     {
-      "id": "brief",
+      "id": "escolhida",
       "x": 0,
-      "y": -300,
-      "w": 420,
-      "text": "Três direções para a tela do melodia, todas dentro da sua paleta do Noctalia (nada de cor nova).\n\nO diagnóstico: hoje quase tudo na tela usa o MESMO cinza médio (#828282), então nenhuma informação se destaca de outra. As três direções atacam isso por caminhos diferentes."
+      "y": -260,
+      "w": 460,
+      "text": "ESCOLHIDA em 27/08.\n\nO que está tocando vira um painel de verdade: capa grande, título em 26px, controles maiores, tags logo abaixo. A barra lateral encolhe para ícones.\n\nO que ela ainda não responde: esta tela mostra um ÁLBUM aberto. Falta desenhar como se navega a biblioteca inteira aqui (as 1.204 faixas), a aba Podcast, e o estado com nada tocando — a capa grande fica vazia."
     },
     {
       "id": "nota-a",
-      "x": 480,
-      "y": -300,
+      "x": 0,
+      "y": -260,
       "w": 420,
-      "text": "A · HIERARQUIA POR CONTRASTE\n\nMesmo layout de hoje, com a escada de cinzas fazendo o trabalho: título da faixa quase branco, artista médio, álbum e duração apagados. A faixa tocando ganha barra clara na borda.\n\nA favor: é a menor mudança — mexe em cor e peso, não em estrutura.\nContra: continua sendo um player convencional; não muda o que a tela faz."
+      "page": "page-2",
+      "text": "A · HIERARQUIA POR CONTRASTE\n\nMesmo layout de hoje, com a escada de cinzas fazendo o trabalho.\n\nNão escolhida — mexia em cor e peso, não no que a tela faz."
     },
     {
       "id": "nota-b",
       "x": 1220,
-      "y": -300,
+      "y": -260,
       "w": 420,
-      "text": "B · DENSA E TABULAR\n\nA biblioteca como planilha: 18 faixas por tela em vez de 7, colunas alinhadas, números em fonte mono, ano e duração à direita. A fila sai da tela (vira atalho) e o transporte fina para 40px, com o progresso como fio no topo.\n\nA favor: para 1.200 faixas, ver mais é ver melhor — é o espírito foobar/mpd.\nContra: densidade alta cansa em sessão longa e a capa some por completo."
-    },
-    {
-      "id": "nota-c",
-      "x": 2440,
-      "y": -300,
-      "w": 420,
-      "text": "C · A CAPA MANDA\n\nO que está tocando vira um painel de verdade: capa grande, título em 26px, controles maiores, tags logo abaixo. A barra lateral encolhe para ícones e a lista mostra o álbum aberto, não a biblioteca inteira.\n\nA favor: é a única que dá prazer de olhar enquanto a música toca.\nContra: mostra menos faixas por tela e exige que suas capas estejam boas — sem elas, vira um retângulo cinza gigante."
+      "page": "page-2",
+      "text": "B · DENSA E TABULAR\n\nA biblioteca como planilha: 18 faixas por tela, colunas alinhadas, fila fora da tela.\n\nNão escolhida — mas a densidade dela é a resposta natural para a tela de biblioteca que falta na C."
     }
   ],
-  "launch": { "view": "canvas" }
+  "launch": { "view": "canvas", "page": "page-1" }
 }
