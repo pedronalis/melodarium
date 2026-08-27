@@ -119,20 +119,20 @@ UI é `"melodia-ui"`. Nenhuma outra fatia pode reusar esses nomes.
 
 ### Task 1: Ligar TagLib e Qt Sql ao build
 
-- [ ] Em `CMakeLists.txt`: acrescentar `Sql` e `Concurrent` aos componentes do
+- [x] Em `CMakeLists.txt`: acrescentar `Sql` e `Concurrent` aos componentes do
       `find_package(Qt6 REQUIRED COMPONENTS ...)`, e acrescentar após o bloco do mpv:
 
 ```cmake
 pkg_check_modules(TAGLIB REQUIRED IMPORTED_TARGET taglib)
 ```
 
-- [ ] Acrescentar `src/database.h/.cpp`, `src/tagreader.h/.cpp`, `src/libraryscanner.h/.cpp`
+- [x] Acrescentar `src/database.h/.cpp`, `src/tagreader.h/.cpp`, `src/libraryscanner.h/.cpp`
       à lista de `qt_add_executable(appmelodia ...)`; acrescentar apenas
       `src/database.h` e `src/database.cpp` ao bloco `SOURCES` de `qt_add_qml_module`
       (só o `Database` é exposto ao QML; `TagReader` e `LibraryScanner` não são).
-- [ ] Acrescentar `Qt6::Sql Qt6::Concurrent PkgConfig::TAGLIB` ao `target_link_libraries`.
-- [ ] verificação mecânica da task: `pkg-config --modversion taglib` → `1.13.1`
-- [ ] commit:
+- [x] Acrescentar `Qt6::Sql Qt6::Concurrent PkgConfig::TAGLIB` ao `target_link_libraries`.
+- [x] verificação mecânica da task: `pkg-config --modversion taglib` → `1.13.1`
+- [x] commit:
 
 ```bash
 git add CMakeLists.txt
