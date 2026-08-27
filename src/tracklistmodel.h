@@ -20,6 +20,10 @@ struct TrackRow {
     QString codec;
     int sampleRate = 0;
     int bitsPerSample = 0;
+    // Where this file came from. The spec is explicit that compressed YouTube audio must not
+    // pass itself off as the lossless files sitting next to it.
+    QString sourceKind = QStringLiteral("local_file");
+    QString sourceNote;
 };
 
 class TrackListModel : public QAbstractListModel
@@ -45,6 +49,8 @@ public:
         BitsPerSampleRole,
         CoverUrlRole,
         IsCurrentRole,
+        SourceKindRole,
+        SourceNoteRole,
     };
     Q_ENUM(Roles)
 
