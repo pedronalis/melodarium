@@ -199,8 +199,10 @@ Rectangle {
         EmptyPane {
             id: convite
             Layout.fillWidth: true
-            Layout.fillHeight: true
-            visible: !root.hasTrack
+            Layout.preferredHeight: convite.implicitHeight
+            // Sem pasta escolhida o convite não teria o que oferecer, e o miolo já está
+            // pedindo a pasta: aqui fica só a moldura vazia.
+            visible: !root.hasTrack && Database.libraryPath !== ""
             onPlayRequested: function (mode) { root.playRequested(mode) }
         }
 
@@ -409,9 +411,7 @@ Rectangle {
             trackId: root.trackId
         }
 
-        Item {
-            Layout.fillHeight: true
-            visible: root.hasTrack
-        }
+        // Sempre presente: é ele que mantém a capa no topo quando o resto da coluna encolhe.
+        Item { Layout.fillHeight: true }
     }
 }
