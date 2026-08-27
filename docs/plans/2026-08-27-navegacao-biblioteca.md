@@ -1,7 +1,7 @@
 ---
 slug: navegacao-biblioteca
 feature: melodia
-status: aprovado
+status: concluido
 depende-de: [tocador-ui]
 decisao-humana: nao
 spec: docs/specs/2026-08-27-player-musica-podcast.md
@@ -91,7 +91,7 @@ Componentes QML publicados: `Sidebar { currentSection; signal sectionChosen(stri
 Cada migração é uma entrada nova no vetor; a de índice 0 fica intocada. O FTS5 usa
 `content=''` (índice sem cópia dos dados) e triggers para nunca ficar desatualizado.
 
-- [ ] Acrescentar ao vetor `migrations()` em `src/database.cpp`, **depois** da entrada
+- [x] Acrescentar ao vetor `migrations()` em `src/database.cpp`, **depois** da entrada
       existente, uma segunda entrada:
 
 ```cpp
@@ -127,10 +127,10 @@ LEFT JOIN albums al ON al.id = t.album_id;
 )SQL"),
 ```
 
-- [ ] verificação mecânica da task: rodar o app uma vez e conferir a versão do schema —
+- [x] verificação mecânica da task: rodar o app uma vez e conferir a versão do schema —
       `QT_QPA_PLATFORM=offscreen timeout 8 ./build/appmelodia; sqlite3 "$(ls ~/.local/share/melodia/melodia.db)" "PRAGMA user_version; SELECT COUNT(*) FROM sqlite_master WHERE name='tracks_fts';"`
       → `2` e `1`
-- [ ] commit:
+- [x] commit:
 
 ```bash
 git add src/database.cpp
@@ -139,7 +139,7 @@ git commit -m "feat(library): add FTS5 search index as schema migration 2"
 
 ### Task 2: LibraryBrowser — as consultas de navegação
 
-- [ ] Criar `src/librarybrowser.h`:
+- [x] Criar `src/librarybrowser.h`:
 
 ```cpp
 #pragma once
@@ -184,7 +184,7 @@ public:
 };
 ```
 
-- [ ] Criar `src/librarybrowser.cpp`:
+- [x] Criar `src/librarybrowser.cpp`:
 
 ```cpp
 #include "librarybrowser.h"
@@ -348,7 +348,7 @@ QString LibraryBrowser::clauseNeverPlayed()
 }
 ```
 
-- [ ] **Ajuste necessário em `TrackListModel::loadFromQuery`** (fatia `tocador-ui`): a cláusula
+- [x] **Ajuste necessário em `TrackListModel::loadFromQuery`** (fatia `tocador-ui`): a cláusula
       de "Recentes" precisa da própria ordenação. Trocar a montagem da query para respeitar uma
       cláusula que já traga `ORDER BY`:
 
@@ -360,8 +360,8 @@ QString LibraryBrowser::clauseNeverPlayed()
                      : QStringLiteral(" ORDER BY IFNULL(al.title,''), t.disc_no, t.track_no, t.title")));
 ```
 
-- [ ] verificação mecânica da task: `cmake --build build` → exit 0
-- [ ] commit:
+- [x] verificação mecânica da task: `cmake --build build` → exit 0
+- [x] commit:
 
 ```bash
 git add src/librarybrowser.h src/librarybrowser.cpp src/tracklistmodel.cpp CMakeLists.txt
@@ -372,7 +372,7 @@ git commit -m "feat(library): browse by artist, album and genre plus FTS5 search
 
 Sem esta task, "Mais tocadas", "Esquecidas" e "Nunca ouvi" ficam vazias para sempre.
 
-- [ ] Criar `src/playstatsrecorder.h`:
+- [x] Criar `src/playstatsrecorder.h`:
 
 ```cpp
 #pragma once
@@ -398,7 +398,7 @@ signals:
 };
 ```
 
-- [ ] Criar `src/playstatsrecorder.cpp`:
+- [x] Criar `src/playstatsrecorder.cpp`:
 
 ```cpp
 #include "playstatsrecorder.h"
@@ -445,8 +445,8 @@ void PlayStatsRecorder::recordSkip(const QString &path)
 }
 ```
 
-- [ ] verificação mecânica da task: `cmake --build build` → exit 0
-- [ ] commit:
+- [x] verificação mecânica da task: `cmake --build build` → exit 0
+- [x] commit:
 
 ```bash
 git add src/playstatsrecorder.h src/playstatsrecorder.cpp CMakeLists.txt
@@ -455,7 +455,7 @@ git commit -m "feat(library): record play and skip counts per track"
 
 ### Task 4: Barra lateral, busca e fila
 
-- [ ] Criar `src/SidebarItem.qml`:
+- [x] Criar `src/SidebarItem.qml`:
 
 ```qml
 import QtQuick
@@ -529,7 +529,7 @@ Item {
 }
 ```
 
-- [ ] Criar `src/Sidebar.qml` — a ordem das seções segue o desenho do spec (§Como fica
+- [x] Criar `src/Sidebar.qml` — a ordem das seções segue o desenho do spec (§Como fica
       organizado): as coleções vêm no topo (a fatia `colecoes-tags` preenche esse espaço),
       depois Artistas, Álbuns, Gêneros, Todas as faixas, e por fim as automáticas:
 
@@ -626,7 +626,7 @@ Rectangle {
 }
 ```
 
-- [ ] Criar `src/SearchField.qml`:
+- [x] Criar `src/SearchField.qml`:
 
 ```qml
 import QtQuick
@@ -705,7 +705,7 @@ Rectangle {
 }
 ```
 
-- [ ] Criar `src/QueuePanel.qml` — mostra a playlist viva do mpv, com a entrada atual
+- [x] Criar `src/QueuePanel.qml` — mostra a playlist viva do mpv, com a entrada atual
       destacada por `AudioEngine.playlistPos`:
 
 ```qml
@@ -785,9 +785,9 @@ Rectangle {
 }
 ```
 
-- [ ] Acrescentar os quatro `.qml` ao bloco `QML_FILES`.
-- [ ] verificação mecânica da task: `cmake --build build` → exit 0
-- [ ] commit:
+- [x] Acrescentar os quatro `.qml` ao bloco `QML_FILES`.
+- [x] verificação mecânica da task: `cmake --build build` → exit 0
+- [x] commit:
 
 ```bash
 git add src/Sidebar.qml src/SidebarItem.qml src/SearchField.qml src/QueuePanel.qml CMakeLists.txt
@@ -796,7 +796,7 @@ git commit -m "feat(ui): sidebar sections, debounced search field and queue pane
 
 ### Task 5: Montar a tela de navegação
 
-- [ ] Reescrever o corpo de `src/Main.qml` para o layout de três colunas (barra lateral ·
+- [x] Reescrever o corpo de `src/Main.qml` para o layout de três colunas (barra lateral ·
       conteúdo · fila), com a barra de transporte embaixo, ligando:
   - `Sidebar.sectionChosen(section, id)` → escolhe a cláusula em `LibraryBrowser` e chama
     `trackModel.loadFromQuery(clause, bindings)`;
@@ -831,14 +831,14 @@ git commit -m "feat(ui): sidebar sections, debounced search field and queue pane
     }
 ```
 
-- [ ] Quando a seção for `artists`, `albums` ou `genres` e `id === 0`, a área central mostra a
+- [x] Quando a seção for `artists`, `albums` ou `genres` e `id === 0`, a área central mostra a
       **lista de grupos** (`LibraryBrowser.artists()` / `.albums()` / `.genres()`) num
       `ListView` de `SidebarItem`-like; clicar num grupo chama `choose(section, grupoId)` e aí
       sim carrega as faixas daquele grupo.
-- [ ] verificação mecânica da task:
+- [x] verificação mecânica da task:
       `QT_QPA_PLATFORM=offscreen timeout 8 ./build/appmelodia 2>&1 | grep -Ec "is not a type|ReferenceError|Unable to assign"`
       → `0`
-- [ ] commit:
+- [x] commit:
 
 ```bash
 git add src/Main.qml
@@ -847,10 +847,10 @@ git commit -m "feat(ui): three-column library navigation with search and queue"
 
 ### Task 6: Testes das consultas e das estatísticas
 
-- [ ] Acrescentar a `tests/CMakeLists.txt` um alvo `tst_librarybrowser` com as mesmas fontes de
+- [x] Acrescentar a `tests/CMakeLists.txt` um alvo `tst_librarybrowser` com as mesmas fontes de
       `tst_library` mais `../src/librarybrowser.*` e `../src/playstatsrecorder.*`, registrado
       com `add_test` e `QT_QPA_PLATFORM=offscreen`.
-- [ ] Criar `tests/tst_librarybrowser.cpp`:
+- [x] Criar `tests/tst_librarybrowser.cpp`:
 
 ```cpp
 #include <QtTest/QtTest>
@@ -969,11 +969,11 @@ QTEST_MAIN(TstLibraryBrowser)
 #include "tst_librarybrowser.moc"
 ```
 
-- [ ] Acrescentar `#include <QSqlError>` ao topo do teste (usado no `QVERIFY2`).
-- [ ] verificação mecânica da task:
+- [x] Acrescentar `#include <QSqlError>` ao topo do teste (usado no `QVERIFY2`).
+- [x] verificação mecânica da task:
       `cmake --build build && ctest --test-dir build -R tst_librarybrowser --output-on-failure`
       → `100% tests passed`
-- [ ] commit:
+- [x] commit:
 
 ```bash
 git add tests/tst_librarybrowser.cpp tests/CMakeLists.txt

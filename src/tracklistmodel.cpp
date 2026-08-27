@@ -1,0 +1,171 @@
+#include "tracklistmodel.h"
+
+#include "covercache.h"
+#include "database.h"
+
+#include <QFileInfo>
+#include <QSqlDatabase>
+#include <QSqlQuery>
+#include <QVariant>
+
+namespace {
+constexpr const char *kSelect =
+    "SELECT t.id, t.path, t.title, t.artist_id, t.album_id, t.duration_ms, t.track_no, "
+    "t.year, t.codec, t.sample_rate, t.bits_per_sample, "
+    "IFNULL(ar.name,''), IFNULL(al.title,'') "
+    "FROM tracks t "
+    "LEFT JOIN artists ar ON ar.id = t.artist_id "
+    "LEFT JOIN albums al ON al.id = t.album_id ";
+} // namespace
+
+TrackListModel::TrackListModel(QObject *parent)
+    : QAbstractListModel(parent)
+{
+}
+
+int TrackListModel::rowCount(const QModelIndex &parent) const
+{
+    return parent.isValid() ? 0 : m_rows.size();
+}
+
+QVariant TrackListModel::data(const QModelIndex &index, int role) const
+{
+    if (!index.isValid() || index.row() < 0 || index.row() >= m_rows.size())
+        return {};
+
+    const TrackRow &r = m_rows.at(index.row());
+    switch (role) {
+    case IdRole:
+        return r.id;
+    case PathRole:
+        return r.path;
+    case TitleRole:
+        // A file with no title tag still needs something readable in the list.
+        return r.title.isEmpty() ? QFileInfo(r.path).completeBaseName() : r.title;
+    case ArtistRole:
+        return r.artist;
+    case AlbumRole:
+        return r.album;
+    case DurationMsRole:
+        return r.durationMs;
+    case TrackNoRole:
+        return r.trackNo;
+    case YearRole:
+        return r.year;
+    case CodecRole:
+        return r.codec;
+    case SampleRateRole:
+        return r.sampleRate;
+    case BitsPerSampleRole:
+        return r.bitsPerSample;
+    case CoverUrlRole: {
+        // One shared instance: a temporary here would run mkpath() on every rendered row.
+        static CoverCache cache;
+        return cache.coverUrlForTrack(r.path, r.albumId);
+    }
+    case IsCurrentRole:
+        return !m_currentPath.isEmpty() && m_currentPath == r.path;
+    default:
+        return {};
+    }
+}
+
+QHash<int, QByteArray> TrackListModel::roleNames() const
+{
+    return {
+        {IdRole, "trackId"},           {PathRole, "path"},
+        {TitleRole, "title"},          {ArtistRole, "artist"},
+        {AlbumRole, "album"},          {DurationMsRole, "durationMs"},
+        {TrackNoRole, "trackNo"},      {YearRole, "year"},
+        {CodecRole, "codec"},          {SampleRateRole, "sampleRate"},
+        {BitsPerSampleRole, "bitsPerSample"}, {CoverUrlRole, "coverUrl"},
+        {IsCurrentRole, "isCurrent"},
+    };
+}
+
+void TrackListModel::setCurrentPath(const QString &path)
+{
+    if (m_currentPath == path)
+        return;
+    m_currentPath = path;
+    emit currentPathChanged();
+    // Only IsCurrentRole changed, on every row — cheaper than resetting the model.
+    if (!m_rows.isEmpty()) {
+        emit dataChanged(index(0), index(m_rows.size() - 1), {IsCurrentRole});
+    }
+}
+
+void TrackListModel::loadAllTracks()
+{
+    loadFromQuery(QStringLiteral("t.removed_at IS NULL"), {});
+}
+
+void TrackListModel::loadFromQuery(const QString &whereClause, const QVariantList &bindings)
+{
+    QSqlDatabase db = QSqlDatabase::database(QLatin1String(Database::kUiConnection));
+    QSqlQuery q(db);
+    // A clause that carries its own ORDER BY (the automatic lists do) keeps it: appending the
+    // default ordering after it would be a syntax error.
+    const bool clauseHasOrder = whereClause.contains(QStringLiteral("ORDER BY"));
+    q.prepare(QLatin1String(kSelect) + QStringLiteral("WHERE ") + whereClause
+              + (clauseHasOrder
+                     ? QString()
+                     : QStringLiteral(" ORDER BY IFNULL(al.title,''), t.disc_no, t.track_no, t.title")));
+    for (const QVariant &b : bindings)
+        q.addBindValue(b);
+
+    QList<TrackRow> rows;
+    if (q.exec()) {
+        while (q.next()) {
+            TrackRow r;
+            r.id = q.value(0).toInt();
+            r.path = q.value(1).toString();
+            r.title = q.value(2).toString();
+            r.albumId = q.value(4).toInt();
+            r.durationMs = q.value(5).toInt();
+            r.trackNo = q.value(6).toInt();
+            r.year = q.value(7).toInt();
+            r.codec = q.value(8).toString();
+            r.sampleRate = q.value(9).toInt();
+            r.bitsPerSample = q.value(10).toInt();
+            r.artist = q.value(11).toString();
+            r.album = q.value(12).toString();
+            rows.append(r);
+        }
+    }
+
+    beginResetModel();
+    m_rows = std::move(rows);
+    endResetModel();
+    emit countChanged();
+}
+
+QStringList TrackListModel::allPaths() const
+{
+    QStringList paths;
+    paths.reserve(m_rows.size());
+    for (const TrackRow &r : m_rows)
+        paths.append(r.path);
+    return paths;
+}
+
+QVariantMap TrackListModel::trackAt(int row) const
+{
+    if (row < 0 || row >= m_rows.size())
+        return {};
+    const TrackRow &r = m_rows.at(row);
+    return {{QStringLiteral("id"), r.id},
+            {QStringLiteral("path"), r.path},
+            {QStringLiteral("title"), r.title},
+            {QStringLiteral("artist"), r.artist},
+            {QStringLiteral("album"), r.album},
+            {QStringLiteral("durationMs"), r.durationMs}};
+}
+
+void TrackListModel::setRowsForTesting(const QList<TrackRow> &rows)
+{
+    beginResetModel();
+    m_rows = rows;
+    endResetModel();
+    emit countChanged();
+}

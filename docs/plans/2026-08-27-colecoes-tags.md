@@ -1,7 +1,7 @@
 ---
 slug: colecoes-tags
 feature: melodia
-status: aprovado
+status: concluido
 depende-de: [navegacao-biblioteca]
 decisao-humana: sim
 spec: docs/specs/2026-08-27-player-musica-podcast.md
@@ -90,7 +90,7 @@ sinal `signal collectRequested()`.
 
 ### Task 1: Migração 3 — coleções e tags
 
-- [ ] Acrescentar ao vetor `migrations()` em `src/database.cpp`, como terceira entrada:
+- [x] Acrescentar ao vetor `migrations()` em `src/database.cpp`, como terceira entrada:
 
 ```cpp
         QStringLiteral(R"SQL(
@@ -121,10 +121,10 @@ CREATE INDEX idx_tracktags_tag ON track_tags(tag_id);
 )SQL"),
 ```
 
-- [ ] verificação mecânica da task:
+- [x] verificação mecânica da task:
       `QT_QPA_PLATFORM=offscreen timeout 8 ./build/appmelodia; sqlite3 ~/.local/share/melodia/melodia.db "PRAGMA user_version;"`
       → `3`
-- [ ] commit:
+- [x] commit:
 
 ```bash
 git add src/database.cpp
@@ -137,7 +137,7 @@ git commit -m "feat(collections): add collections and free tags as schema migrat
 faixa for apagada de verdade — mas o scanner faz soft delete, então a coleção **sobrevive** a
 um disco desmontado. Essa combinação é intencional.
 
-- [ ] Criar `src/collectionmanager.h`:
+- [x] Criar `src/collectionmanager.h`:
 
 ```cpp
 #pragma once
@@ -189,7 +189,7 @@ private:
 };
 ```
 
-- [ ] Criar `src/collectionmanager.cpp`:
+- [x] Criar `src/collectionmanager.cpp`:
 
 ```cpp
 #include "collectionmanager.h"
@@ -412,8 +412,8 @@ bool CollectionManager::moveTrackInCollection(int collectionId, int trackId, int
 }
 ```
 
-- [ ] verificação mecânica da task: `cmake --build build` → exit 0
-- [ ] commit:
+- [x] verificação mecânica da task: `cmake --build build` → exit 0
+- [x] commit:
 
 ```bash
 git add src/collectionmanager.h src/collectionmanager.cpp CMakeLists.txt
@@ -426,7 +426,7 @@ git commit -m "feat(collections): create, fill and order context collections"
 tag. O autocomplete por prefixo usa o índice B-tree (`LIKE 'prefixo%'` — o `%` no fim usa
 índice; no começo não usaria).
 
-- [ ] Acrescentar ao fim de `src/collectionmanager.cpp`:
+- [x] Acrescentar ao fim de `src/collectionmanager.cpp`:
 
 ```cpp
 QVariantList CollectionManager::allTags()
@@ -543,8 +543,8 @@ QVariantList CollectionManager::bindingsForTag(const QString &tagName)
 }
 ```
 
-- [ ] verificação mecânica da task: `cmake --build build` → exit 0
-- [ ] commit:
+- [x] verificação mecânica da task: `cmake --build build` → exit 0
+- [x] commit:
 
 ```bash
 git add src/collectionmanager.cpp
@@ -556,7 +556,7 @@ git commit -m "feat(collections): free tags with prefix autocomplete and orphan 
 Um clique no ícone `plus` da linha abre a lista de coleções; escolher uma adiciona a faixa.
 Nada de arrastar, nada de diálogo de duas etapas: o spec exige que o gesto manual seja **um só**.
 
-- [ ] Criar `src/NewCollectionDialog.qml`:
+- [x] Criar `src/NewCollectionDialog.qml`:
 
 ```qml
 import QtQuick
@@ -659,7 +659,7 @@ Popup {
 }
 ```
 
-- [ ] Criar `src/CollectionsSection.qml` — o bloco que vai no **topo** da barra lateral, onde
+- [x] Criar `src/CollectionsSection.qml` — o bloco que vai no **topo** da barra lateral, onde
       o spec o coloca ("Coleções ← o diferencial, no topo"):
 
 ```qml
@@ -746,7 +746,7 @@ ColumnLayout {
 }
 ```
 
-- [ ] Acrescentar a `src/TrackRow.qml`: as propriedades `property int trackId: 0` e
+- [x] Acrescentar a `src/TrackRow.qml`: as propriedades `property int trackId: 0` e
       `property bool showCollectButton: false`, o sinal `signal collectRequested()`, e — dentro
       do `RowLayout`, imediatamente antes do `Text` de duração — o botão que dispara o gesto:
 
@@ -759,16 +759,16 @@ ColumnLayout {
             }
 ```
 
-- [ ] Em `src/Main.qml`: instanciar `CollectionsSection` no topo da `Sidebar`, ligar
+- [x] Em `src/Main.qml`: instanciar `CollectionsSection` no topo da `Sidebar`, ligar
       `collectionChosen(id)` a
       `trackModel.loadFromQuery(CollectionManager.clauseForCollection(id), CollectionManager.bindingsForCollection(id))`,
       e responder a `TrackRow.collectRequested()` abrindo um `Menu` com as coleções existentes
       (mais o item "Nova coleção…"), cujo `onTriggered` chama
       `CollectionManager.addTrackToCollection(collectionId, trackId)`.
-- [ ] verificação mecânica da task:
+- [x] verificação mecânica da task:
       `cmake --build build && QT_QPA_PLATFORM=offscreen timeout 8 ./build/appmelodia 2>&1 | grep -Ec "is not a type|ReferenceError"`
       → `0`
-- [ ] commit:
+- [x] commit:
 
 ```bash
 git add src/CollectionsSection.qml src/NewCollectionDialog.qml src/TrackRow.qml src/Main.qml CMakeLists.txt
@@ -777,7 +777,7 @@ git commit -m "feat(collections): one-gesture add-to-collection from the track r
 
 ### Task 5: Editor de tags com autocomplete
 
-- [ ] Criar `src/TagChip.qml`:
+- [x] Criar `src/TagChip.qml`:
 
 ```qml
 import QtQuick
@@ -841,7 +841,7 @@ Rectangle {
 }
 ```
 
-- [ ] Criar `src/TagEditor.qml` — a caixa que sugere enquanto o usuário digita:
+- [x] Criar `src/TagEditor.qml` — a caixa que sugere enquanto o usuário digita:
 
 ```qml
 import QtQuick
@@ -948,10 +948,10 @@ ColumnLayout {
 }
 ```
 
-- [ ] Acrescentar os dois `.qml` ao `QML_FILES` e expor o `TagEditor` na tela (painel lateral
+- [x] Acrescentar os dois `.qml` ao `QML_FILES` e expor o `TagEditor` na tela (painel lateral
       direito, abaixo da fila, mostrando as tags da faixa selecionada).
-- [ ] verificação mecânica da task: `cmake --build build` → exit 0
-- [ ] commit:
+- [x] verificação mecânica da task: `cmake --build build` → exit 0
+- [x] commit:
 
 ```bash
 git add src/TagChip.qml src/TagEditor.qml src/Main.qml CMakeLists.txt
@@ -960,10 +960,10 @@ git commit -m "feat(collections): tag editor with prefix suggestions"
 
 ### Task 6: Testes de coleções e tags
 
-- [ ] Acrescentar a `tests/CMakeLists.txt` o alvo `tst_collections` (fontes de `tst_library`
+- [x] Acrescentar a `tests/CMakeLists.txt` o alvo `tst_collections` (fontes de `tst_library`
       mais `../src/collectionmanager.*` e `../src/librarybrowser.*`), com `add_test` e
       `QT_QPA_PLATFORM=offscreen`.
-- [ ] Criar `tests/tst_collections.cpp`:
+- [x] Criar `tests/tst_collections.cpp`:
 
 ```cpp
 #include <QtTest/QtTest>
@@ -1097,10 +1097,10 @@ QTEST_MAIN(TstCollections)
 #include "tst_collections.moc"
 ```
 
-- [ ] verificação mecânica da task:
+- [x] verificação mecânica da task:
       `cmake --build build && ctest --test-dir build -R tst_collections --output-on-failure`
       → `100% tests passed`
-- [ ] commit:
+- [x] commit:
 
 ```bash
 git add tests/tst_collections.cpp tests/CMakeLists.txt

@@ -65,7 +65,9 @@ private slots:
 
     void migrationSetsUserVersion()
     {
-        QCOMPARE(scalar(QStringLiteral("PRAGMA user_version")), 1);
+        // Later slices append migrations, so the exact number is not the contract: what this
+        // asserts is that migrating moved the version off zero and created the base schema.
+        QVERIFY(scalar(QStringLiteral("PRAGMA user_version")) >= 1);
         QCOMPARE(scalar(QStringLiteral(
                      "SELECT COUNT(*) FROM sqlite_master WHERE type='table' AND name='tracks'")),
                  1);
@@ -73,9 +75,10 @@ private slots:
 
     void migrationIsIdempotent()
     {
+        const int before = scalar(QStringLiteral("PRAGMA user_version"));
         QSqlDatabase db = QSqlDatabase::database(QStringLiteral("verify"));
         QVERIFY(Database::migrate(db)); // running it again must not fail nor duplicate anything
-        QCOMPARE(scalar(QStringLiteral("PRAGMA user_version")), 1);
+        QCOMPARE(scalar(QStringLiteral("PRAGMA user_version")), before);
     }
 
     void tagReaderReadsUtf8Metadata()

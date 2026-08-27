@@ -76,8 +76,116 @@ CREATE TABLE track_stats (
     first_seen_at  INTEGER NOT NULL
 );
 )SQL"),
+        QStringLiteral(R"SQL(
+CREATE VIRTUAL TABLE tracks_fts USING fts5(
+    title, artist_name, album_title,
+    content='',
+    tokenize='unicode61 remove_diacritics 2'
+);
+CREATE TRIGGER trg_tracks_ai AFTER INSERT ON tracks BEGIN
+    INSERT INTO tracks_fts(rowid, title, artist_name, album_title)
+    SELECT new.id, IFNULL(new.title,''),
+           IFNULL((SELECT name FROM artists WHERE id = new.artist_id),''),
+           IFNULL((SELECT title FROM albums WHERE id = new.album_id),'');
+END;
+CREATE TRIGGER trg_tracks_ad AFTER DELETE ON tracks BEGIN
+    INSERT INTO tracks_fts(tracks_fts, rowid, title, artist_name, album_title)
+    VALUES('delete', old.id, IFNULL(old.title,''), '', '');
+END;
+CREATE TRIGGER trg_tracks_au AFTER UPDATE ON tracks BEGIN
+    INSERT INTO tracks_fts(tracks_fts, rowid, title, artist_name, album_title)
+    VALUES('delete', old.id, IFNULL(old.title,''), '', '');
+    INSERT INTO tracks_fts(rowid, title, artist_name, album_title)
+    SELECT new.id, IFNULL(new.title,''),
+           IFNULL((SELECT name FROM artists WHERE id = new.artist_id),''),
+           IFNULL((SELECT title FROM albums WHERE id = new.album_id),'');
+END;
+INSERT INTO tracks_fts(rowid, title, artist_name, album_title)
+SELECT t.id, IFNULL(t.title,''), IFNULL(ar.name,''), IFNULL(al.title,'')
+FROM tracks t
+LEFT JOIN artists ar ON ar.id = t.artist_id
+LEFT JOIN albums al ON al.id = t.album_id;
+)SQL"),
+        QStringLiteral(R"SQL(
+CREATE TABLE collections (
+    id         INTEGER PRIMARY KEY,
+    name       TEXT NOT NULL UNIQUE COLLATE NOCASE,
+    created_at INTEGER NOT NULL
+);
+CREATE TABLE collection_tracks (
+    collection_id INTEGER NOT NULL REFERENCES collections(id) ON DELETE CASCADE,
+    track_id      INTEGER NOT NULL REFERENCES tracks(id) ON DELETE CASCADE,
+    position      INTEGER NOT NULL,
+    added_at      INTEGER NOT NULL,
+    PRIMARY KEY (collection_id, track_id)
+);
+CREATE INDEX idx_coltracks_order ON collection_tracks(collection_id, position);
+CREATE TABLE tags (
+    id   INTEGER PRIMARY KEY,
+    name TEXT NOT NULL UNIQUE COLLATE NOCASE
+);
+CREATE TABLE track_tags (
+    track_id INTEGER NOT NULL REFERENCES tracks(id) ON DELETE CASCADE,
+    tag_id   INTEGER NOT NULL REFERENCES tags(id) ON DELETE CASCADE,
+    PRIMARY KEY (track_id, tag_id)
+);
+CREATE INDEX idx_tags_name    ON tags(name);
+CREATE INDEX idx_tracktags_tag ON track_tags(tag_id);
+)SQL"),
     };
     return list;
+}
+
+// SQLite triggers carry their own ";" inside BEGIN ... END. Splitting the script on every ";"
+// cuts a trigger in half and the migration dies with a syntax error, so the trigger body is
+// kept whole here. String literals are tracked as well: a ";" inside quotes ends nothing.
+QStringList splitStatements(const QString &script)
+{
+    auto triggerBodyStillOpen = [](const QString &stmt) {
+        const QString up = stmt.trimmed().toUpper();
+        if (!up.startsWith(QLatin1String("CREATE TRIGGER"))
+            && !up.startsWith(QLatin1String("CREATE TEMP TRIGGER"))
+            && !up.startsWith(QLatin1String("CREATE TEMPORARY TRIGGER")))
+            return false;
+        if (!up.endsWith(QLatin1String("END")))
+            return true;
+        // "END" has to be the closing keyword, not the tail of an identifier.
+        return up.size() > 3 && !up.at(up.size() - 4).isSpace();
+    };
+
+    QStringList out;
+    QString current;
+    bool inString = false;
+    for (int i = 0; i < script.size(); ++i) {
+        const QChar c = script.at(i);
+        if (inString) {
+            current.append(c);
+            if (c == QLatin1Char('\'')) {
+                if (i + 1 < script.size() && script.at(i + 1) == QLatin1Char('\''))
+                    current.append(script.at(++i)); // "''" is an escaped quote, not the end
+                else
+                    inString = false;
+            }
+            continue;
+        }
+        if (c == QLatin1Char('\'')) {
+            inString = true;
+            current.append(c);
+            continue;
+        }
+        if (c == QLatin1Char(';') && !triggerBodyStillOpen(current)) {
+            const QString stmt = current.trimmed();
+            if (!stmt.isEmpty())
+                out.append(stmt);
+            current.clear();
+            continue;
+        }
+        current.append(c);
+    }
+    const QString tail = current.trimmed();
+    if (!tail.isEmpty())
+        out.append(tail);
+    return out;
 }
 
 } // namespace
@@ -140,7 +248,7 @@ bool Database::migrate(QSqlDatabase &db)
         bool ok = true;
         // Each migration is a script: split on ";" and run statement by statement,
         // because QSqlQuery::exec runs exactly one statement per call.
-        const QStringList statements = all.at(v).split(QLatin1Char(';'), Qt::SkipEmptyParts);
+        const QStringList statements = splitStatements(all.at(v));
         for (const QString &raw : statements) {
             const QString stmt = raw.trimmed();
             if (stmt.isEmpty())

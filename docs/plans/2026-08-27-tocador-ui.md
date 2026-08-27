@@ -1,7 +1,7 @@
 ---
 slug: tocador-ui
 feature: melodia
-status: aprovado
+status: concluido
 depende-de: [motor-audio, scan-biblioteca]
 decisao-humana: sim
 spec: docs/specs/2026-08-27-player-musica-podcast.md
@@ -96,7 +96,7 @@ Bytes de imagem não cruzam a ponte para o QML a cada scroll: a capa é extraíd
 no cache e servida por URL. O nome do arquivo é o hash do caminho da faixa, então o cache
 sobrevive a mudança de tags.
 
-- [ ] Criar `src/covercache.h`:
+- [x] Criar `src/covercache.h`:
 
 ```cpp
 #pragma once
@@ -125,7 +125,7 @@ private:
 };
 ```
 
-- [ ] Criar `src/covercache.cpp`:
+- [x] Criar `src/covercache.cpp`:
 
 ```cpp
 #include "covercache.h"
@@ -208,8 +208,8 @@ QString CoverCache::coverUrlForTrack(const QString &trackPath, int albumId)
 }
 ```
 
-- [ ] verificação mecânica da task: `cmake --build build` → exit 0
-- [ ] commit:
+- [x] verificação mecânica da task: `cmake --build build` → exit 0
+- [x] commit:
 
 ```bash
 git add src/covercache.h src/covercache.cpp CMakeLists.txt
@@ -221,7 +221,7 @@ git commit -m "feat(ui): extract embedded covers into an on-disk cache"
 O `Q_ENUM(Roles)` não é decoração: sem ele, `TrackListModel.TitleRole` resolve para `undefined`
 no QML sem erro de compilação — só um aviso de runtime fácil de não ver.
 
-- [ ] Criar `src/tracklistmodel.h`:
+- [x] Criar `src/tracklistmodel.h`:
 
 ```cpp
 #pragma once
@@ -301,7 +301,7 @@ private:
 };
 ```
 
-- [ ] Criar `src/tracklistmodel.cpp`:
+- [x] Criar `src/tracklistmodel.cpp`:
 
 ```cpp
 #include "tracklistmodel.h"
@@ -471,10 +471,10 @@ void TrackListModel::setRowsForTesting(const QList<TrackRow> &rows)
 }
 ```
 
-- [ ] Acrescentar `#include <QFileInfo>` ao topo de `src/tracklistmodel.cpp` (usado no
+- [x] Acrescentar `#include <QFileInfo>` ao topo de `src/tracklistmodel.cpp` (usado no
       `TitleRole`).
-- [ ] verificação mecânica da task: `cmake --build build` → exit 0
-- [ ] commit:
+- [x] verificação mecânica da task: `cmake --build build` → exit 0
+- [x] commit:
 
 ```bash
 git add src/tracklistmodel.h src/tracklistmodel.cpp CMakeLists.txt
@@ -485,7 +485,7 @@ git commit -m "feat(ui): expose library tracks as a QML list model"
 
 Estes três são a base visual de todas as telas seguintes. Todo valor de estilo vem do `Theme`.
 
-- [ ] Criar `src/IconButton.qml`:
+- [x] Criar `src/IconButton.qml`:
 
 ```qml
 import QtQuick
@@ -539,7 +539,7 @@ Item {
 }
 ```
 
-- [ ] Criar `src/MelodiaButton.qml`:
+- [x] Criar `src/MelodiaButton.qml`:
 
 ```qml
 import QtQuick
@@ -597,7 +597,7 @@ Item {
 }
 ```
 
-- [ ] Criar `src/TrackRow.qml`:
+- [x] Criar `src/TrackRow.qml`:
 
 ```qml
 import QtQuick
@@ -714,11 +714,11 @@ Item {
 }
 ```
 
-- [ ] Acrescentar os três arquivos ao bloco `QML_FILES` de `qt_add_qml_module`.
-- [ ] verificação mecânica da task:
+- [x] Acrescentar os três arquivos ao bloco `QML_FILES` de `qt_add_qml_module`.
+- [x] verificação mecânica da task:
       `cmake --build build && /usr/lib64/qt6/bin/qmllint src/IconButton.qml src/MelodiaButton.qml src/TrackRow.qml -I build`
       → sem linha contendo `Error`
-- [ ] commit:
+- [x] commit:
 
 ```bash
 git add src/IconButton.qml src/MelodiaButton.qml src/TrackRow.qml CMakeLists.txt
@@ -727,7 +727,7 @@ git commit -m "feat(ui): reusable Noctalia-styled button, icon button and track 
 
 ### Task 4: PlayerBar — a barra de transporte
 
-- [ ] Criar `src/PlayerBar.qml`:
+- [x] Criar `src/PlayerBar.qml`:
 
 ```qml
 import QtQuick
@@ -885,9 +885,9 @@ Rectangle {
 }
 ```
 
-- [ ] Acrescentar `src/PlayerBar.qml` ao bloco `QML_FILES`.
-- [ ] verificação mecânica da task: `cmake --build build` → exit 0
-- [ ] commit:
+- [x] Acrescentar `src/PlayerBar.qml` ao bloco `QML_FILES`.
+- [x] verificação mecânica da task: `cmake --build build` → exit 0
+- [x] commit:
 
 ```bash
 git add src/PlayerBar.qml CMakeLists.txt
@@ -896,7 +896,7 @@ git commit -m "feat(ui): transport bar wired to the audio engine"
 
 ### Task 5: A tela — escolher pasta, varrer, listar e tocar
 
-- [ ] Criar `src/LibraryEmptyState.qml`:
+- [x] Criar `src/LibraryEmptyState.qml`:
 
 ```qml
 import QtQuick
@@ -946,7 +946,7 @@ Item {
 }
 ```
 
-- [ ] Substituir `src/Main.qml`:
+- [x] Substituir `src/Main.qml`:
 
 ```qml
 import QtQuick
@@ -1070,12 +1070,12 @@ Window {
 }
 ```
 
-- [ ] Acrescentar `src/LibraryEmptyState.qml` ao `QML_FILES` e `Qt6::QuickDialogs2` ao
+- [x] Acrescentar `src/LibraryEmptyState.qml` ao `QML_FILES` e `Qt6::QuickDialogs2` ao
       `find_package`/`target_link_libraries` (o `FolderDialog` vem de `QtQuick.Dialogs`).
-- [ ] verificação mecânica da task: `cmake --build build` → exit 0 e o app sobe sem erro de
+- [x] verificação mecânica da task: `cmake --build build` → exit 0 e o app sobe sem erro de
       QML: `QT_QPA_PLATFORM=offscreen timeout 8 ./build/appmelodia 2>&1 | grep -c "is not a type"`
       → `0`
-- [ ] commit:
+- [x] commit:
 
 ```bash
 git add src/Main.qml src/LibraryEmptyState.qml CMakeLists.txt
@@ -1084,7 +1084,7 @@ git commit -m "feat(ui): first usable screen — pick folder, scan, list and pla
 
 ### Task 6: Teste do modelo de lista
 
-- [ ] Acrescentar a `tests/CMakeLists.txt`:
+- [x] Acrescentar a `tests/CMakeLists.txt`:
 
 ```cmake
 qt_add_executable(tst_tracklistmodel
@@ -1103,7 +1103,7 @@ add_test(NAME tst_tracklistmodel COMMAND tst_tracklistmodel)
 set_tests_properties(tst_tracklistmodel PROPERTIES ENVIRONMENT "QT_QPA_PLATFORM=offscreen")
 ```
 
-- [ ] Criar `tests/tst_tracklistmodel.cpp`:
+- [x] Criar `tests/tst_tracklistmodel.cpp`:
 
 ```cpp
 #include <QtTest/QtTest>
@@ -1183,10 +1183,10 @@ QTEST_MAIN(TstTrackListModel)
 #include "tst_tracklistmodel.moc"
 ```
 
-- [ ] verificação mecânica da task:
+- [x] verificação mecânica da task:
       `cmake --build build && ctest --test-dir build -R tst_tracklistmodel --output-on-failure`
       → `100% tests passed`
-- [ ] commit:
+- [x] commit:
 
 ```bash
 git add tests/tst_tracklistmodel.cpp tests/CMakeLists.txt
