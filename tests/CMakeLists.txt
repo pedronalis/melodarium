@@ -35,3 +35,18 @@ target_link_libraries(tst_library PRIVATE
 
 add_test(NAME tst_library COMMAND tst_library)
 set_tests_properties(tst_library PROPERTIES ENVIRONMENT "QT_QPA_PLATFORM=offscreen" TIMEOUT 120)
+
+qt_add_executable(tst_tracklistmodel
+    tst_tracklistmodel.cpp
+    ../src/tracklistmodel.h ../src/tracklistmodel.cpp
+    ../src/covercache.h ../src/covercache.cpp
+    ../src/tagreader.h ../src/tagreader.cpp
+    ../src/database.h ../src/database.cpp
+    ../src/libraryscanner.h ../src/libraryscanner.cpp
+)
+target_include_directories(tst_tracklistmodel PRIVATE ../src)
+target_link_libraries(tst_tracklistmodel PRIVATE
+    Qt6::Core Qt6::Test Qt6::Qml Qt6::Sql PkgConfig::TAGLIB PkgConfig::MPV)
+
+add_test(NAME tst_tracklistmodel COMMAND tst_tracklistmodel)
+set_tests_properties(tst_tracklistmodel PROPERTIES ENVIRONMENT "QT_QPA_PLATFORM=offscreen")

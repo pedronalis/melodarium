@@ -1084,7 +1084,7 @@ git commit -m "feat(ui): first usable screen — pick folder, scan, list and pla
 
 ### Task 6: Teste do modelo de lista
 
-- [ ] Acrescentar a `tests/CMakeLists.txt`:
+- [x] Acrescentar a `tests/CMakeLists.txt`:
 
 ```cmake
 qt_add_executable(tst_tracklistmodel
@@ -1103,7 +1103,7 @@ add_test(NAME tst_tracklistmodel COMMAND tst_tracklistmodel)
 set_tests_properties(tst_tracklistmodel PROPERTIES ENVIRONMENT "QT_QPA_PLATFORM=offscreen")
 ```
 
-- [ ] Criar `tests/tst_tracklistmodel.cpp`:
+- [x] Criar `tests/tst_tracklistmodel.cpp`:
 
 ```cpp
 #include <QtTest/QtTest>
@@ -1183,10 +1183,10 @@ QTEST_MAIN(TstTrackListModel)
 #include "tst_tracklistmodel.moc"
 ```
 
-- [ ] verificação mecânica da task:
+- [x] verificação mecânica da task:
       `cmake --build build && ctest --test-dir build -R tst_tracklistmodel --output-on-failure`
       → `100% tests passed`
-- [ ] commit:
+- [x] commit:
 
 ```bash
 git add tests/tst_tracklistmodel.cpp tests/CMakeLists.txt
