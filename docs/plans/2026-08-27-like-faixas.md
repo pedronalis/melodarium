@@ -1,7 +1,7 @@
 ---
 slug: like-faixas
 feature: melodia-capa-manda
-status: aprovado
+status: em-execucao
 depende-de: []
 decisao-humana: nao
 spec: design/Main.dc.html (telas aprovadas em 2026-08-27; não há spec textual)
@@ -48,7 +48,7 @@ pelo scanner: curtir é ato do usuário, e uma re-varredura não pode apagar iss
 
 ### Task 1: Migração 4 — a coluna e o índice
 
-- [ ] Em `src/database.cpp`, acrescentar ao fim da lista `migrations()` (depois do último
+- [x] Em `src/database.cpp`, acrescentar ao fim da lista `migrations()` (depois do último
       elemento, antes do `};`) o novo script. **Não use `#` em nenhum lugar dentro do
       `R"SQL(...)"`**: no Qt 6.10.3 isso faz o gerador de código produzir arquivo vazio, sem
       erro (`docs/solutions/build-errors/2026-08-27-moc-raw-string-url-vazio.md`).
@@ -60,8 +60,8 @@ CREATE INDEX idx_tracks_liked ON tracks(liked_at) WHERE liked_at IS NOT NULL;
 )SQL"),
 ```
 
-- [ ] verificação mecânica da task: `cmake --build build && ./build/tests/tst_library` → exit 0
-- [ ] commit:
+- [x] verificação mecânica da task: `cmake --build build && ./build/tests/tst_library` → exit 0
+- [x] commit:
 
 ```bash
 git add src/database.cpp
