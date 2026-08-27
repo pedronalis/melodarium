@@ -1,7 +1,7 @@
 ---
 slug: moldura-capa
 feature: melodia-capa-manda
-status: aprovado
+status: em-execucao
 depende-de: [like-faixas]
 decisao-humana: sim
 spec: design/Main.dc.html (tela 1 aprovada em 2026-08-27)
@@ -59,7 +59,7 @@ seconds)`, `next()`, `previous()`, `setVolume(double)`, `setSpeed(double)`.
 
 ### Task 1: `trackForPath` — do arquivo tocando para os dados da faixa
 
-- [ ] Em `src/librarybrowser.h`, acrescentar junto dos outros `Q_INVOKABLE`:
+- [x] Em `src/librarybrowser.h`, acrescentar junto dos outros `Q_INVOKABLE`:
 
 ```cpp
     Q_INVOKABLE QVariantMap trackForPath(const QString &path);
@@ -67,7 +67,7 @@ seconds)`, `next()`, `previous()`, `setVolume(double)`, `setSpeed(double)`.
 
       e `#include <QVariantMap>` no topo, se ainda não estiver.
 
-- [ ] Em `src/librarybrowser.cpp`, acrescentar ao fim:
+- [x] Em `src/librarybrowser.cpp`, acrescentar ao fim:
 
 ```cpp
 QVariantMap LibraryBrowser::trackForPath(const QString &path)
@@ -104,7 +104,7 @@ QVariantMap LibraryBrowser::trackForPath(const QString &path)
 }
 ```
 
-- [ ] Em `tests/tst_librarybrowser.cpp`, acrescentar o slot e declará-lo em `private slots:`:
+- [x] Em `tests/tst_librarybrowser.cpp`, acrescentar o slot e declará-lo em `private slots:`:
 
 ```cpp
 void TestLibraryBrowser::trackForPathReturnsFieldsOrEmpty()
@@ -125,8 +125,8 @@ void TestLibraryBrowser::trackForPathReturnsFieldsOrEmpty()
       Se a fixture não tiver `firstTrackPath()`, acrescente-o ao lado de `firstTrackId()`,
       devolvendo o `path` da mesma faixa.
 
-- [ ] verificação mecânica da task: `cmake --build build && ./build/tests/tst_librarybrowser` → exit 0
-- [ ] commit:
+- [x] verificação mecânica da task: `cmake --build build && ./build/tests/tst_librarybrowser` → exit 0
+- [x] commit:
 
 ```bash
 git add src/librarybrowser.h src/librarybrowser.cpp tests/tst_librarybrowser.cpp

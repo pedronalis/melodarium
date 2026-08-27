@@ -161,6 +161,19 @@ private slots:
         QCOMPARE(browser.toggleLike(999999), false);
         QCOMPARE(browser.likedCount(), 0);
     }
+
+    void trackForPathReturnsFieldsOrEmpty()
+    {
+        LibraryBrowser browser;
+        const QVariantMap none = browser.trackForPath(QStringLiteral("/nao/existe.flac"));
+        QVERIFY(none.isEmpty());
+
+        const QVariantMap m = browser.trackForPath(firstTrackPath());
+        QVERIFY(!m.isEmpty());
+        QCOMPARE(m.value(QStringLiteral("id")).toInt(), firstTrackId());
+        QVERIFY(m.contains(QStringLiteral("codec")));
+        QCOMPARE(m.value(QStringLiteral("liked")).toBool(), false);
+    }
 };
 
 QTEST_MAIN(TstLibraryBrowser)

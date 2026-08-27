@@ -203,3 +203,36 @@ int LibraryBrowser::likedCount()
         return 0;
     return q.value(0).toInt();
 }
+
+QVariantMap LibraryBrowser::trackForPath(const QString &path)
+{
+    QVariantMap out;
+    if (path.isEmpty())
+        return out;
+
+    QSqlDatabase db = QSqlDatabase::database(QLatin1String(Database::kUiConnection));
+    QSqlQuery q(db);
+    q.prepare(QStringLiteral(
+        "SELECT t.id, IFNULL(t.title,''), IFNULL(ar.name,''), IFNULL(al.title,''), "
+        "IFNULL(t.album_id,0), IFNULL(t.year,0), IFNULL(t.codec,''), "
+        "IFNULL(t.sample_rate,0), IFNULL(t.bits_per_sample,0), t.liked_at IS NOT NULL "
+        "FROM tracks t "
+        "LEFT JOIN artists ar ON ar.id = t.artist_id "
+        "LEFT JOIN albums al ON al.id = t.album_id "
+        "WHERE t.path = ?"));
+    q.addBindValue(path);
+    if (!q.exec() || !q.next())
+        return out;
+
+    out.insert(QStringLiteral("id"), q.value(0).toInt());
+    out.insert(QStringLiteral("title"), q.value(1).toString());
+    out.insert(QStringLiteral("artist"), q.value(2).toString());
+    out.insert(QStringLiteral("album"), q.value(3).toString());
+    out.insert(QStringLiteral("albumId"), q.value(4).toInt());
+    out.insert(QStringLiteral("year"), q.value(5).toInt());
+    out.insert(QStringLiteral("codec"), q.value(6).toString());
+    out.insert(QStringLiteral("sampleRate"), q.value(7).toInt());
+    out.insert(QStringLiteral("bitsPerSample"), q.value(8).toInt());
+    out.insert(QStringLiteral("liked"), q.value(9).toBool());
+    return out;
+}
