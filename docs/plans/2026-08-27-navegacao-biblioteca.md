@@ -796,7 +796,7 @@ git commit -m "feat(ui): sidebar sections, debounced search field and queue pane
 
 ### Task 5: Montar a tela de navegação
 
-- [ ] Reescrever o corpo de `src/Main.qml` para o layout de três colunas (barra lateral ·
+- [x] Reescrever o corpo de `src/Main.qml` para o layout de três colunas (barra lateral ·
       conteúdo · fila), com a barra de transporte embaixo, ligando:
   - `Sidebar.sectionChosen(section, id)` → escolhe a cláusula em `LibraryBrowser` e chama
     `trackModel.loadFromQuery(clause, bindings)`;
@@ -831,14 +831,14 @@ git commit -m "feat(ui): sidebar sections, debounced search field and queue pane
     }
 ```
 
-- [ ] Quando a seção for `artists`, `albums` ou `genres` e `id === 0`, a área central mostra a
+- [x] Quando a seção for `artists`, `albums` ou `genres` e `id === 0`, a área central mostra a
       **lista de grupos** (`LibraryBrowser.artists()` / `.albums()` / `.genres()`) num
       `ListView` de `SidebarItem`-like; clicar num grupo chama `choose(section, grupoId)` e aí
       sim carrega as faixas daquele grupo.
-- [ ] verificação mecânica da task:
+- [x] verificação mecânica da task:
       `QT_QPA_PLATFORM=offscreen timeout 8 ./build/appmelodia 2>&1 | grep -Ec "is not a type|ReferenceError|Unable to assign"`
       → `0`
-- [ ] commit:
+- [x] commit:
 
 ```bash
 git add src/Main.qml
