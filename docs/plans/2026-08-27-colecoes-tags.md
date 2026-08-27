@@ -556,7 +556,7 @@ git commit -m "feat(collections): free tags with prefix autocomplete and orphan 
 Um clique no ícone `plus` da linha abre a lista de coleções; escolher uma adiciona a faixa.
 Nada de arrastar, nada de diálogo de duas etapas: o spec exige que o gesto manual seja **um só**.
 
-- [ ] Criar `src/NewCollectionDialog.qml`:
+- [x] Criar `src/NewCollectionDialog.qml`:
 
 ```qml
 import QtQuick
@@ -659,7 +659,7 @@ Popup {
 }
 ```
 
-- [ ] Criar `src/CollectionsSection.qml` — o bloco que vai no **topo** da barra lateral, onde
+- [x] Criar `src/CollectionsSection.qml` — o bloco que vai no **topo** da barra lateral, onde
       o spec o coloca ("Coleções ← o diferencial, no topo"):
 
 ```qml
@@ -746,7 +746,7 @@ ColumnLayout {
 }
 ```
 
-- [ ] Acrescentar a `src/TrackRow.qml`: as propriedades `property int trackId: 0` e
+- [x] Acrescentar a `src/TrackRow.qml`: as propriedades `property int trackId: 0` e
       `property bool showCollectButton: false`, o sinal `signal collectRequested()`, e — dentro
       do `RowLayout`, imediatamente antes do `Text` de duração — o botão que dispara o gesto:
 
@@ -759,16 +759,16 @@ ColumnLayout {
             }
 ```
 
-- [ ] Em `src/Main.qml`: instanciar `CollectionsSection` no topo da `Sidebar`, ligar
+- [x] Em `src/Main.qml`: instanciar `CollectionsSection` no topo da `Sidebar`, ligar
       `collectionChosen(id)` a
       `trackModel.loadFromQuery(CollectionManager.clauseForCollection(id), CollectionManager.bindingsForCollection(id))`,
       e responder a `TrackRow.collectRequested()` abrindo um `Menu` com as coleções existentes
       (mais o item "Nova coleção…"), cujo `onTriggered` chama
       `CollectionManager.addTrackToCollection(collectionId, trackId)`.
-- [ ] verificação mecânica da task:
+- [x] verificação mecânica da task:
       `cmake --build build && QT_QPA_PLATFORM=offscreen timeout 8 ./build/appmelodia 2>&1 | grep -Ec "is not a type|ReferenceError"`
       → `0`
-- [ ] commit:
+- [x] commit:
 
 ```bash
 git add src/CollectionsSection.qml src/NewCollectionDialog.qml src/TrackRow.qml src/Main.qml CMakeLists.txt

@@ -1,6 +1,7 @@
 pragma ComponentBehavior: Bound
 
 import QtQuick
+import QtQuick.Controls
 import QtQuick.Layouts
 import QtQuick.Window
 import Melodia.App
@@ -20,6 +21,8 @@ Window {
     property bool showingGroups: false
     property var groups: []
     property string groupsTitle: ""
+    // The track the tag editor is looking at: the last one the user activated.
+    property int selectedTrackId: 0
 
     TrackListModel {
         id: trackModel
@@ -34,6 +37,8 @@ Window {
                                  bindings: LibraryBrowser.bindingsFor(id) }
         case "genres":  return { clause: LibraryBrowser.clauseForGenre(id),
                                  bindings: LibraryBrowser.bindingsFor(id) }
+        case "collection": return { clause: CollectionManager.clauseForCollection(id),
+                                   bindings: CollectionManager.bindingsForCollection(id) }
         case "recent":     return { clause: LibraryBrowser.clauseRecent(), bindings: [] }
         case "mostPlayed": return { clause: LibraryBrowser.clauseMostPlayed(), bindings: [] }
         case "forgotten":  return { clause: LibraryBrowser.clauseForgotten(), bindings: [] }
@@ -44,13 +49,16 @@ Window {
 
     function showSection(section, id) {
         search.text = ""
-        const isGroupAxis = section === "artists" || section === "albums" || section === "genres"
+        const isGroupAxis = section === "artists" || section === "albums"
+                            || section === "genres" || section === "tags"
         if (isGroupAxis && id === 0) {
             root.groups = section === "artists" ? LibraryBrowser.artists()
                         : (section === "albums" ? LibraryBrowser.albums()
-                                                : LibraryBrowser.genres())
+                        : (section === "genres" ? LibraryBrowser.genres()
+                                                : CollectionManager.allTags()))
             root.groupsTitle = section === "artists" ? qsTr("Artistas")
-                             : (section === "albums" ? qsTr("Álbuns") : qsTr("Gêneros"))
+                             : (section === "albums" ? qsTr("Álbuns")
+                             : (section === "genres" ? qsTr("Gêneros") : qsTr("Tags")))
             root.showingGroups = true
             return
         }
@@ -61,6 +69,14 @@ Window {
 
     function reloadCurrent() {
         showSection(sidebar.currentSection, sidebar.currentId)
+    }
+
+    // Tags are picked by name, not by id, so they do not go through Sidebar.choose().
+    function showTag(name) {
+        trackModel.loadFromQuery(CollectionManager.clauseForTag(name),
+                                 CollectionManager.bindingsForTag(name))
+        root.groupsTitle = name
+        root.showingGroups = false
     }
 
     Connections {
@@ -190,12 +206,18 @@ Window {
 
                         width: ListView.view.width
                         icon: sidebar.currentSection === "artists" ? "microphone"
-                            : (sidebar.currentSection === "albums" ? "disc" : "tags")
+                            : (sidebar.currentSection === "albums" ? "disc"
+                            : (sidebar.currentSection === "genres" ? "music" : "tags"))
                         label: groupEntry.modelData.subtitle !== ""
                                ? groupEntry.modelData.name + " — " + groupEntry.modelData.subtitle
                                : groupEntry.modelData.name
                         badge: groupEntry.modelData.count
-                        onClicked: sidebar.choose(sidebar.currentSection, groupEntry.modelData.id)
+                        onClicked: {
+                            if (sidebar.currentSection === "tags")
+                                root.showTag(groupEntry.modelData.name)
+                            else
+                                sidebar.choose(sidebar.currentSection, groupEntry.modelData.id)
+                        }
                     }
                 }
 
@@ -224,12 +246,21 @@ Window {
                         durationMs: model.durationMs
                         coverUrl: model.coverUrl
                         isCurrent: model.isCurrent
+                        trackId: model.trackId
+                        showCollectButton: true
 
                         onActivated: {
                             // The queue is what was loaded, not the list showing right now.
                             queue.paths = trackModel.allPaths()
+                            root.selectedTrackId = model.trackId
                             AudioEngine.loadPlaylist(queue.paths, index)
                             AudioEngine.play()
+                        }
+                        onCollectRequested: {
+                            root.selectedTrackId = model.trackId
+                            collectMenu.trackId = model.trackId
+                            collectMenu.options = CollectionManager.collections()
+                            collectMenu.popup()
                         }
                     }
 
@@ -253,6 +284,46 @@ Window {
 
         PlayerBar {
             Layout.fillWidth: true
+        }
+    }
+
+    // The single manual gesture: one click on the row's plus, one click on a collection.
+    Menu {
+        id: collectMenu
+
+        property int trackId: 0
+        property var options: []
+
+        Instantiator {
+            model: collectMenu.options
+            delegate: MenuItem {
+                required property var modelData
+                text: modelData.name
+                onTriggered: CollectionManager.addTrackToCollection(modelData.id,
+                                                                    collectMenu.trackId)
+            }
+            onObjectAdded: function (index, object) { collectMenu.insertItem(index, object) }
+            onObjectRemoved: function (index, object) { collectMenu.removeItem(object) }
+        }
+
+        MenuItem {
+            text: qsTr("Nova coleção…")
+            onTriggered: {
+                newCollectionForTrack.pendingTrackId = collectMenu.trackId
+                newCollectionForTrack.open()
+            }
+        }
+    }
+
+    NewCollectionDialog {
+        id: newCollectionForTrack
+
+        property int pendingTrackId: 0
+
+        onCreated: function (id, name) {
+            if (newCollectionForTrack.pendingTrackId > 0)
+                CollectionManager.addTrackToCollection(id, newCollectionForTrack.pendingTrackId)
+            newCollectionForTrack.pendingTrackId = 0
         }
     }
 }
