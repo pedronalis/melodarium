@@ -275,10 +275,47 @@ Window {
                 }
             }
 
-            QueuePanel {
-                id: queue
+            ColumnLayout {
                 Layout.fillHeight: true
                 Layout.preferredWidth: 300
+                spacing: Theme.marginM
+
+                QueuePanel {
+                    id: queue
+                    Layout.fillWidth: true
+                    Layout.fillHeight: true
+                }
+
+                Rectangle {
+                    Layout.fillWidth: true
+                    implicitHeight: tagColumn.implicitHeight + Theme.marginM * 2
+                    radius: Theme.radiusM
+                    color: Theme.mSurfaceVariant
+                    border.width: Theme.borderS
+                    border.color: Theme.mOutline
+
+                    ColumnLayout {
+                        id: tagColumn
+                        anchors.fill: parent
+                        anchors.margins: Theme.marginM
+                        spacing: Theme.marginS
+
+                        Text {
+                            Layout.fillWidth: true
+                            text: qsTr("Tags da faixa")
+                            font.family: Theme.fontFamily
+                            font.pointSize: Theme.fontSizeS
+                            font.weight: Theme.fontWeightSemiBold
+                            color: Theme.mOnSurfaceVariant
+                        }
+
+                        TagEditor {
+                            Layout.fillWidth: true
+                            trackId: root.selectedTrackId
+                            onTagChosen: function (name) { root.showTag(name) }
+                        }
+                    }
+                }
             }
         }
 

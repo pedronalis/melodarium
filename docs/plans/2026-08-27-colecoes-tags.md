@@ -777,7 +777,7 @@ git commit -m "feat(collections): one-gesture add-to-collection from the track r
 
 ### Task 5: Editor de tags com autocomplete
 
-- [ ] Criar `src/TagChip.qml`:
+- [x] Criar `src/TagChip.qml`:
 
 ```qml
 import QtQuick
@@ -841,7 +841,7 @@ Rectangle {
 }
 ```
 
-- [ ] Criar `src/TagEditor.qml` — a caixa que sugere enquanto o usuário digita:
+- [x] Criar `src/TagEditor.qml` — a caixa que sugere enquanto o usuário digita:
 
 ```qml
 import QtQuick
@@ -948,10 +948,10 @@ ColumnLayout {
 }
 ```
 
-- [ ] Acrescentar os dois `.qml` ao `QML_FILES` e expor o `TagEditor` na tela (painel lateral
+- [x] Acrescentar os dois `.qml` ao `QML_FILES` e expor o `TagEditor` na tela (painel lateral
       direito, abaixo da fila, mostrando as tags da faixa selecionada).
-- [ ] verificação mecânica da task: `cmake --build build` → exit 0
-- [ ] commit:
+- [x] verificação mecânica da task: `cmake --build build` → exit 0
+- [x] commit:
 
 ```bash
 git add src/TagChip.qml src/TagEditor.qml src/Main.qml CMakeLists.txt
