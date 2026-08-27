@@ -25,7 +25,21 @@ clicando numa faixa), **colecoes-tags** (a mesma faixa em duas coleções, com u
 
 ## Em voo
 
-Nada. O run das fatias 1-3 foi colhido: **PASSOU**.
+**Tipo 1 — run headless · fatias 4-6** (`tocador-ui` → `navegacao-biblioteca` → `colecoes-tags`,
+18 tasks) · despachado 2026-08-27 14:45 · cwd do run:
+`/home/pedro/dev/active/.melodia-worktrees/fatias-4-6` (branch `exec/fatias-4-6`, saída de `main`)
+· estimado ~150-200k tok novos / ~20-40 min / teto 260 turnos.
+
+conferir: RUN_GATE ausente = verde · `.run_gate_count` presente = FAIL (ver `RESUMO_RUN.md`/transcript)
+· RUN_GATE presente sem count = em voo
+
+Duas dessas fatias têm `decisao-humana: sim` e foram para o headless mesmo assim, por decisão do
+Pedro ("despacha o restante e deixa trabalhar"): a conferência na tela (som saindo ao clicar numa
+faixa; a mesma faixa em duas coleções) fica pendente para a colheita.
+
+O run das fatias 1-3 foi colhido: **PASSOU** — e integrado em `main` (fast-forward, 20 commits).
+A janela recebeu o OK visual do Pedro em 27/08, com um ajuste: a tela era um card com moldura
+dentro da janela; virou superfície única (`970904d`).
 
 ## Calibração de custo
 
