@@ -505,9 +505,9 @@ git commit -m "feat(download): paste-a-link flow inside a collection with origin
 
 ### Task 5: Testes — argumentos, progresso e ingestão, sem tocar a rede
 
-- [ ] Acrescentar a `tests/CMakeLists.txt` o alvo `tst_ytdlp` (fontes de `tst_collections` mais
+- [x] Acrescentar a `tests/CMakeLists.txt` o alvo `tst_ytdlp` (fontes de `tst_collections` mais
       `../src/ytdlpdownloader.*`), com `add_test` e `QT_QPA_PLATFORM=offscreen`.
-- [ ] Criar `tests/tst_ytdlp.cpp`:
+- [x] Criar `tests/tst_ytdlp.cpp`:
 
 ```cpp
 #include <QtTest/QtTest>
@@ -687,10 +687,10 @@ QTEST_MAIN(TstYtDlp)
 #include "tst_ytdlp.moc"
 ```
 
-- [ ] verificação mecânica da task:
+- [x] verificação mecânica da task:
       `cmake --build build && ctest --test-dir build -R tst_ytdlp --output-on-failure`
       → `100% tests passed`
-- [ ] commit:
+- [x] commit:
 
 ```bash
 git add tests/tst_ytdlp.cpp tests/CMakeLists.txt
