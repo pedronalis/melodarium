@@ -81,7 +81,7 @@ sem ele, o `appmelodia_qmltyperegistrations.cpp` gerado falha o `__has_include(<
 silêncio e o build morre numa cascata de ~15 erros de template que não apontam para a causa.
 Armadilha reproduzida no research (`qt-ponte.md` §Armadilha 1).
 
-- [ ] Criar `CMakeLists.txt`:
+- [x] Criar `CMakeLists.txt`:
 
 ```cmake
 cmake_minimum_required(VERSION 3.21)
@@ -130,7 +130,7 @@ enable_testing()
 add_subdirectory(tests)
 ```
 
-- [ ] Criar `src/main.cpp`:
+- [x] Criar `src/main.cpp`:
 
 ```cpp
 #include <QGuiApplication>
@@ -152,7 +152,7 @@ int main(int argc, char *argv[])
 }
 ```
 
-- [ ] Criar `src/Main.qml` (placeholder desta task; a Task 4 o substitui):
+- [x] Criar `src/Main.qml` (placeholder desta task; a Task 4 o substitui):
 
 ```qml
 import QtQuick
@@ -167,7 +167,7 @@ Window {
 }
 ```
 
-- [ ] Criar `.gitignore`:
+- [x] Criar `.gitignore`:
 
 ```gitignore
 build/
@@ -176,9 +176,9 @@ compile_commands.json
 *.user
 ```
 
-- [ ] verificação mecânica da task: `cmake -B build -G Ninja && cmake --build build` → exit 0
+- [x] verificação mecânica da task: `cmake -B build -G Ninja && cmake --build build` → exit 0
       e o binário existe: `test -x build/appmelodia && echo OK` → `OK`
-- [ ] commit:
+- [x] commit:
 
 ```bash
 git add CMakeLists.txt .gitignore src/main.cpp src/Main.qml
