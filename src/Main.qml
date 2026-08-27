@@ -148,9 +148,18 @@ Window {
                                                  Math.round(AudioEngine.position * 1000))
     }
 
+    Connections {
+        target: YtDlpDownloader
+        // The freshly downloaded track only shows up in the list if the list is asked again.
+        function onFinished(url, trackId) { root.reloadCurrent() }
+    }
+
     Component.onCompleted: {
         if (Database.libraryPath !== "")
             trackModel.loadAllTracks()
+        // Finding out whether yt-dlp exists costs one process start; finding out at the moment
+        // the user clicks costs a dialog that fails in their face.
+        YtDlpDownloader.probe()
     }
 
     ColumnLayout {
@@ -361,6 +370,7 @@ Window {
                             isCurrent: model.isCurrent
                             trackId: model.trackId
                             showCollectButton: true
+                            sourceKind: model.sourceKind
 
                             onActivated: {
                                 // The queue is what was loaded, not the list showing right now.

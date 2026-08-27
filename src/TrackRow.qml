@@ -13,6 +13,9 @@ Item {
     property bool isCurrent: false
     property int trackId: 0
     property bool showCollectButton: false
+    // "local_file" or "youtube". The badge is how the spec's honest limit reaches the eye:
+    // compressed audio lives next to the real files without passing for one.
+    property string sourceKind: "local_file"
 
     signal activated
     signal collectRequested
@@ -119,6 +122,10 @@ Item {
                 Behavior on opacity {
                     NumberAnimation { duration: Theme.animationFast; easing.type: Theme.easingType }
                 }
+            }
+
+            SourceBadge {
+                kind: root.sourceKind
             }
 
             Text {

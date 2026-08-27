@@ -442,7 +442,7 @@ git commit -m "feat(download): register downloaded audio as a tagged collection 
 
 ### Task 4: Interface — colar link dentro da coleção
 
-- [ ] Criar `src/SourceBadge.qml` — a marca que cumpre o limite honesto do spec:
+- [x] Criar `src/SourceBadge.qml` — a marca que cumpre o limite honesto do spec:
 
 ```qml
 import QtQuick
@@ -474,7 +474,7 @@ Rectangle {
 }
 ```
 
-- [ ] Criar `src/AddFromLinkDialog.qml`: campo de URL, botão "Buscar informações" chamando
+- [x] Criar `src/AddFromLinkDialog.qml`: campo de URL, botão "Buscar informações" chamando
       `YtDlpDownloader.fetchInfo(url)` com estado de espera visível (o `-J` faz requisição de
       rede real, ~1-3 s), exibição de título/canal/duração/miniatura ao voltar `infoReady`, e
       botão "Baixar para esta coleção" chamando `YtDlpDownloader.download(url, collectionId)`.
@@ -482,21 +482,21 @@ Rectangle {
       instalar o `yt-dlp` e não deixa prosseguir. Mostrar `YtDlpDownloader.toolVersion` em
       texto pequeno — há duas instalações possíveis nesta máquina e saber qual respondeu
       economiza uma hora de depuração no dia em que uma delas quebrar.
-- [ ] Criar `src/DownloadProgressRow.qml`: barra de progresso ligada a
+- [x] Criar `src/DownloadProgressRow.qml`: barra de progresso ligada a
       `YtDlpDownloader.progress`, que mostra "baixando…" sem porcentagem quando `total === -1`
       (o servidor nem sempre declara o tamanho), e botão de cancelar.
-- [ ] Em `src/TrackRow.qml`: acrescentar `property string sourceKind: "local_file"` e um
+- [x] Em `src/TrackRow.qml`: acrescentar `property string sourceKind: "local_file"` e um
       `SourceBadge { kind: root.sourceKind }` no `RowLayout`, antes da duração. O delegate em
       `src/Main.qml` passa `required property string sourceKind`.
-- [ ] Em `src/CollectionsSection.qml`: acrescentar, no cabeçalho de uma coleção aberta, o botão
+- [x] Em `src/CollectionsSection.qml`: acrescentar, no cabeçalho de uma coleção aberta, o botão
       "Adicionar link" que abre o `AddFromLinkDialog` com aquele `collectionId`.
-- [ ] Em `src/Main.qml`: chamar `YtDlpDownloader.probe()` no `Component.onCompleted` e recarregar
+- [x] Em `src/Main.qml`: chamar `YtDlpDownloader.probe()` no `Component.onCompleted` e recarregar
       a lista da coleção no sinal `finished`.
-- [ ] Acrescentar os três `.qml` ao `QML_FILES`.
-- [ ] verificação mecânica da task:
+- [x] Acrescentar os três `.qml` ao `QML_FILES`.
+- [x] verificação mecânica da task:
       `cmake --build build && QT_QPA_PLATFORM=offscreen timeout 8 ./build/appmelodia 2>&1 | grep -Ec "is not a type|ReferenceError"`
       → `0`
-- [ ] commit:
+- [x] commit:
 
 ```bash
 git add src/SourceBadge.qml src/AddFromLinkDialog.qml src/DownloadProgressRow.qml src/TrackRow.qml src/CollectionsSection.qml src/Main.qml CMakeLists.txt
