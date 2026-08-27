@@ -171,6 +171,27 @@ Window {
         function onFinished(url, trackId) { root.reloadCurrent() }
     }
 
+    // `appmelodia --measure` imprime UMA linha com as medidas dos painéis e sai. É assim que a
+    // fidelidade ao desenho aprovado vira verificação mecânica (tools/check-layout.sh) em vez
+    // de opinião: uma mudança acidental de layout falha o gate em vez de virar tela torta.
+    Loader {
+        active: Qt.application.arguments.indexOf("--measure") >= 0
+        sourceComponent: Timer {
+            running: true
+            interval: 1200
+            onTriggered: {
+                console.log("MEDIDA rail=" + Math.round(rail.width)
+                            + " painel=" + Math.round(nowPlaying.width)
+                            + " miolo=" + Math.round(pane.width)
+                            + " capa=" + Math.round(nowPlaying.coverWidth)
+                            + "x" + Math.round(nowPlaying.coverHeight)
+                            + " janela=" + Math.round(root.width)
+                            + "x" + Math.round(root.height))
+                Qt.quit()
+            }
+        }
+    }
+
     Component.onCompleted: {
         if (Database.libraryPath !== "")
             trackModel.loadAllTracks()
@@ -184,6 +205,7 @@ Window {
         spacing: 0
 
         IconRail {
+            id: rail
             Layout.fillHeight: true
             current: root.section
             onChosen: function (name) { root.showPane(name) }
