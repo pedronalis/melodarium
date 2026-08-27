@@ -1,7 +1,7 @@
 ---
 slug: podcast-vazio
 feature: melodia-capa-manda
-status: aprovado
+status: em-execucao
 depende-de: [moldura-capa]
 decisao-humana: sim
 spec: design/Podcast.dc.html e design/SemMusica.dc.html (telas 4 e 5 aprovadas em 2026-08-27)

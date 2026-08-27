@@ -33,6 +33,9 @@ class TrackListModel : public QAbstractListModel
     QML_ELEMENT
 
     Q_PROPERTY(int count READ rowCount NOTIFY countChanged)
+    // O cabeçalho da biblioteca anuncia "1.204 faixas · 3 d 11 h": a soma sai daqui, calculada
+    // uma vez por carga, e não por uma varredura em QML a cada repintura.
+    Q_PROPERTY(qint64 totalDurationMs READ totalDurationMs NOTIFY countChanged)
     Q_PROPERTY(QString currentPath READ currentPath WRITE setCurrentPath NOTIFY currentPathChanged)
 
 public:
@@ -62,6 +65,7 @@ public:
     QVariant data(const QModelIndex &index, int role) const override;
     QHash<int, QByteArray> roleNames() const override;
 
+    qint64 totalDurationMs() const { return m_totalDurationMs; }
     QString currentPath() const { return m_currentPath; }
     void setCurrentPath(const QString &path);
 
@@ -78,6 +82,9 @@ signals:
     void currentPathChanged();
 
 private:
+    void recomputeTotalDuration();
+
     QList<TrackRow> m_rows;
+    qint64 m_totalDurationMs = 0;
     QString m_currentPath;
 };
