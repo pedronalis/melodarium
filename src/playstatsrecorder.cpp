@@ -40,3 +40,18 @@ void PlayStatsRecorder::recordSkip(const QString &path)
     if (q.exec() && q.numRowsAffected() > 0)
         emit statsChanged(path);
 }
+
+void PlayStatsRecorder::savePosition(const QString &path, int positionMs)
+{
+    if (path.isEmpty() || positionMs < 0)
+        return;
+
+    QSqlDatabase db = QSqlDatabase::database(QLatin1String(Database::kUiConnection));
+    QSqlQuery q(db);
+    q.prepare(QStringLiteral(
+        "UPDATE track_stats SET last_position_ms = ? "
+        "WHERE track_id = (SELECT id FROM tracks WHERE path = ?)"));
+    q.addBindValue(positionMs);
+    q.addBindValue(path);
+    q.exec();
+}
