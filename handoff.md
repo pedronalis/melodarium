@@ -23,6 +23,18 @@ Três fatias têm `decisao-humana: sim` e precisam do Pedro olhando a tela para 
 concluídas: **esqueleto-build** (a janela abre com a cara certa), **tocador-ui** (o som sai
 clicando numa faixa), **colecoes-tags** (a mesma faixa em duas coleções, com um clique).
 
+## Em voo
+
+**Tipo 1 — run headless (RUN_GATE)** · despachado 2026-08-27 ~13:45 BRT
+- **Objetivo:** executar em sequência as fatias `esqueleto-build` → `motor-audio` →
+  `scan-biblioteca` (16 tasks), na branch `exec/fatias-1-3`. Teto de 220 turnos.
+- **cwd do run:** `/home/pedro/dev/active/melodia`
+- **conferir:** RUN_GATE ausente = verde · `.run_gate_count` presente = FAIL (ver
+  `RESUMO_RUN.md`/transcript) · RUN_GATE presente sem count = em voo
+- **Pendência que o run NÃO resolve:** a fatia `esqueleto-build` tem `decisao-humana: sim`.
+  Mesmo com o gate verde, falta o Pedro rodar `./build/appmelodia` numa sessão gráfica e
+  confirmar que a janela abre com a cara certa.
+
 ## Próximo passo
 
 Executar a fatia `esqueleto-build` numa sessão fresca — contexto zero é o design, o plano
