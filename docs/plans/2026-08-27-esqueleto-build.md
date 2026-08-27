@@ -449,7 +449,7 @@ A fonte é MIT (verificado em `/etc/xdg/quickshell/noctalia-shell/Assets/Fonts/t
 "Tabler Admin Template and Tabler Icons are available under MIT License", Copyright (c)
 2018-2025 Tabler) — pode ser redistribuída desde que o arquivo de licença acompanhe.
 
-- [ ] Copiar a fonte e a licença para o repo:
+- [x] Copiar a fonte e a licença para o repo:
 
 ```bash
 mkdir -p assets/fonts
@@ -457,7 +457,7 @@ cp /etc/xdg/quickshell/noctalia-shell/Assets/Fonts/tabler/noctalia-tabler-icons.
 cp /etc/xdg/quickshell/noctalia-shell/Assets/Fonts/tabler/tabler-icons-license.txt assets/fonts/
 ```
 
-- [ ] Criar `src/Icons.qml` — só os ícones que um player usa; os codepoints são PUA e só
+- [x] Criar `src/Icons.qml` — só os ícones que um player usa; os codepoints são PUA e só
       renderizam com esta fonte carregada:
 
 ```qml
@@ -514,7 +514,7 @@ QtObject {
 }
 ```
 
-- [ ] Substituir `src/Main.qml` pela janela com a estética aplicada:
+- [x] Substituir `src/Main.qml` pela janela com a estética aplicada:
 
 ```qml
 import QtQuick
@@ -574,10 +574,10 @@ Window {
 }
 ```
 
-- [ ] verificação mecânica da task: a fonte precisa estar embutida no binário —
+- [x] verificação mecânica da task: a fonte precisa estar embutida no binário —
       `cmake --build build && strings build/appmelodia | grep -c "noctalia-tabler-icons.ttf"`
       → número maior que `0`
-- [ ] commit:
+- [x] commit:
 
 ```bash
 git add assets/fonts src/Icons.qml src/Main.qml CMakeLists.txt
