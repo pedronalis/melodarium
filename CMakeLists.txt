@@ -46,6 +46,7 @@ qt_add_qml_module(appmelodia
         src/IconButton.qml
         src/MelodiaButton.qml
         src/TrackRow.qml
+        src/PlayerBar.qml
     RESOURCES
         assets/fonts/noctalia-tabler-icons.ttf
     SOURCES
