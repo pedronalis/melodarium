@@ -1,7 +1,7 @@
 ---
 slug: podcast-local
 feature: melodia
-status: aprovado
+status: em-execucao
 depende-de: [navegacao-biblioteca]
 decisao-humana: nao
 spec: docs/specs/2026-08-27-player-musica-podcast.md
@@ -90,7 +90,7 @@ O `feed_url` fica `NULL` nesta fatia (o programa veio de uma pasta, não de um f
 `feed-rss` que passa a preenchê-lo. Por isso a coluna nasce **anulável** e o `UNIQUE` fica sobre
 `folder_path`, não sobre a URL.
 
-- [ ] Acrescentar ao vetor `migrations()` em `src/database.cpp`, como quarta entrada:
+- [x] Acrescentar ao vetor `migrations()` em `src/database.cpp`, como quarta entrada:
 
 ```cpp
         QStringLiteral(R"SQL(
@@ -123,10 +123,10 @@ CREATE UNIQUE INDEX idx_episodes_path ON podcast_episodes(local_path) WHERE loca
 )SQL"),
 ```
 
-- [ ] verificação mecânica da task:
+- [x] verificação mecânica da task:
       `QT_QPA_PLATFORM=offscreen timeout 8 ./build/appmelodia; sqlite3 ~/.local/share/melodia/melodia.db "PRAGMA user_version;"`
       → `4`
-- [ ] commit:
+- [x] commit:
 
 ```bash
 git add src/database.cpp
