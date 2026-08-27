@@ -106,6 +106,32 @@ FROM tracks t
 LEFT JOIN artists ar ON ar.id = t.artist_id
 LEFT JOIN albums al ON al.id = t.album_id;
 )SQL"),
+        QStringLiteral(R"SQL(
+CREATE TABLE collections (
+    id         INTEGER PRIMARY KEY,
+    name       TEXT NOT NULL UNIQUE COLLATE NOCASE,
+    created_at INTEGER NOT NULL
+);
+CREATE TABLE collection_tracks (
+    collection_id INTEGER NOT NULL REFERENCES collections(id) ON DELETE CASCADE,
+    track_id      INTEGER NOT NULL REFERENCES tracks(id) ON DELETE CASCADE,
+    position      INTEGER NOT NULL,
+    added_at      INTEGER NOT NULL,
+    PRIMARY KEY (collection_id, track_id)
+);
+CREATE INDEX idx_coltracks_order ON collection_tracks(collection_id, position);
+CREATE TABLE tags (
+    id   INTEGER PRIMARY KEY,
+    name TEXT NOT NULL UNIQUE COLLATE NOCASE
+);
+CREATE TABLE track_tags (
+    track_id INTEGER NOT NULL REFERENCES tracks(id) ON DELETE CASCADE,
+    tag_id   INTEGER NOT NULL REFERENCES tags(id) ON DELETE CASCADE,
+    PRIMARY KEY (track_id, tag_id)
+);
+CREATE INDEX idx_tags_name    ON tags(name);
+CREATE INDEX idx_tracktags_tag ON track_tags(tag_id);
+)SQL"),
     };
     return list;
 }
