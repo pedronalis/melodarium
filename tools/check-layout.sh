@@ -19,6 +19,13 @@ medir() {
     local raw
     raw=$(QT_LOGGING_RULES="*.debug=true" QT_FORCE_STDERR_LOGGING=1 QT_QPA_PLATFORM=offscreen \
           timeout 10 "$BIN" --measure "$largura" 2>&1)
+    local ruido
+    ruido=$(printf '%s\n' "$raw" | grep -Ec 'is not a type|Unable to assign|ReferenceError|TypeError|unavailable|Cannot override|Cannot assign')
+    if [ "$ruido" -ne 0 ]; then
+        echo "FALHA: o QML reclamou $ruido vez(es) ao montar a tela em $largura px"
+        printf '%s\n' "$raw" | grep -E 'is not a type|Unable to assign|ReferenceError|TypeError|unavailable|Cannot override|Cannot assign' | head -5
+        fail=1
+    fi
     line=$(printf '%s\n' "$raw" | grep -ao 'MEDIDA .*' | tail -1)
     if [ -z "$line" ]; then
         echo "check-layout: o app não imprimiu a linha MEDIDA em $largura px"
@@ -70,6 +77,18 @@ checa_capa() {
     fi
 }
 
+checa_busca() {
+    local w h
+    w=$(arredonda "$(printf '%s\n' "$line" | sed -n 's/.*busca=\([0-9.]*\)x[0-9.]*.*/\1/p')")
+    h=$(arredonda "$(printf '%s\n' "$line" | sed -n 's/.*busca=[0-9.]*x\([0-9.]*\).*/\1/p')")
+    if [ "$w" -ne 660 ] || [ "$h" -ne 520 ]; then
+        echo "FALHA: overlay de busca ${w}x${h}, o desenho manda 660x520"
+        fail=1
+    else
+        echo "ok:    busca = ${w}x${h}"
+    fi
+}
+
 checa_filtros() {
     local pede tem
     pede=$(arredonda "$(campo chips)")
@@ -89,6 +108,7 @@ if medir 1100; then
     checa_miolo
     checa_capa
     checa_filtros
+    checa_busca
 fi
 
 echo

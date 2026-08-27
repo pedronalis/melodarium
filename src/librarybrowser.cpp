@@ -270,6 +270,12 @@ QString formatShortDate(qint64 secs)
                               QStringLiteral("dd MMM"));
 }
 
+// "1 álbuns" salta aos olhos numa lista curta: a busca conta em português.
+QString plural(int n, const QString &singular, const QString &plural)
+{
+    return QStringLiteral("%1 %2").arg(n).arg(n == 1 ? singular : plural);
+}
+
 QString joinParts(const QStringList &parts)
 {
     QStringList kept;
@@ -339,7 +345,8 @@ QVariantList LibraryBrowser::searchGrouped(const QString &text, int limitPerKind
             append(QStringLiteral("album"), alq.value(0).toInt(), alq.value(1).toString(),
                    joinParts({alq.value(2).toString(),
                               year > 0 ? QString::number(year) : QString(),
-                              QStringLiteral("%1 faixas").arg(alq.value(3).toInt())}),
+                              plural(alq.value(3).toInt(), QStringLiteral("faixa"),
+                                     QStringLiteral("faixas"))}),
                    QString());
         }
     }
@@ -355,8 +362,11 @@ QVariantList LibraryBrowser::searchGrouped(const QString &text, int limitPerKind
         while (arq.next()) {
             const int albums = arq.value(3).toInt();
             append(QStringLiteral("artist"), arq.value(0).toInt(), arq.value(1).toString(),
-                   joinParts({QStringLiteral("%1 faixas").arg(arq.value(2).toInt()),
-                              albums > 0 ? QStringLiteral("%1 álbuns").arg(albums) : QString()}),
+                   joinParts({plural(arq.value(2).toInt(), QStringLiteral("faixa"),
+                                     QStringLiteral("faixas")),
+                              albums > 0 ? plural(albums, QStringLiteral("álbum"),
+                                                  QStringLiteral("álbuns"))
+                                         : QString()}),
                    QString());
         }
     }

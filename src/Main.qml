@@ -12,6 +12,32 @@ Window {
     // linha de filtros aguenta a tela estreita.
     readonly property bool measuring: Qt.application.arguments.indexOf("--measure") >= 0
 
+    // `--shot <arquivo.png>`: salva a tela montada, para comparar com o desenho aprovado sem
+    // depender de alguém descrever o que está vendo.
+    readonly property string shotPath: {
+        const i = Qt.application.arguments.indexOf("--shot")
+        return i >= 0 && Qt.application.arguments.length > i + 1
+               ? Qt.application.arguments[i + 1] : ""
+    }
+
+    // `--pane <library|podcast|empty>`: qual miolo montar na hora de medir ou fotografar.
+    readonly property string measurePane: {
+        const i = Qt.application.arguments.indexOf("--pane")
+        return i >= 0 && Qt.application.arguments.length > i + 1
+               ? Qt.application.arguments[i + 1] : "library"
+    }
+
+    // `--search-text <texto>`: digita no overlay antes de fotografar, para a foto mostrar
+    // resultados de verdade em vez de um campo vazio.
+    readonly property string measureSearchText: {
+        const i = Qt.application.arguments.indexOf("--search-text")
+        return i >= 0 && Qt.application.arguments.length > i + 1
+               ? Qt.application.arguments[i + 1] : ""
+    }
+
+    // `--no-search`: não abre o overlay antes de medir.
+    readonly property bool measureSearch: Qt.application.arguments.indexOf("--no-search") < 0
+
     readonly property int measureWidth: {
         const i = Qt.application.arguments.indexOf("--measure")
         if (i < 0 || Qt.application.arguments.length <= i + 1)
@@ -114,15 +140,24 @@ Window {
 
     // Opening a group keeps its name on screen: the list is no longer "Biblioteca".
     function openGroup(section, id) {
+        let name = ""
         for (let i = 0; i < root.groups.length; ++i) {
             if (root.groups[i].id === id) {
-                root.groupsTitle = root.groups[i].name
+                name = root.groups[i].name
                 break
             }
         }
-        const q = clauseFor(section, id)
+        root.openNamedGroup(section, id, name)
+    }
+
+    // Chegar por busca é chegar de fora da lista de grupos: o nome vem junto do resultado.
+    function openNamedGroup(section, id, name) {
+        root.section = "library"
+        root.libraryFilter = section
         root.currentSection = section
         root.currentId = id
+        root.groupsTitle = name
+        const q = clauseFor(section, id)
         trackModel.loadFromQuery(q.clause, q.bindings)
         root.showingGroups = false
     }
@@ -140,11 +175,11 @@ Window {
         collectMenu.popup()
     }
 
-    // The rail picks the pane. Search is not a pane: it is an overlay the busca-overlay slice
-    // brings in, so until then the rail says so instead of pretending to switch.
+    // The rail picks the pane. Search is not a pane: it is an overlay over whatever is on
+    // screen, so the rail opens it and leaves the pane where it was.
     function showPane(name) {
         if (name === "search") {
-            console.log("busca ainda não implementada")
+            searchOverlay.open()
             return
         }
         root.section = name
@@ -237,8 +272,24 @@ Window {
     // fidelidade ao desenho aprovado vira verificação mecânica (tools/check-layout.sh) em vez
     // de opinião: uma mudança acidental de layout falha o gate em vez de virar tela torta.
     Loader {
-        active: Qt.application.arguments.indexOf("--measure") >= 0
-        sourceComponent: Timer {
+        active: root.measuring
+        // O overlay abre antes de medir de propósito: o conteúdo de um Popup só é construído
+        // na primeira abertura, e um erro lá dentro passaria despercebido por um app que
+        // nunca o abre.
+        sourceComponent: Item {
+            Timer {
+                running: true
+                interval: 600
+                onTriggered: {
+                    if (!root.measureSearch)
+                        return
+                    searchOverlay.open()
+                    if (root.measureSearchText !== "")
+                        searchOverlay.typeForMeasure(root.measureSearchText)
+                }
+            }
+
+            Timer {
             running: true
             interval: 1200
             onTriggered: {
@@ -250,8 +301,23 @@ Window {
                             + " janela=" + Math.round(root.width)
                             + "x" + Math.round(root.height)
                             + " chips=" + Math.round(libraryPane.chipsImplicitWidth)
-                            + " chipsvao=" + Math.round(libraryPane.chipsWidth))
-                Qt.quit()
+                            + " chipsvao=" + Math.round(libraryPane.chipsWidth)
+                            + " busca=" + Math.round(searchOverlay.width)
+                            + "x" + Math.round(searchOverlay.height))
+                if (root.shotPath === "") {
+                    Qt.quit()
+                    return
+                }
+                const grab = root.contentItem.grabToImage(function (result) {
+                    console.log("SHOT " + (result.saveToFile(root.shotPath)
+                                           ? root.shotPath : "falhou"))
+                    Qt.quit()
+                })
+                if (!grab) {
+                    console.log("SHOT falhou: grabToImage recusou")
+                    Qt.quit()
+                }
+            }
             }
         }
     }
@@ -296,7 +362,8 @@ Window {
             // Medir mede a tela da biblioteca: qual banco a máquina tem não pode mudar o
             // resultado do gate de layout.
             currentIndex: root.measuring
-                          ? 0
+                          ? (root.measurePane === "podcast"
+                             ? 1 : (root.measurePane === "empty" ? 2 : 0))
                           : (root.section === "podcast"
                              ? 1
                              : (Database.libraryPath === "" ? 2 : 0))
@@ -314,11 +381,34 @@ Window {
                 onTagOpened: function (name) { root.showTag(name) }
                 onTrackActivated: function (index) { root.activateTrack(index) }
                 onCollectRequested: function (trackId) { root.collectTrack(trackId) }
+                onSearchRequested: searchOverlay.open()
             }
 
             PodcastPane { }
             EmptyPane { }
         }
+    }
+
+    SearchOverlay {
+        id: searchOverlay
+
+        onTrackChosen: function (path) {
+            AudioEngine.loadPlaylist([path], 0)
+            AudioEngine.play()
+        }
+        onEpisodeChosen: function (episodeId) { PodcastLibrary.playEpisode(episodeId) }
+        onAlbumChosen: function (albumId, title) {
+            root.openNamedGroup("albums", albumId, title)
+        }
+        onArtistChosen: function (artistId, title) {
+            root.openNamedGroup("artists", artistId, title)
+        }
+    }
+
+    // Ctrl+F por hábito antigo, Ctrl+K porque é o gesto que todo app com paleta usa hoje.
+    Shortcut {
+        sequences: ["Ctrl+K", "Ctrl+F"]
+        onActivated: searchOverlay.open()
     }
 
     // The single manual gesture: one click on the row's plus, one click on a collection.
