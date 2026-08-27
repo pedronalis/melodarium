@@ -34,7 +34,16 @@
       "y": 1040,
       "w": 1100,
       "h": 700,
-      "title": "3 · Podcast",
+      "title": "4 · Podcast",
+      "page": "page-1"
+    },
+    {
+      "file": "Busca.dc.html",
+      "x": 2440,
+      "y": 0,
+      "w": 1100,
+      "h": 700,
+      "title": "3 · Busca",
       "page": "page-1"
     },
     {
@@ -43,7 +52,7 @@
       "y": 1040,
       "w": 1100,
       "h": 700,
-      "title": "4 · Nada tocando",
+      "title": "5 · Nada tocando",
       "page": "page-1"
     },
     {
@@ -79,6 +88,14 @@
       "y": -240,
       "w": 460,
       "text": "A tela que faltava. O painel do que toca fica; o miolo vira lista densa com busca e filtros em chips — a densidade da direção B, dentro da moldura da C.\n\nDecisão embutida: a busca fica no miolo, não no topo, porque o topo não existe mais nesta direção."
+    },
+    {
+      "id": "nota-busca",
+      "x": 2440,
+      "y": -240,
+      "w": 460,
+      "page": "page-1",
+      "text": "BUSCA. Sem barra no topo, ela vira um painel que abre por cima (lupa na barra de ícones, ou um atalho de teclado).\n\nBusca tudo de uma vez — faixa, álbum, artista e episódio de podcast na mesma lista — e toca com Enter, sem tirar a mão do teclado."
     },
     {
       "id": "nota-podcast",
