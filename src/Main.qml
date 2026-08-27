@@ -8,7 +8,19 @@ import Melodia.App
 
 Window {
     id: root
-    width: 1100
+    // `--measure [largura]`: medir também na janela mínima é o único jeito de saber se a
+    // linha de filtros aguenta a tela estreita.
+    readonly property bool measuring: Qt.application.arguments.indexOf("--measure") >= 0
+
+    readonly property int measureWidth: {
+        const i = Qt.application.arguments.indexOf("--measure")
+        if (i < 0 || Qt.application.arguments.length <= i + 1)
+            return 0
+        const w = parseInt(Qt.application.arguments[i + 1])
+        return isNaN(w) ? 0 : w
+    }
+
+    width: root.measureWidth > 0 ? root.measureWidth : 1100
     height: 700
     minimumWidth: 720
     minimumHeight: 480
@@ -32,6 +44,18 @@ Window {
     property int currentId: 0
     // 0 when what is playing is not a podcast episode.
     property int currentEpisodeId: 0
+    // Which chip of the filter row is lit. The rail picks the pane; this picks the list.
+    property string libraryFilter: "all"
+    // The order the engine is playing, kept here because the queue drawer left this design.
+    property var queuePaths: []
+
+    readonly property var filterTitles: ({
+        "liked": qsTr("Curtidas"),
+        "recent": qsTr("Recentes"),
+        "mostPlayed": qsTr("Mais tocadas"),
+        "forgotten": qsTr("Esquecidas"),
+        "never": qsTr("Nunca ouvi")
+    })
 
     TrackListModel {
         id: trackModel
@@ -76,6 +100,44 @@ Window {
         const q = clauseFor(section, id)
         trackModel.loadFromQuery(q.clause, q.bindings)
         root.showingGroups = false
+        // O cabeçalho do miolo diz que lista é esta: "Biblioteca" só quando é a lista inteira.
+        if (id === 0)
+            root.groupsTitle = root.filterTitles[section] !== undefined
+                               ? root.filterTitles[section] : ""
+    }
+
+    // The filter row speaks its own keys; the query layer speaks the section names.
+    function chooseFilter(key) {
+        root.libraryFilter = key
+        root.showSection(key === "most" ? "mostPlayed" : key, 0)
+    }
+
+    // Opening a group keeps its name on screen: the list is no longer "Biblioteca".
+    function openGroup(section, id) {
+        for (let i = 0; i < root.groups.length; ++i) {
+            if (root.groups[i].id === id) {
+                root.groupsTitle = root.groups[i].name
+                break
+            }
+        }
+        const q = clauseFor(section, id)
+        root.currentSection = section
+        root.currentId = id
+        trackModel.loadFromQuery(q.clause, q.bindings)
+        root.showingGroups = false
+    }
+
+    function activateTrack(index) {
+        root.queuePaths = trackModel.allPaths()
+        AudioEngine.loadPlaylist(root.queuePaths, index)
+        AudioEngine.play()
+    }
+
+    function collectTrack(trackId) {
+        root.selectedTrackId = trackId
+        collectMenu.trackId = trackId
+        collectMenu.options = CollectionManager.collections()
+        collectMenu.popup()
     }
 
     // The rail picks the pane. Search is not a pane: it is an overlay the busca-overlay slice
@@ -186,7 +248,9 @@ Window {
                             + " capa=" + Math.round(nowPlaying.coverWidth)
                             + "x" + Math.round(nowPlaying.coverHeight)
                             + " janela=" + Math.round(root.width)
-                            + "x" + Math.round(root.height))
+                            + "x" + Math.round(root.height)
+                            + " chips=" + Math.round(libraryPane.chipsImplicitWidth)
+                            + " chipsvao=" + Math.round(libraryPane.chipsWidth))
                 Qt.quit()
             }
         }
@@ -229,9 +293,29 @@ Window {
             Layout.fillHeight: true
             // A lista é o ponto da tela: nunca cede espaço ao painel.
             Layout.minimumWidth: 360
-            currentIndex: root.section === "podcast" ? 1 : (AudioEngine.currentFile === "" && root.section === "library" && trackModel.count === 0 ? 2 : 0)
+            // Medir mede a tela da biblioteca: qual banco a máquina tem não pode mudar o
+            // resultado do gate de layout.
+            currentIndex: root.measuring
+                          ? 0
+                          : (root.section === "podcast"
+                             ? 1
+                             : (Database.libraryPath === "" ? 2 : 0))
 
-            LibraryPane { }
+            LibraryPane {
+                id: libraryPane
+                model: trackModel
+                filter: root.libraryFilter
+                groups: root.groups
+                showingGroups: root.showingGroups
+                groupTitle: root.groupsTitle
+                scanning: Database.scanning
+                onGroupChosen: function (key) { root.chooseFilter(key) }
+                onGroupOpened: function (section, id) { root.openGroup(section, id) }
+                onTagOpened: function (name) { root.showTag(name) }
+                onTrackActivated: function (index) { root.activateTrack(index) }
+                onCollectRequested: function (trackId) { root.collectTrack(trackId) }
+            }
+
             PodcastPane { }
             EmptyPane { }
         }

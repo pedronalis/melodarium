@@ -1,7 +1,7 @@
 ---
 slug: busca-overlay
 feature: melodia-capa-manda
-status: aprovado
+status: em-execucao
 depende-de: [moldura-capa]
 decisao-humana: nao
 spec: design/Busca.dc.html (tela 3 aprovada em 2026-08-27)
