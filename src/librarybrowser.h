@@ -41,6 +41,9 @@ public:
     Q_INVOKABLE QString clauseForLiked();
     Q_INVOKABLE int likedCount();
 
+    // Uma chamada só para a busca inteira: o QML não monta SQL nem decide a ordem dos tipos.
+    Q_INVOKABLE QVariantList searchGrouped(const QString &text, int limitPerKind = 4);
+
     // The panel only knows the file mpv has open; this turns it back into a library row.
     Q_INVOKABLE QVariantMap trackForPath(const QString &path);
 
