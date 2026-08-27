@@ -25,6 +25,10 @@ Rectangle {
 
     readonly property int coverSide: root.compact ? 200 : 340
 
+    // mpv reports pause=false while it is idle, so AudioEngine.playing is true before any file
+    // is loaded. Without this guard the transport shows a pause button with nothing playing.
+    readonly property bool hasTrack: AudioEngine.currentFile !== ""
+
     function refresh() {
         const path = AudioEngine.currentFile
         root.info = path === "" ? ({}) : LibraryBrowser.trackForPath(path)
@@ -201,7 +205,7 @@ Rectangle {
 
                 Text {
                     anchors.centerIn: parent
-                    text: AudioEngine.playing ? Icons.get("pause") : Icons.get("play")
+                    text: AudioEngine.playing && root.hasTrack ? Icons.get("pause") : Icons.get("play")
                     font.family: Icons.fontFamily
                     font.pointSize: Theme.fontSizeXL
                     color: Theme.mOnTertiary
