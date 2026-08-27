@@ -17,12 +17,8 @@ qt_add_executable(appmelodia
     src/colorschemeprovider.cpp
     src/audioengine.h
     src/audioengine.cpp
-    src/database.h
-    src/database.cpp
     src/tagreader.h
     src/tagreader.cpp
-    src/libraryscanner.h
-    src/libraryscanner.cpp
 )
 
 # Theme.qml e Icons.qml usam `pragma Singleton`. O qt_add_qml_module NAO detecta o pragma
@@ -46,8 +42,6 @@ qt_add_qml_module(appmelodia
         src/colorschemeprovider.cpp
         src/audioengine.h
         src/audioengine.cpp
-        src/database.h
-        src/database.cpp
 )
 
 # OBRIGATORIO: sem isto o build quebra com erros de template que nao apontam a causa.
