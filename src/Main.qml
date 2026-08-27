@@ -192,8 +192,10 @@ Window {
         NowPlayingPanel {
             id: nowPlaying
             Layout.fillHeight: true
-            Layout.preferredWidth: 392
-            Layout.maximumWidth: 392
+            // Both follow the panel's own implicit width so compact mode actually narrows the
+            // frame; fillWidth stays false so the panel can never eat the pane.
+            Layout.preferredWidth: nowPlaying.implicitWidth
+            Layout.maximumWidth: nowPlaying.implicitWidth
             Layout.fillWidth: false
             compact: root.width < 900
             onLikeRequested: function (id) { LibraryBrowser.toggleLike(id) }
