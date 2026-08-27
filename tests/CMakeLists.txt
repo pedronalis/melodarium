@@ -97,3 +97,13 @@ target_link_libraries(tst_podcast PRIVATE
 
 add_test(NAME tst_podcast COMMAND tst_podcast)
 set_tests_properties(tst_podcast PROPERTIES ENVIRONMENT "QT_QPA_PLATFORM=offscreen")
+
+qt_add_executable(tst_feedparser
+    tst_feedparser.cpp
+    ../src/podcastfeedfetcher.h ../src/podcastfeedfetcher.cpp
+)
+target_include_directories(tst_feedparser PRIVATE ../src)
+target_link_libraries(tst_feedparser PRIVATE Qt6::Core Qt6::Test Qt6::Network)
+
+add_test(NAME tst_feedparser COMMAND tst_feedparser)
+set_tests_properties(tst_feedparser PROPERTIES ENVIRONMENT "QT_QPA_PLATFORM=offscreen")
