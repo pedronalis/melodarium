@@ -5,9 +5,10 @@ set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_AUTOMOC ON)
 
-find_package(Qt6 REQUIRED COMPONENTS Core Qml Quick)
+find_package(Qt6 REQUIRED COMPONENTS Concurrent Core Qml Quick Sql)
 find_package(PkgConfig REQUIRED)
 pkg_check_modules(MPV REQUIRED IMPORTED_TARGET mpv)
+pkg_check_modules(TAGLIB REQUIRED IMPORTED_TARGET taglib)
 qt_standard_project_setup(REQUIRES 6.5)
 
 qt_add_executable(appmelodia
@@ -16,6 +17,12 @@ qt_add_executable(appmelodia
     src/colorschemeprovider.cpp
     src/audioengine.h
     src/audioengine.cpp
+    src/database.h
+    src/database.cpp
+    src/tagreader.h
+    src/tagreader.cpp
+    src/libraryscanner.h
+    src/libraryscanner.cpp
 )
 
 # Theme.qml e Icons.qml usam `pragma Singleton`. O qt_add_qml_module NAO detecta o pragma
@@ -39,12 +46,16 @@ qt_add_qml_module(appmelodia
         src/colorschemeprovider.cpp
         src/audioengine.h
         src/audioengine.cpp
+        src/database.h
+        src/database.cpp
 )
 
 # OBRIGATORIO: sem isto o build quebra com erros de template que nao apontam a causa.
 target_include_directories(appmelodia PRIVATE src)
 
-target_link_libraries(appmelodia PRIVATE Qt6::Core Qt6::Qml Qt6::Quick PkgConfig::MPV)
+target_link_libraries(appmelodia PRIVATE
+    Qt6::Concurrent Qt6::Core Qt6::Qml Qt6::Quick Qt6::Sql
+    PkgConfig::MPV PkgConfig::TAGLIB)
 
 enable_testing()
 add_subdirectory(tests)
