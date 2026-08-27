@@ -358,7 +358,7 @@ git commit -m "feat(download): drive external yt-dlp with safe args and parseabl
 
 ### Task 3: Registrar o arquivo baixado como faixa da coleção
 
-- [ ] Acrescentar ao fim de `src/collectionmanager.cpp`:
+- [x] Acrescentar ao fim de `src/collectionmanager.cpp`:
 
 ```cpp
 int CollectionManager::ingestDownloadedFile(const QString &path, int collectionId,
@@ -430,10 +430,10 @@ int CollectionManager::ingestDownloadedFile(const QString &path, int collectionI
 }
 ```
 
-- [ ] Acrescentar `#include "tagreader.h"`, `#include <QDateTime>` e `#include <QFileInfo>` ao
+- [x] Acrescentar `#include "tagreader.h"`, `#include <QDateTime>` e `#include <QFileInfo>` ao
       topo de `src/collectionmanager.cpp`, e a declaração do método ao header.
-- [ ] verificação mecânica da task: `cmake --build build` → exit 0
-- [ ] commit:
+- [x] verificação mecânica da task: `cmake --build build` → exit 0
+- [x] commit:
 
 ```bash
 git add src/collectionmanager.h src/collectionmanager.cpp
