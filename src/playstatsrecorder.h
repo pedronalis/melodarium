@@ -15,6 +15,8 @@ public:
 
     Q_INVOKABLE void recordPlay(const QString &path);
     Q_INVOKABLE void recordSkip(const QString &path);
+    // Onde a faixa parou, para o convite "continuar de onde parou" ter um minuto para retomar.
+    Q_INVOKABLE void savePosition(const QString &path, int positionMs);
 
 signals:
     void statsChanged(const QString &path);

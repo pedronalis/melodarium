@@ -42,6 +42,9 @@ public:
 
     Q_INVOKABLE QVariantList shows();
     Q_INVOKABLE QVariantList continueListening(int limit = 5);
+    // Todos os episódios numa lista só, do mais novo para o mais velho, com o nome do programa
+    // junto: é assim que o desenho mostra o miolo do podcast — uma coluna, não duas.
+    Q_INVOKABLE QVariantList allEpisodes(int showId = 0, int limit = 300);
     Q_INVOKABLE void scanPodcastFolder();
     Q_INVOKABLE void playEpisode(int episodeId);
     Q_INVOKABLE void savePosition(int episodeId, int positionMs);

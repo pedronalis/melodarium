@@ -8,7 +8,72 @@ import Melodia.App
 
 Window {
     id: root
-    width: 1100
+    // `--measure [largura]`: medir também na janela mínima é o único jeito de saber se a
+    // linha de filtros aguenta a tela estreita.
+    readonly property bool measuring: Qt.application.arguments.indexOf("--measure") >= 0
+
+    // `--shot <arquivo.png>`: salva a tela montada, para comparar com o desenho aprovado sem
+    // depender de alguém descrever o que está vendo.
+    readonly property string shotPath: {
+        const i = Qt.application.arguments.indexOf("--shot")
+        return i >= 0 && Qt.application.arguments.length > i + 1
+               ? Qt.application.arguments[i + 1] : ""
+    }
+
+    // `--pane <library|podcast|empty>`: qual miolo montar na hora de medir ou fotografar.
+    readonly property string measurePane: {
+        const i = Qt.application.arguments.indexOf("--pane")
+        return i >= 0 && Qt.application.arguments.length > i + 1
+               ? Qt.application.arguments[i + 1] : "library"
+    }
+
+    // `--search-text <texto>`: digita no overlay antes de fotografar, para a foto mostrar
+    // resultados de verdade em vez de um campo vazio.
+    readonly property string measureSearchText: {
+        const i = Qt.application.arguments.indexOf("--search-text")
+        return i >= 0 && Qt.application.arguments.length > i + 1
+               ? Qt.application.arguments[i + 1] : ""
+    }
+
+    // `--play-episode <id>`: põe um episódio para tocar antes de fotografar, que é o único
+    // jeito de ver o transporte de fala montado.
+    readonly property int measureEpisode: {
+        const i = Qt.application.arguments.indexOf("--play-episode")
+        if (i < 0 || Qt.application.arguments.length <= i + 1)
+            return 0
+        const id = parseInt(Qt.application.arguments[i + 1])
+        return isNaN(id) ? 0 : id
+    }
+
+    // `--delay <ms>`: quanto esperar antes de medir. Abrir um arquivo no mpv leva mais do que
+    // montar a tela.
+    readonly property int measureDelay: {
+        const i = Qt.application.arguments.indexOf("--delay")
+        if (i < 0 || Qt.application.arguments.length <= i + 1)
+            return 1200
+        const ms = parseInt(Qt.application.arguments[i + 1])
+        return isNaN(ms) ? 1200 : ms
+    }
+
+    // `--play-track <caminho>`: mesma ideia do --play-episode, para a tela com música.
+    readonly property string measureTrack: {
+        const i = Qt.application.arguments.indexOf("--play-track")
+        return i >= 0 && Qt.application.arguments.length > i + 1
+               ? Qt.application.arguments[i + 1] : ""
+    }
+
+    // `--no-search`: não abre o overlay antes de medir.
+    readonly property bool measureSearch: Qt.application.arguments.indexOf("--no-search") < 0
+
+    readonly property int measureWidth: {
+        const i = Qt.application.arguments.indexOf("--measure")
+        if (i < 0 || Qt.application.arguments.length <= i + 1)
+            return 0
+        const w = parseInt(Qt.application.arguments[i + 1])
+        return isNaN(w) ? 0 : w
+    }
+
+    width: root.measureWidth > 0 ? root.measureWidth : 1100
     height: 700
     minimumWidth: 720
     minimumHeight: 480
@@ -32,6 +97,18 @@ Window {
     property int currentId: 0
     // 0 when what is playing is not a podcast episode.
     property int currentEpisodeId: 0
+    // Which chip of the filter row is lit. The rail picks the pane; this picks the list.
+    property string libraryFilter: "all"
+    // The order the engine is playing, kept here because the queue drawer left this design.
+    property var queuePaths: []
+
+    readonly property var filterTitles: ({
+        "liked": qsTr("Curtidas"),
+        "recent": qsTr("Recentes"),
+        "mostPlayed": qsTr("Mais tocadas"),
+        "forgotten": qsTr("Esquecidas"),
+        "never": qsTr("Nunca ouvi")
+    })
 
     TrackListModel {
         id: trackModel
@@ -76,13 +153,105 @@ Window {
         const q = clauseFor(section, id)
         trackModel.loadFromQuery(q.clause, q.bindings)
         root.showingGroups = false
+        // O cabeçalho do miolo diz que lista é esta: "Biblioteca" só quando é a lista inteira.
+        if (id === 0)
+            root.groupsTitle = root.filterTitles[section] !== undefined
+                               ? root.filterTitles[section] : ""
     }
 
-    // The rail picks the pane. Search is not a pane: it is an overlay the busca-overlay slice
-    // brings in, so until then the rail says so instead of pretending to switch.
+    // The filter row speaks its own keys; the query layer speaks the section names.
+    function chooseFilter(key) {
+        root.libraryFilter = key
+        root.showSection(key === "most" ? "mostPlayed" : key, 0)
+    }
+
+    // Opening a group keeps its name on screen: the list is no longer "Biblioteca".
+    function openGroup(section, id) {
+        let name = ""
+        for (let i = 0; i < root.groups.length; ++i) {
+            if (root.groups[i].id === id) {
+                name = root.groups[i].name
+                break
+            }
+        }
+        root.openNamedGroup(section, id, name)
+    }
+
+    // Chegar por busca é chegar de fora da lista de grupos: o nome vem junto do resultado.
+    function openNamedGroup(section, id, name) {
+        root.section = "library"
+        root.libraryFilter = section
+        root.currentSection = section
+        root.currentId = id
+        root.groupsTitle = name
+        const q = clauseFor(section, id)
+        trackModel.loadFromQuery(q.clause, q.bindings)
+        root.showingGroups = false
+    }
+
+    function activateTrack(index) {
+        root.queuePaths = trackModel.allPaths()
+        AudioEngine.loadPlaylist(root.queuePaths, index)
+        AudioEngine.play()
+    }
+
+    // As três saídas do estado "nada tocando". Nenhuma delas começa a tocar sozinha: o app
+    // só toca quando alguém pede.
+    function startFromEmpty(mode) {
+        if (mode === "resume") {
+            const info = LibraryBrowser.lastPlayed()
+            if (info.path === undefined || info.path === "")
+                return
+            AudioEngine.loadPlaylist([info.path], 0)
+            AudioEngine.play()
+            if (info.positionMs > 0) {
+                resumeSeek.targetSeconds = Math.floor(info.positionMs / 1000)
+                resumeSeek.restart()
+            }
+            return
+        }
+
+        const clause = mode === "never" ? LibraryBrowser.clauseNeverPlayed()
+                     : (mode === "forgotten" ? LibraryBrowser.clauseForgotten()
+                                             : LibraryBrowser.clauseForAll())
+        trackModel.loadFromQuery(clause, [])
+        root.currentSection = mode === "never" ? "never"
+                            : (mode === "forgotten" ? "forgotten" : "all")
+        root.currentId = 0
+        root.libraryFilter = mode === "shuffle" ? "all" : mode
+        root.groupsTitle = root.filterTitles[root.currentSection] !== undefined
+                           ? root.filterTitles[root.currentSection] : ""
+        root.showingGroups = false
+
+        let paths = trackModel.allPaths()
+        if (paths.length === 0)
+            return
+        if (mode === "shuffle") {
+            // Fisher-Yates: sortear índice a cada passo, não ordenar por número aleatório.
+            for (let i = paths.length - 1; i > 0; --i) {
+                const j = Math.floor(Math.random() * (i + 1))
+                const tmp = paths[i]
+                paths[i] = paths[j]
+                paths[j] = tmp
+            }
+        }
+        root.queuePaths = paths
+        AudioEngine.loadPlaylist(paths, 0)
+        AudioEngine.play()
+    }
+
+    function collectTrack(trackId) {
+        root.selectedTrackId = trackId
+        collectMenu.trackId = trackId
+        collectMenu.options = CollectionManager.collections()
+        collectMenu.popup()
+    }
+
+    // The rail picks the pane. Search is not a pane: it is an overlay over whatever is on
+    // screen, so the rail opens it and leaves the pane where it was.
     function showPane(name) {
         if (name === "search") {
-            console.log("busca ainda não implementada")
+            searchOverlay.open()
             return
         }
         root.section = name
@@ -109,6 +278,14 @@ Window {
 
     Connections {
         target: AudioEngine
+        // Um motor que não sobe, ou um arquivo que não abre, não podem falhar em silêncio: sem
+        // esta linha o sintoma é "clico e não acontece nada".
+        function onEngineUnavailable(message) {
+            console.warn("melodia: motor de áudio indisponível — " + message)
+        }
+        function onPlaybackError(path, message) {
+            console.warn("melodia: não consegui tocar " + path + " — " + message)
+        }
         function onTrackFinished(path) {
             PlayStatsRecorder.recordPlay(path)
         }
@@ -123,6 +300,9 @@ Window {
             if (!AudioEngine.playing && root.currentEpisodeId > 0)
                 PodcastLibrary.savePosition(root.currentEpisodeId,
                                             Math.round(AudioEngine.position * 1000))
+            else if (!AudioEngine.playing && root.currentEpisodeId === 0)
+                PlayStatsRecorder.savePosition(AudioEngine.currentFile,
+                                               Math.round(AudioEngine.position * 1000))
         }
     }
 
@@ -165,10 +345,82 @@ Window {
                                                  Math.round(AudioEngine.position * 1000))
     }
 
+    // Mesma razão do timer do podcast: gravar a cada positionChanged escreveria no SQLite a
+    // cada quadro. Cinco segundos de imprecisão ao retomar não se percebem.
+    Timer {
+        interval: 5000
+        repeat: true
+        running: AudioEngine.playing && root.currentEpisodeId === 0
+                 && AudioEngine.currentFile !== ""
+        onTriggered: PlayStatsRecorder.savePosition(AudioEngine.currentFile,
+                                                    Math.round(AudioEngine.position * 1000))
+    }
+
     Connections {
         target: YtDlpDownloader
         // The freshly downloaded track only shows up in the list if the list is asked again.
         function onFinished(url, trackId) { root.reloadCurrent() }
+    }
+
+    // `appmelodia --measure` imprime UMA linha com as medidas dos painéis e sai. É assim que a
+    // fidelidade ao desenho aprovado vira verificação mecânica (tools/check-layout.sh) em vez
+    // de opinião: uma mudança acidental de layout falha o gate em vez de virar tela torta.
+    Loader {
+        active: root.measuring
+        // O overlay abre antes de medir de propósito: o conteúdo de um Popup só é construído
+        // na primeira abertura, e um erro lá dentro passaria despercebido por um app que
+        // nunca o abre.
+        sourceComponent: Item {
+            Timer {
+                running: true
+                interval: 600
+                onTriggered: {
+                    if (root.measureEpisode > 0)
+                        PodcastLibrary.playEpisode(root.measureEpisode)
+                    if (root.measureTrack !== "") {
+                        AudioEngine.loadPlaylist([root.measureTrack], 0)
+                        AudioEngine.play()
+                    }
+                    if (!root.measureSearch)
+                        return
+                    searchOverlay.open()
+                    if (root.measureSearchText !== "")
+                        searchOverlay.typeForMeasure(root.measureSearchText)
+                }
+            }
+
+            Timer {
+            running: true
+            interval: root.measureDelay
+            onTriggered: {
+                console.log("MEDIDA rail=" + Math.round(rail.width)
+                            + " painel=" + Math.round(nowPlaying.width)
+                            + " miolo=" + Math.round(pane.width)
+                            + " capa=" + Math.round(nowPlaying.coverWidth)
+                            + "x" + Math.round(nowPlaying.coverHeight)
+                            + " janela=" + Math.round(root.width)
+                            + "x" + Math.round(root.height)
+                            + " chips=" + Math.round(libraryPane.chipsImplicitWidth)
+                            + " chipsvao=" + Math.round(libraryPane.chipsWidth)
+                            + " busca=" + Math.round(searchOverlay.width)
+                            + "x" + Math.round(searchOverlay.height)
+                            + " motor=" + (AudioEngine.isAvailable() ? "ok" : "MORTO"))
+                if (root.shotPath === "") {
+                    Qt.quit()
+                    return
+                }
+                const grab = root.contentItem.grabToImage(function (result) {
+                    console.log("SHOT " + (result.saveToFile(root.shotPath)
+                                           ? root.shotPath : "falhou"))
+                    Qt.quit()
+                })
+                if (!grab) {
+                    console.log("SHOT falhou: grabToImage recusou")
+                    Qt.quit()
+                }
+            }
+            }
+        }
     }
 
     Component.onCompleted: {
@@ -184,6 +436,7 @@ Window {
         spacing: 0
 
         IconRail {
+            id: rail
             Layout.fillHeight: true
             current: root.section
             onChosen: function (name) { root.showPane(name) }
@@ -198,7 +451,9 @@ Window {
             Layout.maximumWidth: nowPlaying.implicitWidth
             Layout.fillWidth: false
             compact: root.width < 900
+            episodeMode: root.currentEpisodeId > 0
             onLikeRequested: function (id) { LibraryBrowser.toggleLike(id) }
+            onPlayRequested: function (mode) { root.startFromEmpty(mode) }
         }
 
         StackLayout {
@@ -207,12 +462,63 @@ Window {
             Layout.fillHeight: true
             // A lista é o ponto da tela: nunca cede espaço ao painel.
             Layout.minimumWidth: 360
-            currentIndex: root.section === "podcast" ? 1 : (AudioEngine.currentFile === "" && root.section === "library" && trackModel.count === 0 ? 2 : 0)
+            // Medir mede a tela da biblioteca: qual banco a máquina tem não pode mudar o
+            // resultado do gate de layout.
+            currentIndex: root.measuring
+                          ? (root.measurePane === "podcast"
+                             ? 1 : (root.measurePane === "empty" ? 2 : 0))
+                          : (root.section === "podcast"
+                             ? 1
+                             : (Database.libraryPath === "" ? 2 : 0))
 
-            LibraryPane { }
-            PodcastPane { }
-            EmptyPane { }
+            LibraryPane {
+                id: libraryPane
+                model: trackModel
+                filter: root.libraryFilter
+                groups: root.groups
+                showingGroups: root.showingGroups
+                groupTitle: root.groupsTitle
+                scanning: Database.scanning
+                onGroupChosen: function (key) { root.chooseFilter(key) }
+                onGroupOpened: function (section, id) { root.openGroup(section, id) }
+                onTagOpened: function (name) { root.showTag(name) }
+                onTrackActivated: function (index) { root.activateTrack(index) }
+                onCollectRequested: function (trackId) { root.collectTrack(trackId) }
+                onSearchRequested: searchOverlay.open()
+            }
+
+            PodcastPane {
+                episodePlaying: root.currentEpisodeId > 0
+                currentPath: AudioEngine.currentFile
+            }
+
+            EmptyPane {
+                framed: true
+                onPlayRequested: function (mode) { root.startFromEmpty(mode) }
+            }
         }
+    }
+
+    SearchOverlay {
+        id: searchOverlay
+
+        onTrackChosen: function (path) {
+            AudioEngine.loadPlaylist([path], 0)
+            AudioEngine.play()
+        }
+        onEpisodeChosen: function (episodeId) { PodcastLibrary.playEpisode(episodeId) }
+        onAlbumChosen: function (albumId, title) {
+            root.openNamedGroup("albums", albumId, title)
+        }
+        onArtistChosen: function (artistId, title) {
+            root.openNamedGroup("artists", artistId, title)
+        }
+    }
+
+    // Ctrl+F por hábito antigo, Ctrl+K porque é o gesto que todo app com paleta usa hoje.
+    Shortcut {
+        sequences: ["Ctrl+K", "Ctrl+F"]
+        onActivated: searchOverlay.open()
     }
 
     // The single manual gesture: one click on the row's plus, one click on a collection.

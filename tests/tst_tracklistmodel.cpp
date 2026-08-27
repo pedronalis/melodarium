@@ -41,6 +41,20 @@ private slots:
         QCOMPARE(roles.value(TrackListModel::IsCurrentRole), QByteArrayLiteral("isCurrent"));
     }
 
+    // O cabeçalho da biblioteca anuncia "N faixas · 3 d 11 h": a soma vem do modelo, e uma
+    // lista vazia tem de somar zero em vez de herdar o total da lista anterior.
+    void totalDurationSumsTheLoadedRows()
+    {
+        TrackListModel model;
+        QCOMPARE(model.totalDurationMs(), 0);
+
+        model.setRowsForTesting(sampleRows());
+        QCOMPARE(model.totalDurationMs(), 185000);
+
+        model.setRowsForTesting({});
+        QCOMPARE(model.totalDurationMs(), 0);
+    }
+
     void untitledTrackFallsBackToFileName()
     {
         TrackListModel model;

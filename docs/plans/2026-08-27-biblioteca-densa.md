@@ -1,7 +1,7 @@
 ---
 slug: biblioteca-densa
 feature: melodia-capa-manda
-status: aprovado
+status: concluido
 depende-de: [moldura-capa, like-faixas]
 decisao-humana: nao
 spec: design/Biblioteca.dc.html (tela 2 aprovada em 2026-08-27)
@@ -52,7 +52,7 @@ em duas: `Layout.fillWidth` no espaçador, nunca `flex-wrap`.
 
 ### Task 1: O coração na linha da faixa
 
-- [ ] Em `src/TrackRow.qml`, acrescentar às propriedades do topo (junto de
+- [x] Em `src/TrackRow.qml`, acrescentar às propriedades do topo (junto de
       `property bool showCollectButton: false`):
 
 ```qml
@@ -61,7 +61,7 @@ em duas: `Layout.fillWidth` no espaçador, nunca `flex-wrap`.
     signal likeToggled
 ```
 
-- [ ] No `RowLayout` interno, inserir o botão IMEDIATAMENTE ANTES do `SourceBadge`:
+- [x] No `RowLayout` interno, inserir o botão IMEDIATAMENTE ANTES do `SourceBadge`:
 
 ```qml
             // Sempre presente, nunca só no hover: um coração que aparece ao passar o mouse é
@@ -79,9 +79,9 @@ em duas: `Layout.fillWidth` no espaçador, nunca `flex-wrap`.
             }
 ```
 
-- [ ] verificação mecânica da task: `grep -c 'signal likeToggled' src/TrackRow.qml` → `1` e
+- [x] verificação mecânica da task: `grep -c 'signal likeToggled' src/TrackRow.qml` → `1` e
       `cmake --build build` → exit 0
-- [ ] commit:
+- [x] commit:
 
 ```bash
 git add src/TrackRow.qml
@@ -90,7 +90,7 @@ git commit -m "feat(ui): heart on every track row"
 
 ### Task 2: `FilterChips.qml` — os filtros em uma linha só
 
-- [ ] Criar `src/FilterChips.qml`:
+- [x] Criar `src/FilterChips.qml`:
 
 ```qml
 import QtQuick
@@ -214,10 +214,10 @@ RowLayout {
 }
 ```
 
-- [ ] Registrar em `CMakeLists.txt`, na lista `QML_FILES`: `src/FilterChips.qml`
-- [ ] verificação mecânica da task: `cmake --build build` → exit 0 e
+- [x] Registrar em `CMakeLists.txt`, na lista `QML_FILES`: `src/FilterChips.qml`
+- [x] verificação mecânica da task: `cmake --build build` → exit 0 e
       `grep -c 'signal chosen' src/FilterChips.qml` → `1`
-- [ ] commit:
+- [x] commit:
 
 ```bash
 git add src/FilterChips.qml CMakeLists.txt
@@ -226,7 +226,7 @@ git commit -m "feat(ui): single-line filter row with a menu for the automatic li
 
 ### Task 3: `LibraryPane.qml` — o miolo de verdade
 
-- [ ] Substituir o conteúdo inteiro do stub `src/LibraryPane.qml` por:
+- [x] Substituir o conteúdo inteiro do stub `src/LibraryPane.qml` por:
 
 ```qml
 import QtQuick
@@ -348,8 +348,8 @@ Rectangle {
 }
 ```
 
-- [ ] verificação mecânica da task: `cmake --build build` → exit 0
-- [ ] commit:
+- [x] verificação mecânica da task: `cmake --build build` → exit 0
+- [x] commit:
 
 ```bash
 git add src/LibraryPane.qml
@@ -358,14 +358,14 @@ git commit -m "feat(ui): the library pane, filters and list in one place"
 
 ### Task 4: Ligar o pane ao roteamento de `Main.qml`
 
-- [ ] Em `src/Main.qml`, acrescentar ao `clauseFor(section, id)` existente o caso do filtro
+- [x] Em `src/Main.qml`, acrescentar ao `clauseFor(section, id)` existente o caso do filtro
       novo, antes do `default:`:
 
 ```qml
         case "liked":      return { clause: LibraryBrowser.clauseForLiked(), bindings: [] }
 ```
 
-- [ ] Substituir o filho `LibraryPane { }` do `StackLayout` por:
+- [x] Substituir o filho `LibraryPane { }` do `StackLayout` por:
 
 ```qml
             LibraryPane {
@@ -381,8 +381,8 @@ git commit -m "feat(ui): the library pane, filters and list in one place"
             }
 ```
 
-- [ ] Acrescentar às propriedades de `Main.qml`: `property string libraryFilter: "all"`
-- [ ] Acrescentar a `Main.qml` as duas funções que o delegate chama:
+- [x] Acrescentar às propriedades de `Main.qml`: `property string libraryFilter: "all"`
+- [x] Acrescentar a `Main.qml` as duas funções que o delegate chama:
 
 ```qml
     function activateTrack(index) {
@@ -402,9 +402,9 @@ git commit -m "feat(ui): the library pane, filters and list in one place"
       (`queuePaths` substitui o antigo `queue.paths` do `QueuePanel`, que saiu da tela nesta
       direção; declare `property var queuePaths: []` junto das outras propriedades.)
 
-- [ ] verificação mecânica da task:
+- [x] verificação mecânica da task:
       `cmake --build build && test "$(QT_QPA_PLATFORM=offscreen timeout 8 ./build/appmelodia 2>&1 | grep -Ec 'is not a type|Unable to assign|ReferenceError')" -eq 0` → exit 0
-- [ ] commit:
+- [x] commit:
 
 ```bash
 git add src/Main.qml
@@ -413,7 +413,7 @@ git commit -m "feat(ui): route the library filters through the pane"
 
 ### Task 5: A linha de filtros cabe mesmo?
 
-- [ ] Medir, não olhar: acrescentar temporariamente ao `FilterChips`:
+- [x] Medir, não olhar: acrescentar temporariamente ao `FilterChips`:
 
 ```qml
     Timer {
@@ -422,13 +422,13 @@ git commit -m "feat(ui): route the library filters through the pane"
     }
 ```
 
-- [ ] Rodar:
+- [x] Rodar:
       `QT_LOGGING_RULES="*.debug=true" QT_FORCE_STDERR_LOGGING=1 QT_QPA_PLATFORM=offscreen timeout 6 ./build/appmelodia 2>&1 | grep -a MEDIDA`
       → `chips` tem de ser ≤ `disponivel`. Se estourar, encolha `Theme.marginL` para
       `Theme.marginM` no padding do `Chip` e meça de novo; NÃO deixe quebrar em duas linhas.
-- [ ] Remover o `Timer`.
-- [ ] verificação mecânica da task: `test "$(grep -c 'MEDIDA' src/FilterChips.qml)" -eq 0` → exit 0
-- [ ] commit:
+- [x] Remover o `Timer`.
+- [x] verificação mecânica da task: `test "$(grep -c 'MEDIDA' src/FilterChips.qml)" -eq 0` → exit 0
+- [x] commit:
 
 ```bash
 git add src/FilterChips.qml
@@ -450,3 +450,28 @@ git commit -m "fix(ui): keep the filter row on one line"
 - Ordenar a lista por coluna (clicar no cabeçalho) — a direção aprovada não tem cabeçalho de
   coluna; se você quiser isso depois, é fatia nova.
 - Arrastar faixa para dentro de coleção: o botão `+` existente continua sendo o gesto.
+
+## Divergências entre o plano e o desenho (2026-08-27, execução)
+
+Onde os dois discordaram, a aparência seguiu `design/Biblioteca.dc.html` e a API seguiu o
+plano — regra do run.
+
+- **`TrackRow` virou tabular.** O plano só acrescentava o coração à linha existente; o desenho
+  mostra colunas fixas (número · título/artista · álbum · coração · duração), sem miniatura de
+  capa por linha e com zebra a cada duas linhas. A linha caiu de 54 px para 38 px, que é o que
+  torna a lista "densa". A API (`title`, `artist`, `album`, `durationMs`, `coverUrl`,
+  `isCurrent`, `trackId`, `showCollectButton`, `sourceKind`, `activated`, `collectRequested`)
+  ficou intacta; entraram `liked`, `likeToggled`, `position` e `alternate`.
+- **O miolo não tem moldura.** No desenho ele é o próprio fundo da janela; o stub era um
+  `Rectangle` com borda. Uma caixa em volta da lista só roubaria largura.
+- **A barra de busca entrou no miolo.** Está no desenho da biblioteca e não estava no plano.
+  Ela não busca: abre o overlay da fatia `busca-overlay` (mesma coisa que `Ctrl+K`).
+- **A lista de grupos entrou no pane.** Sem ela, clicar em "Artistas" mostrava uma tela
+  parada: o `Main.qml` já calculava os grupos e ninguém os desenhava.
+- **Chips recolhem em janela estreita.** Em 720 px os sete chips pedem 532 px e só há 364.
+  Em vez de espremer o texto (ou embrulhar em duas linhas, reprovado), "Gêneros" e "Tags"
+  entram no menu e "Curtidas" fica só com o coração. Medido pelo gate nas duas larguras.
+- **O contador de curtidas saiu de dentro do chip.** No desenho o chip "Curtidas" não carrega
+  número; ele virou um número solto ao lado, no mesmo tom do resto dos metadados.
+- **`TrackListModel.totalDurationMs`** foi acrescentado (não estava no plano) porque o
+  cabeçalho do desenho anuncia "1.204 faixas · 3 d 11 h".
