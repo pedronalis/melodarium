@@ -81,6 +81,37 @@ private slots:
         QCOMPARE(scalar(QStringLiteral("PRAGMA user_version")), before);
     }
 
+    void migration4AddsLikedColumn()
+    {
+        QTemporaryDir dir;
+        const QString dbPath = dir.filePath(QStringLiteral("m4.db"));
+        QVERIFY(Database::openConnection(QStringLiteral("m4"), dbPath));
+        {
+            QSqlDatabase db = QSqlDatabase::database(QStringLiteral("m4"));
+            QVERIFY(Database::migrate(db));
+
+            QSqlQuery v(db);
+            QVERIFY(v.exec(QStringLiteral("PRAGMA user_version")));
+            QVERIFY(v.next());
+            // The liked_at script is the seventh migration, so a fully migrated database sits
+            // at 7 or higher once later slices append their own.
+            QVERIFY(v.value(0).toInt() >= 7);
+
+            QSqlQuery c(db);
+            QVERIFY(c.exec(QStringLiteral("SELECT COUNT(*) FROM pragma_table_info('tracks') "
+                                          "WHERE name = 'liked_at'")));
+            QVERIFY(c.next());
+            QCOMPARE(c.value(0).toInt(), 1);
+
+            QSqlQuery i(db);
+            QVERIFY(i.exec(QStringLiteral("SELECT COUNT(*) FROM sqlite_master "
+                                          "WHERE type='index' AND name='idx_tracks_liked'")));
+            QVERIFY(i.next());
+            QCOMPARE(i.value(0).toInt(), 1);
+        }
+        QSqlDatabase::removeDatabase(QStringLiteral("m4"));
+    }
+
     void tagReaderReadsUtf8Metadata()
     {
         const TrackRecord r = TagReader::read(m_music.filePath(QStringLiteral("one.flac")));
