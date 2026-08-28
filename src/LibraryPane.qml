@@ -17,6 +17,9 @@ Item {
     property var groups: []
     property bool showingGroups: false
     property string groupTitle: ""
+    // The design puts "Ólafur Arnalds · 8 faixas · 35 min" in the header: without the artist,
+    // two same-named albums by different artists are indistinguishable (design/Main.dc.html:82).
+    property string groupSubtitle: ""
     property bool scanning: false
 
     // Lidas por `appmelodia --measure`: a linha de filtros nunca pode pedir mais largura do
@@ -31,6 +34,7 @@ Item {
     signal collectRequested(int trackId)
     signal searchRequested
     signal queueActivated(int queueIndex)
+    signal collectAllRequested
 
     function reload() {
         chips.likedCount = LibraryBrowser.likedCount()
@@ -84,6 +88,19 @@ Item {
                 color: Theme.mOnSurface
             }
 
+            // The album artist, right before the count, so the header reads as one sentence:
+            // "Island Songs · Ólafur Arnalds · 8 faixas · 35 min".
+            Text {
+                Layout.alignment: Qt.AlignBaseline
+                Layout.maximumWidth: root.width * 0.3
+                visible: root.groupSubtitle !== "" && !root.showingGroups
+                text: root.groupSubtitle + " ·"
+                elide: Text.ElideRight
+                font.family: Theme.fontFamily
+                font.pointSize: Theme.fontSizeS
+                color: Theme.mOnSurfaceVariant
+            }
+
             Text {
                 Layout.alignment: Qt.AlignBaseline
                 text: root.showingGroups
@@ -105,6 +122,51 @@ Item {
                 font.family: Theme.fontFamily
                 font.pointSize: Theme.fontSizeS
                 color: Theme.mOnSurfaceVariant
+            }
+
+            // Doze faixas numa coleção custavam doze idas ao menu da linha. Este botão joga
+            // a lista inteira que está na tela de uma vez (design/Main.dc.html:84-87).
+            Rectangle {
+                Layout.preferredHeight: Math.round(24 * Theme.uiScale)
+                Layout.preferredWidth: rotuloColecao.implicitWidth + Theme.marginM * 2
+                visible: !root.showingGroups && list.count > 0
+                radius: Theme.iRadiusS
+                color: coletarArea.containsMouse ? Theme.mSurfaceVariant : "transparent"
+                border.width: Theme.borderS
+                border.color: Theme.mSurfaceVariant
+
+                Behavior on color {
+                    ColorAnimation { duration: Theme.animationFast; easing.type: Theme.easingType }
+                }
+
+                Row {
+                    id: rotuloColecao
+                    anchors.centerIn: parent
+                    spacing: Theme.marginS
+
+                    Text {
+                        anchors.verticalCenter: parent.verticalCenter
+                        text: Icons.get("plus")
+                        font.family: Icons.fontFamily
+                        font.pointSize: Theme.fontSizeXS
+                        color: Theme.mOnSurfaceVariant
+                    }
+                    Text {
+                        anchors.verticalCenter: parent.verticalCenter
+                        text: qsTr("Coleção")
+                        font.family: Theme.fontFamily
+                        font.pointSize: Theme.fontSizeS
+                        color: Theme.mOnSurfaceVariant
+                    }
+                }
+
+                MouseArea {
+                    id: coletarArea
+                    anchors.fill: parent
+                    hoverEnabled: true
+                    cursorShape: Qt.PointingHandCursor
+                    onClicked: root.collectAllRequested()
+                }
             }
 
             // Reler a pasta é raro, então o botão é discreto: só o ícone, sem rótulo.
