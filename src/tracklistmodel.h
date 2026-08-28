@@ -74,6 +74,10 @@ public:
     Q_INVOKABLE QStringList allPaths() const;
     Q_INVOKABLE QVariantMap trackAt(int row) const;
 
+    // Curtir é um clique numa linha, não um motivo para recarregar a lista: isto altera a
+    // linha em memória e avisa a ListView de UM papel de UMA linha.
+    Q_INVOKABLE void applyLiked(int trackId, bool liked);
+
     // Test seam: fill the model without touching SQLite.
     void setRowsForTesting(const QList<TrackRow> &rows);
 
