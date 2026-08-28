@@ -75,8 +75,11 @@ verde, 9/9 alvos de teste, integrado em `main`. As capturas estão em `docs/tela
 
 ## Verificação
 
-- `ctest --test-dir build --output-on-failure` → `100% tests passed, 0 out of 9` · 2026-08-28 08:57
-- `bash tools/check-layout.sh` → 11 medidas ok · 2026-08-28 08:57
+- `ctest --test-dir build --output-on-failure` → `100% tests passed, 0 out of 9` · 2026-08-28 12:10 (pós-merge)
+- `bash tools/check-layout.sh` → 11 medidas ok · 2026-08-28 12:10 (pós-merge)
+- `bash tools/check-orfaos.sh` → `0 item(ns) sem porta de entrada`, mais 6 em reserva
+  declarada que ele imprime toda vez · 2026-08-28 12:10 (pós-merge)
+- erros de QML em tela virtual, nas 6 telas e na busca aberta → 0 · 2026-08-28 12:10 (pós-merge)
 - `./build/appmelodia --scan` → `27 faixas` no banco · 2026-08-28
 
 ## Calibração de custo
