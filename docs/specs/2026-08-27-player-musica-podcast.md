@@ -1,6 +1,6 @@
 # Player de música e podcast — esqueleto
 
-**Data:** 2026-08-27 · **Nome provisório:** melodia (definir com `/batiza`)
+**Data:** 2026-08-27 · **Nome provisório:** melodarium (definir com `/batiza`)
 **Modo:** esqueleto (não é SPEC completo — decisões que amarram, o resto se decide construindo)
 
 ---

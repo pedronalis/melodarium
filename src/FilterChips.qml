@@ -1,7 +1,7 @@
 import QtQuick
 import QtQuick.Controls
 import QtQuick.Layouts
-import Melodia.App
+import Melodarium.App
 
 // A linha de filtros do desenho aprovado. UMA linha, sempre: o Pedro reprovou explicitamente
 // a versão que quebrava em duas fileiras de chips. Os quatro eixos automáticos recolhem num

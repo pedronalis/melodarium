@@ -38,7 +38,7 @@ Para fotografar estados que dependem de dados, dá para redirecionar o banco int
 no do usuário:
 
 ```bash
-XDG_DATA_HOME=/tmp/md/data XDG_CONFIG_HOME=/tmp/md/cfg ./build/appmelodia --measure 1100 --shot /tmp/tela.png
+XDG_DATA_HOME=/tmp/md/data XDG_CONFIG_HOME=/tmp/md/cfg ./build/melodarium --measure 1100 --shot /tmp/tela.png
 ```
 
 O app cria e migra o banco no primeiro arranque; depois é só semear com `sqlite3`. Somando

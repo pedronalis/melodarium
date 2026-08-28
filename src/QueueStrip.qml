@@ -2,7 +2,7 @@ pragma ComponentBehavior: Bound
 
 import QtQuick
 import QtQuick.Layouts
-import Melodia.App
+import Melodarium.App
 
 // "A seguir na fila": o rótulo, quatro capas pequenas e o quadradinho "+N" com quantas
 // faltam (design/Main.dc.html:141-152). Mora no pé da coluna do meio, não no painel da

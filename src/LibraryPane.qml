@@ -2,7 +2,7 @@ pragma ComponentBehavior: Bound
 
 import QtQuick
 import QtQuick.Layouts
-import Melodia.App
+import Melodarium.App
 
 // O miolo da biblioteca do desenho aprovado (design/Biblioteca.dc.html): cabeçalho com a
 // contagem, uma barra de busca, UMA linha de filtros e a lista densa. Sem moldura própria —
@@ -22,7 +22,7 @@ Item {
     property string groupSubtitle: ""
     property bool scanning: false
 
-    // Lidas por `appmelodia --measure`: a linha de filtros nunca pode pedir mais largura do
+    // Lidas por `melodarium --measure`: a linha de filtros nunca pode pedir mais largura do
     // que tem. Ela não quebra em duas — ela espreme, e o Pedro reprovou as duas coisas.
     readonly property alias chipsImplicitWidth: chips.implicitWidth
     readonly property alias chipsWidth: chips.width

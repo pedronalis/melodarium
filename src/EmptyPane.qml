@@ -3,7 +3,7 @@ pragma ComponentBehavior: Bound
 import QtQuick
 import QtQuick.Dialogs
 import QtQuick.Layouts
-import Melodia.App
+import Melodarium.App
 
 // O convite da tela "nada tocando" (design/SemMusica.dc.html): em vez de uma capa cinza e um
 // transporte que não controla nada, o app oferece três saídas — voltar para onde parou, jogar
@@ -292,13 +292,13 @@ Item {
             visible: !root.temBiblioteca
             horizontalAlignment: root.framed ? Text.AlignHCenter : Text.AlignLeft
             wrapMode: Text.WordWrap
-            text: qsTr("Escolha a pasta onde sua música está: o melodia lê os arquivos, nunca escreve neles.")
+            text: qsTr("Escolha a pasta onde sua música está: o melodarium lê os arquivos, nunca escreve neles.")
             font.family: Theme.fontFamily
             font.pixelSize: Theme.fontSizeS
             color: Theme.cFaint
         }
 
-        MelodiaButton {
+        MelodariumButton {
             Layout.alignment: Qt.AlignHCenter
             visible: !root.temBiblioteca
             text: qsTr("Escolher pasta")

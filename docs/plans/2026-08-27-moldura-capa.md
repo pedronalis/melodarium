@@ -140,7 +140,7 @@ git commit -m "feat(library): look up the playing track by its file path"
 ```qml
 import QtQuick
 import QtQuick.Layouts
-import Melodia.App
+import Melodarium.App
 
 Rectangle {
     id: root
@@ -229,7 +229,7 @@ git commit -m "feat(ui): icon rail replaces the wide sidebar"
 ```qml
 import QtQuick
 import QtQuick.Layouts
-import Melodia.App
+import Melodarium.App
 
 Rectangle {
     id: root
@@ -547,7 +547,7 @@ git commit -m "build(ui): register the rail and panel, retire the transport bar"
 ```qml
 // src/LibraryPane.qml — stub, substituído pela fatia biblioteca-densa
 import QtQuick
-import Melodia.App
+import Melodarium.App
 
 Rectangle {
     color: Theme.mSurfaceVariant
@@ -562,7 +562,7 @@ Rectangle {
       até ela existir, troque a chamada por `console.log("busca ainda não implementada")`.
 
 - [x] verificação mecânica da task:
-      `cmake --build build && QT_QPA_PLATFORM=offscreen timeout 8 ./build/appmelodia 2>&1 | grep -Ec "is not a type|Unable to assign|ReferenceError"` → `0`
+      `cmake --build build && QT_QPA_PLATFORM=offscreen timeout 8 ./build/melodarium 2>&1 | grep -Ec "is not a type|Unable to assign|ReferenceError"` → `0`
 - [x] commit:
 
 ```bash
@@ -585,7 +585,7 @@ git commit -m "feat(ui): rebuild the window around the now-playing panel"
 ```
 
 - [x] Rodar e ler a medida:
-      `QT_LOGGING_RULES="*.debug=true" QT_FORCE_STDERR_LOGGING=1 QT_QPA_PLATFORM=offscreen timeout 6 ./build/appmelodia 2>&1 | grep -a MEDIDA`
+      `QT_LOGGING_RULES="*.debug=true" QT_FORCE_STDERR_LOGGING=1 QT_QPA_PLATFORM=offscreen timeout 6 ./build/melodarium 2>&1 | grep -a MEDIDA`
       → o miolo tem de ficar ≥ 360 (numa janela de 1100: rail 56 + painel 392 + miolo ~652).
 - [x] Remover o `Timer` depois de ler a medida.
 - [x] verificação mecânica da task:
@@ -601,10 +601,10 @@ git commit -m "fix(ui): keep the pane above its minimum width"
 
 - `cmake -B build -G Ninja && cmake --build build` → exit 0
 - `ctest --test-dir build --output-on-failure` → `100% tests passed`
-- `test "$(QT_QPA_PLATFORM=offscreen timeout 8 ./build/appmelodia 2>&1 | grep -Ec 'is not a type|Unable to assign|ReferenceError')" -eq 0` → exit 0
+- `test "$(QT_QPA_PLATFORM=offscreen timeout 8 ./build/melodarium 2>&1 | grep -Ec 'is not a type|Unable to assign|ReferenceError')" -eq 0` → exit 0
 - `grep -q "trackForPath" src/librarybrowser.h` → exit 0
 - `test "$(ls src/PlayerBar.qml 2>/dev/null | wc -l)" -eq 0` → exit 0
-- **Decisão humana:** o Pedro abre `./build/appmelodia` numa sessão gráfica e confirma que a
+- **Decisão humana:** o Pedro abre `./build/melodarium` numa sessão gráfica e confirma que a
   janela ficou como a tela 1 do canvas — capa grande à esquerda, ícones na lateral, miolo à
   direita. Sem esse OK a fatia não fecha.
 

@@ -1,7 +1,7 @@
 pragma Singleton
 
 import QtQuick
-import Melodia.App
+import Melodarium.App
 
 QtObject {
     id: theme

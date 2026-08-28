@@ -1,6 +1,6 @@
 import QtQuick
 import QtQuick.Controls
-import Melodia.App
+import Melodarium.App
 
 // A velocidade de fala como o desenho do podcast mostra: uma pílula discreta com o valor
 // atual, e um menu com os passos. Seis botões lado a lado não caberiam no transporte.

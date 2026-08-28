@@ -5,7 +5,7 @@
 # usuário. A segunda passada, na janela mínima, é o que pega a linha de filtros espremida.
 set -uo pipefail
 
-BIN="${1:-./build/appmelodia}"
+BIN="${1:-./build/melodarium}"
 if [ ! -x "$BIN" ]; then
     echo "check-layout: binário não encontrado ou não executável: $BIN"
     exit 1

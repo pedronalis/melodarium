@@ -5,7 +5,7 @@ import QtQuick
 import QtQuick.Controls
 import QtQuick.Dialogs
 import QtQuick.Layouts
-import Melodia.App
+import Melodarium.App
 
 // O app não tinha nenhum lugar de ajuste. O efeito colateral que mais dói: depois de
 // escolher a pasta uma vez na tela de boas-vindas, não havia como trocá-la nunca mais.
@@ -64,7 +64,7 @@ Popup {
                     color: Theme.cTitle
                 }
 
-                MelodiaButton {
+                MelodariumButton {
                     text: qsTr("Trocar")
                     outlined: true
                     enabled: !Database.scanning
@@ -87,14 +87,14 @@ Popup {
 
                 Item { Layout.fillWidth: true; visible: !Database.scanning }
 
-                MelodiaButton {
+                MelodariumButton {
                     text: qsTr("Cancelar varredura")
                     outlined: true
                     visible: Database.scanning
                     onClicked: Database.cancelScan()
                 }
 
-                MelodiaButton {
+                MelodariumButton {
                     text: qsTr("Reler a pasta")
                     outlined: true
                     visible: !Database.scanning && Database.libraryPath !== ""
@@ -151,7 +151,7 @@ Popup {
                 // Preenchido quando ligado, contornado quando não — o par visual que o app
                 // já usa. Um Chip some aqui: a cor de "selecionado" dele é a mesma cor do
                 // fundo desta gaveta, e o controle deixaria de parecer clicável.
-                MelodiaButton {
+                MelodariumButton {
                     id: nivelar
 
                     property bool checked: false
@@ -190,7 +190,7 @@ Popup {
                     }
                 }
 
-                MelodiaButton {
+                MelodariumButton {
                     id: exclusiva
 
                     property bool checked: false
@@ -210,7 +210,7 @@ Popup {
             Layout.fillWidth: true
             spacing: Theme.marginS
             Item { Layout.fillWidth: true }
-            MelodiaButton {
+            MelodariumButton {
                 text: qsTr("Fechar")
                 onClicked: root.close()
             }
@@ -219,13 +219,13 @@ Popup {
 
     // Uma preferência que não sobrevive ao fechar o app não é uma preferência.
     function carregar() {
-        nivelar.checked = melodiaSettings.replayGain
-        exclusiva.checked = melodiaSettings.exclusiveOutput
+        nivelar.checked = melodariumSettings.replayGain
+        exclusiva.checked = melodariumSettings.exclusiveOutput
     }
 
     function aplicar() {
-        melodiaSettings.replayGain = nivelar.checked
-        melodiaSettings.exclusiveOutput = exclusiva.checked
+        melodariumSettings.replayGain = nivelar.checked
+        melodariumSettings.exclusiveOutput = exclusiva.checked
         AudioEngine.setReplayGainMode(nivelar.checked ? "track" : "no")
         AudioEngine.setExclusiveOutput(exclusiva.checked)
     }
@@ -233,7 +233,7 @@ Popup {
     onOpened: root.carregar()
 
     Settings {
-        id: melodiaSettings
+        id: melodariumSettings
         category: "audio"
         property bool replayGain: false
         property bool exclusiveOutput: false

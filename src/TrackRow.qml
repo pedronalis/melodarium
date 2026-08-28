@@ -1,6 +1,6 @@
 import QtQuick
 import QtQuick.Layouts
-import Melodia.App
+import Melodarium.App
 
 // Uma linha da lista densa do desenho aprovado (design/Biblioteca.dc.html): número, título
 // com o artista embaixo, álbum, curtir e duração. Sem miniatura de capa por linha — a capa

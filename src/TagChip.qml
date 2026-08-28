@@ -1,6 +1,6 @@
 import QtQuick
 import QtQuick.Layouts
-import Melodia.App
+import Melodarium.App
 
 // A etiqueta do desenho (design/Main.dc.html:110-114): pílula de canto 12, fundo um degrau
 // acima do painel, texto de corpo. A variante tracejada é o convite a criar uma nova — no

@@ -63,7 +63,7 @@ Timer {
 
 ```bash
 QT_LOGGING_RULES="*.debug=true" QT_FORCE_STDERR_LOGGING=1 \
-  QT_QPA_PLATFORM=offscreen timeout 6 ./build/appmelodia 2>&1 | grep -a MEDIDA
+  QT_QPA_PLATFORM=offscreen timeout 6 ./build/melodarium 2>&1 | grep -a MEDIDA
 ```
 
 O `offscreen` serve: o layout é calculado do mesmo jeito sem tela, então isso roda em qualquer

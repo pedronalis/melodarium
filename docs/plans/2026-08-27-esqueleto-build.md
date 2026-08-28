@@ -1,6 +1,6 @@
 ---
 slug: esqueleto-build
-feature: melodia
+feature: melodarium
 status: concluido
 depende-de: []
 decisao-humana: sim
@@ -13,9 +13,9 @@ spec: docs/specs/2026-08-27-player-musica-podcast.md
 lida do `colors.json` do usuário, tipografia Inter, ícones Tabler, tokens de forma e
 movimento. A janela ainda não faz nada além de existir com a cara certa.
 
-**Arquitetura:** Um único módulo QML (`Melodia.App`) declarado por `qt_add_qml_module` sobre
+**Arquitetura:** Um único módulo QML (`Melodarium.App`) declarado por `qt_add_qml_module` sobre
 `qt_add_executable`. Todo arquivo C++ e QML mora em `src/` **plano** (sem subpastas) — decisão
-deliberada: `qt_add_qml_module` gera `appmelodia_qmltyperegistrations.cpp` que inclui headers
+deliberada: `qt_add_qml_module` gera `melodarium_qmltyperegistrations.cpp` que inclui headers
 pelo nome puro em `<>`, e subpastas exigiriam um `target_include_directories` por pasta,
 multiplicando a chance do erro descrito na Task 1. A paleta vem de uma classe C++
 (`ColorSchemeProvider`) que lê o JSON do Noctalia com `QFileSystemWatcher`, e um singleton QML
@@ -44,8 +44,8 @@ Wayland/Linux-only — não existe port").
 
 - **Consome:** nada (fatia folha).
 - **Produz** — todas as fatias seguintes dependem destas assinaturas verbatim:
-  - Módulo QML de URI `Melodia.App`, versão `1.0`. Todo QML de outra fatia começa com
-    `import Melodia.App`.
+  - Módulo QML de URI `Melodarium.App`, versão `1.0`. Todo QML de outra fatia começa com
+    `import Melodarium.App`.
   - Singleton QML `Theme` (arquivo `src/Theme.qml`), com estas propriedades:
     - cores: `mSurface`, `mOnSurface`, `mSurfaceVariant`, `mOnSurfaceVariant`, `mPrimary`,
       `mOnPrimary`, `mSecondary`, `mOnSecondary`, `mTertiary`, `mOnTertiary`, `mError`,
@@ -68,16 +68,16 @@ Wayland/Linux-only — não existe port").
     header `src/colorschemeprovider.h`), com `Q_PROPERTY` `QColor` para as 16 chaves acima,
     `Q_PROPERTY(bool usingNoctalia READ usingNoctalia NOTIFY colorsChanged)` e o sinal
     `void colorsChanged()`. Consumido só pelo `Theme.qml`; nenhuma outra fatia fala com ele.
-  - Alvo CMake do executável: `appmelodia`. Toda fatia que adicionar arquivo C++ acrescenta
-    à lista de `qt_add_executable(appmelodia ...)` e, se o tipo for exposto ao QML, também
+  - Alvo CMake do executável: `melodarium`. Toda fatia que adicionar arquivo C++ acrescenta
+    à lista de `qt_add_executable(melodarium ...)` e, se o tipo for exposto ao QML, também
     ao bloco `SOURCES` de `qt_add_qml_module`.
 
 ## Tasks
 
 ### Task 1: Esqueleto CMake + janela que abre
 
-O `target_include_directories(appmelodia PRIVATE src)` da última linha **não é opcional**:
-sem ele, o `appmelodia_qmltyperegistrations.cpp` gerado falha o `__has_include(<...>)` em
+O `target_include_directories(melodarium PRIVATE src)` da última linha **não é opcional**:
+sem ele, o `melodarium_qmltyperegistrations.cpp` gerado falha o `__has_include(<...>)` em
 silêncio e o build morre numa cascata de ~15 erros de template que não apontam para a causa.
 Armadilha reproduzida no research (`qt-ponte.md` §Armadilha 1).
 
@@ -85,7 +85,7 @@ Armadilha reproduzida no research (`qt-ponte.md` §Armadilha 1).
 
 ```cmake
 cmake_minimum_required(VERSION 3.21)
-project(melodia LANGUAGES CXX)
+project(melodarium LANGUAGES CXX)
 
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
@@ -94,7 +94,7 @@ set(CMAKE_AUTOMOC ON)
 find_package(Qt6 REQUIRED COMPONENTS Core Quick)
 qt_standard_project_setup(REQUIRES 6.5)
 
-qt_add_executable(appmelodia
+qt_add_executable(melodarium
     src/main.cpp
     src/colorschemeprovider.h
     src/colorschemeprovider.cpp
@@ -107,8 +107,8 @@ qt_add_executable(appmelodia
 set_source_files_properties(src/Theme.qml PROPERTIES QT_QML_SINGLETON_TYPE TRUE)
 set_source_files_properties(src/Icons.qml PROPERTIES QT_QML_SINGLETON_TYPE TRUE)
 
-qt_add_qml_module(appmelodia
-    URI Melodia.App
+qt_add_qml_module(melodarium
+    URI Melodarium.App
     VERSION 1.0
     QML_FILES
         src/Main.qml
@@ -122,9 +122,9 @@ qt_add_qml_module(appmelodia
 )
 
 # OBRIGATORIO: sem isto o build quebra com erros de template que nao apontam a causa.
-target_include_directories(appmelodia PRIVATE src)
+target_include_directories(melodarium PRIVATE src)
 
-target_link_libraries(appmelodia PRIVATE Qt6::Core Qt6::Quick)
+target_link_libraries(melodarium PRIVATE Qt6::Core Qt6::Quick)
 
 enable_testing()
 add_subdirectory(tests)
@@ -139,14 +139,14 @@ add_subdirectory(tests)
 int main(int argc, char *argv[])
 {
     QGuiApplication app(argc, argv);
-    app.setApplicationName(QStringLiteral("melodia"));
-    app.setOrganizationName(QStringLiteral("melodia"));
+    app.setApplicationName(QStringLiteral("melodarium"));
+    app.setOrganizationName(QStringLiteral("melodarium"));
 
     QQmlApplicationEngine engine;
     QObject::connect(&engine, &QQmlApplicationEngine::objectCreationFailed,
                      &app, []() { QCoreApplication::exit(-1); },
                      Qt::QueuedConnection);
-    engine.loadFromModule("Melodia.App", "Main");
+    engine.loadFromModule("Melodarium.App", "Main");
 
     return app.exec();
 }
@@ -162,7 +162,7 @@ Window {
     width: 1100
     height: 700
     visible: true
-    title: qsTr("melodia")
+    title: qsTr("melodarium")
     color: "#070722"
 }
 ```
@@ -177,7 +177,7 @@ compile_commands.json
 ```
 
 - [x] verificação mecânica da task: `cmake -B build -G Ninja && cmake --build build` → exit 0
-      e o binário existe: `test -x build/appmelodia && echo OK` → `OK`
+      e o binário existe: `test -x build/melodarium && echo OK` → `OK`
 - [x] commit:
 
 ```bash
@@ -355,7 +355,7 @@ git commit -m "feat(theme): read Noctalia color scheme with live reload and safe
 
 Valores literais extraídos de `Commons/Style.qml` do Noctalia com todos os ratios em 1.0
 (research §2-4). Não portamos o sistema de `radiusRatio`/`uiScaleRatio` configurável: o
-melodia não tem UI-scale ajustável nesta versão.
+melodarium não tem UI-scale ajustável nesta versão.
 
 - [x] Criar `src/Theme.qml`:
 
@@ -363,7 +363,7 @@ melodia não tem UI-scale ajustável nesta versão.
 pragma Singleton
 
 import QtQuick
-import Melodia.App
+import Melodarium.App
 
 QtObject {
     // --- Colors: passthrough from the C++ provider (falls back when Noctalia is absent) ---
@@ -434,7 +434,7 @@ QtObject {
 
 - [x] verificação mecânica da task: o qmldir gerado precisa marcar `singleton` — sem isso o
       Theme resolve para `undefined` em silêncio:
-      `cmake --build build && grep -h "singleton Theme" build/Melodia/App/qmldir` →
+      `cmake --build build && grep -h "singleton Theme" build/Melodarium/App/qmldir` →
       `singleton Theme 1.0 src/Theme.qml`
 - [x] commit:
 
@@ -469,7 +469,7 @@ QtObject {
     id: root
 
     readonly property FontLoader loader: FontLoader {
-        source: "qrc:/qt/qml/Melodia/App/assets/fonts/noctalia-tabler-icons.ttf"
+        source: "qrc:/qt/qml/Melodarium/App/assets/fonts/noctalia-tabler-icons.ttf"
     }
     readonly property string fontFamily: loader.name
 
@@ -519,7 +519,7 @@ QtObject {
 ```qml
 import QtQuick
 import QtQuick.Window
-import Melodia.App
+import Melodarium.App
 
 Window {
     id: root
@@ -528,7 +528,7 @@ Window {
     minimumWidth: 720
     minimumHeight: 480
     visible: true
-    title: qsTr("melodia")
+    title: qsTr("melodarium")
     color: Theme.mSurface
 
     Rectangle {
@@ -556,7 +556,7 @@ Window {
             }
             Text {
                 anchors.horizontalCenter: parent.horizontalCenter
-                text: qsTr("melodia")
+                text: qsTr("melodarium")
                 font.family: Theme.fontFamily
                 font.pointSize: Theme.fontSizeXXL
                 font.weight: Theme.fontWeightSemiBold
@@ -575,7 +575,7 @@ Window {
 ```
 
 - [x] verificação mecânica da task: a fonte precisa estar embutida no binário —
-      `cmake --build build && strings build/appmelodia | grep -c "noctalia-tabler-icons.ttf"`
+      `cmake --build build && strings build/melodarium | grep -c "noctalia-tabler-icons.ttf"`
       → número maior que `0`
 - [x] commit:
 
@@ -686,7 +686,7 @@ do produto (spec §Pra quê: "Player feio não se abre").
       `MELODIA_DEV_QML`, `QFileSystemWatcher` + `engine.clearComponentCache()`).
 - [x] Criar `README.md` documentando: dependências (`qt6-qtbase-devel qt6-qtdeclarative-devel`),
       comandos de build e teste, a variável `MELODIA_DEV_QML`, e a linha de debug obrigatória
-      nesta máquina — `QT_LOGGING_RULES="*.debug=true" QT_FORCE_STDERR_LOGGING=1 ./build/appmelodia`
+      nesta máquina — `QT_LOGGING_RULES="*.debug=true" QT_FORCE_STDERR_LOGGING=1 ./build/melodarium`
       — porque o Fedora instala `/usr/share/qt6/qtlogging.ini` com `*.debug=false` e manda o
       resto para o journald, fazendo todo `qDebug`/`console.log` sumir sem erro.
 - [x] Registrar no README a licença MIT da fonte Tabler, apontando `assets/fonts/tabler-icons-license.txt`.
@@ -703,11 +703,11 @@ git commit -m "docs: build, test and QML dev-mode instructions"
 
 - `cmake -B build -G Ninja && cmake --build build` → exit 0
 - `ctest --test-dir build --output-on-failure` → `100% tests passed`
-- `grep -h "singleton Theme" build/Melodia/App/qmldir` → `singleton Theme 1.0 src/Theme.qml`
-- `grep -h "singleton Icons" build/Melodia/App/qmldir` → `singleton Icons 1.0 src/Icons.qml`
-- `QT_QPA_PLATFORM=offscreen timeout 10 ./build/appmelodia & sleep 3; kill %1` → sem erro de
+- `grep -h "singleton Theme" build/Melodarium/App/qmldir` → `singleton Theme 1.0 src/Theme.qml`
+- `grep -h "singleton Icons" build/Melodarium/App/qmldir` → `singleton Icons 1.0 src/Icons.qml`
+- `QT_QPA_PLATFORM=offscreen timeout 10 ./build/melodarium & sleep 3; kill %1` → sem erro de
   QML no stderr (nenhuma linha contendo `is not a type`, `Unable to assign` ou `undefined`)
-- **Decisão humana:** o Pedro roda `./build/appmelodia` numa sessão gráfica e confirma que a
+- **Decisão humana:** o Pedro roda `./build/melodarium` numa sessão gráfica e confirma que a
   janela abre com a paleta dele. Sem esse OK a fatia não é dada por concluída — a aparência é
   o requisito nº 1 do produto e nenhum teste automatizado a valida.
 
@@ -718,6 +718,6 @@ git commit -m "docs: build, test and QML dev-mode instructions"
 - Componentes de UI reutilizáveis (botão, lista, slider) — nascem na fatia `tocador-ui`,
   quando houver uma tela real que os use. Criar uma biblioteca de componentes antes disso é
   inventar requisito.
-- UI-scale configurável pelo usuário (o Noctalia tem; o melodia fixa ratio 1.0).
+- UI-scale configurável pelo usuário (o Noctalia tem; o melodarium fixa ratio 1.0).
 - Ícone da aplicação, `.desktop` file, empacotamento — o spec exclui instalador
   ("GitHub aberto, sem instalador nem suporte").

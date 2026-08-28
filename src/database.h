@@ -19,8 +19,8 @@ class Database : public QObject
     Q_PROPERTY(bool scanning READ scanning NOTIFY scanningChanged)
 
 public:
-    static constexpr const char *kUiConnection = "melodia-ui";
-    static constexpr const char *kScannerConnection = "melodia-scanner";
+    static constexpr const char *kUiConnection = "melodarium-ui";
+    static constexpr const char *kScannerConnection = "melodarium-scanner";
 
     explicit Database(QObject *parent = nullptr);
     ~Database() override;

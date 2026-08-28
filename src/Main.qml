@@ -5,7 +5,7 @@ import QtQuick
 import QtQuick.Controls
 import QtQuick.Layouts
 import QtQuick.Window
-import Melodia.App
+import Melodarium.App
 
 Window {
     id: root
@@ -139,7 +139,7 @@ Window {
     minimumWidth: 720
     minimumHeight: 480
     visible: true
-    title: qsTr("melodia")
+    title: qsTr("melodarium")
     color: Theme.cBase
 
     // Which pane the icon rail is showing: "library" or "podcast". Search is an overlay,
@@ -373,10 +373,10 @@ Window {
         // Um motor que não sobe, ou um arquivo que não abre, não podem falhar em silêncio: sem
         // esta linha o sintoma é "clico e não acontece nada".
         function onEngineUnavailable(message) {
-            console.warn("melodia: motor de áudio indisponível — " + message)
+            console.warn("melodarium: motor de áudio indisponível — " + message)
         }
         function onPlaybackError(path, message) {
-            console.warn("melodia: não consegui tocar " + path + " — " + message)
+            console.warn("melodarium: não consegui tocar " + path + " — " + message)
         }
         function onTrackFinished(path) {
             PlayStatsRecorder.recordPlay(path)
@@ -454,7 +454,7 @@ Window {
         function onFinished(url, trackId) { root.reloadCurrent() }
     }
 
-    // `appmelodia --measure` imprime UMA linha com as medidas dos painéis e sai. É assim que a
+    // `melodarium --measure` imprime UMA linha com as medidas dos painéis e sai. É assim que a
     // fidelidade ao desenho aprovado vira verificação mecânica (tools/check-layout.sh) em vez
     // de opinião: uma mudança acidental de layout falha o gate em vez de virar tela torta.
     Loader {

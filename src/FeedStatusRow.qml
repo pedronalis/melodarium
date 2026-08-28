@@ -1,6 +1,6 @@
 import QtQuick
 import QtQuick.Layouts
-import Melodia.App
+import Melodarium.App
 
 // The honest limit, written where the user reads it. A desktop app does not run with its
 // window closed, so "baixa sozinho" without this sentence would be a promise the app cannot
@@ -48,7 +48,7 @@ ColumnLayout {
     Text {
         Layout.fillWidth: true
         wrapMode: Text.WordWrap
-        text: qsTr("Verifica novos episódios enquanto o melodia está aberto.")
+        text: qsTr("Verifica novos episódios enquanto o melodarium está aberto.")
         font.family: Theme.fontFamily
         font.pixelSize: Theme.fontSizeXS
         color: Theme.cMuted

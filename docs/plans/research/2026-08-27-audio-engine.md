@@ -55,7 +55,7 @@ audio outputs, such as wasapi, coreaudio, **pipewire** and audiounit."_ Ou seja,
 com o `ao=pipewire` do Fedora 43.
 
 O trade-off é literal: com `audio-exclusive=yes` **nenhum outro app toca som** enquanto o
-melodia estiver com um arquivo carregado (notificação do Slack, vídeo do navegador, etc.
+melodarium estiver com um arquivo carregado (notificação do Slack, vídeo do navegador, etc.
 ficam mudos). Isso NÃO deve ser o default — vira uma opção "modo bit-perfect exclusivo" nas
 configurações avançadas, com o aviso explícito de que silencia o resto do sistema.
 
@@ -64,7 +64,7 @@ com uma taxa de clock (`default.clock.rate` / `default.clock.allowed-rates` em
 `pipewire.conf`); mesmo com `audio-exclusive=yes`, se o grafo do PipeWire estiver fixo em
 48kHz e o FLAC for 96kHz, quem resampleia pode ser o próprio PipeWire antes de chegar ao
 dispositivo, dependendo de como o driver ALSA por trás negocia. Isso é configuração de
-**sistema**, fora do código do melodia — NÃO VERIFICADO nesta pesquisa (exigiria testar com
+**sistema**, fora do código do melodarium — NÃO VERIFICADO nesta pesquisa (exigiria testar com
 um FLAC 96kHz real e um analisador de taxa no ponto ALSA, fora do escopo de "motor de
 áudio"). Documentar essa dependência no manual/troubleshooting do usuário é mais honesto
 que prometer bit-perfect garantido só pela opção do mpv.
@@ -129,7 +129,7 @@ Isso amarra a fatia de biblioteca: o C++ só precisa **alimentar a playlist do m
 reprodução em si (próxima faixa, shuffle, repeat) tanto pode vir dos comandos
 `playlist-next`/`playlist-prev`/`playlist-shuffle` do mpv quanto ser pré-computada pelo C++
 antes de popular a playlist (mais fácil de testar e de casar com "coleções" do domínio
-melodia). Confirmado rodando (§9): duas faixas em sequência tocaram sem intervenção do
+melodarium). Confirmado rodando (§9): duas faixas em sequência tocaram sem intervenção do
 código entre uma e outra.
 
 ## 5. Estado observável para a UI
@@ -348,7 +348,7 @@ args[]` e chamar `mpv_command`) — omitidos aqui, presentes no arquivo testado.
 find_package(Qt6 REQUIRED COMPONENTS Core Qml)
 find_package(PkgConfig REQUIRED)
 pkg_check_modules(MPV REQUIRED IMPORTED_TARGET mpv)
-target_link_libraries(melodia PRIVATE Qt6::Core Qt6::Qml PkgConfig::MPV)
+target_link_libraries(melodarium PRIVATE Qt6::Core Qt6::Qml PkgConfig::MPV)
 ```
 
 Não existe `mpv.pc` com `Requires:` estranho, então `pkg_check_modules(... mpv)` basta —
@@ -378,7 +378,7 @@ out.flac`).
 Comando de verificação (o que um plano de fatia deve rodar em terminal/CI):
 
 ```sh
-./melodia_audioengine_smoketest /caminho/fixture1.wav /caminho/fixture2.wav
+./melodarium_audioengine_smoketest /caminho/fixture1.wav /caminho/fixture2.wav
 # sucesso = process sai 0 dentro de N segundos E os sinais duration/position/currentFile
 # dispararam pelo menos uma vez cada (grep no stderr, ou um pequeno harness que conta
 # emissões de sinal e faz exit(1) se algum ficou em zero).

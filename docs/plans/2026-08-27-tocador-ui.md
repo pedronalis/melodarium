@@ -1,6 +1,6 @@
 ---
 slug: tocador-ui
-feature: melodia
+feature: melodarium
 status: concluido
 depende-de: [motor-audio, scan-biblioteca]
 decisao-humana: sim
@@ -14,9 +14,9 @@ vê as faixas numa lista com a cara do Noctalia, clica e o som sai — com capa,
 barra de progresso e controles de transporte.
 
 **Arquitetura:** Um `TrackListModel` (`QAbstractListModel`) lê do SQLite e alimenta a `ListView`
-do QML. Um `CoverCache` extrai a capa embutida uma vez, grava em `~/.cache/melodia/covers/` e
+do QML. Um `CoverCache` extrai a capa embutida uma vez, grava em `~/.cache/melodarium/covers/` e
 devolve uma URL de arquivo — o QML nunca recebe bytes de imagem. A UI é montada com três
-componentes reutilizáveis (`MelodiaButton`, `IconButton`, `TrackRow`) que as fatias seguintes
+componentes reutilizáveis (`MelodariumButton`, `IconButton`, `TrackRow`) que as fatias seguintes
 reusam em vez de reinventar.
 
 **Constraints globais:** Toda cor, tamanho, raio, margem e duração vem do singleton `Theme` —
@@ -30,7 +30,7 @@ o que significa `delegate` leve e nada de `Repeater`.
 
 - Criar: `src/tracklistmodel.h` · `src/tracklistmodel.cpp`
 - Criar: `src/covercache.h` · `src/covercache.cpp`
-- Criar: `src/MelodiaButton.qml` · `src/IconButton.qml` · `src/TrackRow.qml`
+- Criar: `src/MelodariumButton.qml` · `src/IconButton.qml` · `src/TrackRow.qml`
 - Criar: `src/PlayerBar.qml` · `src/LibraryEmptyState.qml`
 - Criar: `tests/tst_tracklistmodel.cpp`
 - Modificar: `src/Main.qml` (a janela vira a tela real) · `CMakeLists.txt` · `tests/CMakeLists.txt`
@@ -47,7 +47,7 @@ o que significa `delegate` leve e nada de `Repeater`.
   - `Database` (singleton QML, fatia `scan-biblioteca`): `libraryPath` (leitura e escrita),
     `scanning`, `startScan()`, e os sinais `scanProgress(int done, int total)` e
     `scanFinished(int added, int updated, int removed)`. Constantes de conexão
-    `Database::kUiConnection` (`"melodia-ui"`).
+    `Database::kUiConnection` (`"melodarium-ui"`).
   - `TagReader::readCover(const QString &absolutePath, QString *mimeTypeOut)` (fatia
     `scan-biblioteca`).
   - Singletons QML `Theme` e `Icons` (fatia `esqueleto-build`).
@@ -78,9 +78,9 @@ class CoverCache : public QObject {
 };
 ```
 
-Componentes QML publicados para as fatias seguintes (mesmo módulo `Melodia.App`):
+Componentes QML publicados para as fatias seguintes (mesmo módulo `Melodarium.App`):
 
-- `MelodiaButton { text; enabled; signal clicked }` — botão de rótulo, estilo `NButton`.
+- `MelodariumButton { text; enabled; signal clicked }` — botão de rótulo, estilo `NButton`.
 - `IconButton { icon; size; accent; enabled; signal clicked }` — `icon` é o nome do ícone
   aceito por `Icons.get()`; `accent` (bool) pinta com `Theme.mPrimary`.
 - `TrackRow { title; artist; album; durationMs; coverUrl; isCurrent; index; signal activated }`
@@ -489,7 +489,7 @@ Estes três são a base visual de todas as telas seguintes. Todo valor de estilo
 
 ```qml
 import QtQuick
-import Melodia.App
+import Melodarium.App
 
 Item {
     id: root
@@ -539,11 +539,11 @@ Item {
 }
 ```
 
-- [x] Criar `src/MelodiaButton.qml`:
+- [x] Criar `src/MelodariumButton.qml`:
 
 ```qml
 import QtQuick
-import Melodia.App
+import Melodarium.App
 
 Item {
     id: root
@@ -602,7 +602,7 @@ Item {
 ```qml
 import QtQuick
 import QtQuick.Layouts
-import Melodia.App
+import Melodarium.App
 
 Item {
     id: root
@@ -716,12 +716,12 @@ Item {
 
 - [x] Acrescentar os três arquivos ao bloco `QML_FILES` de `qt_add_qml_module`.
 - [x] verificação mecânica da task:
-      `cmake --build build && /usr/lib64/qt6/bin/qmllint src/IconButton.qml src/MelodiaButton.qml src/TrackRow.qml -I build`
+      `cmake --build build && /usr/lib64/qt6/bin/qmllint src/IconButton.qml src/MelodariumButton.qml src/TrackRow.qml -I build`
       → sem linha contendo `Error`
 - [x] commit:
 
 ```bash
-git add src/IconButton.qml src/MelodiaButton.qml src/TrackRow.qml CMakeLists.txt
+git add src/IconButton.qml src/MelodariumButton.qml src/TrackRow.qml CMakeLists.txt
 git commit -m "feat(ui): reusable Noctalia-styled button, icon button and track row"
 ```
 
@@ -732,7 +732,7 @@ git commit -m "feat(ui): reusable Noctalia-styled button, icon button and track 
 ```qml
 import QtQuick
 import QtQuick.Layouts
-import Melodia.App
+import Melodarium.App
 
 Rectangle {
     id: root
@@ -902,7 +902,7 @@ git commit -m "feat(ui): transport bar wired to the audio engine"
 import QtQuick
 import QtQuick.Dialogs
 import QtQuick.Layouts
-import Melodia.App
+import Melodarium.App
 
 Item {
     id: root
@@ -923,12 +923,12 @@ Item {
             Layout.fillWidth: true
             horizontalAlignment: Text.AlignHCenter
             wrapMode: Text.WordWrap
-            text: qsTr("Escolha a pasta onde sua música está. O melodia lê os arquivos; nunca escreve neles.")
+            text: qsTr("Escolha a pasta onde sua música está. O melodarium lê os arquivos; nunca escreve neles.")
             font.family: Theme.fontFamily
             font.pointSize: Theme.fontSizeM
             color: Theme.mOnSurfaceVariant
         }
-        MelodiaButton {
+        MelodariumButton {
             Layout.alignment: Qt.AlignHCenter
             text: qsTr("Escolher pasta")
             onClicked: folderDialog.open()
@@ -952,7 +952,7 @@ Item {
 import QtQuick
 import QtQuick.Layouts
 import QtQuick.Window
-import Melodia.App
+import Melodarium.App
 
 Window {
     id: root
@@ -961,7 +961,7 @@ Window {
     minimumWidth: 720
     minimumHeight: 480
     visible: true
-    title: qsTr("melodia")
+    title: qsTr("melodarium")
     color: Theme.mSurface
 
     TrackListModel {
@@ -997,7 +997,7 @@ Window {
                 color: Theme.mPrimary
             }
             Text {
-                text: qsTr("melodia")
+                text: qsTr("melodarium")
                 font.family: Theme.fontFamily
                 font.pointSize: Theme.fontSizeL
                 font.weight: Theme.fontWeightSemiBold
@@ -1073,7 +1073,7 @@ Window {
 - [x] Acrescentar `src/LibraryEmptyState.qml` ao `QML_FILES` e `Qt6::QuickDialogs2` ao
       `find_package`/`target_link_libraries` (o `FolderDialog` vem de `QtQuick.Dialogs`).
 - [x] verificação mecânica da task: `cmake --build build` → exit 0 e o app sobe sem erro de
-      QML: `QT_QPA_PLATFORM=offscreen timeout 8 ./build/appmelodia 2>&1 | grep -c "is not a type"`
+      QML: `QT_QPA_PLATFORM=offscreen timeout 8 ./build/melodarium 2>&1 | grep -c "is not a type"`
       → `0`
 - [x] commit:
 
@@ -1197,7 +1197,7 @@ git commit -m "test(ui): track list model roles, fallbacks and current-track mar
 
 - `cmake -B build -G Ninja && cmake --build build` → exit 0
 - `ctest --test-dir build --output-on-failure` → `100% tests passed`
-- `QT_QPA_PLATFORM=offscreen timeout 8 ./build/appmelodia 2>&1 | grep -Ec "is not a type|Unable to assign|ReferenceError"` → `0`
+- `QT_QPA_PLATFORM=offscreen timeout 8 ./build/melodarium 2>&1 | grep -Ec "is not a type|Unable to assign|ReferenceError"` → `0`
 - **Decisão humana:** o Pedro roda o app numa sessão gráfica, aponta para a pasta de música
   dele, espera a varredura e **toca uma faixa**. Confirma: a lista tem a cara certa, o som sai,
   a barra de progresso anda, a capa aparece. É este o momento em que o app deixa de ser

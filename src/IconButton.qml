@@ -1,5 +1,5 @@
 import QtQuick
-import Melodia.App
+import Melodarium.App
 
 Item {
     id: root

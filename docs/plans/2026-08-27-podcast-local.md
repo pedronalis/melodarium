@@ -1,6 +1,6 @@
 ---
 slug: podcast-local
-feature: melodia
+feature: melodarium
 status: concluido
 depende-de: [navegacao-biblioteca]
 decisao-humana: nao
@@ -44,7 +44,7 @@ não é consumido — é uma fronteira deliberada, não um esquecimento.
   (`coverUrlForTrack(const QString &trackPath, int albumId)`), `AudioEngine`
   (`loadPlaylist(const QStringList &, int)`, `seek(double)`, `play()`, `pause()`,
   `position`, `duration`, `playing`, `currentFile`, `speed`, `setSpeed(double)`,
-  `trackFinished(const QString &path)`), `Theme`, `Icons`, `IconButton`, `MelodiaButton`,
+  `trackFinished(const QString &path)`), `Theme`, `Icons`, `IconButton`, `MelodariumButton`,
   `SidebarItem`.
 - **Produz:**
 
@@ -124,7 +124,7 @@ CREATE UNIQUE INDEX idx_episodes_path ON podcast_episodes(local_path) WHERE loca
 ```
 
 - [x] verificação mecânica da task:
-      `QT_QPA_PLATFORM=offscreen timeout 8 ./build/appmelodia; sqlite3 ~/.local/share/melodia/melodia.db "PRAGMA user_version;"`
+      `QT_QPA_PLATFORM=offscreen timeout 8 ./build/melodarium; sqlite3 ~/.local/share/melodarium/melodarium.db "PRAGMA user_version;"`
       → `4`
 - [x] commit:
 
@@ -671,7 +671,7 @@ git commit -m "feat(podcast): episode list model with listening progress"
 ```qml
 import QtQuick
 import QtQuick.Layouts
-import Melodia.App
+import Melodarium.App
 
 RowLayout {
     id: root
@@ -777,7 +777,7 @@ RowLayout {
       `id` (0 quando o arquivo não é episódio). Ao pausar, gravar a posição uma vez a mais.
 - [x] Acrescentar os quatro `.qml` ao `QML_FILES`.
 - [x] verificação mecânica da task:
-      `cmake --build build && QT_QPA_PLATFORM=offscreen timeout 8 ./build/appmelodia 2>&1 | grep -Ec "is not a type|ReferenceError"`
+      `cmake --build build && QT_QPA_PLATFORM=offscreen timeout 8 ./build/melodarium 2>&1 | grep -Ec "is not a type|ReferenceError"`
       → `0`
 - [x] commit:
 
@@ -927,7 +927,7 @@ git commit -m "test(podcast): position saving, resume backoff and played marking
 
 - `cmake -B build -G Ninja && cmake --build build` → exit 0
 - `ctest --test-dir build --output-on-failure` → `100% tests passed`
-- `QT_QPA_PLATFORM=offscreen timeout 8 ./build/appmelodia 2>&1 | grep -Ec "is not a type|ReferenceError"` → `0`
+- `QT_QPA_PLATFORM=offscreen timeout 8 ./build/melodarium 2>&1 | grep -Ec "is not a type|ReferenceError"` → `0`
 - **[divergência resolvida na execução]** o plano pedia
   `grep -c "collection\|CollectionManager" src/podcastlibrary.cpp src/podcastepisodemodel.cpp` → `0`,
   mas o `RUN_GATE` do run exige o oposto (`grep -qE 'collection|CollectionManager'` tem de

@@ -149,7 +149,7 @@ Fonte: `Commons/Icons.qml`, `Commons/IconsTabler.qml` (6204 linhas), `Widgets/NI
      sem Quickshell.
   3. Um `Text { font.family: tablerFont.name; text: "\u{eb4d}" }` renderiza o ícone.
   4. Portar (ou reduzir) o mapa `icons`/`aliases` de `IconsTabler.qml` para um `pragma
-Singleton` próprio do melodia — é puro JS/QML, nenhuma API de Quickshell nele.
+Singleton` próprio do melodarium — é puro JS/QML, nenhuma API de Quickshell nele.
 
 ---
 
@@ -163,8 +163,8 @@ Confirmado por grep em `Commons/*.qml` e `Modules/Tooltip/Tooltip.qml`:
 | `import Quickshell` (símbolo `Quickshell.*`, ex. `Quickshell.shellDir`, `Quickshell.execDetached`, `Quickshell.screens`)                           | `Icons.qml`, `ShellState.qml`, `Tooltip.qml`                                 | `Quickshell.shellDir` → `Qt.application.applicationDirPath` ou um caminho de recurso fixo do app. `Quickshell.execDetached([...])` → `QProcess::startDetached(...)` em C++ exposto ao QML, ou `Qt.openUrlExternally` para casos simples. `Quickshell.screens` → `Qt.application.screens` / `Window.screen` (API nativa do QtQuick.Window).              |
 | `import Quickshell.Io` → `FileView` (leitura/escrita reativa de arquivo, com `watchChanges`, `onFileChanged`, `JsonAdapter`)                       | `Color.qml` (le `colors.json`), `Settings.qml`, `I18n.qml`, `ShellState.qml` | Não existe em Qt6 puro. Rota recomendada: uma classe C++ (`QObject` com `Q_PROPERTY`) que lê/escreve o arquivo com `QFile`+`QJsonDocument`, expõe as propriedades ao QML via `qmlRegisterSingletonType`, e usa `QFileSystemWatcher` para observar mudanças externas (o equivalente do `watchChanges`). Ver seção 7 para o código concreto do Theme.qml. |
 | `PopupWindow` (`Modules/Tooltip/Tooltip.qml:7`)                                                                                                    | Tooltip customizado, posicionado livre sobre a tela                          | `Qt.labs.platform` não tem popup window leve equivalente fora de Quickshell; em Qt6 puro **QtQuick.Controls `ToolTip`** cobre o caso comum (attached property `ToolTip.text`/`ToolTip.visible`), ou uma `Popup` de `QtQuick.Controls` para layouts customizados (grid, texto rico) — ambos suportados nativamente pelo `qtdeclarative` já instalado.    |
-| `PanelWindow`, `ShellRoot` (não vistos nos arquivos lidos aqui, mas são a base de todo shell Quickshell — o próprio `noctalia-shell.qml` raiz usa) | Janela de painel sem decoração ancorada a uma borda de tela (barra, dock)    | `ApplicationWindow` ou `Window` de `QtQuick.Window`/`QtQuick.Controls`, com `flags: Qt.FramelessWindowHint \| Qt.WindowStaysOnTopHint` e posicionamento manual via `x`/`y`/`Screen.desktopAvailableWidth` etc. Para o melodia (app de janela única, não shell de desktop) isso não é sequer necessário — um `ApplicationWindow` comum resolve.          |
-| `IpcHandler` (não visto nos arquivos lidos; é usado no restante do shell para IPC entre instâncias)                                                | Comunicação inter-processo do Quickshell                                     | Não existe em Qt6 puro. Se precisar (ex.: instância única do melodia, ou controle remoto via CLI), usar `QLocalServer`/`QLocalSocket` (Qt Network) ou D-Bus (`QtDBus`) — nenhum dos dois foi verificado como já instalado; checar antes de depender disso.                                                                                              |
+| `PanelWindow`, `ShellRoot` (não vistos nos arquivos lidos aqui, mas são a base de todo shell Quickshell — o próprio `noctalia-shell.qml` raiz usa) | Janela de painel sem decoração ancorada a uma borda de tela (barra, dock)    | `ApplicationWindow` ou `Window` de `QtQuick.Window`/`QtQuick.Controls`, com `flags: Qt.FramelessWindowHint \| Qt.WindowStaysOnTopHint` e posicionamento manual via `x`/`y`/`Screen.desktopAvailableWidth` etc. Para o melodarium (app de janela única, não shell de desktop) isso não é sequer necessário — um `ApplicationWindow` comum resolve.          |
+| `IpcHandler` (não visto nos arquivos lidos; é usado no restante do shell para IPC entre instâncias)                                                | Comunicação inter-processo do Quickshell                                     | Não existe em Qt6 puro. Se precisar (ex.: instância única do melodarium, ou controle remoto via CLI), usar `QLocalServer`/`QLocalSocket` (Qt Network) ou D-Bus (`QtDBus`) — nenhum dos dois foi verificado como já instalado; checar antes de depender disso.                                                                                              |
 | `Quickshell.Io.Process` (não visto diretamente nos arquivos lidos, mas é o padrão do ecossistema para rodar comandos externos com stdout reativo)  | Rodar `yt-dlp`, etc.                                                         | `QProcess` (Qt Core) — já disponível, é C++ puro. Conectar `readyReadStandardOutput`/`finished` a slots.                                                                                                                                                                                                                                                |
 
 **Resumo para quem vai copiar QML do Noctalia:** os arquivos em `Commons/` (Style, Color,
@@ -312,7 +312,7 @@ Registro no `main.cpp` (antes de `engine.load(...)`):
 
 ```cpp
 qmlRegisterSingletonInstance<ColorSchemeProvider>(
-    "Melodia.Theme", 1, 0, "ColorScheme", new ColorSchemeProvider());
+    "Melodarium.Theme", 1, 0, "ColorScheme", new ColorSchemeProvider());
 ```
 
 ### QML: `Theme.qml` (pragma Singleton, consome `ColorScheme` de C++)
@@ -321,7 +321,7 @@ qmlRegisterSingletonInstance<ColorSchemeProvider>(
 // Theme.qml — put in a "Theme" module directory with a qmldir declaring it as singleton
 pragma Singleton
 import QtQuick
-import Melodia.Theme 1.0
+import Melodarium.Theme 1.0
 
 QtObject {
     id: root
@@ -405,7 +405,7 @@ QtObject {
 `qmldir` da pasta `Theme/`:
 
 ```
-module Melodia.Theme
+module Melodarium.Theme
 singleton Theme 1.0 Theme.qml
 ```
 
@@ -417,7 +417,7 @@ singleton Theme 1.0 Theme.qml
 // PlayerButton.qml — port direto do padrão visto em Widgets/NButton.qml
 import QtQuick
 import QtQuick.Layouts
-import Melodia.Theme 1.0 as Th
+import Melodarium.Theme 1.0 as Th
 
 Item {
     id: root
@@ -484,12 +484,12 @@ puros, que já estão instalados (`qt6-qtdeclarative-devel`).
 
 1. `fontDefault` **não é hardcoded "Inter" no shell** — é `Qt.application.font.family` por
    padrão; quem fixou Inter foi a config pessoal do usuário em
-   `~/.config/noctalia/settings.json`. O melodia deve hardcodar `"Inter"` (fonte já instalada
+   `~/.config/noctalia/settings.json`. O melodarium deve hardcodar `"Inter"` (fonte já instalada
    no Fedora do usuário) e não depender de ler isso do Noctalia.
 2. `radiusRatio`/`iRadiusRatio`/`screenRadiusRatio`/`uiScaleRatio` no Noctalia são fatores de
    escala configuráveis pelo usuário (todos default `1.0`) — os números acima já são os
    valores com ratio 1.0 aplicado (ou seja, os números "crus" do design). Não precisa portar
-   o sistema de ratio, só os valores finais, a menos que o melodia também queira UI-scale
+   o sistema de ratio, só os valores finais, a menos que o melodarium também queira UI-scale
    configurável.
 3. `Color.smartAlpha()` e `Color.adaptiveOpacity()` (translucidez de card ajustada por
    dark/light mode e por `panelBackgroundOpacity`) são lógica extra do Noctalia para
@@ -500,12 +500,12 @@ Math.pow(baseOpacity, 1.5)` (`Color.qml:354`).
 4. `NBox` (o "card" do Noctalia) não some sozinho: ele SEMPRE aplica `border.color:
 Style.boxBorderColor`, que por sua vez é `Color.mOutline` só **se**
    `Settings.data.ui.boxBorderEnabled` — outro toggle de usuário. Fixar como "sempre com
-   borda `mOutline`" é a leitura mais simples para o melodia.
+   borda `mOutline`" é a leitura mais simples para o melodarium.
 5. O ícone Tabler é **PUA (Private Use Area)** do Unicode — os codepoints (`\u{eb4d}` etc.)
    só significam algo com a fonte `noctalia-tabler-icons.ttf` carregada; não são glyphs
    Unicode padrão, não vão renderizar com nenhuma outra fonte.
 6. Licença do arquivo de fonte Tabler (`Assets/Fonts/tabler/tabler-icons-license.txt`) não foi
-   lida neste research — **NAO VERIFICADO** se copiar o `.ttf` para o melodia é permitido sem
+   lida neste research — **NAO VERIFICADO** se copiar o `.ttf` para o melodarium é permitido sem
    restrição; checar antes de embutir o arquivo no repo/instalador.
 
 ## Não verificado (marcado explicitamente, não inventado)

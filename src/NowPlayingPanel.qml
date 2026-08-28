@@ -1,6 +1,6 @@
 import QtQuick
 import QtQuick.Layouts
-import Melodia.App
+import Melodarium.App
 
 Rectangle {
     id: root
@@ -36,7 +36,7 @@ Rectangle {
 
     readonly property int coverSide: root.compact ? Math.round(200 * Theme.uiScale) : Theme.panelCover
 
-    // Lidos por `appmelodia --measure`: a capa quadrada é uma das linhas do gate de layout.
+    // Lidos por `melodarium --measure`: a capa quadrada é uma das linhas do gate de layout.
     readonly property alias coverWidth: capaRect.width
     readonly property alias coverHeight: capaRect.height
 

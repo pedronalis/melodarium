@@ -1,6 +1,6 @@
 import QtQuick
 import QtQuick.Layouts
-import Melodia.App
+import Melodarium.App
 
 // Uma linha da lista de episódios do desenho aprovado (design/Podcast.dc.html): arte, título
 // com "programa · data · duração" embaixo e, à direita, a única informação que muda de

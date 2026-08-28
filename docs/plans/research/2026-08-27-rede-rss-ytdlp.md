@@ -311,7 +311,7 @@ silenciosamente.
 
 Um app Qt desktop comum só roda enquanto está aberto: um `QTimer` de
 verificação periódica (ex.: a cada 30-60min) só dispara com o processo vivo —
-se o Melodia estiver fechado, nenhum episódio novo é baixado, mesmo que o
+se o Melodarium estiver fechado, nenhum episódio novo é baixado, mesmo que o
 timer diga "a cada 1h". Isso é diferente de "baixa sozinho em segundo plano
 mesmo com o app fechado", que exigiria um serviço separado do processo da UI
 — no Linux isso seria uma `systemd --user` timer/service rodando um binário
@@ -369,7 +369,7 @@ Decisões e justificativa:
   reconhece).
 
 - **`--embed-metadata`**: grava título/canal/etc como tags no arquivo de
-  áudio final — é o que faz o TagLib do app enxergar metadados sem o Melodia
+  áudio final — é o que faz o TagLib do app enxergar metadados sem o Melodarium
   ter que parsear o JSON do yt-dlp separadamente depois.
 
 - **`-o "%(title)s [%(id)s].%(ext)s"`**: inclui o ID do vídeo no nome pra

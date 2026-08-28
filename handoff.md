@@ -1,4 +1,4 @@
-# Handoff — melodia
+# Handoff — melodarium
 
 > Atualizado: 2026-08-28 08:57 · branch: `main` · via /fecho · contexto: ~67% consumido
 
@@ -12,12 +12,12 @@
 - **`--scan` varre a biblioteca sem abrir janela.** Antes a varredura só existia como botão, o
   que impedia reproduzir problema de scanner sem tela e obrigava o Pedro a clicar para semear.
 - **Acervo de teste no disco:** 27 faixas em 3 álbuns com capa e tags (`~/Música`, licença livre)
-  e 3 episódios reais do Hipsters Ponto Tech (`~/Podcasts/melodia`). Banco varrido, 27 faixas.
+  e 3 episódios reais do Hipsters Ponto Tech (`~/Podcasts/melodarium`). Banco varrido, 27 faixas.
 - **O app ainda não foi ouvido.** Tudo que se sabe vem de teste e de captura de tela.
 
 ## Alvo
 
-- **Frente:** melodia — player de música local com a estética do Noctalia
+- **Frente:** melodarium — player de música local com a estética do Noctalia
 - **Plano-fonte:** `docs/specs/2026-08-27-player-musica-podcast.md` — 9 fatias do produto +
   5 do redesenho `melodia-capa-manda`, todas `concluido` (14/14)
 - **PRONTA quando:** as fatias concluídas **e** o Pedro ouvindo o som sair ao clicar numa faixa
@@ -28,25 +28,29 @@
 ## Fila da sessão
 
 1. **[S · 2ª desde 2026-08-27]** Ouvir: abrir o app, clicar numa faixa e confirmar que sai som ·
-   done: som saindo · `./build/appmelodia` (biblioteca já varrida, 27 faixas)
-2. **[S]** Passar o nome pelo `/batiza` antes de publicar — "melodia" é provisório ·
+   done: som saindo · `./build/melodarium` (biblioteca já varrida, 27 faixas)
+2. **[S]** Passar o nome pelo `/batiza` antes de publicar — "melodarium" é provisório ·
    done: nome decidido e registrado
 3. **[M]** Publicar o repo no GitHub, como o spec pede · done: `git remote -v` com o remoto
 
 ## Estacionamento (derivas)
 
 - [x] 2026-08-28 · Publicar o repo no GitHub — FEITO, mas **privado**
-      (`pedronalis/melodia`). Abrir ao público ficou preso ao nome: o Pedro escolheu subir
+      (`pedronalis/melodarium`). Abrir ao público ficou preso ao nome: o Pedro escolheu subir
       fechado hoje e batizar depois, porque repo privado renomeia sem quebrar clone de ninguém.
-- [ ] 2026-08-28 · Nome definitivo do projeto: "melodia" é provisório, o spec manda passar no
-      `/batiza`. **É o único item entre o repo de hoje e o repo aberto que o spec pede** —
-      decisão do Pedro em 2026-08-28 foi publicar privado e batizar antes de abrir.
+- [x] 2026-08-28 · Nome definitivo do projeto — RESOLVIDO: **melodarium**, escolhido pelo Pedro
+      no `/batiza`. O anterior era "melodia" (genérico, 930 repos no GitHub); "melodarium" tem
+      namespace virgem em GitHub, npm, PyPI, crates e Homebrew. Código, dados, documentos, repo
+      e pasta renomeados no mesmo dia. Era o último item entre o repo fechado e o aberto que o
+      spec pede.
 - [ ] 2026-08-27 · Bit-perfect real depende do grafo do PipeWire (`default.clock.rate`), não só
       das opções do mpv. O plano documenta o limite; medir de verdade exige um FLAC 96 kHz e uma
       sonda no ponto ALSA.
-- [ ] 2026-08-27 · Sobrou um `melodia.db` de 0 byte em `~/.local/share/melodia/` (o banco de
-      verdade é `~/.local/share/melodia/melodia/melodia.db`). Sem efeito observável, origem não
-      identificada — os testes usam pasta temporária. Apagar se não voltar.
+- [x] 2026-08-28 · O `melodia.db` de 0 byte solto em `~/.local/share/melodia/` — APAGADO. A
+      renomeação isolou o arquivo (a migração levou só a pasta interna, que era a de verdade), e
+      aí ficou claro que era lixo: 0 byte, do nome que não existe mais. A origem segue não
+      identificada; se um `melodarium.db` de 0 byte reaparecer solto em
+      `~/.local/share/melodarium/`, a causa é viva e vale investigar.
 
 ## Em voo
 
@@ -82,7 +86,7 @@ verde, 9/9 alvos de teste, integrado em `main`. As capturas estão em `docs/tela
 - `bash tools/check-orfaos.sh` → `0 item(ns) sem porta de entrada`, mais 6 em reserva
   declarada que ele imprime toda vez · 2026-08-28 12:10 (pós-merge)
 - erros de QML em tela virtual, nas 6 telas e na busca aberta → 0 · 2026-08-28 12:10 (pós-merge)
-- `./build/appmelodia --scan` → `27 faixas` no banco · 2026-08-28
+- `./build/melodarium --scan` → `27 faixas` no banco · 2026-08-28
 
 ## Calibração de custo
 
@@ -155,15 +159,15 @@ verde, 9/9 alvos de teste, integrado em `main`. As capturas estão em `docs/tela
 - [ ] 2026-08-27 · **O Fedora silencia `qDebug`/`console.log`** (`/usr/share/qt6/qtlogging.ini`
       manda tudo para o journald). Religar com `QT_LOGGING_RULES="*.debug=true"
 QT_FORCE_STDERR_LOGGING=1` — mas o log fica enorme (845 KB num único start).
-- [ ] 2026-08-27 · **`target_include_directories(appmelodia PRIVATE src)` é obrigatório** — sem
+- [ ] 2026-08-27 · **`target_include_directories(melodarium PRIVATE src)` é obrigatório** — sem
       ele o build morre numa cascata de ~15 erros de template que não apontam a causa.
 - [ ] 2026-08-27 · **Há dois `yt-dlp`** — o do PATH é o do Homebrew (2026.01.31), o do Fedora é
       `/usr/bin/yt-dlp` (2026.08.19).
 - [ ] 2026-08-27 · **A tela é uma superfície só** (decisão do Pedro, `970904d`) — retângulo com
       margem + borda + canto arredondado preenchendo a janela inteira lê como card flutuando
       dentro de outra tela. Painel interno de conteúdo com borda continua ok.
-- [ ] 2026-08-27 · **`pkill -f 'build/appmelodia'` mata o próprio comando** que o executa (a
-      string casa com a linha de comando do shell, exit 144). Usar `pkill -x appmelodia`.
+- [ ] 2026-08-27 · **`pkill -f 'build/melodarium'` mata o próprio comando** que o executa (a
+      string casa com a linha de comando do shell, exit 144). Usar `pkill -x melodarium`.
 
 - [ ] 2026-08-28 · **Interface com tamanho fixo vira microscópica em tela grande** — todo
       número nasceu de um desenho de 1100×700. Mexeu em tamanho? passe por `Theme.uiScale`, e
@@ -186,7 +190,7 @@ QT_FORCE_STDERR_LOGGING=1` — mas o log fica enorme (845 KB num único start).
       verde. Lição em `docs/solutions/test-failures/`.
 - [ ] 2026-08-28 · **`loadfile … replace` REINICIA a faixa que está tocando** — medido: 3,0 s
       viravam 0,7 s. Para reordenar a fila sem interromper, `playlist-move` entrada por entrada.
-- [ ] 2026-08-28 · **`cp` do `melodia.db` copia um banco VAZIO** — o SQLite está em modo WAL e os
+- [ ] 2026-08-28 · **`cp` do `melodarium.db` copia um banco VAZIO** — o SQLite está em modo WAL e os
       dados vivem no `-wal`. Use `sqlite3 orig ".backup copia"`. Para fotografar com dados de
       teste sem tocar no banco do Pedro: `XDG_DATA_HOME=/tmp/algo`.
 
