@@ -35,10 +35,12 @@
 
 ## Estacionamento (derivas)
 
-- [ ] 2026-08-27 · Publicar o repo no GitHub (spec pede "aberto, sem instalador nem suporte") —
-      fora dos planos de propósito: é ação manual, não código. Fazer quando o app existir.
-- [ ] 2026-08-27 · Nome definitivo do projeto: "melodia" é provisório, o spec manda passar no
-      `/batiza`. Trocar antes de publicar custa menos que depois.
+- [x] 2026-08-28 · Publicar o repo no GitHub — FEITO, mas **privado**
+      (`pedronalis/melodia`). Abrir ao público ficou preso ao nome: o Pedro escolheu subir
+      fechado hoje e batizar depois, porque repo privado renomeia sem quebrar clone de ninguém.
+- [ ] 2026-08-28 · Nome definitivo do projeto: "melodia" é provisório, o spec manda passar no
+      `/batiza`. **É o único item entre o repo de hoje e o repo aberto que o spec pede** —
+      decisão do Pedro em 2026-08-28 foi publicar privado e batizar antes de abrir.
 - [ ] 2026-08-27 · Bit-perfect real depende do grafo do PipeWire (`default.clock.rate`), não só
       das opções do mpv. O plano documenta o limite; medir de verdade exige um FLAC 96 kHz e uma
       sonda no ponto ALSA.

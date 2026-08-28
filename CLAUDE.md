@@ -31,5 +31,8 @@ QML sem quem o instancie e `Q_INVOKABLE` sem quem o chame compilam verdes e some
 
 ## Fronteiras
 
-- Commits locais. **Nunca push, nunca PR** — o repo ainda não foi publicado (é decisão do Pedro).
+- Repo publicado em `pedronalis/melodia`, **privado** (2026-08-28). Push em `main` liberado;
+  **abrir ao público continua sendo decisão do Pedro** — o spec pede aberto, mas ele segurou
+  até o nome ser decidido no `/batiza`. Enquanto for privado, renomear não quebra nada.
+- **Nunca PR** sem ele pedir: o repo é de um dono só, e PR aqui é cerimônia sem revisor.
 - Código, commits e comentários em inglês; conversa e documentos em pt-BR.
