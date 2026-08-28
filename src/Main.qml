@@ -78,6 +78,11 @@ Window {
     // um só — com ela a tirinha ficaria corretamente invisível e não haveria o que provar.
     readonly property bool measureQueue: Qt.application.arguments.indexOf("--play-queue") >= 0
 
+    // `--queue-hit`: manda o overlay pôr na fila o resultado em destaque e fecha, que é o
+    // gesto do Shift+Enter. Sem isto o atalho só poderia ser provado por alguém apertando a
+    // tecla — e um atalho que anuncia no rodapé e não faz nada é o defeito deste lote.
+    readonly property bool measureQueueHit: Qt.application.arguments.indexOf("--queue-hit") >= 0
+
     // `--no-search`: não abre o overlay antes de medir.
     readonly property bool measureSearch: Qt.application.arguments.indexOf("--no-search") < 0
 
@@ -421,6 +426,10 @@ Window {
                     searchOverlay.open()
                     if (root.measureSearchText !== "")
                         searchOverlay.typeForMeasure(root.measureSearchText)
+                    if (root.measureQueueHit) {
+                        searchOverlay.queueAt(searchOverlay.highlighted)
+                        searchOverlay.close()
+                    }
                 }
             }
 

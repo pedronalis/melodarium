@@ -249,3 +249,28 @@ depois, plano por último.
 destoando das três dicas ao lado — e sem tradução.
 
 **Custo de estar errada.** Visual e reversível numa linha.
+
+## 13. Duas bandeiras de medição a mais, para a fila poder ser fotografada e o atalho, provado
+
+**Contexto.** O comando de prova que o plano `fila-tirinha` traz é
+`--play-track "<um arquivo>"`, que monta uma fila de UM. Com fila de um não há "a seguir", a
+tirinha fica corretamente invisível, e a foto não prova nada. E o Shift+Enter, por ser uma
+tecla, não tem como ser acionado em tela virtual: sem alguma porta, a única evidência
+possível seria "o rodapé anuncia o atalho" — que é literalmente o defeito que este lote
+conserta (botão que anuncia e não faz).
+
+**Decisão.** Duas bandeiras, só ativas em `--measure`: `--play-queue`, que carrega a
+biblioteca como fila e toca a primeira; e `--queue-hit`, que manda o overlay de busca
+enfileirar o resultado em destaque e fechar — o mesmo caminho de código do Shift+Enter
+(`queueAt` → `trackQueued` → `appendToQueue`). As provas:
+`docs/telas/leva2-fila-tirinha.png` (quatro capas e "+22" com 27 na fila) e
+`docs/telas/leva2-busca-enfileirou.png` (o noturno de Chopin seguindo em 0:02 enquanto o
+resultado buscado aparece como próximo — "sem interromper o que toca", que é a frase do
+objetivo da fatia).
+
+**Alternativa descartada.** Declarar a fatia pronta com a foto do rodapé, que mostra a dica
+"⇧↵ pôr na fila" e não prova que a tecla faz alguma coisa.
+
+**Custo de estar errada.** As duas só existem sob `--measure`; no app normal não há nada
+diferente. Somadas à `--open-collection`, o harness ganhou três entradas — todas do mesmo
+feitio das cinco que já tinha.
