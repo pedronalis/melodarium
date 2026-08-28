@@ -345,7 +345,7 @@ teste que não testava nada — a definição do problema que este lote existe p
 **Custo de estar errada.** Nenhum: os dois estados (mutado e são) foram medidos no
 transcript, não inferidos.
 
-## 17. Testei uma suspeita sobre o aleatório da tela vazia; estava errada, e fica registrado
+## 17. Suspeitei do aleatório da tela vazia, o teste me desmentiu, e a FOTO me deu razão
 
 **Contexto.** A Task 4 faz `loadPlaylist(paths, 0)` e só então `setShuffle(true)`. Nesse
 instante o mpv já recebeu a ordem antiga e começou a primeira entrada dela. Suspeitei que ele
@@ -384,6 +384,21 @@ tocando é o `queue[0]` da ordem nova, em quatro execuções seguidas com ordens
 arquivos reais. Foi o "+21" numa foto — três pixels de texto — que denunciou o defeito, não a
 suíte.
 
+## 18. Nota: o plano lista `src/EmptyPane.qml` como arquivo a modificar e nenhuma task o toca
+
+**Contexto.** A seção "Arquivos" de `shuffle-repeat` inclui `src/EmptyPane.qml`, mas as
+quatro tasks só mexem em `audioengine.{h,cpp}`, `NowPlayingPanel.qml`, `Main.qml` e o teste.
+
+**Decisão.** Não mexi. O `EmptyPane` já emite `playRequested("shuffle")` e quem trata isso é
+o `startFromEmpty` do `Main.qml`, que é justamente o que a Task 4 mudou. O comportamento
+pedido chegou inteiro sem tocar no arquivo.
+
+**Alternativa descartada.** Inventar uma mudança no `EmptyPane` para cumprir a lista.
+
+**Custo de estar errada.** Se faltasse algo lá, o botão "Tocar tudo em ordem aleatória" não
+ligaria o modo — e o portão `grep -c 'AudioEngine.setShuffle' src/Main.qml` → 1 mostra que a
+ligação está no lugar por onde o sinal passa.
+
 ## 19. O teste do aleatório-parado ficou instável, e a instabilidade era dele
 
 **Contexto.** Depois da correção acima, `shuffleFromAStandstillStartsAtTheTopOfTheNewOrder`
@@ -401,21 +416,6 @@ pelo evento certo, e voltaria a falhar numa máquina mais lenta.
 
 **Custo de estar errada.** Um teste instável é pior que nenhum: ensina a ignorar vermelho.
 Por isso a conferência foi por repetição, não por uma execução verde.
-
-## 18. Nota: o plano lista `src/EmptyPane.qml` como arquivo a modificar e nenhuma task o toca
-
-**Contexto.** A seção "Arquivos" de `shuffle-repeat` inclui `src/EmptyPane.qml`, mas as
-quatro tasks só mexem em `audioengine.{h,cpp}`, `NowPlayingPanel.qml`, `Main.qml` e o teste.
-
-**Decisão.** Não mexi. O `EmptyPane` já emite `playRequested("shuffle")` e quem trata isso é
-o `startFromEmpty` do `Main.qml`, que é justamente o que a Task 4 mudou. O comportamento
-pedido chegou inteiro sem tocar no arquivo.
-
-**Alternativa descartada.** Inventar uma mudança no `EmptyPane` para cumprir a lista.
-
-**Custo de estar errada.** Se faltasse algo lá, o botão "Tocar tudo em ordem aleatória" não
-ligaria o modo — e o portão `grep -c 'AudioEngine.setShuffle' src/Main.qml` → 1 mostra que a
-ligação está no lugar por onde o sinal passa.
 
 ## 20. O "ligado" dos dois botões é visível, mas discreto — e fica como está, com a medida
 
