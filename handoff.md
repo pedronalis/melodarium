@@ -48,9 +48,17 @@
 
 ## Em voo
 
-Nada. O run do redesenho (fatias 3-5) foi colhido: **PASSOU** — 9 commits, gate de 19 linhas
-verde, 9/9 alvos de teste, integrado em `main`. As capturas que ele gerou estão em
-`docs/telas/`, e eu re-conferi em tela virtual antes de entregar.
+**Lote `melodia-religa` — run headless em 3 levas, despachado 2026-08-28 10:40.**
+
+- cwd do run: `/home/pedro/dev/active/melodia-religa-run` (worktree, branch `exec/melodia-religa`)
+- objetivo: as 7 fatias de `docs/plans/2026-08-28-*.md` executadas, integradas em `main`
+  local e verificadas DEPOIS do merge. Autonomia total — sem checkpoint humano, os gates
+  `decisao-humana: sim` são do agente.
+- orquestrador: 3 levas em série (folhas → UI → alcance+ajustes+integração);
+  log em `ORQUESTRADOR.log`, saída por leva em `leva{1,2,3}.out` no cwd do run.
+- conferir: RUN_GATE ausente = verde · `.run_gate_count` presente = FAIL (ver
+  `RESUMO_RUN.md`/transcript) · RUN_GATE presente sem count = em voo
+- decisões que o run tomou sozinho ficam em `DECISOES_RUN.md` no cwd do run.
 
 ## Verificação
 
