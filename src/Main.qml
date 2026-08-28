@@ -119,6 +119,10 @@ Window {
     // que é a metade que este lote existe para consertar.
     readonly property bool measureActivateHit: Qt.application.arguments.indexOf("--activate-hit") >= 0
 
+    // `--open-settings`: abre a gaveta de ajustes antes de medir. Um Popup só é construído
+    // na primeira abertura: sem alguém abri-lo, nenhuma verificação o alcança.
+    readonly property bool measureSettings: Qt.application.arguments.indexOf("--open-settings") >= 0
+
     // `--no-search`: não abre o overlay antes de medir.
     readonly property bool measureSearch: Qt.application.arguments.indexOf("--no-search") < 0
 
@@ -481,6 +485,8 @@ Window {
                         root.startFromEmpty(root.measureQueueMode)
                     for (let r = 0; r < root.measureRepeat; ++r)
                         AudioEngine.cycleRepeat()
+                    if (root.measureSettings)
+                        settingsDialog.open()
                     if (!root.measureSearch)
                         return
                     searchOverlay.open()
