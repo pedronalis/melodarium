@@ -90,3 +90,26 @@ foi escrita de propósito — passar por cima dela seria decidir por quem a escr
 
 **Custo de estar errada.** Se o resumo devia mesmo ser versionado, basta um `git add -f`
 depois; o arquivo está pronto e intacto no worktree.
+
+---
+
+# Decisões do run — leva 2 (colecoes-tela · fila-tirinha · shuffle-repeat)
+
+## 6. `grep -c 'renameId' src/NewCollectionDialog.qml` esperava 5, dá 7
+
+**Contexto.** A Task 1 do plano `colecoes-tela` pede `grep -c 'renameId'` → `5`. O próprio
+código que o plano prescreve para esse arquivo espalha `renameId` por sete LINHAS: o
+comentário explicativo, a declaração da propriedade, o título, o rótulo do botão, o `if`, a
+chamada a `renameCollection` e a emissão de `renamed`. `grep -c` conta linhas casadas.
+
+**Decisão.** O código do plano foi colado exatamente como escrito, comentário incluído; a
+expectativa numérica é que está errada. Aceito 7 como verde. Mesmo padrão da decisão nº 1
+desta série (o plano contou ocorrências mentalmente e escreveu o número de um grep).
+
+**Alternativa descartada.** Apagar o comentário do plano e reescrever o bloco para caber em
+cinco linhas casadas — escrever código para agradar um grep, e jogar fora justamente a
+explicação de por que o diálogo tem dois modos.
+
+**Custo de estar errada.** Nenhum funcional: o modo renomear existe, o título e o botão
+trocam de texto, e o duplicado de nome volta o aviso em vez de fechar o diálogo. Nenhum
+portão do objetivo do run cobra esse número.

@@ -81,7 +81,7 @@ nem rodar o app pega. Lição completa em
 
 ### Task 1: O diálogo de nome aprende a renomear
 
-- [ ] Em `src/NewCollectionDialog.qml`, acrescentar as duas linhas de estado logo depois de
+- [x] Em `src/NewCollectionDialog.qml`, acrescentar as duas linhas de estado logo depois de
       `signal created(int id, string name)`:
 
 ```qml
@@ -93,7 +93,7 @@ nem rodar o app pega. Lição completa em
     signal renamed(int id, string name)
 ```
 
-- [ ] No mesmo arquivo, substituir o `onOpened` para que o campo já venha preenchido ao
+- [x] No mesmo arquivo, substituir o `onOpened` para que o campo já venha preenchido ao
       renomear:
 
 ```qml
@@ -105,7 +105,7 @@ nem rodar o app pega. Lição completa em
     }
 ```
 
-- [ ] Trocar o texto do título para acompanhar o modo (o `Text` cujo `text` é hoje
+- [x] Trocar o texto do título para acompanhar o modo (o `Text` cujo `text` é hoje
       `qsTr("Nova coleção")`):
 
 ```qml
@@ -118,7 +118,7 @@ nem rodar o app pega. Lição completa em
         }
 ```
 
-- [ ] Substituir o `MelodiaButton { id: confirm … }` inteiro:
+- [x] Substituir o `MelodiaButton { id: confirm … }` inteiro:
 
 ```qml
             MelodiaButton {
@@ -145,10 +145,10 @@ nem rodar o app pega. Lição completa em
             }
 ```
 
-- [ ] verificação mecânica da task:
+- [x] verificação mecânica da task:
       `grep -c 'renameId' src/NewCollectionDialog.qml` → `5`
-- [ ] verificação mecânica da task: `quiet-run cmake --build build` → exit 0
-- [ ] commit:
+- [x] verificação mecânica da task: `quiet-run cmake --build build` → exit 0
+- [x] commit:
 
 ```bash
 git add src/NewCollectionDialog.qml docs/plans/2026-08-28-colecoes-tela.md
