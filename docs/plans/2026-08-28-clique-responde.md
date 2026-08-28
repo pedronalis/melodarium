@@ -402,7 +402,7 @@ git commit -m "feat(ui): bring volume and mute back into the transport row"
 
 ### Task 7: O detector de órfãos vira portão do repositório
 
-- [ ] Criar `tools/check-orfaos.sh` com este conteúdo (é o detector já validado em
+- [x] Criar `tools/check-orfaos.sh` com este conteúdo (é o detector já validado em
       2026-08-28, que achou as 24 lacunas; a lição está em
       `docs/solutions/ui/2026-08-28-redesenho-deixa-funcionalidade-orfa.md`):
 
@@ -446,7 +446,7 @@ echo "check-orfaos: $falhas item(ns) sem porta de entrada"
 [ "$falhas" -eq 0 ]
 ```
 
-- [ ] Tornar executável e registrar a contagem de partida (esta fatia NÃO zera a lista: as
+- [x] Tornar executável e registrar a contagem de partida (esta fatia NÃO zera a lista: as
       fatias seguintes é que religam coleções, fila e ajustes):
 
 ```bash
@@ -454,10 +454,10 @@ chmod +x tools/check-orfaos.sh
 bash tools/check-orfaos.sh; echo "exit=$?"
 ```
 
-- [ ] verificação mecânica da task: `bash tools/check-orfaos.sh | tail -1` →
+- [x] verificação mecânica da task: `bash tools/check-orfaos.sh | tail -1` →
       linha começando com `check-orfaos:` (a contagem cai a zero só ao fim do lote; aqui o
       que se exige é que o script RODE e liste)
-- [ ] commit:
+- [x] commit:
 
 ```bash
 git add tools/check-orfaos.sh docs/plans/2026-08-28-clique-responde.md
