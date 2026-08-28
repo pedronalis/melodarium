@@ -149,6 +149,12 @@ verde, 9/9 alvos de teste, integrado em `main`. As capturas estão em `docs/tela
 
 ## Perigos
 
+- [ ] 2026-08-28 · **Renomear o app move a casa inteira do usuário** — todo caminho de dados no
+      Qt sai do `applicationName`: banco, capas e preferências trocam de endereço e o app abre
+      limpo, sem erro, como se nunca tivesse sido usado. `migrarDoNomeAntigo()` em `main.cpp`
+      cobre os três; **não remova**. E o log do Qt aqui vai para o journald: sem
+      `QT_FORCE_STDERR_LOGGING=1` você depura no escuro achando que a função nem foi chamada.
+      Lição em `docs/solutions/dados/2026-08-28-renomear-o-app-muda-todo-caminho-de-dados.md`.
 - [ ] 2026-08-27 · **`qt_add_qml_module` não honra `pragma Singleton`** — sem
       `set_source_files_properties(X.qml PROPERTIES QT_QML_SINGLETON_TYPE TRUE)` todo acesso
       resolve `undefined`, sem erro de compilação nem de runtime.
