@@ -20,7 +20,7 @@ Window {
                ? Qt.application.arguments[i + 1] : ""
     }
 
-    // `--pane <library|podcast|empty>`: qual miolo montar na hora de medir ou fotografar.
+    // `--pane <library|podcast|empty|collections>`: qual miolo montar ao medir ou fotografar.
     readonly property string measurePane: {
         const i = Qt.application.arguments.indexOf("--pane")
         return i >= 0 && Qt.application.arguments.length > i + 1
@@ -483,10 +483,13 @@ Window {
             // resultado do gate de layout.
             currentIndex: root.measuring
                           ? (root.measurePane === "podcast"
-                             ? 1 : (root.measurePane === "empty" ? 2 : 0))
+                             ? 1 : (root.measurePane === "empty"
+                                    ? 2 : (root.measurePane === "collections" ? 3 : 0)))
                           : (root.section === "podcast"
                              ? 1
-                             : (Database.libraryPath === "" ? 2 : 0))
+                             : (root.section === "collections"
+                                ? 3
+                                : (Database.libraryPath === "" ? 2 : 0)))
 
             LibraryPane {
                 id: libraryPane
@@ -512,6 +515,25 @@ Window {
             EmptyPane {
                 framed: true
                 onPlayRequested: function (mode) { root.startFromEmpty(mode) }
+            }
+
+            CollectionsPane {
+                id: collectionsPane
+                model: trackModel
+                onCollectionOpened: function (id, name) {
+                    root.currentSection = "collection"
+                    root.currentId = id
+                    const q = root.clauseFor("collection", id)
+                    trackModel.loadFromQuery(q.clause, q.bindings)
+                }
+                onCloseRequested: {
+                    // Sair de uma coleção devolve a lista inteira ao modelo: o painel da
+                    // biblioteca compartilha este modelo e não pode herdar o filtro.
+                    root.currentSection = "all"
+                    root.currentId = 0
+                    root.showSection("all", 0)
+                }
+                onTrackActivated: function (index) { root.activateTrack(index) }
             }
         }
     }

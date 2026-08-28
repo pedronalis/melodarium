@@ -113,3 +113,30 @@ explicação de por que o diálogo tem dois modos.
 **Custo de estar errada.** Nenhum funcional: o modo renomear existe, o título e o botão
 trocam de texto, e o duplicado de nome volta o aviso em vez de fechar o diálogo. Nenhum
 portão do objetivo do run cobra esse número.
+
+## 7. Provei que o portão de erros QML tem dentes antes de confiar nele
+
+**Contexto.** O plano `colecoes-tela` manda provar os popups abrindo-os, porque a lição
+`docs/solutions/ui/2026-08-27-popup-final-property-nao-carrega.md` diz que "o conteúdo de um
+Popup só é construído na primeira abertura". Mas o comando que o plano dá
+(`--measure --pane collections --no-search`) **não abre** nenhum dos três diálogos do painel
+novo. Ou o comando prova menos do que o plano acha, ou a lição vale só para o filtro antigo.
+
+**Decisão.** Em vez de deduzir, injetei o defeito exato da lição
+(`property bool opened: visible` no `ConfirmDialog`), reconstruí e rodei o portão. Ele
+acusou **9** linhas, entre elas as três que importam:
+`ConfirmDialog.qml:11:5: Cannot override FINAL property`,
+`CollectionsPane.qml:332:5: Type ConfirmDialog unavailable` e
+`Main.qml:520:13: Type CollectionsPane unavailable`. Revertido em seguida, o portão voltou a
+`0`. Conclusão: com o filtro ALARGADO (que já inclui `unavailable` e `Cannot override`), o
+portão pega a redeclaração sem precisar abrir o popup — o que a lição descreve como cego era
+o filtro de três padrões, não o gesto de não abrir. Nenhuma linha de código de produto foi
+acrescentada só para o gate.
+
+**Alternativa descartada.** Acrescentar ao harness de `--measure` uma rotina que abre e fecha
+os três diálogos do painel. Seria código de produto existindo só para o portão, e agora sei
+que ele não acrescenta nada: o tipo já falha na instanciação do painel, não na abertura.
+
+**Custo de estar errada.** Se um defeito de popup escapasse assim mesmo, o sintoma seria um
+diálogo que não abre no app real. Mas a prova foi feita com o defeito real, no arquivo real,
+com o comando real do portão — não é inferência.

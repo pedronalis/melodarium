@@ -24,9 +24,10 @@ Rectangle {
     // entregam — decisão do Pedro em 2026-08-28: saem daqui. A fatia colecoes-tela insere
     // "collections" como PRIMEIRO item; a fatia ajustes acrescenta "settings" no pé.
     readonly property var items: [
-        { key: "library", icon: "list",       tip: qsTr("Biblioteca") },
-        { key: "podcast", icon: "microphone", tip: qsTr("Podcast") },
-        { key: "search",  icon: "search",     tip: qsTr("Buscar") }
+        { key: "collections", icon: "playlist",   tip: qsTr("Coleções") },
+        { key: "library",     icon: "list",       tip: qsTr("Biblioteca") },
+        { key: "podcast",     icon: "microphone", tip: qsTr("Podcast") },
+        { key: "search",      icon: "search",     tip: qsTr("Buscar") }
     ]
 
     ColumnLayout {
