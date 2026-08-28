@@ -1,7 +1,7 @@
 ---
 slug: clique-responde
 feature: melodia-religa
-status: aprovado
+status: concluido
 depende-de: []
 decisao-humana: sim
 spec: docs/auditoria-completude.md (achados 1,2,3,4,7,8,9) · design/Main.dc.html
