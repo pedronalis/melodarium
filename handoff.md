@@ -1,19 +1,24 @@
 # Handoff — melodarium
 
-> Atualizado: 2026-08-28 08:57 · branch: `main` · via /fecho · contexto: ~67% consumido
+> Atualizado: 2026-08-28 16:35 · branch: `main` · via /fecho · contexto: ~47% consumido
 
 ## Estado
 
-- **As 14 fatias estão prontas e integradas em `main`.** Suíte de 9 alvos verde;
-  `tools/check-layout.sh` verde nas 11 medidas.
-- **A interface agora escala com a janela.** Todo tamanho vinha de um desenho de 1100×700 e
-  virava um app de brinquedo na tela cheia do Pedro ("uma escala microscópica"). `Theme.uiScale`
-  é a alavanca única, derivada da janela real; altura de linha e largura de coluna acompanham.
-- **`--scan` varre a biblioteca sem abrir janela.** Antes a varredura só existia como botão, o
-  que impedia reproduzir problema de scanner sem tela e obrigava o Pedro a clicar para semear.
-- **Acervo de teste no disco:** 27 faixas em 3 álbuns com capa e tags (`~/Música`, licença livre)
-  e 3 episódios reais do Hipsters Ponto Tech (`~/Podcasts/melodarium`). Banco varrido, 27 faixas.
-- **O app ainda não foi ouvido.** Tudo que se sabe vem de teste e de captura de tela.
+- **A tela voltou a ser o desenho aprovado.** O Pedro abriu e reprovou: cor fora, sem degradê,
+  capa de canto vivo, badge de tag errado. Causa raiz: o app consumia as 16 chaves do tema do
+  sistema, e o desenho usa **14 cinzas com papéis distintos** — quatro fundos de estado
+  colapsavam num só. `Theme` ganhou a escada por PAPEL; 10 pontos de cor batem no hex.
+- **Capa arredondada existe de verdade.** `radius` + `clip` NÃO recorta imagem no QML: a
+  moldura estava no código e a arte por cima seguia quadrada, em todas as capas. `RoundedImage`
+  (QQuickPaintedItem) resolve num caminho que sobrevive ao adaptador de software — `MultiEffect`
+  não sobrevive, e some a capa inteira.
+- **O projeto se chama `melodarium`** (escolhido pelo Pedro no /batiza). Repo, pasta, binário,
+  módulo QML, textos e documentos renomeados. `~/dev/active/melodarium`, `./build/melodarium`.
+- **A migração de dados foi a parte perigosa e está verificada:** banco, capas e preferências
+  mudam de endereço com o nome, e o app abriria limpo como se nunca tivesse sido usado.
+  27 faixas, 4 álbuns, 17 capas e a pasta de música atravessaram.
+- **O som sai — medido, não suposto.** Num canal de áudio isolado, o app entrega 13× o nível do
+  silêncio, com a forma do arquivo. Falta só o ouvido do Pedro.
 
 ## Alvo
 
@@ -21,23 +26,28 @@
 - **Plano-fonte:** `docs/specs/2026-08-27-player-musica-podcast.md` — 9 fatias do produto +
   5 do redesenho `melodia-capa-manda`, todas `concluido` (14/14)
 - **PRONTA quando:** as fatias concluídas **e** o Pedro ouvindo o som sair ao clicar numa faixa
-- **Restante:** só a confirmação de áudio — nenhum código pendente
+- **Restante:** só o julgamento do Pedro na tela dele — o som já foi medido saindo (13× o
+  ruído) e a cor conferida contra o desenho (10/10 pontos). Nenhum código pendente.
 - **Correção de rumo (Pedro, 2026-08-28):** "Despacha e me traz pronto, é isso que eu
   quero" — gates de conferência visual passaram a ser meus, não dele.
+- **Correção de rumo (Pedro, 2026-08-28, tarde):** "o visual ainda está feio, não está fiel as
+  cores do artifact desenhado, não está com degrades, não está com as capas com bordas
+  arredondadas, o badge de criar tag está diferente" — gate de geometria passa verde com a
+  paleta inteira errada; desde então todo redesenho roda `tools/check-fidelidade.sh`.
 
 ## Fila da sessão
 
-1. **[S · 2ª desde 2026-08-27]** Ouvir: abrir o app, clicar numa faixa e confirmar que sai som ·
-   done: som saindo · `./build/melodarium` (biblioteca já varrida, 27 faixas)
-2. **[S]** Passar o nome pelo `/batiza` antes de publicar — "melodarium" é provisório ·
-   done: nome decidido e registrado
-3. **[M]** Publicar o repo no GitHub, como o spec pede · done: `git remote -v` com o remoto
+1. **[S · IMPASSE · bloqueado em ação humana]** O que falta é um minuto do Pedro, e nomeando:
+   rodar `./build/melodarium`, clicar numa faixa, e dizer se sai som e se a tela agora é o
+   desenho. Eu já medi as duas coisas por instrumento; o que falta é julgamento, que não tem
+   como ser meu. — 3ª fila desde 2026-08-27. · done: ele responde
+2. **[S · 3ª desde 2026-08-27]** Ouvir e aprovar a tela — **bloqueado pelo vagão 1** ·
+   done: o Pedro confirma o som e o visual
+3. **[S]** Abrir o repo ao público, como o spec pede — nada trava mais, o nome saiu do /batiza ·
+   done: `gh repo view --json visibility` diz `PUBLIC`
 
 ## Estacionamento (derivas)
 
-- [x] 2026-08-28 · Publicar o repo no GitHub — FEITO, mas **privado**
-      (`pedronalis/melodarium`). Abrir ao público ficou preso ao nome: o Pedro escolheu subir
-      fechado hoje e batizar depois, porque repo privado renomeia sem quebrar clone de ninguém.
 - [x] 2026-08-28 · Nome definitivo do projeto — RESOLVIDO: **melodarium**, escolhido pelo Pedro
       no `/batiza`. O anterior era "melodia" (genérico, 930 repos no GitHub); "melodarium" tem
       namespace virgem em GitHub, npm, PyPI, crates e Homebrew. Código, dados, documentos, repo
@@ -54,39 +64,32 @@
 
 ## Em voo
 
-**Lote `melodia-religa` (7 fatias) — TERMINADO e integrado em `main` local, 2026-08-28.**
-Nada pendente dele. Rodou como run headless autônomo em 3 levas, no worktree
-`~/dev/active/melodia-religa-run` (branch `exec/melodia-religa`), sem checkpoint humano.
+Nada em voo. O lote `melodia-religa` (7 fatias) foi **colhido e calibrado em 2026-08-28** —
+desfecho na `## Calibração de custo`. O worktree `~/dev/active/melodia-religa-run` continua no
+disco (branch `exec/melodia-religa`, já integrada em `main`); o vínculo dele com o repo foi
+reparado depois da renomeação da pasta, e ele pode ser removido quando o Pedro quiser.
 
-As sete fatias: `clique-responde`, `fila-motor`, `colecoes-tela`, `fila-tirinha`,
-`shuffle-repeat`, `colecoes-alcance`, `ajustes` — todas com status `concluido`.
+Seis peças de motor prontas seguem em **reserva declarada**, impressas pelo `check-orfaos.sh` a
+cada execução: desinscrever de podcast, "continuar ouvindo", reordenar dentro de uma coleção,
+entre outras. Esperam decisão sobre merecerem tela.
 
-O que mudou na tela: o coração e a lateral respondem ao clique; as coleções têm um modo
-próprio, com tela que abre, renomeia, apaga e tira faixa pela linha; a fila aparece no pé da
-lista com as capas do que vem; aleatório e repetir ligam de verdade; um álbum inteiro entra
-numa coleção com um clique; a busca acha coleção pelo nome e abre; e existe uma gaveta de
-ajustes (engrenagem no pé da tira) onde se troca a pasta de música e se ligam os dois
-compromissos de qualidade de áudio.
-
-**Uma decisão que o run tomou sozinho e vale você conferir** (está inteira em
-`DECISOES_RUN.md` do worktree, nº 32): sobraram seis pedaços de motor prontos e testados que
-nenhum desenho pede — desinscrever de um podcast, "continuar ouvindo", arrastar para
-reordenar dentro de uma coleção, entre outros. Em vez de inventar telas para eles ou apagá-los,
-o run os pôs numa **reserva declarada**, que o detector de órfãos imprime toda vez que roda.
-Eles não somem da vista; esperam você decidir se merecem tela. Quatro peças realmente mortas
-(duas telas substituídas pelo redesenho e a busca antiga) saíram do disco.
-
-O run do redesenho (fatias 3-5) foi colhido antes: **PASSOU** — 9 commits, gate de 19 linhas
-verde, 9/9 alvos de teste, integrado em `main`. As capturas estão em `docs/telas/`.
+- 2026-08-28 · /despacha run headless · lote `melodia-religa` (7 fatias) · modelo Opus 5 ·
+  estimado n/d · real **~850k tok novos (~63,90M com releitura, inflação 75×) / ~0,56 h /
+  336 turnos** · **PASSOU** — 7 fatias `concluido`, integradas em `main`. Lição: o run de lote
+  custou **6,2× os tokens novos** do run de fatias 1-3 (138k) para 2,3× o número de turnos —
+  fatia que RELIGA código existente lê muito mais do que fatia que escreve do zero.
 
 ## Verificação
 
-- `ctest --test-dir build --output-on-failure` → `100% tests passed, 0 out of 9` · 2026-08-28 12:10 (pós-merge)
-- `bash tools/check-layout.sh` → 11 medidas ok · 2026-08-28 12:10 (pós-merge)
+- `ctest --test-dir build --output-on-failure` → `100% tests passed, 0 out of 9` · 2026-08-28 16:35
+- `bash tools/check-layout.sh` → 11 medidas ok · 2026-08-28 16:35
 - `bash tools/check-orfaos.sh` → `0 item(ns) sem porta de entrada`, mais 6 em reserva
-  declarada que ele imprime toda vez · 2026-08-28 12:10 (pós-merge)
-- erros de QML em tela virtual, nas 6 telas e na busca aberta → 0 · 2026-08-28 12:10 (pós-merge)
-- `./build/melodarium --scan` → `27 faixas` no banco · 2026-08-28
+  declarada · 2026-08-28 16:35
+- `bash tools/check-fidelidade.sh` → 10 pontos de cor ok contra o desenho · 2026-08-28 16:35
+- erros de QML em tela virtual, nas 6 telas → 0 · 2026-08-28 16:35
+- `./build/melodarium --scan` → acha a pasta e reporta `0 novas` contra o banco migrado · 2026-08-28
+- áudio real na saída, em canal isolado → pico 0,173 / RMS 0,026 contra 0,009 / 0,002 de
+  silêncio · 2026-08-28
 
 ## Calibração de custo
 
@@ -172,8 +175,11 @@ QT_FORCE_STDERR_LOGGING=1` — mas o log fica enorme (845 KB num único start).
 - [ ] 2026-08-27 · **A tela é uma superfície só** (decisão do Pedro, `970904d`) — retângulo com
       margem + borda + canto arredondado preenchendo a janela inteira lê como card flutuando
       dentro de outra tela. Painel interno de conteúdo com borda continua ok.
-- [ ] 2026-08-27 · **`pkill -f 'build/melodarium'` mata o próprio comando** que o executa (a
+- [ ] 2026-08-28 · **`pkill -f 'build/melodarium'` mata o próprio comando** que o executa (a
       string casa com a linha de comando do shell, exit 144). Usar `pkill -x melodarium`.
+      Confirmado vivo em 2026-08-28: a sessão caiu nele de novo, e levou junto uma tarefa de
+      background de OUTRA sessão. O aviso existia e não foi lido — ele só é consultado quando
+      o vagão 1 encosta no assunto, e naquele momento o vagão 1 era a tela.
 
 - [ ] 2026-08-28 · **Interface com tamanho fixo vira microscópica em tela grande** — todo
       número nasceu de um desenho de 1100×700. Mexeu em tamanho? passe por `Theme.uiScale`, e
