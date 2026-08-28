@@ -76,7 +76,7 @@ faz.
 
 ### Task 1: Uma transação para o álbum inteiro
 
-- [ ] Escrever o teste que falha, em `tests/tst_collections.cpp`, dentro de
+- [x] Escrever o teste que falha, em `tests/tst_collections.cpp`, dentro de
       `private slots:`:
 
 ```cpp
@@ -114,10 +114,10 @@ faz.
     }
 ```
 
-- [ ] Rodar e confirmar que falha pelo motivo certo:
+- [x] Rodar e confirmar que falha pelo motivo certo:
       `cmake --build build --target tst_collections` → erro de compilação
       `no member named 'addTracksToCollection'`
-- [ ] Declarar em `src/collectionmanager.h`, logo depois de
+- [x] Declarar em `src/collectionmanager.h`, logo depois de
       `Q_INVOKABLE bool addTrackToCollection(int collectionId, int trackId);`:
 
 ```cpp
@@ -126,7 +126,7 @@ faz.
     Q_INVOKABLE int addTracksToCollection(int collectionId, const QVariantList &trackIds);
 ```
 
-- [ ] Implementar em `src/collectionmanager.cpp`, depois de
+- [x] Implementar em `src/collectionmanager.cpp`, depois de
       `bool CollectionManager::addTrackToCollection(...)`:
 
 ```cpp
@@ -178,10 +178,10 @@ int CollectionManager::addTracksToCollection(int collectionId, const QVariantLis
 }
 ```
 
-- [ ] verificação mecânica da task:
+- [x] verificação mecânica da task:
       `quiet-run ctest --test-dir build -R tst_collections --output-on-failure`
       → `100% tests passed`
-- [ ] commit:
+- [x] commit:
 
 ```bash
 git add src/collectionmanager.h src/collectionmanager.cpp tests/tst_collections.cpp docs/plans/2026-08-28-colecoes-alcance.md
