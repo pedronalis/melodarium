@@ -73,6 +73,17 @@ Window {
         return isNaN(id) ? 0 : id
     }
 
+    // `--open-album <id>`: entra no eixo de álbuns e abre um deles, pelo mesmo caminho do
+    // clique. O cabeçalho com o artista e o botão "+ Coleção" só existem com um álbum
+    // aberto: sem isto essa metade da tela não teria como ser fotografada.
+    readonly property int measureAlbum: {
+        const i = Qt.application.arguments.indexOf("--open-album")
+        if (i < 0 || Qt.application.arguments.length <= i + 1)
+            return 0
+        const id = parseInt(Qt.application.arguments[i + 1])
+        return isNaN(id) ? 0 : id
+    }
+
     // `--play-queue`: carrega a biblioteca inteira como fila e toca a primeira. A tirinha
     // "a seguir na fila" só existe quando há PRÓXIMOS, e `--play-track` monta uma fila de
     // um só — com ela a tirinha ficaria corretamente invisível e não haveria o que provar.
@@ -101,6 +112,11 @@ Window {
     // gesto do Shift+Enter. Sem isto o atalho só poderia ser provado por alguém apertando a
     // tecla — e um atalho que anuncia no rodapé e não faz nada é o defeito deste lote.
     readonly property bool measureQueueHit: Qt.application.arguments.indexOf("--queue-hit") >= 0
+
+    // `--activate-hit`: aperta Enter no resultado em destaque. Fotografar o resultado na
+    // lista prova que a busca ACHA; só ativá-lo prova que o resultado LEVA a algum lugar —
+    // que é a metade que este lote existe para consertar.
+    readonly property bool measureActivateHit: Qt.application.arguments.indexOf("--activate-hit") >= 0
 
     // `--no-search`: não abre o overlay antes de medir.
     readonly property bool measureSearch: Qt.application.arguments.indexOf("--no-search") < 0
@@ -448,6 +464,12 @@ Window {
                 onTriggered: {
                     if (root.measureCollection > 0)
                         collectionsPane.openById(root.measureCollection)
+                    if (root.measureAlbum > 0) {
+                        // O caminho do clique: o eixo carrega os grupos, e o grupo abre a
+                        // partir deles — é de lá que o artista do cabeçalho vem.
+                        root.showSection("albums", 0)
+                        root.openGroup("albums", root.measureAlbum)
+                    }
                     if (root.measureEpisode > 0)
                         PodcastLibrary.playEpisode(root.measureEpisode)
                     if (root.measureTrack !== "") {
@@ -467,6 +489,8 @@ Window {
                         searchOverlay.queueAt(searchOverlay.highlighted)
                         searchOverlay.close()
                     }
+                    if (root.measureActivateHit)
+                        searchOverlay.activate(searchOverlay.highlighted)
                 }
             }
 
