@@ -78,6 +78,25 @@ Window {
     // um só — com ela a tirinha ficaria corretamente invisível e não haveria o que provar.
     readonly property bool measureQueue: Qt.application.arguments.indexOf("--play-queue") >= 0
 
+    // `--play-queue-mode <all|shuffle|never|forgotten>`: qual dos convites da tela vazia
+    // disparar. Com "shuffle" o modo aleatório fica LIGADO, que é o único jeito de
+    // fotografar o botão aceso — apagado ele não prova o estado visível que a fatia promete.
+    readonly property string measureQueueMode: {
+        const i = Qt.application.arguments.indexOf("--play-queue-mode")
+        return i >= 0 && Qt.application.arguments.length > i + 1
+               ? Qt.application.arguments[i + 1] : "all"
+    }
+
+    // `--repeat <n>`: avança o repetir n posições (1 = a fila, 2 = esta faixa), para o "1"
+    // sobreposto do terceiro estado poder ser visto na foto.
+    readonly property int measureRepeat: {
+        const i = Qt.application.arguments.indexOf("--repeat")
+        if (i < 0 || Qt.application.arguments.length <= i + 1)
+            return 0
+        const n = parseInt(Qt.application.arguments[i + 1])
+        return isNaN(n) ? 0 : n
+    }
+
     // `--queue-hit`: manda o overlay pôr na fila o resultado em destaque e fecha, que é o
     // gesto do Shift+Enter. Sem isto o atalho só poderia ser provado por alguém apertando a
     // tecla — e um atalho que anuncia no rodapé e não faz nada é o defeito deste lote.
@@ -415,7 +434,9 @@ Window {
                         AudioEngine.play()
                     }
                     if (root.measureQueue)
-                        root.startFromEmpty("all")
+                        root.startFromEmpty(root.measureQueueMode)
+                    for (let r = 0; r < root.measureRepeat; ++r)
+                        AudioEngine.cycleRepeat()
                     if (!root.measureSearch)
                         return
                     searchOverlay.open()
