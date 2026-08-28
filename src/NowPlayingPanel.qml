@@ -337,7 +337,10 @@ Rectangle {
                 visible: !root.episodeMode
                 icon: "shuffle"
                 size: Theme.fontSizeL
-                onClicked: {}
+                // Sem estado visível, um botão ligado é indistinguível de um desligado.
+                accent: AudioEngine.shuffle
+                tooltip: AudioEngine.shuffle ? qsTr("aleatório ligado") : qsTr("aleatório")
+                onClicked: AudioEngine.setShuffle(!AudioEngine.shuffle)
             }
 
             IconButton {
@@ -389,7 +392,26 @@ Rectangle {
                 visible: !root.episodeMode
                 icon: "repeat"
                 size: Theme.fontSizeL
-                onClicked: {}
+                accent: AudioEngine.repeatMode !== AudioEngine.RepeatOff
+                // O terceiro estado precisa se distinguir do segundo por mais do que a cor:
+                // um "1" sobreposto é o que diz "esta faixa" em vez de "a fila".
+                tooltip: AudioEngine.repeatMode === AudioEngine.RepeatOne
+                         ? qsTr("repetir esta faixa")
+                         : (AudioEngine.repeatMode === AudioEngine.RepeatAll
+                            ? qsTr("repetir a fila") : qsTr("repetir"))
+                onClicked: AudioEngine.cycleRepeat()
+
+                Text {
+                    anchors.right: parent.right
+                    anchors.bottom: parent.bottom
+                    anchors.rightMargin: Math.round(2 * Theme.uiScale)
+                    visible: AudioEngine.repeatMode === AudioEngine.RepeatOne
+                    text: "1"
+                    font.family: Theme.fontFamilyFixed
+                    font.pointSize: Theme.fontSizeXXS
+                    font.weight: Theme.fontWeightBold
+                    color: Theme.mPrimary
+                }
             }
 
             // O rótulo do pulo: sem ele, as duas setas viriam a ser "faixa anterior" aos olhos

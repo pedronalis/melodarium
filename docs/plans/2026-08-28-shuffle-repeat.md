@@ -322,7 +322,7 @@ git commit -m "feat(audio): shuffle the current queue, reversibly"
 
 ### Task 3: Os dois botões passam a fazer e a mostrar
 
-- [ ] Em `src/NowPlayingPanel.qml`, substituir o `IconButton` do aleatório (o que hoje tem
+- [x] Em `src/NowPlayingPanel.qml`, substituir o `IconButton` do aleatório (o que hoje tem
       `onClicked: {}`) por:
 
 ```qml
@@ -337,7 +337,7 @@ git commit -m "feat(audio): shuffle the current queue, reversibly"
             }
 ```
 
-- [ ] No mesmo arquivo, substituir o `IconButton` do repetir (o outro `onClicked: {}`) por:
+- [x] No mesmo arquivo, substituir o `IconButton` do repetir (o outro `onClicked: {}`) por:
 
 ```qml
             IconButton {
@@ -367,12 +367,12 @@ git commit -m "feat(audio): shuffle the current queue, reversibly"
             }
 ```
 
-- [ ] verificação mecânica da task:
+- [x] verificação mecânica da task:
       `grep -c 'onClicked: {}' src/NowPlayingPanel.qml` → `0`
-- [ ] verificação mecânica da task:
+- [x] verificação mecânica da task:
       `grep -c 'AudioEngine.setShuffle\|AudioEngine.cycleRepeat' src/NowPlayingPanel.qml` → `2`
-- [ ] verificação mecânica da task: `quiet-run cmake --build build` → exit 0
-- [ ] commit:
+- [x] verificação mecânica da task: `quiet-run cmake --build build` → exit 0
+- [x] commit:
 
 ```bash
 git add src/NowPlayingPanel.qml docs/plans/2026-08-28-shuffle-repeat.md
