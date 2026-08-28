@@ -183,6 +183,22 @@ QStringList AudioEngine::upcoming(int limit) const
     return m_queue.mid(first, limit);
 }
 
+void AudioEngine::cycleRepeat()
+{
+    switch (m_repeatMode) {
+    case RepeatOff:  m_repeatMode = RepeatAll; break;
+    case RepeatAll:  m_repeatMode = RepeatOne; break;
+    case RepeatOne:  m_repeatMode = RepeatOff; break;
+    }
+
+    // As duas propriedades são escritas sempre, as duas: deixar a anterior ligada faria
+    // "repetir a faixa" e "repetir a fila" valerem ao mesmo tempo.
+    setPropertyString("loop-playlist", m_repeatMode == RepeatAll ? "inf" : "no");
+    setPropertyString("loop-file", m_repeatMode == RepeatOne ? "inf" : "no");
+
+    emit repeatModeChanged();
+}
+
 void AudioEngine::setVolume(double v)
 {
     if (qFuzzyCompare(m_volume, v) || !m_mpv)

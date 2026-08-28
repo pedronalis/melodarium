@@ -61,7 +61,7 @@ conversão de áudio entra no construtor (contrato de qualidade do spec).
 
 ### Task 1: Repetir em três posições, no motor
 
-- [ ] Escrever o teste que falha, em `tests/tst_audioengine.cpp`, dentro de
+- [x] Escrever o teste que falha, em `tests/tst_audioengine.cpp`, dentro de
       `private slots:`:
 
 ```cpp
@@ -86,10 +86,10 @@ conversão de áudio entra no construtor (contrato de qualidade do spec).
     }
 ```
 
-- [ ] Rodar e confirmar que falha pelo motivo certo:
+- [x] Rodar e confirmar que falha pelo motivo certo:
       `cmake --build build --target tst_audioengine` → erro de compilação
       `no member named 'repeatMode' in 'AudioEngine'`
-- [ ] Declarar em `src/audioengine.h`, no bloco `public:` **antes** do construtor (um
+- [x] Declarar em `src/audioengine.h`, no bloco `public:` **antes** do construtor (um
       `Q_ENUM` precisa do tipo declarado antes de qualquer `Q_PROPERTY` que o use):
 
 ```cpp
@@ -99,38 +99,38 @@ conversão de áudio entra no construtor (contrato de qualidade do spec).
     Q_ENUM(RepeatMode)
 ```
 
-- [ ] No mesmo arquivo, junto das outras `Q_PROPERTY`:
+- [x] No mesmo arquivo, junto das outras `Q_PROPERTY`:
 
 ```cpp
     Q_PROPERTY(RepeatMode repeatMode READ repeatMode NOTIFY repeatModeChanged)
 ```
 
-- [ ] No mesmo arquivo, junto dos getters inline:
+- [x] No mesmo arquivo, junto dos getters inline:
 
 ```cpp
     RepeatMode repeatMode() const { return m_repeatMode; }
 ```
 
-- [ ] No mesmo arquivo, junto dos `Q_INVOKABLE`:
+- [x] No mesmo arquivo, junto dos `Q_INVOKABLE`:
 
 ```cpp
     // Avança Off → All → One → Off. Um botão só, como no desenho.
     Q_INVOKABLE void cycleRepeat();
 ```
 
-- [ ] No mesmo arquivo, junto dos sinais:
+- [x] No mesmo arquivo, junto dos sinais:
 
 ```cpp
     void repeatModeChanged();
 ```
 
-- [ ] No mesmo arquivo, junto dos membros privados:
+- [x] No mesmo arquivo, junto dos membros privados:
 
 ```cpp
     RepeatMode m_repeatMode = RepeatOff;
 ```
 
-- [ ] Implementar em `src/audioengine.cpp`, depois de `AudioEngine::upcoming`:
+- [x] Implementar em `src/audioengine.cpp`, depois de `AudioEngine::upcoming`:
 
 ```cpp
 void AudioEngine::cycleRepeat()
@@ -150,10 +150,10 @@ void AudioEngine::cycleRepeat()
 }
 ```
 
-- [ ] verificação mecânica da task:
+- [x] verificação mecânica da task:
       `quiet-run ctest --test-dir build -R tst_audioengine --output-on-failure`
       → `100% tests passed`
-- [ ] commit:
+- [x] commit:
 
 ```bash
 git add src/audioengine.h src/audioengine.cpp tests/tst_audioengine.cpp docs/plans/2026-08-28-shuffle-repeat.md

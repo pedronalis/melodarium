@@ -144,6 +144,26 @@ private slots:
         QCOMPARE(engine.upcoming(4), QStringList({m_toneB}));
         QCOMPARE(engine.upcoming(0), QStringList());
     }
+
+    // Três posições, não duas: repetir a fila e repetir a faixa são propriedades
+    // diferentes no mpv, e um booleano só não conseguiria expressar as duas.
+    void repeatCyclesThroughThreePositions()
+    {
+        AudioEngine engine(nullptr, true);
+        if (!engine.isAvailable())
+            QSKIP("mpv unavailable");
+
+        QCOMPARE(engine.repeatMode(), AudioEngine::RepeatOff);
+
+        QSignalSpy spy(&engine, &AudioEngine::repeatModeChanged);
+        engine.cycleRepeat();
+        QCOMPARE(engine.repeatMode(), AudioEngine::RepeatAll);
+        engine.cycleRepeat();
+        QCOMPARE(engine.repeatMode(), AudioEngine::RepeatOne);
+        engine.cycleRepeat();
+        QCOMPARE(engine.repeatMode(), AudioEngine::RepeatOff);
+        QCOMPARE(spy.count(), 3);
+    }
 };
 
 QTEST_MAIN(TstAudioEngine)

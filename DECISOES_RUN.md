@@ -274,3 +274,24 @@ objetivo da fatia).
 **Custo de estar errada.** As duas só existem sob `--measure`; no app normal não há nada
 diferente. Somadas à `--open-collection`, o harness ganhou três entradas — todas do mesmo
 feitio das cinco que já tinha.
+
+## 14. `ctest` roda o binário que existe, não o código que está no disco
+
+**Contexto.** Depois de implementar `cycleRepeat`, rodei
+`quiet-run ctest --test-dir build -R tst_audioengine` e li `100% tests passed`. Fui conferir
+qual teste tinha passado e o binário respondeu
+`Unknown test function: 'repeatCyclesThroughThreePositions'`: o ctest tinha rodado o
+executável ANTERIOR, de antes da compilação falhar na etapa do teste vermelho. O verde era
+sobre código que não existia.
+
+**Decisão.** `quiet-run cmake --build build` **antes** de todo `ctest`, e conferência do
+teste novo por nome (`./build/tests/tst_audioengine -functions` e execução isolada com
+`-v1`, que mostra `3 passed, 0 skipped`). O mesmo cuidado vale para o `QSKIP` por falta de
+ffmpeg: um teste pulado também sai verde.
+
+**Alternativa descartada.** Confiar no `100% tests passed`. É o primo do "suíte verde não
+prova que a tela existe" que motivou este lote inteiro — aqui, suíte verde não prova nem que
+o código foi compilado.
+
+**Custo de estar errada.** Se eu não tivesse conferido, esta fatia teria fechado com um teste
+fantasma e uma função possivelmente quebrada.
