@@ -25,6 +25,7 @@ Popup {
     signal albumChosen(int albumId, string title)
     signal artistChosen(int artistId, string title)
     signal trackQueued(string path)
+    signal collectionChosen(int collectionId, string title)
 
     modal: true
     focus: true
@@ -159,6 +160,8 @@ Popup {
             root.albumChosen(hit.id, hit.title)
         else if (hit.kind === "artist")
             root.artistChosen(hit.id, hit.title)
+        else if (hit.kind === "collection")
+            root.collectionChosen(hit.id, hit.title)
         else
             return
         root.close()
@@ -168,6 +171,7 @@ Popup {
         if (kind === "album") return Icons.get("disc")
         if (kind === "artist") return Icons.get("microphone")
         if (kind === "episode") return Icons.get("rss")
+        if (kind === "collection") return Icons.get("playlist")
         return Icons.get("music")
     }
 
@@ -175,6 +179,7 @@ Popup {
         if (kind === "album") return qsTr("Álbuns")
         if (kind === "artist") return qsTr("Artistas")
         if (kind === "episode") return qsTr("Episódios")
+        if (kind === "collection") return qsTr("Coleções")
         return qsTr("Faixas")
     }
 
