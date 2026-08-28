@@ -518,6 +518,10 @@ Window {
                 onTrackActivated: function (index) { root.activateTrack(index) }
                 onCollectRequested: function (trackId) { root.collectTrack(trackId) }
                 onSearchRequested: searchOverlay.open()
+                onQueueActivated: function (queueIndex) {
+                    AudioEngine.loadPlaylist(AudioEngine.queue, queueIndex)
+                    AudioEngine.play()
+                }
             }
 
             PodcastPane {

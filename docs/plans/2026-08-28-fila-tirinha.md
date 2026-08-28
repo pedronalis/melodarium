@@ -220,13 +220,13 @@ git commit -m "feat(ui): the up-next strip with covers and a +N tile"
 
 ### Task 2: A tirinha ganha o pé da lista
 
-- [ ] Em `src/LibraryPane.qml`, declarar o sinal junto dos outros:
+- [x] Em `src/LibraryPane.qml`, declarar o sinal junto dos outros:
 
 ```qml
     signal queueActivated(int queueIndex)
 ```
 
-- [ ] No mesmo arquivo, acrescentar a tirinha como **último filho** do `ColumnLayout`
+- [x] No mesmo arquivo, acrescentar a tirinha como **último filho** do `ColumnLayout`
       principal, depois do `ListView { id: groupList … }`:
 
 ```qml
@@ -237,7 +237,7 @@ git commit -m "feat(ui): the up-next strip with covers and a +N tile"
         }
 ```
 
-- [ ] Em `src/Main.qml`, no `LibraryPane { id: libraryPane … }`, ligar o pulo na fila:
+- [x] Em `src/Main.qml`, no `LibraryPane { id: libraryPane … }`, ligar o pulo na fila:
 
 ```qml
                 onQueueActivated: function (queueIndex) {
@@ -246,12 +246,12 @@ git commit -m "feat(ui): the up-next strip with covers and a +N tile"
                 }
 ```
 
-- [ ] verificação mecânica da task:
+- [x] verificação mecânica da task:
       `grep -c 'QueueStrip\|queueActivated' src/LibraryPane.qml` → `3`
-- [ ] verificação mecânica da task:
+- [x] verificação mecânica da task:
       `bash tools/check-layout.sh` → 11 medidas ok (a tirinha não pode empurrar o layout;
       ela some quando a fila está vazia, que é o caso do gate)
-- [ ] commit:
+- [x] commit:
 
 ```bash
 git add src/LibraryPane.qml src/Main.qml docs/plans/2026-08-28-fila-tirinha.md
