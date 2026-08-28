@@ -21,6 +21,8 @@ class AudioEngine : public QObject
     Q_PROPERTY(QString currentFile READ currentFile NOTIFY currentFileChanged)
     Q_PROPERTY(int playlistPos READ playlistPos NOTIFY playlistPosChanged)
     Q_PROPERTY(double speed READ speed WRITE setSpeed NOTIFY speedChanged)
+    Q_PROPERTY(QStringList queue READ queue NOTIFY queueChanged)
+    Q_PROPERTY(int queueCount READ queueCount NOTIFY queueChanged)
 
 public:
     // headlessAo = true forces --ao=null: never opens a real device, for automated tests.
@@ -34,6 +36,8 @@ public:
     QString currentFile() const { return m_currentFile; }
     int playlistPos() const { return m_playlistPos; }
     double speed() const { return m_speed; }
+    QStringList queue() const { return m_queue; }
+    int queueCount() const { return m_queue.size(); }
 
     // Q_INVOKABLE and not just a Q_PROPERTY WRITE: the podcast slice calls
     // AudioEngine.setSpeed(x) as a function. A bare WRITE method is invisible to QML.
@@ -48,6 +52,11 @@ public:
     Q_INVOKABLE void next();
     Q_INVOKABLE void previous();
     Q_INVOKABLE void loadPlaylist(const QStringList &files, int startIndex = 0);
+    // Pôr no fim sem interromper o que toca. Com a fila vazia, carrega e NÃO começa a
+    // tocar: o app só toca quando alguém pede.
+    Q_INVOKABLE void appendToQueue(const QString &file);
+    // Os próximos `limit` caminhos, sem incluir o que toca — é o que a tirinha desenha.
+    Q_INVOKABLE QStringList upcoming(int limit) const;
     Q_INVOKABLE void setGaplessAggressive(bool on);
     Q_INVOKABLE void setReplayGainMode(const QString &mode);
     Q_INVOKABLE void setExclusiveOutput(bool on);
@@ -64,6 +73,7 @@ signals:
     void currentFileChanged();
     void playlistPosChanged();
     void speedChanged();
+    void queueChanged();
     void trackFinished(const QString &path);
     void playbackError(const QString &path, const QString &message);
     void engineUnavailable(const QString &message);
@@ -86,4 +96,7 @@ private:
     QString m_currentFile;
     int m_playlistPos = -1;
     double m_speed = 1.0;
+    // Espelho do que foi mandado ao mpv. Ler playlist/N/filename seria uma consulta por
+    // entrada a cada repintura da tirinha de capas.
+    QStringList m_queue;
 };

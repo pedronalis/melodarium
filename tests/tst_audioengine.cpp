@@ -95,6 +95,55 @@ private slots:
         engine.setSpeed(0.01);
         QCOMPARE(engine.speed(), 0.25);
     }
+
+    // A ordem de reprodução existia só dentro do mpv e numa variável de QML que ninguém
+    // lia. Sem isto não há como desenhar "o que vem a seguir".
+    void queueMirrorsWhatWasLoaded()
+    {
+        AudioEngine engine(nullptr, true);
+        if (!engine.isAvailable())
+            QSKIP("mpv unavailable");
+
+        QCOMPARE(engine.queue().size(), 0);
+        QCOMPARE(engine.queueCount(), 0);
+
+        QSignalSpy spy(&engine, &AudioEngine::queueChanged);
+        engine.loadPlaylist({m_toneA, m_toneB}, 0);
+
+        QCOMPARE(engine.queue(), QStringList({m_toneA, m_toneB}));
+        QCOMPARE(engine.queueCount(), 2);
+        QCOMPARE(spy.count(), 1);
+    }
+
+    // Pôr no fim não pode reiniciar o que toca: é o gesto de "depois dessa, essa".
+    void appendGrowsTheQueueWithoutReplacingIt()
+    {
+        AudioEngine engine(nullptr, true);
+        if (!engine.isAvailable())
+            QSKIP("mpv unavailable");
+
+        engine.loadPlaylist({m_toneA}, 0);
+        QSignalSpy spy(&engine, &AudioEngine::queueChanged);
+        engine.appendToQueue(m_toneB);
+
+        QCOMPARE(engine.queue(), QStringList({m_toneA, m_toneB}));
+        QCOMPARE(spy.count(), 1);
+    }
+
+    // A tirinha da tela pede "os próximos quatro": o que toca não entra, e pedir mais do
+    // que existe devolve o que existe em vez de estourar.
+    void upcomingSkipsTheCurrentAndClampsToWhatExists()
+    {
+        AudioEngine engine(nullptr, true);
+        if (!engine.isAvailable())
+            QSKIP("mpv unavailable");
+
+        engine.loadPlaylist({m_toneA, m_toneB}, 0);
+        QTRY_COMPARE_WITH_TIMEOUT(engine.playlistPos(), 0, 5000);
+
+        QCOMPARE(engine.upcoming(4), QStringList({m_toneB}));
+        QCOMPARE(engine.upcoming(0), QStringList());
+    }
 };
 
 QTEST_MAIN(TstAudioEngine)

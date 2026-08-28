@@ -157,6 +157,30 @@ void AudioEngine::loadPlaylist(const QStringList &files, int startIndex)
     }
     if (startIndex > 0 && startIndex < files.size())
         setPropertyString("playlist-pos", QByteArray::number(startIndex).constData());
+
+    m_queue = files;
+    emit queueChanged();
+}
+
+void AudioEngine::appendToQueue(const QString &file)
+{
+    if (!m_mpv || file.isEmpty())
+        return;
+    // "append" e não "append-play": pôr no fim é um gesto de organizar a fila, não de
+    // mandar tocar. Quem quiser tocar chama play().
+    command({QStringLiteral("loadfile"), file, QStringLiteral("append")});
+    m_queue.append(file);
+    emit queueChanged();
+}
+
+QStringList AudioEngine::upcoming(int limit) const
+{
+    if (limit <= 0 || m_queue.isEmpty())
+        return {};
+    const int first = m_playlistPos < 0 ? 0 : m_playlistPos + 1;
+    if (first >= m_queue.size())
+        return {};
+    return m_queue.mid(first, limit);
 }
 
 void AudioEngine::setVolume(double v)
