@@ -41,6 +41,25 @@ void migrarDoNomeAntigo()
               + QLatin1Char('/') + antigo + QLatin1Char('/') + antigo },
     };
 
+    // As preferências vêm antes, e por outro caminho: o QSettings cria o arquivo novo (vazio)
+    // logo na primeira leitura, então "mover se o destino não existe" nunca dispararia — o app
+    // esqueceria a pasta de música e os dois compromissos de qualidade de áudio, e o usuário
+    // veria a tela de "escolha uma pasta" com a biblioteca inteira já varrida atrás dela.
+    // Copiar chave a chave é idempotente e não sobrescreve nada que já tenha sido escolhido.
+    {
+        QSettings atuais;
+        // NativeFormat, e não IniFormat: pedir Ini explicitamente faz o Qt procurar
+        // `melodia.ini`, e o arquivo que existe de verdade é `melodia.conf` — o nativo no
+        // Unix. A diferença é uma palavra, e ela custou a pasta de música do usuário.
+        QSettings velhas(QSettings::NativeFormat, QSettings::UserScope, antigo, antigo);
+        const QStringList chaves = velhas.allKeys();
+        for (const QString &chave : chaves) {
+            if (!atuais.contains(chave))
+                atuais.setValue(chave, velhas.value(chave));
+        }
+        atuais.sync();
+    }
+
     for (const Caminho &c : caminhos) {
         if (c.novo.isEmpty() || QDir(c.novo).exists() || !QDir(c.velho).exists())
             continue;
