@@ -606,6 +606,12 @@ Window {
                     root.showSection("all", 0)
                 }
                 onTrackActivated: function (index) { root.activateTrack(index) }
+                // Sem recarregar, a linha removida continua na tela até alguém trocar de
+                // painel — e o usuário clica de novo achando que o botão não funcionou.
+                onTrackRemoved: function (trackId) {
+                    const q = root.clauseFor("collection", collectionsPane.openId)
+                    trackModel.loadFromQuery(q.clause, q.bindings)
+                }
             }
         }
     }
