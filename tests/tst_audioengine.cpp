@@ -278,6 +278,42 @@ private slots:
         QTRY_COMPARE_WITH_TIMEOUT(engine.playlistPos(), 1, 5000);
         QCOMPARE(engine.currentFile(), esperado);
     }
+
+    // "Tocar tudo em ordem aleatória" (a tela de boas-vindas) carrega a fila e SÓ ENTÃO liga
+    // o modo — nesse instante o mpv já começou a carregar a primeira entrada da ordem
+    // antiga. Se ele ficar nela, a fila nova só é ouvida a partir dali: o convite promete
+    // tudo e entrega um pedaço, sempre começando pela mesma faixa.
+    void shuffleFromAStandstillStartsAtTheTopOfTheNewOrder()
+    {
+        QStringList original = {m_toneA, m_toneB};
+        for (int i = 0; i < 3; ++i) {
+            const QString extra = makeTone(
+                m_dir.filePath(QStringLiteral("parado%1.flac").arg(i)), 500 + i * 90, 1.0);
+            if (extra.isEmpty())
+                QSKIP("ffmpeg unavailable");
+            original.append(extra);
+        }
+
+        // Motor novo a cada tentativa: o que se testa é o instante em que nada tocou ainda,
+        // e esse instante não volta depois que a fila anda.
+        for (int tentativa = 0; tentativa < 30; ++tentativa) {
+            AudioEngine engine(nullptr, true);
+            if (!engine.isAvailable())
+                QSKIP("mpv unavailable");
+
+            engine.loadPlaylist(original, 0);
+            engine.setShuffle(true);
+            if (engine.queue().at(0) == original.at(0))
+                continue; // ordem por acaso igual no começo: não distinguiria nada
+
+            // Pausado, senão a fila de tons de 1 s anda sozinha e passa pelo esperado.
+            engine.pause();
+            const QString esperado = engine.queue().at(0);
+            QTRY_COMPARE_WITH_TIMEOUT(engine.currentFile(), esperado, 5000);
+            return;
+        }
+        QFAIL("trinta embaralhamentos e a primeira entrada nunca mudou");
+    }
 };
 
 QTEST_MAIN(TstAudioEngine)
