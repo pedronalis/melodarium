@@ -486,7 +486,7 @@ git commit -m "feat(ui): album header shows the artist and collects the whole li
 
 ### Task 6: O menu de coleção atende a lista inteira
 
-- [ ] Em `src/Main.qml`, o menu de coleções precisa saber se está atendendo uma faixa ou a
+- [x] Em `src/Main.qml`, o menu de coleções precisa saber se está atendendo uma faixa ou a
       lista inteira. Substituir a função `collectTrack` e acrescentar a irmã:
 
 ```qml
@@ -507,7 +507,7 @@ git commit -m "feat(ui): album header shows the artist and collects the whole li
     }
 ```
 
-- [ ] No mesmo arquivo, no `Menu { id: collectMenu … }`, acrescentar a propriedade e trocar
+- [x] No mesmo arquivo, no `Menu { id: collectMenu … }`, acrescentar a propriedade e trocar
       o que o item do menu faz:
 
 ```qml
@@ -550,7 +550,7 @@ git commit -m "feat(ui): album header shows the artist and collects the whole li
     }
 ```
 
-- [ ] No mesmo arquivo, o diálogo de criação precisa honrar o lote:
+- [x] No mesmo arquivo, o diálogo de criação precisa honrar o lote:
 
 ```qml
     NewCollectionDialog {
@@ -570,7 +570,7 @@ git commit -m "feat(ui): album header shows the artist and collects the whole li
     }
 ```
 
-- [ ] No `LibraryPane { id: libraryPane … }` do mesmo arquivo, ligar o sinal novo e o
+- [x] No `LibraryPane { id: libraryPane … }` do mesmo arquivo, ligar o sinal novo e o
       subtítulo (o nome do artista do álbum aberto):
 
 ```qml
@@ -578,7 +578,7 @@ git commit -m "feat(ui): album header shows the artist and collects the whole li
                 groupSubtitle: root.groupSubtitle
 ```
 
-- [ ] Declarar a propriedade que alimenta o subtítulo, junto das outras do topo de
+- [x] Declarar a propriedade que alimenta o subtítulo, junto das outras do topo de
       `Main.qml`, depois de `property string groupsTitle: ""`:
 
 ```qml
@@ -586,7 +586,7 @@ git commit -m "feat(ui): album header shows the artist and collects the whole li
     property string groupSubtitle: ""
 ```
 
-- [ ] O artista já vem junto do grupo: `LibraryBrowser.albums()` devolve
+- [x] O artista já vem junto do grupo: `LibraryBrowser.albums()` devolve
       `{id, name, count, subtitle}`, com `subtitle` = nome do artista do álbum (verificado
       em `src/librarybrowser.cpp`, função `runLookup`). Basta carregá-lo junto do nome em
       vez de consultar de novo. Substituir `openGroup` inteiro:
@@ -611,7 +611,7 @@ git commit -m "feat(ui): album header shows the artist and collects the whole li
     }
 ```
 
-- [ ] `openNamedGroup` é o outro caminho de entrada (a busca) e não tem o subtítulo em mãos.
+- [x] `openNamedGroup` é o outro caminho de entrada (a busca) e não tem o subtítulo em mãos.
       Ele **não** pode limpar o que `openGroup` acabou de escrever, então a limpeza é
       condicional. Acrescentar como primeira linha do corpo de `openNamedGroup`:
 
@@ -622,10 +622,10 @@ git commit -m "feat(ui): album header shows the artist and collects the whole li
             root.groupSubtitle = ""
 ```
 
-- [ ] verificação mecânica da task:
+- [x] verificação mecânica da task:
       `grep -c 'addTracksToCollection' src/Main.qml` → `2`
-- [ ] verificação mecânica da task: `quiet-run cmake --build build` → exit 0
-- [ ] commit:
+- [x] verificação mecânica da task: `quiet-run cmake --build build` → exit 0
+- [x] commit:
 
 ```bash
 git add src/Main.qml docs/plans/2026-08-28-colecoes-alcance.md
