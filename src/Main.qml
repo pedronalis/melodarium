@@ -81,7 +81,8 @@ Window {
     title: qsTr("melodia")
     color: Theme.mSurface
 
-    // Which pane the icon rail is showing: "library", "albums", "tags", "podcast", "search".
+    // Which pane the icon rail is showing: "library" or "podcast". Search is an overlay,
+    // not a pane. The axis inside the library ("albums", "tags", …) is the chips' job.
     property string section: "library"
 
     // A interface foi desenhada para 1100x700. Numa janela muito maior, tamanho fixo vira
@@ -263,6 +264,11 @@ Window {
             searchOverlay.open()
             return
         }
+        // Voltar para a biblioteca releva a lista que estava aberta: sem isto, sair do
+        // podcast e voltar mostrava a lista velha, e clicar em "Biblioteca" já estando
+        // nela não fazia absolutamente nada.
+        if (name === "library" && root.section === "library")
+            root.reloadCurrent()
         root.section = name
     }
 
