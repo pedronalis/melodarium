@@ -219,7 +219,7 @@ git commit -m "feat(audio): the queue becomes readable state with append and loo
 
 ### Task 2: A tela para de guardar uma fila que ninguém lê
 
-- [ ] Em `src/Main.qml`, apagar a propriedade `queuePaths` — ela era escrita em três
+- [x] Em `src/Main.qml`, apagar a propriedade `queuePaths` — ela era escrita em três
       lugares e lida em nenhum. Remover a declaração:
 
 ```qml
@@ -227,7 +227,7 @@ git commit -m "feat(audio): the queue becomes readable state with append and loo
     property var queuePaths: []
 ```
 
-- [ ] No mesmo arquivo, em `activateTrack`, tirar a escrita morta:
+- [x] No mesmo arquivo, em `activateTrack`, tirar a escrita morta:
 
 ```qml
     function activateTrack(index) {
@@ -236,7 +236,7 @@ git commit -m "feat(audio): the queue becomes readable state with append and loo
     }
 ```
 
-- [ ] No mesmo arquivo, em `startFromEmpty`, tirar a outra escrita morta — a linha
+- [x] No mesmo arquivo, em `startFromEmpty`, tirar a outra escrita morta — a linha
       `root.queuePaths = paths` some, e `AudioEngine.loadPlaylist(paths, 0)` fica:
 
 ```qml
@@ -255,10 +255,10 @@ git commit -m "feat(audio): the queue becomes readable state with append and loo
         AudioEngine.play()
 ```
 
-- [ ] verificação mecânica da task:
+- [x] verificação mecânica da task:
       `grep -c 'queuePaths' src/Main.qml` → `0`
-- [ ] verificação mecânica da task: `quiet-run cmake --build build` → exit 0
-- [ ] commit:
+- [x] verificação mecânica da task: `quiet-run cmake --build build` → exit 0
+- [x] commit:
 
 ```bash
 git add src/Main.qml docs/plans/2026-08-28-fila-motor.md
