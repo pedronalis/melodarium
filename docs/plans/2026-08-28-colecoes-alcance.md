@@ -1,7 +1,7 @@
 ---
 slug: colecoes-alcance
 feature: melodia-religa
-status: aprovado
+status: concluido
 depende-de: [colecoes-tela]
 decisao-humana: nao
 spec: docs/auditoria-completude.md (achados 16,17,22,23) · design/Main.dc.html:78-88
