@@ -219,7 +219,7 @@ git commit -m "test(library): grouped search shape, empty input and per-kind lim
 import QtQuick
 import QtQuick.Controls
 import QtQuick.Layouts
-import Melodia.App
+import Melodarium.App
 
 Popup {
     id: root
@@ -486,7 +486,7 @@ git commit -m "feat(ui): search overlay across the whole library"
 ```
 
 - [x] verificação mecânica da task:
-      `test "$(QT_QPA_PLATFORM=offscreen timeout 8 ./build/appmelodia 2>&1 | grep -Ec 'is not a type|Unable to assign|ReferenceError')" -eq 0` → exit 0
+      `test "$(QT_QPA_PLATFORM=offscreen timeout 8 ./build/melodarium 2>&1 | grep -Ec 'is not a type|Unable to assign|ReferenceError')" -eq 0` → exit 0
       e `test "$(grep -c 'busca ainda não implementada' src/Main.qml)" -eq 0` → exit 0
 - [x] commit:
 
@@ -499,7 +499,7 @@ git commit -m "feat(ui): open search from the rail and from Ctrl+K"
 
 - `cmake -B build -G Ninja && cmake --build build` → exit 0
 - `ctest --test-dir build --output-on-failure` → `100% tests passed`
-- `test "$(QT_QPA_PLATFORM=offscreen timeout 8 ./build/appmelodia 2>&1 | grep -Ec 'is not a type|Unable to assign|ReferenceError')" -eq 0` → exit 0
+- `test "$(QT_QPA_PLATFORM=offscreen timeout 8 ./build/melodarium 2>&1 | grep -Ec 'is not a type|Unable to assign|ReferenceError')" -eq 0` → exit 0
 - `grep -q "searchGrouped" src/librarybrowser.h` → exit 0
 - `grep -q "Ctrl+K" src/Main.qml` → exit 0
 - `test "$(grep -c 'busca ainda não implementada' src/Main.qml)" -eq 0` → exit 0

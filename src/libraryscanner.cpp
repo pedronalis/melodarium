@@ -17,8 +17,8 @@
 // The scanner's SQLite connection name is contractual: no other slice may reuse it.
 // Pinned here so that renaming it in database.h fails the build instead of silently
 // letting two components share a connection across threads.
-static_assert(std::string_view(Database::kScannerConnection) == "melodia-scanner",
-              "the scanner connection name must stay \"melodia-scanner\"");
+static_assert(std::string_view(Database::kScannerConnection) == "melodarium-scanner",
+              "the scanner connection name must stay \"melodarium-scanner\"");
 
 namespace {
 

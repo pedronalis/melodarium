@@ -6,7 +6,7 @@ QtObject {
     id: root
 
     readonly property FontLoader loader: FontLoader {
-        source: "qrc:/qt/qml/Melodia/App/assets/fonts/noctalia-tabler-icons.ttf"
+        source: "qrc:/qt/qml/Melodarium/App/assets/fonts/noctalia-tabler-icons.ttf"
     }
     readonly property string fontFamily: loader.name
 

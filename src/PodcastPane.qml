@@ -4,7 +4,7 @@ import QtQuick
 import QtQuick.Controls
 import QtQuick.Dialogs
 import QtQuick.Layouts
-import Melodia.App
+import Melodarium.App
 
 // O miolo do podcast do desenho aprovado (design/Podcast.dc.html): UMA coluna com todos os
 // episódios, do mais novo para o mais velho, com o nome do programa em cada linha. A escolha

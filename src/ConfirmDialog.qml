@@ -1,7 +1,7 @@
 import QtQuick
 import QtQuick.Controls
 import QtQuick.Layouts
-import Melodia.App
+import Melodarium.App
 
 // Apagar uma coleção não tem desfazer. Um Popup pequeno é a diferença entre um clique
 // errado custar um segundo e custar a organização inteira de uma noite.
@@ -42,12 +42,12 @@ Popup {
             Layout.fillWidth: true
             spacing: Theme.marginS
             Item { Layout.fillWidth: true }
-            MelodiaButton {
+            MelodariumButton {
                 text: qsTr("Cancelar")
                 outlined: true
                 onClicked: root.close()
             }
-            MelodiaButton {
+            MelodariumButton {
                 text: root.confirmLabel
                 onClicked: {
                     root.confirmed()

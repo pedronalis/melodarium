@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.21)
-project(melodia LANGUAGES CXX)
+project(melodarium LANGUAGES CXX)
 
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
@@ -11,7 +11,7 @@ pkg_check_modules(MPV REQUIRED IMPORTED_TARGET mpv)
 pkg_check_modules(TAGLIB REQUIRED IMPORTED_TARGET taglib)
 qt_standard_project_setup(REQUIRES 6.5)
 
-qt_add_executable(appmelodia
+qt_add_executable(melodarium
     src/main.cpp
     src/colorschemeprovider.h
     src/colorschemeprovider.cpp
@@ -52,8 +52,8 @@ qt_add_executable(appmelodia
 set_source_files_properties(src/Theme.qml PROPERTIES QT_QML_SINGLETON_TYPE TRUE)
 set_source_files_properties(src/Icons.qml PROPERTIES QT_QML_SINGLETON_TYPE TRUE)
 
-qt_add_qml_module(appmelodia
-    URI Melodia.App
+qt_add_qml_module(melodarium
+    URI Melodarium.App
     VERSION 1.0
     QML_FILES
         src/Main.qml
@@ -61,7 +61,7 @@ qt_add_qml_module(appmelodia
         src/Icons.qml
         src/IconButton.qml
         src/IconRail.qml
-        src/MelodiaButton.qml
+        src/MelodariumButton.qml
         src/TrackRow.qml
         src/NowPlayingPanel.qml
         src/LibraryPane.qml
@@ -125,9 +125,9 @@ qt_add_qml_module(appmelodia
 # esse nome, a decisao do spec foi revertida sem querer.
 #
 # OBRIGATORIO: sem isto o build quebra com erros de template que nao apontam a causa.
-target_include_directories(appmelodia PRIVATE src)
+target_include_directories(melodarium PRIVATE src)
 
-target_link_libraries(appmelodia PRIVATE
+target_link_libraries(melodarium PRIVATE
     Qt6::Concurrent Qt6::Core Qt6::Network Qt6::Qml Qt6::Quick Qt6::QuickControls2
     Qt6::QuickDialogs2 Qt6::Sql
     PkgConfig::MPV PkgConfig::TAGLIB)

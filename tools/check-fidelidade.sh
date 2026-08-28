@@ -11,7 +11,7 @@
 # dependem do acervo de quem roda (fundo, painel, trilho, campo de busca, pílula de filtro).
 set -uo pipefail
 
-BIN="${1:-./build/appmelodia}"
+BIN="${1:-./build/melodarium}"
 if [ ! -x "$BIN" ]; then
     echo "check-fidelidade: binário não encontrado ou não executável: $BIN"
     exit 1

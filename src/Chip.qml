@@ -1,5 +1,5 @@
 import QtQuick
-import Melodia.App
+import Melodarium.App
 
 // A pílula do desenho: fundo cheio quando escolhida, só contorno quando não. Vive aqui, e não
 // dentro da linha de filtros, porque o podcast usa exatamente a mesma peça.

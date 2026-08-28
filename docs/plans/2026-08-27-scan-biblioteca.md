@@ -1,6 +1,6 @@
 ---
 slug: scan-biblioteca
-feature: melodia
+feature: melodarium
 status: concluido
 depende-de: [esqueleto-build]
 decisao-humana: nao
@@ -37,7 +37,7 @@ contra `/usr/include/taglib/`) e `docs/plans/research/2026-08-27-qt-ponte.md` §
 
 ## Interfaces
 
-- **Consome:** o alvo `appmelodia` e o módulo `Melodia.App` (fatia `esqueleto-build`).
+- **Consome:** o alvo `melodarium` e o módulo `Melodarium.App` (fatia `esqueleto-build`).
   **Não** consome o `AudioEngine` — esta fatia e a `motor-audio` são independentes e podem ser
   executadas em paralelo.
 - **Produz:**
@@ -80,11 +80,11 @@ namespace TagReader {
     QString computeContentHash(const QString &absolutePath);
 }
 
-// src/database.h — singleton C++ (QML_ELEMENT + QML_SINGLETON), URI Melodia.App
+// src/database.h — singleton C++ (QML_ELEMENT + QML_SINGLETON), URI Melodarium.App
 class Database : public QObject {
     // Q_PROPERTY(int schemaVersion READ schemaVersion CONSTANT)
     // Q_PROPERTY(QString libraryPath READ libraryPath WRITE setLibraryPath NOTIFY libraryPathChanged)
-    static QString defaultDatabasePath();           // QStandardPaths::AppDataLocation + "/melodia.db"
+    static QString defaultDatabasePath();           // QStandardPaths::AppDataLocation + "/melodarium.db"
     static bool openConnection(const QString &connectionName, const QString &dbPath);
     static void applyPragmas(QSqlDatabase &db);     // foreign_keys, WAL, synchronous
     static bool migrate(QSqlDatabase &db);          // runs every migration above user_version
@@ -112,8 +112,8 @@ class LibraryScanner : public QObject {
 };
 ```
 
-O nome de conexão SQLite usado pelo scanner é a constante `"melodia-scanner"`; o da thread da
-UI é `"melodia-ui"`. Nenhuma outra fatia pode reusar esses nomes.
+O nome de conexão SQLite usado pelo scanner é a constante `"melodarium-scanner"`; o da thread da
+UI é `"melodarium-ui"`. Nenhuma outra fatia pode reusar esses nomes.
 
 ## Tasks
 
@@ -127,7 +127,7 @@ pkg_check_modules(TAGLIB REQUIRED IMPORTED_TARGET taglib)
 ```
 
 - [x] Acrescentar `src/database.h/.cpp`, `src/tagreader.h/.cpp`, `src/libraryscanner.h/.cpp`
-      à lista de `qt_add_executable(appmelodia ...)`; acrescentar apenas
+      à lista de `qt_add_executable(melodarium ...)`; acrescentar apenas
       `src/database.h` e `src/database.cpp` ao bloco `SOURCES` de `qt_add_qml_module`
       (só o `Database` é exposto ao QML; `TagReader` e `LibraryScanner` não são).
 - [x] Acrescentar `Qt6::Sql Qt6::Concurrent PkgConfig::TAGLIB` ao `target_link_libraries`.
@@ -464,8 +464,8 @@ class Database : public QObject
     Q_PROPERTY(bool scanning READ scanning NOTIFY scanningChanged)
 
 public:
-    static constexpr const char *kUiConnection = "melodia-ui";
-    static constexpr const char *kScannerConnection = "melodia-scanner";
+    static constexpr const char *kUiConnection = "melodarium-ui";
+    static constexpr const char *kScannerConnection = "melodarium-scanner";
 
     explicit Database(QObject *parent = nullptr);
     ~Database() override;
@@ -612,7 +612,7 @@ Database::~Database()
 QString Database::defaultDatabasePath()
 {
     const QString dir = QStandardPaths::writableLocation(QStandardPaths::AppDataLocation);
-    return dir + QStringLiteral("/melodia.db");
+    return dir + QStringLiteral("/melodarium.db");
 }
 
 bool Database::openConnection(const QString &connectionName, const QString &dbPath)
@@ -1274,7 +1274,7 @@ git commit -m "test(library): schema migration, tag reading, move detection and 
 
 - `cmake -B build -G Ninja && cmake --build build` → exit 0
 - `ctest --test-dir build --output-on-failure` → `100% tests passed`
-- `grep -c "melodia-scanner" src/libraryscanner.cpp src/database.h` → ao menos `1` em cada
+- `grep -c "melodarium-scanner" src/libraryscanner.cpp src/database.h` → ao menos `1` em cada
 - `grep -c "removeDatabase" src/libraryscanner.cpp` → `1`
 
 ## Fora de escopo

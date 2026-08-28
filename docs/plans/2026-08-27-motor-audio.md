@@ -1,6 +1,6 @@
 ---
 slug: motor-audio
-feature: melodia
+feature: melodarium
 status: concluido
 depende-de: [esqueleto-build]
 decisao-humana: nao
@@ -39,7 +39,7 @@ executado de verdade, tocando duas faixas em sequência).
 
 ## Interfaces
 
-- **Consome:** o alvo CMake `appmelodia` e o módulo QML `Melodia.App` (fatia `esqueleto-build`).
+- **Consome:** o alvo CMake `melodarium` e o módulo QML `Melodarium.App` (fatia `esqueleto-build`).
   Nada mais — este motor não conhece banco, biblioteca nem UI.
 - **Produz** — singleton C++ `AudioEngine` (`QML_ELEMENT` + `QML_SINGLETON`, header
   `src/audioengine.h`), consumido pelas fatias `tocador-ui`, `navegacao-biblioteca` e
@@ -92,8 +92,8 @@ pkg_check_modules(MPV REQUIRED IMPORTED_TARGET mpv)
 ```
 
 - [x] Acrescentar `src/audioengine.h` e `src/audioengine.cpp` à lista de
-      `qt_add_executable(appmelodia ...)` **e** ao bloco `SOURCES` de `qt_add_qml_module`.
-- [x] Acrescentar `PkgConfig::MPV` ao `target_link_libraries(appmelodia PRIVATE ...)` e
+      `qt_add_executable(melodarium ...)` **e** ao bloco `SOURCES` de `qt_add_qml_module`.
+- [x] Acrescentar `PkgConfig::MPV` ao `target_link_libraries(melodarium PRIVATE ...)` e
       `Qt6::Qml` à lista de componentes do `find_package(Qt6 ...)`.
 - [x] verificação mecânica da task: `pkg-config --exists mpv && echo OK` → `OK`
       (nota: `pkg-config --modversion mpv` devolve `2.5.0` — é a versão da **API cliente**,
@@ -666,7 +666,7 @@ depende da config do PipeWire do usuário seria mentira.
       formato diferente; que `audio-exclusive` silencia todo o resto do sistema e por isso
       não é padrão; e o limite honesto — mesmo com modo exclusivo, se o grafo do PipeWire
       estiver fixo em 48 kHz (`default.clock.rate` no `pipewire.conf`), quem reamostra pode
-      ser o próprio PipeWire, e isso é configuração do sistema, não do melodia.
+      ser o próprio PipeWire, e isso é configuração do sistema, não do melodarium.
 - [x] verificação mecânica da task: `grep -c "audio-exclusive" README.md` → `1` ou mais
 - [x] commit:
 

@@ -162,7 +162,7 @@ sobrar, é uma função de dez linhas num harness que já tem quatro iguais.
 
 ## 9. As fotos saem de uma CÓPIA do banco, nunca do banco do Pedro
 
-**Contexto.** O banco real (`~/.local/share/melodia/melodia/melodia.db`) tem 27 faixas e
+**Contexto.** O banco real (`~/.local/share/melodarium/melodarium/melodarium.db`) tem 27 faixas e
 **zero** coleções. Fotografar a lista de coleções exigia dados que ele não tem.
 
 **Decisão.** Copiei o banco com `sqlite3 .backup` para `/tmp/mel-shot/…` e semeei três
@@ -447,10 +447,10 @@ desenho aprovado pedindo.
 
 **Contexto.** O `RUN_GATE` do worktree diz de si mesmo, na primeira linha: "Portão do lote
 melodia-religa. O lote só está PRONTO quando o trabalho está integrado em main NO REPO
-PRINCIPAL". Ele aponta para `/home/pedro/dev/active/melodia`, não para este worktree. As duas
+PRINCIPAL". Ele aponta para `/home/pedro/dev/active/melodarium`, não para este worktree. As duas
 linhas vermelhas são:
 
-- `bash /home/pedro/dev/active/melodia/tools/check-orfaos.sh` → rc=127, o arquivo não existe
+- `bash /home/pedro/dev/active/melodarium/tools/check-orfaos.sh` → rc=127, o arquivo não existe
   lá. O detector foi criado na leva 1, no commit `d1e1a88`, e
   `git branch --contains d1e1a88` responde apenas `exec/melodia-religa` — o repo principal
   está em `main` e ainda não o tem.
@@ -504,7 +504,7 @@ e continuam agora.
 implícita de quem insiste é "se você integrasse, ficaria verde". Em vez de repetir o
 argumento da decisão nº 21, testei a hipótese.
 
-**O experimento.** Montei em `/tmp/melodia-integrado` uma réplica fiel do que o repo principal
+**O experimento.** Montei em `/tmp/melodarium-integrado` uma réplica fiel do que o repo principal
 teria **depois** do merge de `exec/melodia-religa`: o `tools/` (com o detector criado na leva
 1) e o `src/` com todo o trabalho das levas 1 e 2. É exatamente o que a linha 5 do `RUN_GATE`
 executaria pós-integração, porque o script faz `cd "$(dirname "$0")/.."` e mede o repo em que
@@ -667,7 +667,7 @@ desenha o estado selecionado com `Theme.mSurfaceVariant`, que é exatamente a co
 desta gaveta; e a borda do não-selecionado é a mesma cor. Ficaram duas palavras soltas, sem
 nada que dissesse "isto é clicável".
 
-**Decisão final.** `MelodiaButton`, preenchido quando ligado e contornado quando desligado —
+**Decisão final.** `MelodariumButton`, preenchido quando ligado e contornado quando desligado —
 o outro par de liga/desliga que o app já tem, e o mesmo componente dos botões "Trocar" e
 "Fechar" ao lado. Fotografado nos dois estados
 (`docs/telas/leva3-ajustes.png` e `leva3-ajustes-ligado.png`): distinguem-se por FORMA, não só

@@ -1,7 +1,7 @@
 import QtQuick
 import QtQuick.Controls
 import QtQuick.Layouts
-import Melodia.App
+import Melodarium.App
 
 Popup {
     id: root
@@ -84,12 +84,12 @@ Popup {
             Layout.fillWidth: true
             spacing: Theme.marginS
             Item { Layout.fillWidth: true }
-            MelodiaButton {
+            MelodariumButton {
                 text: qsTr("Cancelar")
                 outlined: true
                 onClicked: root.close()
             }
-            MelodiaButton {
+            MelodariumButton {
                 id: confirm
                 text: root.renameId > 0 ? qsTr("Renomear") : qsTr("Criar")
                 onClicked: {

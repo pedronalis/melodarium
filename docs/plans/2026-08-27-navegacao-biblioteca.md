@@ -1,6 +1,6 @@
 ---
 slug: navegacao-biblioteca
-feature: melodia
+feature: melodarium
 status: concluido
 depende-de: [tocador-ui]
 decisao-humana: nao
@@ -41,7 +41,7 @@ estatísticas são gravadas por um `PlayStatsRecorder` que escuta `AudioEngine::
   (`loadFromQuery(const QString &whereClause, const QVariantList &bindings)`, `allPaths()`,
   `count`, `currentPath`), `AudioEngine` (`loadPlaylist(const QStringList &, int)`,
   `trackFinished(const QString &path)`, `playlistPos`), `Theme`, `Icons`, `TrackRow`,
-  `IconButton`, `MelodiaButton`.
+  `IconButton`, `MelodariumButton`.
 - **Produz:**
 
 ```cpp
@@ -128,7 +128,7 @@ LEFT JOIN albums al ON al.id = t.album_id;
 ```
 
 - [x] verificação mecânica da task: rodar o app uma vez e conferir a versão do schema —
-      `QT_QPA_PLATFORM=offscreen timeout 8 ./build/appmelodia; sqlite3 "$(ls ~/.local/share/melodia/melodia.db)" "PRAGMA user_version; SELECT COUNT(*) FROM sqlite_master WHERE name='tracks_fts';"`
+      `QT_QPA_PLATFORM=offscreen timeout 8 ./build/melodarium; sqlite3 "$(ls ~/.local/share/melodarium/melodarium.db)" "PRAGMA user_version; SELECT COUNT(*) FROM sqlite_master WHERE name='tracks_fts';"`
       → `2` e `1`
 - [x] commit:
 
@@ -460,7 +460,7 @@ git commit -m "feat(library): record play and skip counts per track"
 ```qml
 import QtQuick
 import QtQuick.Layouts
-import Melodia.App
+import Melodarium.App
 
 Item {
     id: root
@@ -536,7 +536,7 @@ Item {
 ```qml
 import QtQuick
 import QtQuick.Layouts
-import Melodia.App
+import Melodarium.App
 
 Rectangle {
     id: root
@@ -631,7 +631,7 @@ Rectangle {
 ```qml
 import QtQuick
 import QtQuick.Layouts
-import Melodia.App
+import Melodarium.App
 
 Rectangle {
     id: root
@@ -711,7 +711,7 @@ Rectangle {
 ```qml
 import QtQuick
 import QtQuick.Layouts
-import Melodia.App
+import Melodarium.App
 
 Rectangle {
     id: root
@@ -836,7 +836,7 @@ git commit -m "feat(ui): sidebar sections, debounced search field and queue pane
       `ListView` de `SidebarItem`-like; clicar num grupo chama `choose(section, grupoId)` e aí
       sim carrega as faixas daquele grupo.
 - [x] verificação mecânica da task:
-      `QT_QPA_PLATFORM=offscreen timeout 8 ./build/appmelodia 2>&1 | grep -Ec "is not a type|ReferenceError|Unable to assign"`
+      `QT_QPA_PLATFORM=offscreen timeout 8 ./build/melodarium 2>&1 | grep -Ec "is not a type|ReferenceError|Unable to assign"`
       → `0`
 - [x] commit:
 
@@ -984,7 +984,7 @@ git commit -m "test(library): browse queries, FTS sanitising and play statistics
 
 - `cmake -B build -G Ninja && cmake --build build` → exit 0
 - `ctest --test-dir build --output-on-failure` → `100% tests passed`
-- `QT_QPA_PLATFORM=offscreen timeout 8 ./build/appmelodia 2>&1 | grep -Ec "is not a type|ReferenceError|Unable to assign"` → `0`
+- `QT_QPA_PLATFORM=offscreen timeout 8 ./build/melodarium 2>&1 | grep -Ec "is not a type|ReferenceError|Unable to assign"` → `0`
 - `grep -c "kForgottenMinPlays" src/librarybrowser.h src/librarybrowser.cpp` → ao menos `1` em cada
   (o limiar tem de continuar sendo constante nomeada, nunca número solto na query)
 

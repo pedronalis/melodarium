@@ -118,10 +118,10 @@ nem rodar o app pega. Lição completa em
         }
 ```
 
-- [x] Substituir o `MelodiaButton { id: confirm … }` inteiro:
+- [x] Substituir o `MelodariumButton { id: confirm … }` inteiro:
 
 ```qml
-            MelodiaButton {
+            MelodariumButton {
                 id: confirm
                 text: root.renameId > 0 ? qsTr("Renomear") : qsTr("Criar")
                 onClicked: {
@@ -164,7 +164,7 @@ git commit -m "feat(ui): the collection name dialog also renames"
 import QtQuick
 import QtQuick.Controls
 import QtQuick.Layouts
-import Melodia.App
+import Melodarium.App
 
 // Apagar uma coleção não tem desfazer. Um Popup pequeno é a diferença entre um clique
 // errado custar um segundo e custar a organização inteira de uma noite.
@@ -205,12 +205,12 @@ Popup {
             Layout.fillWidth: true
             spacing: Theme.marginS
             Item { Layout.fillWidth: true }
-            MelodiaButton {
+            MelodariumButton {
                 text: qsTr("Cancelar")
                 outlined: true
                 onClicked: root.close()
             }
-            MelodiaButton {
+            MelodariumButton {
                 text: root.confirmLabel
                 onClicked: {
                     root.confirmed()
@@ -246,7 +246,7 @@ pragma ComponentBehavior: Bound
 
 import QtQuick
 import QtQuick.Layouts
-import Melodia.App
+import Melodarium.App
 
 // O diferencial nº 1 do produto, de volta à tela. Dois estados no mesmo painel: a lista das
 // coleções, e as faixas de UMA coleção aberta. A linha de faixa é o mesmo TrackRow da
@@ -702,10 +702,10 @@ git commit -m "chore(ui): delete the sidebar the redesign left orphaned"
 - `ls src/Sidebar.qml src/CollectionsSection.qml 2>&1 | grep -c 'No such file'` → `2`
 - Os popups têm de ser abertos para provar que existem — um `Popup` que redeclara uma
   propriedade FINAL só falha na primeira abertura, com o build verde:
-  `QT_QPA_PLATFORM=offscreen QT_LOGGING_RULES="*.debug=true" QT_FORCE_STDERR_LOGGING=1 ./build/appmelodia --measure --pane collections --no-search 2>&1 | grep -Ec 'is not a type|Unable to assign|ReferenceError|TypeError|unavailable|Cannot override|Cannot assign'`
+  `QT_QPA_PLATFORM=offscreen QT_LOGGING_RULES="*.debug=true" QT_FORCE_STDERR_LOGGING=1 ./build/melodarium --measure --pane collections --no-search 2>&1 | grep -Ec 'is not a type|Unable to assign|ReferenceError|TypeError|unavailable|Cannot override|Cannot assign'`
   → `0`
-- `./build/appmelodia --measure --pane collections --shot /tmp/melodia-colecoes.png --no-search`
-  → imprime `SHOT /tmp/melodia-colecoes.png`
+- `./build/melodarium --measure --pane collections --shot /tmp/melodarium-colecoes.png --no-search`
+  → imprime `SHOT /tmp/melodarium-colecoes.png`
 - `bash tools/check-orfaos.sh` → não lista mais `Sidebar`, `SidebarItem`,
   `CollectionsSection`, `renameCollection`, `deleteCollection`, `clauseForCollection`,
   `bindingsForCollection`, `downloadDirectory`

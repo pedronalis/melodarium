@@ -146,7 +146,7 @@ void YtDlpDownloader::fetchInfo(const QUrl &url)
         if (error == QProcess::FailedToStart) {
             emit infoFailed(url,
                             tr("yt-dlp não foi encontrado. Instale pelo gerenciador de pacotes "
-                               "da sua distro e reabra o melodia."));
+                               "da sua distro e reabra o melodarium."));
         }
     });
     proc->start(QStringLiteral("yt-dlp"), {QStringLiteral("-J"), url.toString()});
@@ -183,7 +183,7 @@ void YtDlpDownloader::download(const QUrl &url, int collectionId)
         if (error == QProcess::FailedToStart) {
             emit failed(url,
                         tr("yt-dlp não foi encontrado. Instale pelo gerenciador de pacotes da "
-                           "sua distro e reabra o melodia."));
+                           "sua distro e reabra o melodarium."));
         }
     });
 

@@ -23,13 +23,13 @@ janela** — o gate humano vira um ciclo de dois minutos, com a imagem na conver
 
 ```bash
 # 1. subir o app (background do harness, não bloqueia a sessão)
-./build/appmelodia > /tmp/app.log 2>&1        # run_in_background: true
+./build/melodarium > /tmp/app.log 2>&1        # run_in_background: true
 
 # 2. achar a geometria da janela pelo compositor
 hyprctl clients -j | python3 -c "
 import json,sys
 for c in json.load(sys.stdin):
-    if c.get('class')=='appmelodia':
+    if c.get('class')=='melodarium':
         x,y=c['at']; w,h=c['size']; print(f'{x},{y} {w}x{h}')
 "
 
@@ -47,9 +47,9 @@ das duas está ativa, sem ninguém precisar julgar.
 
 ## O que NÃO funcionou
 
-- **`pkill -f 'build/appmelodia'`** — a string casa com a linha de comando do próprio shell que
+- **`pkill -f 'build/melodarium'`** — a string casa com a linha de comando do próprio shell que
   executa o `pkill`, então o comando se mata (exit 144) e o resto do bloco nunca roda. Usar
-  `pkill -x appmelodia`.
+  `pkill -x melodarium`.
 - **`QT_LOGGING_RULES="*.debug=true"` para conferir o start** — gera 845 KB de log de plugin do
   Qt num único start, que estoura qualquer leitura direta. Só ligar quando o alvo for depurar
   QML de verdade, e sempre com `grep` na saída.

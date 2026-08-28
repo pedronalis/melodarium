@@ -416,8 +416,8 @@ git commit -m "fix(ui): the welcome shuffle turns the mode on instead of scrambl
 - `grep -c 'onClicked: {}' src/NowPlayingPanel.qml` → `0` (nenhum botão inerte sobra)
 - `grep -cE 'audio-samplerate|audio-format|af=' src/audioengine.cpp` → `0`
 - `bash tools/check-layout.sh` → 11 medidas ok
-- `./build/appmelodia --measure --pane library --play-track "$(ls ~/Música/**/*.mp3 2>/dev/null | head -1)" --delay 2500 --shot /tmp/melodia-transporte.png --no-search`
-  → imprime `SHOT /tmp/melodia-transporte.png`
+- `./build/melodarium --measure --pane library --play-track "$(ls ~/Música/**/*.mp3 2>/dev/null | head -1)" --delay 2500 --shot /tmp/melodarium-transporte.png --no-search`
+  → imprime `SHOT /tmp/melodarium-transporte.png`
 - `bash tools/check-orfaos.sh` → não lista `cycleRepeat` nem `setShuffle`
 
 ## Fora de escopo

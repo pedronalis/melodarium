@@ -1,6 +1,6 @@
 ---
 slug: download-youtube
-feature: melodia
+feature: melodarium
 status: travado
 depende-de: [colecoes-tags]
 decisao-humana: nao
@@ -54,7 +54,7 @@ marcar a origem.
   (`collections()`, `addTrackToCollection(int collectionId, int trackId)`,
   `clauseForCollection(int)`, `bindingsForCollection(int)`, sinal `collectionsChanged()`),
   `TagReader` (`read(const QString &absolutePath)`, `computeContentHash(const QString &)`),
-  `LibraryScanner` (padrão de inserção de faixa), `Theme`, `Icons`, `MelodiaButton`,
+  `LibraryScanner` (padrão de inserção de faixa), `Theme`, `Icons`, `MelodariumButton`,
   `IconButton`, `TrackRow`.
 - **Produz:**
 
@@ -117,7 +117,7 @@ CREATE INDEX idx_tracks_source ON tracks(source_kind);
       `src/tracklistmodel.cpp`, mais os papéis `SourceKindRole` e `SourceNoteRole` no enum
       `Roles`, no `data()` e no `roleNames()` (`"sourceKind"` e `"sourceNote"`).
 - [x] verificação mecânica da task:
-      `QT_QPA_PLATFORM=offscreen timeout 8 ./build/appmelodia; sqlite3 ~/.local/share/melodia/melodia.db "PRAGMA user_version; SELECT COUNT(*) FROM pragma_table_info('tracks') WHERE name='source_kind';"`
+      `QT_QPA_PLATFORM=offscreen timeout 8 ./build/melodarium; sqlite3 ~/.local/share/melodarium/melodarium.db "PRAGMA user_version; SELECT COUNT(*) FROM pragma_table_info('tracks') WHERE name='source_kind';"`
       → `6` e `1`
 - [x] commit:
 
@@ -302,7 +302,7 @@ void YtDlpDownloader::download(const QUrl &url, int collectionId)
         if (error == QProcess::FailedToStart) {
             emit failed(url,
                         tr("yt-dlp não foi encontrado. Instale pelo gerenciador de pacotes da "
-                           "sua distro e reabra o melodia."));
+                           "sua distro e reabra o melodarium."));
         }
     });
 
@@ -446,7 +446,7 @@ git commit -m "feat(download): register downloaded audio as a tagged collection 
 
 ```qml
 import QtQuick
-import Melodia.App
+import Melodarium.App
 
 Rectangle {
     id: root
@@ -494,7 +494,7 @@ Rectangle {
       a lista da coleção no sinal `finished`.
 - [x] Acrescentar os três `.qml` ao `QML_FILES`.
 - [x] verificação mecânica da task:
-      `cmake --build build && QT_QPA_PLATFORM=offscreen timeout 8 ./build/appmelodia 2>&1 | grep -Ec "is not a type|ReferenceError"`
+      `cmake --build build && QT_QPA_PLATFORM=offscreen timeout 8 ./build/melodarium 2>&1 | grep -Ec "is not a type|ReferenceError"`
       → `0`
 - [x] commit:
 

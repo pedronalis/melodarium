@@ -2,7 +2,7 @@ pragma ComponentBehavior: Bound
 
 import QtQuick
 import QtQuick.Layouts
-import Melodia.App
+import Melodarium.App
 
 // O diferencial nº 1 do produto, de volta à tela. Dois estados no mesmo painel: a lista das
 // coleções, e as faixas de UMA coleção aberta. A linha de faixa é o mesmo TrackRow da

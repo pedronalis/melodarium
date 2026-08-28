@@ -1,6 +1,6 @@
 ---
 slug: colecoes-tags
-feature: melodia
+feature: melodarium
 status: travado
 depende-de: [navegacao-biblioteca]
 decisao-humana: sim
@@ -45,7 +45,7 @@ tags distintas (spec §Decisões, linha "Tags").
   (`clauseForAll()`, `bindingsFor(int)`), `TrackListModel`
   (`loadFromQuery(const QString &whereClause, const QVariantList &bindings)`, `allPaths()`,
   `trackAt(int row)`), `AudioEngine` (`loadPlaylist(const QStringList &, int)`), `Theme`,
-  `Icons`, `TrackRow`, `SidebarItem`, `IconButton`, `MelodiaButton`, `SearchField`.
+  `Icons`, `TrackRow`, `SidebarItem`, `IconButton`, `MelodariumButton`, `SearchField`.
 - **Produz:**
 
 ```cpp
@@ -122,7 +122,7 @@ CREATE INDEX idx_tracktags_tag ON track_tags(tag_id);
 ```
 
 - [x] verificação mecânica da task:
-      `QT_QPA_PLATFORM=offscreen timeout 8 ./build/appmelodia; sqlite3 ~/.local/share/melodia/melodia.db "PRAGMA user_version;"`
+      `QT_QPA_PLATFORM=offscreen timeout 8 ./build/melodarium; sqlite3 ~/.local/share/melodarium/melodarium.db "PRAGMA user_version;"`
       → `3`
 - [x] commit:
 
@@ -562,7 +562,7 @@ Nada de arrastar, nada de diálogo de duas etapas: o spec exige que o gesto manu
 import QtQuick
 import QtQuick.Controls
 import QtQuick.Layouts
-import Melodia.App
+import Melodarium.App
 
 Popup {
     id: root
@@ -636,12 +636,12 @@ Popup {
             Layout.fillWidth: true
             spacing: Theme.marginS
             Item { Layout.fillWidth: true }
-            MelodiaButton {
+            MelodariumButton {
                 text: qsTr("Cancelar")
                 outlined: true
                 onClicked: root.close()
             }
-            MelodiaButton {
+            MelodariumButton {
                 id: confirm
                 text: qsTr("Criar")
                 onClicked: {
@@ -665,7 +665,7 @@ Popup {
 ```qml
 import QtQuick
 import QtQuick.Layouts
-import Melodia.App
+import Melodarium.App
 
 ColumnLayout {
     id: root
@@ -766,7 +766,7 @@ ColumnLayout {
       (mais o item "Nova coleção…"), cujo `onTriggered` chama
       `CollectionManager.addTrackToCollection(collectionId, trackId)`.
 - [x] verificação mecânica da task:
-      `cmake --build build && QT_QPA_PLATFORM=offscreen timeout 8 ./build/appmelodia 2>&1 | grep -Ec "is not a type|ReferenceError"`
+      `cmake --build build && QT_QPA_PLATFORM=offscreen timeout 8 ./build/melodarium 2>&1 | grep -Ec "is not a type|ReferenceError"`
       → `0`
 - [x] commit:
 
@@ -782,7 +782,7 @@ git commit -m "feat(collections): one-gesture add-to-collection from the track r
 ```qml
 import QtQuick
 import QtQuick.Layouts
-import Melodia.App
+import Melodarium.App
 
 Rectangle {
     id: root
@@ -846,7 +846,7 @@ Rectangle {
 ```qml
 import QtQuick
 import QtQuick.Layouts
-import Melodia.App
+import Melodarium.App
 
 ColumnLayout {
     id: root
@@ -1111,7 +1111,7 @@ git commit -m "test(collections): multi-collection membership, ordering and tag 
 
 - `cmake -B build -G Ninja && cmake --build build` → exit 0
 - `ctest --test-dir build --output-on-failure` → `100% tests passed`
-- `QT_QPA_PLATFORM=offscreen timeout 8 ./build/appmelodia 2>&1 | grep -Ec "is not a type|ReferenceError"` → `0`
+- `QT_QPA_PLATFORM=offscreen timeout 8 ./build/melodarium 2>&1 | grep -Ec "is not a type|ReferenceError"` → `0`
 - **Decisão humana:** o Pedro cria duas coleções, põe **a mesma faixa nas duas**, e confirma
   que o gesto é um clique só. É o diferencial inteiro do produto num teste de trinta segundos —
   se parecer trabalhoso aqui, a fatia falhou mesmo com todos os testes verdes.

@@ -5,6 +5,7 @@
 #include <QSettings>
 #include <QSqlError>
 #include <QSqlQuery>
+#include <QCoreApplication>
 #include <QStandardPaths>
 #include <QThread>
 #include <QVariant>
@@ -262,7 +263,13 @@ Database::~Database()
 QString Database::defaultDatabasePath()
 {
     const QString dir = QStandardPaths::writableLocation(QStandardPaths::AppDataLocation);
-    return dir + QStringLiteral("/melodia.db");
+    // Derivado do nome da aplicação, e não escrito à mão: é assim que o arquivo acompanha o
+    // projeto se ele for rebatizado de novo. O fallback cobre os testes, que sobem sem
+    // QCoreApplication nomeada.
+    const QString nome = QCoreApplication::applicationName().isEmpty()
+                             ? QStringLiteral("melodarium")
+                             : QCoreApplication::applicationName();
+    return dir + QLatin1Char('/') + nome + QStringLiteral(".db");
 }
 
 bool Database::openConnection(const QString &connectionName, const QString &dbPath)

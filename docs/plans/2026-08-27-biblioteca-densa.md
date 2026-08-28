@@ -96,7 +96,7 @@ git commit -m "feat(ui): heart on every track row"
 import QtQuick
 import QtQuick.Controls
 import QtQuick.Layouts
-import Melodia.App
+import Melodarium.App
 
 RowLayout {
     id: root
@@ -231,7 +231,7 @@ git commit -m "feat(ui): single-line filter row with a menu for the automatic li
 ```qml
 import QtQuick
 import QtQuick.Layouts
-import Melodia.App
+import Melodarium.App
 
 Rectangle {
     id: root
@@ -403,7 +403,7 @@ git commit -m "feat(ui): the library pane, filters and list in one place"
       direção; declare `property var queuePaths: []` junto das outras propriedades.)
 
 - [x] verificação mecânica da task:
-      `cmake --build build && test "$(QT_QPA_PLATFORM=offscreen timeout 8 ./build/appmelodia 2>&1 | grep -Ec 'is not a type|Unable to assign|ReferenceError')" -eq 0` → exit 0
+      `cmake --build build && test "$(QT_QPA_PLATFORM=offscreen timeout 8 ./build/melodarium 2>&1 | grep -Ec 'is not a type|Unable to assign|ReferenceError')" -eq 0` → exit 0
 - [x] commit:
 
 ```bash
@@ -423,7 +423,7 @@ git commit -m "feat(ui): route the library filters through the pane"
 ```
 
 - [x] Rodar:
-      `QT_LOGGING_RULES="*.debug=true" QT_FORCE_STDERR_LOGGING=1 QT_QPA_PLATFORM=offscreen timeout 6 ./build/appmelodia 2>&1 | grep -a MEDIDA`
+      `QT_LOGGING_RULES="*.debug=true" QT_FORCE_STDERR_LOGGING=1 QT_QPA_PLATFORM=offscreen timeout 6 ./build/melodarium 2>&1 | grep -a MEDIDA`
       → `chips` tem de ser ≤ `disponivel`. Se estourar, encolha `Theme.marginL` para
       `Theme.marginM` no padding do `Chip` e meça de novo; NÃO deixe quebrar em duas linhas.
 - [x] Remover o `Timer`.
@@ -439,7 +439,7 @@ git commit -m "fix(ui): keep the filter row on one line"
 
 - `cmake -B build -G Ninja && cmake --build build` → exit 0
 - `ctest --test-dir build --output-on-failure` → `100% tests passed`
-- `test "$(QT_QPA_PLATFORM=offscreen timeout 8 ./build/appmelodia 2>&1 | grep -Ec 'is not a type|Unable to assign|ReferenceError')" -eq 0` → exit 0
+- `test "$(QT_QPA_PLATFORM=offscreen timeout 8 ./build/melodarium 2>&1 | grep -Ec 'is not a type|Unable to assign|ReferenceError')" -eq 0` → exit 0
 - `grep -q "clauseForLiked" src/Main.qml` → exit 0
 - `grep -q "property bool liked" src/TrackRow.qml` → exit 0
 - `test "$(grep -c 'flex-wrap\|Flow' src/FilterChips.qml)" -eq 0` → exit 0

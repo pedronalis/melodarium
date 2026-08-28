@@ -1,7 +1,7 @@
 import QtQuick
 import QtQuick.Controls
 import QtQuick.Layouts
-import Melodia.App
+import Melodarium.App
 
 Popup {
     id: root
@@ -86,7 +86,7 @@ Popup {
             Text {
                 Layout.fillWidth: true
                 wrapMode: Text.WordWrap
-                text: qsTr("O melodia não baixa nada sozinho: ele chama o yt-dlp que estiver instalado na sua máquina. Instale pelo gerenciador de pacotes da sua distro e reabra o melodia.")
+                text: qsTr("O melodarium não baixa nada sozinho: ele chama o yt-dlp que estiver instalado na sua máquina. Instale pelo gerenciador de pacotes da sua distro e reabra o melodarium.")
                 font.family: Theme.fontFamily
                 font.pixelSize: Theme.fontSizeS
                 color: Theme.cMuted
@@ -207,12 +207,12 @@ Popup {
             spacing: Theme.marginS
             Item { Layout.fillWidth: true }
 
-            MelodiaButton {
+            MelodariumButton {
                 text: qsTr("Cancelar")
                 outlined: true
                 onClicked: root.close()
             }
-            MelodiaButton {
+            MelodariumButton {
                 id: lookup
                 text: qsTr("Buscar informações")
                 outlined: true
@@ -229,7 +229,7 @@ Popup {
                     YtDlpDownloader.fetchInfo(link)
                 }
             }
-            MelodiaButton {
+            MelodariumButton {
                 text: qsTr("Baixar para esta coleção")
                 enabled: YtDlpDownloader.available && root.hasInfo
                 onClicked: {

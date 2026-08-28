@@ -1,5 +1,5 @@
 import QtQuick
-import Melodia.App
+import Melodarium.App
 
 // A capa do desenho tem canto arredondado — e no QML isso não sai de graça. `radius` desenha
 // o canto do Rectangle, e `clip: true` recorta os filhos pelo RETÂNGULO do item, não pelo raio:

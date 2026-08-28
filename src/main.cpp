@@ -2,19 +2,74 @@
 #include "libraryscanner.h"
 
 #include <QCoreApplication>
+#include <QDir>
+#include <QFile>
+#include <QFileInfo>
 #include <QFileSystemWatcher>
 #include <QGuiApplication>
 #include <QQmlApplicationEngine>
 #include <QSettings>
 #include <QSqlDatabase>
+#include <QStandardPaths>
 #include <QTextStream>
 #include <QUrl>
+
+namespace {
+
+// O projeto se chamou "melodia" até 28/08/2026. Todo caminho de dados do Qt sai do nome da
+// aplicação, então trocar o nome move a biblioteca varrida, as capas em cache, os downloads e
+// os podcasts para um endereço novo — e o app abriria pela primeira vez com a tela vazia, como
+// se nada existisse. Esta função existe para que a troca de nome não custe nada a quem já
+// usava: na primeira abertura com o nome novo, ela traz a casa antiga junto.
+//
+// Roda uma vez só: assim que o diretório novo existe, ela não faz mais nada.
+void migrarDoNomeAntigo()
+{
+    const QString antigo = QStringLiteral("melodia");
+    const QString atual = QCoreApplication::applicationName();
+
+    struct Caminho {
+        QString novo;
+        QString velho;
+    };
+    const QList<Caminho> caminhos = {
+        { QStandardPaths::writableLocation(QStandardPaths::AppDataLocation),
+          QStandardPaths::writableLocation(QStandardPaths::GenericDataLocation)
+              + QLatin1Char('/') + antigo + QLatin1Char('/') + antigo },
+        { QStandardPaths::writableLocation(QStandardPaths::CacheLocation),
+          QStandardPaths::writableLocation(QStandardPaths::GenericCacheLocation)
+              + QLatin1Char('/') + antigo + QLatin1Char('/') + antigo },
+    };
+
+    for (const Caminho &c : caminhos) {
+        if (c.novo.isEmpty() || QDir(c.novo).exists() || !QDir(c.velho).exists())
+            continue;
+        QDir().mkpath(QFileInfo(c.novo).absolutePath());
+        if (!QDir().rename(c.velho, c.novo))
+            continue;
+        // O arquivo do banco leva o nome do app no próprio nome; mover a pasta não basta.
+        QDir destino(c.novo);
+        const QStringList sufixos = { QString(), QStringLiteral("-wal"), QStringLiteral("-shm") };
+        for (const QString &sufixo : sufixos) {
+            const QString de = destino.filePath(antigo + QStringLiteral(".db") + sufixo);
+            if (QFile::exists(de))
+                QFile::rename(de, destino.filePath(atual + QStringLiteral(".db") + sufixo));
+        }
+        // A pasta da organização antiga fica para trás vazia; rmdir só remove se estiver.
+        QDir().rmdir(QFileInfo(c.velho).absolutePath());
+    }
+}
+
+} // namespace
 
 int main(int argc, char *argv[])
 {
     QGuiApplication app(argc, argv);
-    app.setApplicationName(QStringLiteral("melodia"));
-    app.setOrganizationName(QStringLiteral("melodia"));
+    app.setApplicationName(QStringLiteral("melodarium"));
+    app.setOrganizationName(QStringLiteral("melodarium"));
+
+    // Antes de qualquer coisa que leia disco: é ela que decide de onde o banco vai ser aberto.
+    migrarDoNomeAntigo();
 
     // --scan varre a biblioteca configurada e sai, sem abrir janela. Existe porque a
     // varredura só tinha um botão: sem isto não há como reproduzir um problema de scanner
@@ -74,7 +129,7 @@ int main(int argc, char *argv[])
         QObject::connect(watcher, &QFileSystemWatcher::fileChanged, &engine, reload);
         reload();
     } else {
-        engine.loadFromModule("Melodia.App", "Main");
+        engine.loadFromModule("Melodarium.App", "Main");
     }
 
     return app.exec();

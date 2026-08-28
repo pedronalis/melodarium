@@ -2,7 +2,7 @@ pragma ComponentBehavior: Bound
 
 import QtQuick
 import QtQuick.Layouts
-import Melodia.App
+import Melodarium.App
 
 // As etiquetas da faixa e o convite para criar mais uma, numa fileira só — como no desenho
 // (design/Main.dc.html:110-114). O campo de digitação não fica sempre aberto atravessando o

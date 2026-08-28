@@ -71,7 +71,7 @@ pragma ComponentBehavior: Bound
 
 import QtQuick
 import QtQuick.Layouts
-import Melodia.App
+import Melodarium.App
 
 // "A seguir na fila": o rótulo, quatro capas pequenas e o quadradinho "+N" com quantas
 // faltam (design/Main.dc.html:141-152). Mora no pé da coluna do meio, não no painel da
@@ -376,9 +376,9 @@ git commit -m "chore(ui): delete the orphaned textual queue list"
 - `grep -c 'QueuePanel' CMakeLists.txt` → `0`
 - `ls src/QueuePanel.qml 2>&1 | grep -c 'No such file'` → `1`
 - A tirinha só aparece com fila; a prova precisa de uma faixa tocando:
-  `./build/appmelodia --measure --pane library --play-track "$(ls ~/Música/**/*.mp3 2>/dev/null | head -1)" --delay 2500 --shot /tmp/melodia-fila.png --no-search`
-  → imprime `SHOT /tmp/melodia-fila.png`
-- `QT_QPA_PLATFORM=offscreen QT_LOGGING_RULES="*.debug=true" QT_FORCE_STDERR_LOGGING=1 ./build/appmelodia --measure --pane library --search-text "a" 2>&1 | grep -Ec 'is not a type|Unable to assign|ReferenceError|TypeError|unavailable|Cannot override|Cannot assign'`
+  `./build/melodarium --measure --pane library --play-track "$(ls ~/Música/**/*.mp3 2>/dev/null | head -1)" --delay 2500 --shot /tmp/melodarium-fila.png --no-search`
+  → imprime `SHOT /tmp/melodarium-fila.png`
+- `QT_QPA_PLATFORM=offscreen QT_LOGGING_RULES="*.debug=true" QT_FORCE_STDERR_LOGGING=1 ./build/melodarium --measure --pane library --search-text "a" 2>&1 | grep -Ec 'is not a type|Unable to assign|ReferenceError|TypeError|unavailable|Cannot override|Cannot assign'`
   → `0`
 - `bash tools/check-orfaos.sh` → não lista mais `QueuePanel`, `appendToQueue` nem
   `upcoming`

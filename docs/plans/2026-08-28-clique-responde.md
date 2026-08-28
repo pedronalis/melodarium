@@ -516,8 +516,8 @@ git commit -m "docs(plans): reopen the three slices the redesign silently unplug
   `src/tracklistmodel.h:1`, `src/LibraryPane.qml:1`
 - `bash tools/check-orfaos.sh` → roda e imprime a contagem (exit ≠ 0 é esperado nesta
   fatia; as coleções e a fila só voltam nas fatias seguintes)
-- `./build/appmelodia --measure --pane library --shot /tmp/melodia-onda1.png --no-search`
-  → imprime uma linha `MEDIDA …` e `SHOT /tmp/melodia-onda1.png`
+- `./build/melodarium --measure --pane library --shot /tmp/melodarium-onda1.png --no-search`
+  → imprime uma linha `MEDIDA …` e `SHOT /tmp/melodarium-onda1.png`
 
 ## Fora de escopo
 

@@ -1,4 +1,4 @@
-# melodia — instruções do projeto
+# melodarium — instruções do projeto
 
 Player de música local em Qt6/QML + libmpv, com a estética do Noctalia. Fedora, Wayland/Hyprland.
 
@@ -7,7 +7,7 @@ Player de música local em Qt6/QML + libmpv, com a estética do Noctalia. Fedora
 - Consultar `docs/solutions/` (lições deste repo) e a seção `## Perigos` do `handoff.md`.
 - O trabalho é fatiado: os planos vivem em `docs/plans/`, um por fatia, com frontmatter
   (`status`, `depende-de`, `decisao-humana`). Ler o lote com
-  `python3 ~/.claude/scripts/planos-lote.py listar melodia --dir docs/plans`.
+  `python3 ~/.claude/scripts/planos-lote.py listar melodarium --dir docs/plans`.
 
 ## O plano é o ledger
 
@@ -37,8 +37,12 @@ nunca das 16 chaves do tema do sistema: elas não têm os degraus que o desenho 
 
 ## Fronteiras
 
-- Repo publicado em `pedronalis/melodia`, **privado** (2026-08-28). Push em `main` liberado;
-  **abrir ao público continua sendo decisão do Pedro** — o spec pede aberto, mas ele segurou
-  até o nome ser decidido no `/batiza`. Enquanto for privado, renomear não quebra nada.
+- Repo em `pedronalis/melodarium`, **privado**. Push em `main` liberado; **abrir ao público
+  continua sendo decisão do Pedro** — o spec pede aberto, e o nome já saiu do `/batiza`
+  (melodarium, 2026-08-28), então o que faltava para abrir já não falta.
+- O nome anterior era `melodia`. `migrarDoNomeAntigo()` em `main.cpp` traz biblioteca, capas,
+  downloads e podcasts do caminho antigo na primeira abertura — **não remova** enquanto houver
+  chance de alguém abrir com dados velhos. Nome de lote histórico (`melodia-religa`,
+  `melodia-capa-manda`) fica como está: é registro do que aconteceu.
 - **Nunca PR** sem ele pedir: o repo é de um dono só, e PR aqui é cerimônia sem revisor.
 - Código, commits e comentários em inglês; conversa e documentos em pt-BR.

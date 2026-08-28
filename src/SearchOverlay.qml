@@ -3,7 +3,7 @@ pragma ComponentBehavior: Bound
 import QtQuick
 import QtQuick.Controls
 import QtQuick.Layouts
-import Melodia.App
+import Melodarium.App
 
 // O overlay de busca do desenho aprovado (design/Busca.dc.html): um painel de 660x520 a 74 px
 // do topo, sobre a tela escurecida, com os resultados agrupados por tipo e tudo alcançável

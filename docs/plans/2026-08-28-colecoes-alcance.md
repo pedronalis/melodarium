@@ -695,7 +695,7 @@ git commit -m "feat(ui): remove a track from a collection from its own row"
   `Total Tests: 9` ou mais
 - `bash tools/check-layout.sh` → 11 medidas ok (o cabeçalho cresceu; esta linha é o gate)
 - `grep -c 'addTracksToCollection' src/collectionmanager.h` → `1`
-- `QT_QPA_PLATFORM=offscreen QT_LOGGING_RULES="*.debug=true" QT_FORCE_STDERR_LOGGING=1 ./build/appmelodia --measure --pane library --search-text "codar" 2>&1 | grep -Ec 'is not a type|Unable to assign|ReferenceError|TypeError|unavailable|Cannot override|Cannot assign'`
+- `QT_QPA_PLATFORM=offscreen QT_LOGGING_RULES="*.debug=true" QT_FORCE_STDERR_LOGGING=1 ./build/melodarium --measure --pane library --search-text "codar" 2>&1 | grep -Ec 'is not a type|Unable to assign|ReferenceError|TypeError|unavailable|Cannot override|Cannot assign'`
   → `0`
 - `bash tools/check-orfaos.sh` → não lista mais `removeTrackFromCollection`,
   `collectionsForTrack`, `clauseForSearch`, `bindingsForSearch`

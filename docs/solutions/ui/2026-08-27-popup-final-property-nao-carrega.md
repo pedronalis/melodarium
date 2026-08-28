@@ -15,7 +15,7 @@ tags: [qml, qtquick-controls, popup, qt-6.10, final-property, gate]
 e a linha do gate
 
 ```bash
-QT_QPA_PLATFORM=offscreen ./build/appmelodia 2>&1 | grep -Ec 'is not a type|Unable to assign|ReferenceError'
+QT_QPA_PLATFORM=offscreen ./build/melodarium 2>&1 | grep -Ec 'is not a type|Unable to assign|ReferenceError'
 ```
 
 devolvia `0`. O overlay, porém, nunca abria: o tipo inteiro não existia em tempo de execução.

@@ -171,7 +171,7 @@ git commit -m "feat(library): save and read the position a track stopped at"
 import QtQuick
 import QtQuick.Controls
 import QtQuick.Layouts
-import Melodia.App
+import Melodarium.App
 
 Rectangle {
     id: root
@@ -228,7 +228,7 @@ Rectangle {
 ```qml
 import QtQuick
 import QtQuick.Layouts
-import Melodia.App
+import Melodarium.App
 
 Rectangle {
     id: root
@@ -297,7 +297,7 @@ Rectangle {
       seção): eles agora vivem no painel e no `PodcastPane`. Não mexa em mais nada do arquivo.
 - [x] Registrar `src/SpeedControl.qml` em `QML_FILES` no `CMakeLists.txt`.
 - [x] verificação mecânica da task:
-      `cmake --build build && test "$(QT_QPA_PLATFORM=offscreen timeout 8 ./build/appmelodia 2>&1 | grep -Ec 'is not a type|Unable to assign|ReferenceError')" -eq 0` → exit 0
+      `cmake --build build && test "$(QT_QPA_PLATFORM=offscreen timeout 8 ./build/melodarium 2>&1 | grep -Ec 'is not a type|Unable to assign|ReferenceError')" -eq 0` → exit 0
 - [x] commit:
 
 ```bash
@@ -312,7 +312,7 @@ git commit -m "feat(ui): podcast pane with speed and 30-second jumps"
 ```qml
 import QtQuick
 import QtQuick.Layouts
-import Melodia.App
+import Melodarium.App
 
 Rectangle {
     id: root
@@ -547,7 +547,7 @@ git commit -m "feat(ui): the empty state invites instead of showing a blank cove
 ```
 
 - [x] verificação mecânica da task:
-      `cmake --build build && test "$(QT_QPA_PLATFORM=offscreen timeout 8 ./build/appmelodia 2>&1 | grep -Ec 'is not a type|Unable to assign|ReferenceError')" -eq 0` → exit 0
+      `cmake --build build && test "$(QT_QPA_PLATFORM=offscreen timeout 8 ./build/melodarium 2>&1 | grep -Ec 'is not a type|Unable to assign|ReferenceError')" -eq 0` → exit 0
 - [x] commit:
 
 ```bash
@@ -593,7 +593,7 @@ git commit -m "test(library): playback position round-trips and ignores unknown 
 
 - `cmake -B build -G Ninja && cmake --build build` → exit 0
 - `ctest --test-dir build --output-on-failure` → `100% tests passed`
-- `test "$(QT_QPA_PLATFORM=offscreen timeout 8 ./build/appmelodia 2>&1 | grep -Ec 'is not a type|Unable to assign|ReferenceError')" -eq 0` → exit 0
+- `test "$(QT_QPA_PLATFORM=offscreen timeout 8 ./build/melodarium 2>&1 | grep -Ec 'is not a type|Unable to assign|ReferenceError')" -eq 0` → exit 0
 - `grep -q "last_position_ms" src/database.cpp` → exit 0
 - `grep -q "neverPlayedCount" src/librarybrowser.h` → exit 0
 - `grep -q "SpeedControl" CMakeLists.txt` → exit 0
