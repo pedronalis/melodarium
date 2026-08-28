@@ -71,7 +71,7 @@ verdade na fatia `shuffle-repeat`, não removê-los agora.
 
 ### Task 1: O modelo aprende a atualizar uma curtida sozinho
 
-- [ ] Escrever o teste que falha, em `tests/tst_tracklistmodel.cpp`, dentro de
+- [x] Escrever o teste que falha, em `tests/tst_tracklistmodel.cpp`, dentro de
       `private slots:`, depois de `totalDurationSumsTheLoadedRows()`:
 
 ```cpp
@@ -109,10 +109,10 @@ verdade na fatia `shuffle-repeat`, não removê-los agora.
     }
 ```
 
-- [ ] Rodar e confirmar que falha pelo motivo certo:
+- [x] Rodar e confirmar que falha pelo motivo certo:
       `cmake --build build --target tst_tracklistmodel` → erro de compilação
       `no member named 'applyLiked' in 'TrackListModel'`
-- [ ] Declarar em `src/tracklistmodel.h`, logo depois de
+- [x] Declarar em `src/tracklistmodel.h`, logo depois de
       `Q_INVOKABLE QVariantMap trackAt(int row) const;`:
 
 ```cpp
@@ -121,7 +121,7 @@ verdade na fatia `shuffle-repeat`, não removê-los agora.
     Q_INVOKABLE void applyLiked(int trackId, bool liked);
 ```
 
-- [ ] Implementar em `src/tracklistmodel.cpp`, depois de `QVariantMap TrackListModel::trackAt`:
+- [x] Implementar em `src/tracklistmodel.cpp`, depois de `QVariantMap TrackListModel::trackAt`:
 
 ```cpp
 void TrackListModel::applyLiked(int trackId, bool liked)
@@ -138,10 +138,10 @@ void TrackListModel::applyLiked(int trackId, bool liked)
 }
 ```
 
-- [ ] verificação mecânica da task:
+- [x] verificação mecânica da task:
       `quiet-run ctest --test-dir build -R tst_tracklistmodel --output-on-failure`
       → `100% tests passed`
-- [ ] commit:
+- [x] commit:
 
 ```bash
 git add src/tracklistmodel.h src/tracklistmodel.cpp tests/tst_tracklistmodel.cpp docs/plans/2026-08-28-clique-responde.md

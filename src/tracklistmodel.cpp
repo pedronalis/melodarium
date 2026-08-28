@@ -176,6 +176,19 @@ QVariantMap TrackListModel::trackAt(int row) const
             {QStringLiteral("durationMs"), r.durationMs}};
 }
 
+void TrackListModel::applyLiked(int trackId, bool liked)
+{
+    for (int i = 0; i < m_rows.size(); ++i) {
+        if (m_rows[i].id != trackId)
+            continue;
+        if (m_rows[i].liked == liked)
+            return;
+        m_rows[i].liked = liked;
+        emit dataChanged(index(i), index(i), {LikedRole});
+        return;
+    }
+}
+
 void TrackListModel::setRowsForTesting(const QList<TrackRow> &rows)
 {
     beginResetModel();
