@@ -1,21 +1,19 @@
 # Handoff — melodia
 
-> Atualizado: 2026-08-27 20:20 · branch: `main` · via /fecho · contexto: ~27% consumido
+> Atualizado: 2026-08-28 08:57 · branch: `main` · via /fecho · contexto: ~67% consumido
 
 ## Estado
 
-- **As 14 fatias do produto estão prontas e integradas em `main`** — as 9 originais mais as 5
-  do redesenho. Suíte de 9 alvos, 100% passando depois do último merge.
-- O app é a direção "capa manda" de ponta a ponta: barra de ícones, painel do que toca com
-  capa grande e like, biblioteca densa com filtros numa linha, busca por cima (Ctrl+K),
-  podcast com velocidade e pulos de 30 s, e o convite no lugar da capa vazia.
-- **A fidelidade virou verificação mecânica:** `tools/check-layout.sh` roda o app com
-  `--measure` e reprova se a barra sair de 56px, o painel de 392, o miolo cair de 360 ou a
-  capa perder o esquadro. Está no gate.
-- Conferido por mim em tela virtual (`Xvfb` + `import`), nos dois formatos que o Hyprland dá à
-  janela: 2540×686 e 1264×1384. Capturas do app real em `docs/telas/`.
-- **O que nenhum teste cobre e ninguém fez ainda: ouvir.** Clicar numa faixa e o som sair pelo
-  alto-falante é o único item que exige o Pedro.
+- **As 14 fatias estão prontas e integradas em `main`.** Suíte de 9 alvos verde;
+  `tools/check-layout.sh` verde nas 11 medidas.
+- **A interface agora escala com a janela.** Todo tamanho vinha de um desenho de 1100×700 e
+  virava um app de brinquedo na tela cheia do Pedro ("uma escala microscópica"). `Theme.uiScale`
+  é a alavanca única, derivada da janela real; altura de linha e largura de coluna acompanham.
+- **`--scan` varre a biblioteca sem abrir janela.** Antes a varredura só existia como botão, o
+  que impedia reproduzir problema de scanner sem tela e obrigava o Pedro a clicar para semear.
+- **Acervo de teste no disco:** 27 faixas em 3 álbuns com capa e tags (`~/Música`, licença livre)
+  e 3 episódios reais do Hipsters Ponto Tech (`~/Podcasts/melodia`). Banco varrido, 27 faixas.
+- **O app ainda não foi ouvido.** Tudo que se sabe vem de teste e de captura de tela.
 
 ## Alvo
 
@@ -24,11 +22,13 @@
   5 do redesenho `melodia-capa-manda`, todas `concluido` (14/14)
 - **PRONTA quando:** as fatias concluídas **e** o Pedro ouvindo o som sair ao clicar numa faixa
 - **Restante:** só a confirmação de áudio — nenhum código pendente
+- **Correção de rumo (Pedro, 2026-08-28):** "Despacha e me traz pronto, é isso que eu
+  quero" — gates de conferência visual passaram a ser meus, não dele.
 
 ## Fila da sessão
 
-1. **[S]** Ouvir: apontar a pasta de música, clicar numa faixa e confirmar que sai som ·
-   done: som saindo · `./build/appmelodia`
+1. **[S · 2ª desde 2026-08-27]** Ouvir: abrir o app, clicar numa faixa e confirmar que sai som ·
+   done: som saindo · `./build/appmelodia` (biblioteca já varrida, 27 faixas)
 2. **[S]** Passar o nome pelo `/batiza` antes de publicar — "melodia" é provisório ·
    done: nome decidido e registrado
 3. **[M]** Publicar o repo no GitHub, como o spec pede · done: `git remote -v` com o remoto
@@ -54,10 +54,9 @@ verde, 9/9 alvos de teste, integrado em `main`. As capturas que ele gerou estão
 
 ## Verificação
 
-- `cmake -B build -G Ninja && cmake --build build` → exit 0 · 2026-08-27 20:17
-- `ctest --test-dir build --output-on-failure` → `100% tests passed, 0 tests failed out of 9`
-- `bash tools/check-layout.sh` → `ok` nas quatro medidas (rail 56 · painel 392 · miolo ≥360 ·
-  capa quadrada) · 2026-08-27 20:17
+- `ctest --test-dir build --output-on-failure` → `100% tests passed, 0 out of 9` · 2026-08-28 08:57
+- `bash tools/check-layout.sh` → 11 medidas ok · 2026-08-28 08:57
+- `./build/appmelodia --scan` → `27 faixas` no banco · 2026-08-28
 
 ## Calibração de custo
 
@@ -139,6 +138,17 @@ QT_FORCE_STDERR_LOGGING=1` — mas o log fica enorme (845 KB num único start).
       dentro de outra tela. Painel interno de conteúdo com borda continua ok.
 - [ ] 2026-08-27 · **`pkill -f 'build/appmelodia'` mata o próprio comando** que o executa (a
       string casa com a linha de comando do shell, exit 144). Usar `pkill -x appmelodia`.
+
+- [ ] 2026-08-28 · **Interface com tamanho fixo vira microscópica em tela grande** — todo
+      número nasceu de um desenho de 1100×700. Mexeu em tamanho? passe por `Theme.uiScale`, e
+      lembre que altura de linha e largura de coluna precisam do mesmo fator, senão o texto
+      cresce e se atropela. Lição em `docs/solutions/ui/`.
+- [ ] 2026-08-28 · **`grim` fotografa a REGIÃO da tela, não a janela** — com o app num
+      workspace escondido, a captura traz a janela que estiver por cima. Para conferir sem
+      mexer nos workspaces do Pedro: `Xvfb :99` + `QT_QPA_PLATFORM=xcb` + `import -window root`.
+- [ ] 2026-08-28 · **Arquivo de áudio corrompido não entra na biblioteca e não avisa** — dois
+      MP3 vieram truncados do download e a varredura simplesmente os ignorou. `ffprobe` no
+      arquivo diz se é o arquivo ou o scanner.
 
 ## Legado (arquivado)
 
