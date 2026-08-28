@@ -48,7 +48,20 @@
 
 ## Em voo
 
-Nada. O run do redesenho (fatias 3-5) foi colhido: **PASSOU** — 9 commits, gate de 19 linhas
+**Lote `melodia-religa` (7 fatias) em `exec/melodia-religa`, worktree
+`~/dev/active/melodia-religa-run` — NÃO integrado.** Levas 1 e 2 fechadas: `clique-responde`,
+`fila-motor`, `colecoes-tela`, `fila-tirinha`, `shuffle-repeat` com status `concluido`.
+Faltam `colecoes-alcance` e `ajustes`, e a integração.
+
+> [!warning] O portão do lote (`RUN_GATE`) não fecha só terminando as fatias
+> A linha `tools/check-orfaos.sh` sai `rc=1` mesmo com o lote inteiro pronto e integrado —
+> provado por réplica pós-merge. Sobram 4 órfãos que **não têm dono em nenhuma fatia**:
+> `LibraryEmptyState`, `SearchField`, `continueListening`, `ingestDownloadedFile`. Vêm do lote
+> de 27/08, dois de fatias `travado`, e nenhum está na auditoria de completude. Alguém precisa
+> DECIDIR: exceção no detector, fatia nova, ou trocar a linha por um teto. Detalhe em
+> `DECISOES_RUN.md` nº 22 e 23 do worktree.
+
+O run do redesenho (fatias 3-5) foi colhido: **PASSOU** — 9 commits, gate de 19 linhas
 verde, 9/9 alvos de teste, integrado em `main`. As capturas que ele gerou estão em
 `docs/telas/`, e eu re-conferi em tela virtual antes de entregar.
 
@@ -149,6 +162,20 @@ QT_FORCE_STDERR_LOGGING=1` — mas o log fica enorme (845 KB num único start).
 - [ ] 2026-08-28 · **Arquivo de áudio corrompido não entra na biblioteca e não avisa** — dois
       MP3 vieram truncados do download e a varredura simplesmente os ignorou. `ffprobe` no
       arquivo diz se é o arquivo ou o scanner.
+
+- [ ] 2026-08-28 · **Chamada de método numa ligação QML não cria dependência** — e ler a
+      propriedade sem USAR o valor também não (`void X` é eliminado). Componente nasce vazio e
+      congela, com build verde e o gate de erros de QML passando. Lição em
+      `docs/solutions/ui/2026-08-28-chamada-de-metodo-nao-cria-dependencia-qml.md`.
+- [ ] 2026-08-28 · **`ctest` roda o binário que existe, não o código do disco** — depois de um
+      teste que não compilou, ele devolve `100% tests passed` do executável anterior. Sempre
+      `cmake --build build` antes, e conferir o teste novo com `-functions`. `QSKIP` também sai
+      verde. Lição em `docs/solutions/test-failures/`.
+- [ ] 2026-08-28 · **`loadfile … replace` REINICIA a faixa que está tocando** — medido: 3,0 s
+      viravam 0,7 s. Para reordenar a fila sem interromper, `playlist-move` entrada por entrada.
+- [ ] 2026-08-28 · **`cp` do `melodia.db` copia um banco VAZIO** — o SQLite está em modo WAL e os
+      dados vivem no `-wal`. Use `sqlite3 orig ".backup copia"`. Para fotografar com dados de
+      teste sem tocar no banco do Pedro: `XDG_DATA_HOME=/tmp/algo`.
 
 ## Legado (arquivado)
 
