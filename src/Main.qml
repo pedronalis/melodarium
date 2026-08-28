@@ -109,8 +109,6 @@ Window {
     property int currentEpisodeId: 0
     // Which chip of the filter row is lit. The rail picks the pane; this picks the list.
     property string libraryFilter: "all"
-    // The order the engine is playing, kept here because the queue drawer left this design.
-    property var queuePaths: []
 
     readonly property var filterTitles: ({
         "liked": qsTr("Curtidas"),
@@ -200,8 +198,7 @@ Window {
     }
 
     function activateTrack(index) {
-        root.queuePaths = trackModel.allPaths()
-        AudioEngine.loadPlaylist(root.queuePaths, index)
+        AudioEngine.loadPlaylist(trackModel.allPaths(), index)
         AudioEngine.play()
     }
 
@@ -245,7 +242,6 @@ Window {
                 paths[j] = tmp
             }
         }
-        root.queuePaths = paths
         AudioEngine.loadPlaylist(paths, 0)
         AudioEngine.play()
     }
