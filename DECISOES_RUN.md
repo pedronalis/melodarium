@@ -37,3 +37,40 @@ perigo nº 8 pela metade e criaria uma incoerência visível.
 **Custo de estar errada.** Numa tela muito grande os dois trilhos ficam finos JUNTOS, que é
 o defeito que o app já tem hoje e que se conserta numa passada só, nos dois, quando alguém
 decidir a espessura certa. Nenhum trilho fica mais fino que o outro por causa desta fatia.
+
+## 3. A aceitação visual não capturou o painel `collections`
+
+**Contexto.** O briefing manda provar o resultado em tela virtual com
+`--pane <library|collections|podcast>`. O app aceita hoje `library`, `podcast` e `empty`
+(`src/Main.qml`, propriedade `measurePane` e o `currentIndex` do `StackLayout`). Não existe
+painel de coleções para fotografar.
+
+**Decisão.** Capturei `library` e `podcast`, mais uma terceira tela com música tocando
+(`--play-track`), que é a única que mostra o transporte com o volume novo. `collections` fica
+para quando a fatia `colecoes-tela` — que é da leva 2, não desta — construir o painel.
+
+**Alternativa descartada.** Inventar um `--pane collections` nesta fatia só para satisfazer o
+comando do briefing. Isso seria adiantar meia fatia de outra leva, e produziria exatamente o
+defeito que este lote existe para curar: uma porta de entrada para um painel que não existe.
+
+**Custo de estar errada.** Nenhum: as três telas capturadas cobrem tudo que as duas fatias
+desta leva alteram (a tira de ícones, o coração sólido na lista, o transporte com volume, os
+chips como eixo). A fila desta leva é motor puro, sem tela — o próprio plano diz isso.
+
+## 4. O rail aparece aceso em "Biblioteca" na captura do painel de podcast
+
+**Contexto.** Em `docs/telas/leva1-final-podcast.png` o miolo mostra Episódios enquanto o
+ícone aceso na tira é o da Biblioteca.
+
+**Decisão.** Não é defeito e não foi mexido. Em modo `--measure` o `currentIndex` do
+`StackLayout` é forçado pela flag `--pane` e ignora `root.section` de propósito — o
+comentário no próprio código diz por quê: "qual banco a máquina tem não pode mudar o
+resultado do gate de layout". No app de verdade quem troca o painel é o clique na tira, que
+escreve `root.section`, e aí os dois concordam.
+
+**Alternativa descartada.** Fazer `--pane` escrever `root.section` também. Mexeria no harness
+de medição que os 11 gates de layout usam, dentro de uma fatia que não tem nada com isso.
+
+**Custo de estar errada.** Se fosse defeito de verdade, apareceria como ícone aceso errado ao
+navegar no app real — e não aparece, porque `showPane` escreve `section` e o rail lê `section`
+(`current: root.section`, `src/Main.qml`).
