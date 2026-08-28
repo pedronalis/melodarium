@@ -634,7 +634,7 @@ git commit -m "feat(ui): one click puts the whole open list into a collection"
 
 ### Task 7: Tirar uma faixa da coleção pela própria linha
 
-- [ ] Em `src/CollectionsPane.qml`, no `TrackRow` do `ListView { id: tracks … }`, ligar o
+- [x] Em `src/CollectionsPane.qml`, no `TrackRow` do `ListView { id: tracks … }`, ligar o
       gesto de sair da coleção ao botão que a biblioteca usa para entrar numa. Substituir as
       duas linhas `showCollectButton: false` e `onLikeToggled:` por:
 
@@ -653,7 +653,7 @@ git commit -m "feat(ui): one click puts the whole open list into a collection"
                 }
 ```
 
-- [ ] Em `src/TrackRow.qml`, o botão da linha precisa poder trocar de glifo — declarar a
+- [x] Em `src/TrackRow.qml`, o botão da linha precisa poder trocar de glifo — declarar a
       propriedade junto das outras, depois de `property bool showCollectButton: false`:
 
 ```qml
@@ -661,13 +661,13 @@ git commit -m "feat(ui): one click puts the whole open list into a collection"
     property string collectGlyph: "plus"
 ```
 
-- [ ] No mesmo arquivo, o `IconButton` do `showCollectButton` passa a usar a propriedade:
+- [x] No mesmo arquivo, o `IconButton` do `showCollectButton` passa a usar a propriedade:
 
 ```qml
                 icon: root.collectGlyph
 ```
 
-- [ ] Em `src/Main.qml`, no `CollectionsPane { id: collectionsPane … }`, recarregar a lista
+- [x] Em `src/Main.qml`, no `CollectionsPane { id: collectionsPane … }`, recarregar a lista
       quando uma faixa sai — sem isto a linha continua na tela depois de removida:
 
 ```qml
@@ -677,11 +677,11 @@ git commit -m "feat(ui): one click puts the whole open list into a collection"
                 }
 ```
 
-- [ ] verificação mecânica da task:
+- [x] verificação mecânica da task:
       `grep -c 'collectGlyph' src/TrackRow.qml src/CollectionsPane.qml` →
       `src/TrackRow.qml:2`, `src/CollectionsPane.qml:1`
-- [ ] verificação mecânica da task: `quiet-run cmake --build build` → exit 0
-- [ ] commit:
+- [x] verificação mecânica da task: `quiet-run cmake --build build` → exit 0
+- [x] commit:
 
 ```bash
 git add src/TrackRow.qml src/CollectionsPane.qml src/Main.qml docs/plans/2026-08-28-colecoes-alcance.md

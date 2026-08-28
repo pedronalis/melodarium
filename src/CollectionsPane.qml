@@ -314,12 +314,18 @@ Item {
                 trackId: faixa.model.trackId
                 liked: faixa.model.liked
                 sourceKind: faixa.model.sourceKind
-                // Dentro de uma coleção o gesto útil não é "pôr numa coleção": é tirar
-                // desta. O + da biblioteca daria uma segunda porta para o mesmo lugar.
-                showCollectButton: false
+                // Dentro de uma coleção o gesto útil é o inverso: o mesmo botão da linha
+                // tira a faixa daqui em vez de pô-la em outro lugar.
+                showCollectButton: true
+                collectGlyph: "close"
 
                 onActivated: root.trackActivated(faixa.index)
                 onLikeToggled: LibraryBrowser.toggleLike(faixa.model.trackId)
+                onCollectRequested: {
+                    CollectionManager.removeTrackFromCollection(root.openId,
+                                                               faixa.model.trackId)
+                    root.trackRemoved(faixa.model.trackId)
+                }
             }
 
             Text {
