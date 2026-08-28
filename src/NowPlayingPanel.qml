@@ -45,6 +45,11 @@ Rectangle {
     // biblioteca: um episódio não tem artista nem álbum, tem programa e data.
     property var episodeInfo: ({})
 
+    // O motor não tem mudo: o botão antigo alternava entre 0 e 100 e perdia o valor que o
+    // usuário tinha escolhido. Guardar o volume anterior é o que faz o mudo ser reversível.
+    property real volumeAntesDoMudo: 100
+    readonly property bool mudo: AudioEngine.volume <= 0
+
     readonly property string tituloAtual: root.episodeMode
                                           ? (root.episodeInfo.title !== undefined
                                              ? root.episodeInfo.title : "")
@@ -405,6 +410,53 @@ Rectangle {
                     font.family: Theme.fontFamily
                     font.pointSize: Theme.fontSizeS
                     color: Theme.mOutline
+                }
+            }
+
+            // O volume saiu da tela quando a barra de transporte foi aposentada e nunca
+            // migrou para cá. Sem ele o único volume do app é o do sistema.
+            RowLayout {
+                spacing: Theme.marginS
+
+                IconButton {
+                    icon: root.mudo ? "volume-off"
+                                    : (AudioEngine.volume < 50 ? "volume-low" : "volume")
+                    size: Theme.fontSizeL
+                    tooltip: root.mudo ? qsTr("com som") : qsTr("mudo")
+                    onClicked: {
+                        if (root.mudo) {
+                            AudioEngine.setVolume(root.volumeAntesDoMudo)
+                        } else {
+                            root.volumeAntesDoMudo = AudioEngine.volume
+                            AudioEngine.setVolume(0)
+                        }
+                    }
+                }
+
+                Rectangle {
+                    id: trilhoVolume
+                    Layout.preferredWidth: Math.round(72 * Theme.uiScale)
+                    Layout.alignment: Qt.AlignVCenter
+                    implicitHeight: 3
+                    radius: Theme.radiusXXS
+                    color: Theme.mSurfaceVariant
+
+                    Rectangle {
+                        width: parent.width * (AudioEngine.volume / 100)
+                        height: parent.height
+                        radius: parent.radius
+                        color: Theme.mOnSurfaceVariant
+                    }
+
+                    MouseArea {
+                        anchors.fill: parent
+                        anchors.margins: -Theme.marginS
+                        cursorShape: Qt.PointingHandCursor
+                        onClicked: function (mouse) {
+                            AudioEngine.setVolume(
+                                Math.max(0, Math.min(100, 100 * mouse.x / trilhoVolume.width)))
+                        }
+                    }
                 }
             }
         }
