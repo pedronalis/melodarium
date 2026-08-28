@@ -563,6 +563,7 @@ Window {
             AudioEngine.play()
         }
         onEpisodeChosen: function (episodeId) { PodcastLibrary.playEpisode(episodeId) }
+        onTrackQueued: function (path) { AudioEngine.appendToQueue(path) }
         onAlbumChosen: function (albumId, title) {
             root.openNamedGroup("albums", albumId, title)
         }
