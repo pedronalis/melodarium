@@ -327,7 +327,7 @@ git commit -m "fix(ui): clicking a tag under the cover filters the library by it
 
 ### Task 6: O volume volta para a fileira de controles
 
-- [ ] Em `src/NowPlayingPanel.qml`, declarar o estado do mudo junto das outras propriedades
+- [x] Em `src/NowPlayingPanel.qml`, declarar o estado do mudo junto das outras propriedades
       do topo, logo depois de `property var episodeInfo: ({})`:
 
 ```qml
@@ -337,7 +337,7 @@ git commit -m "fix(ui): clicking a tag under the cover filters the library by it
     readonly property bool mudo: AudioEngine.volume <= 0
 ```
 
-- [ ] No mesmo arquivo, dentro do `RowLayout` dos controles (o que tem
+- [x] No mesmo arquivo, dentro do `RowLayout` dos controles (o que tem
       `Layout.alignment: Qt.AlignHCenter` e `visible: root.hasTrack`), acrescentar o
       controle de volume **como último filho**, depois do `Rectangle` do rótulo "30s":
 
@@ -390,10 +390,10 @@ git commit -m "fix(ui): clicking a tag under the cover filters the library by it
             }
 ```
 
-- [ ] verificação mecânica da task:
+- [x] verificação mecânica da task:
       `grep -c 'AudioEngine.setVolume' src/NowPlayingPanel.qml` → `3`
-- [ ] verificação mecânica da task: `quiet-run cmake --build build` → exit 0
-- [ ] commit:
+- [x] verificação mecânica da task: `quiet-run cmake --build build` → exit 0
+- [x] commit:
 
 ```bash
 git add src/NowPlayingPanel.qml docs/plans/2026-08-28-clique-responde.md
