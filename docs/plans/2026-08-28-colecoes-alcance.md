@@ -312,7 +312,7 @@ git commit -m "feat(search): opening a collection hit opens the collection"
 
 ### Task 4: O modelo devolve os ids que a lista tem na tela
 
-- [ ] Declarar em `src/tracklistmodel.h`, logo depois de
+- [x] Declarar em `src/tracklistmodel.h`, logo depois de
       `Q_INVOKABLE QStringList allPaths() const;`:
 
 ```cpp
@@ -321,7 +321,7 @@ git commit -m "feat(search): opening a collection hit opens the collection"
     Q_INVOKABLE QVariantList allTrackIds() const;
 ```
 
-- [ ] Implementar em `src/tracklistmodel.cpp`, depois de `QStringList TrackListModel::allPaths`:
+- [x] Implementar em `src/tracklistmodel.cpp`, depois de `QStringList TrackListModel::allPaths`:
 
 ```cpp
 QVariantList TrackListModel::allTrackIds() const
@@ -334,12 +334,12 @@ QVariantList TrackListModel::allTrackIds() const
 }
 ```
 
-- [ ] verificação mecânica da task:
+- [x] verificação mecânica da task:
       `quiet-run cmake --build build` → exit 0
-- [ ] verificação mecânica da task:
+- [x] verificação mecânica da task:
       `grep -c 'allTrackIds' src/tracklistmodel.h src/tracklistmodel.cpp` →
       `src/tracklistmodel.h:1`, `src/tracklistmodel.cpp:1`
-- [ ] commit:
+- [x] commit:
 
 ```bash
 git add src/tracklistmodel.h src/tracklistmodel.cpp docs/plans/2026-08-28-colecoes-alcance.md

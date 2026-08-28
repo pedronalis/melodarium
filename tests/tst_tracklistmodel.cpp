@@ -116,6 +116,18 @@ private slots:
         QCOMPARE(paths.size(), 2);
         QCOMPARE(paths.first(), QStringLiteral("/music/a.flac"));
     }
+
+    // The bulk "+ Coleção" gesture reads ids, in the same order the rows are shown: a
+    // collection stores ids, and the playlist stores paths.
+    void allTrackIdsFeedsCollectionsInTheSameOrder()
+    {
+        TrackListModel model;
+        model.setRowsForTesting(sampleRows());
+        const QVariantList ids = model.allTrackIds();
+        QCOMPARE(ids.size(), 2);
+        QCOMPARE(ids.first().toInt(), 1);
+        QCOMPARE(ids.last().toInt(), 2);
+    }
 };
 
 QTEST_MAIN(TstTrackListModel)
