@@ -148,14 +148,17 @@ Popup {
                     }
                 }
 
-                Chip {
+                // Preenchido quando ligado, contornado quando não — o par visual que o app
+                // já usa. Um Chip some aqui: a cor de "selecionado" dele é a mesma cor do
+                // fundo desta gaveta, e o controle deixaria de parecer clicável.
+                MelodiaButton {
                     id: nivelar
 
                     property bool checked: false
 
                     Layout.alignment: Qt.AlignVCenter
-                    label: nivelar.checked ? qsTr("ligado") : qsTr("desligado")
-                    selected: nivelar.checked
+                    text: nivelar.checked ? qsTr("ligado") : qsTr("desligado")
+                    outlined: !nivelar.checked
                     onClicked: {
                         nivelar.checked = !nivelar.checked
                         root.aplicar()
@@ -187,14 +190,14 @@ Popup {
                     }
                 }
 
-                Chip {
+                MelodiaButton {
                     id: exclusiva
 
                     property bool checked: false
 
                     Layout.alignment: Qt.AlignVCenter
-                    label: exclusiva.checked ? qsTr("ligada") : qsTr("desligada")
-                    selected: exclusiva.checked
+                    text: exclusiva.checked ? qsTr("ligada") : qsTr("desligada")
+                    outlined: !exclusiva.checked
                     onClicked: {
                         exclusiva.checked = !exclusiva.checked
                         root.aplicar()
