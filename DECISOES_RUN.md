@@ -533,3 +533,124 @@ verde é literalmente o defeito que este lote existe para consertar.
 
 **Custo de estar errada.** Se a intenção era mesmo silenciar os quatro, é uma linha no
 detector, e a decisão nº 22 já diz quais são e de onde vêm.
+
+---
+
+# Decisões do run — leva 3 (colecoes-alcance · ajustes · integração)
+
+## 24. Os testes de lote não podiam usar os nomes de coleção que o plano escreveu
+
+**Contexto.** As duas funções que a Task 1 de `colecoes-alcance` traz criam as coleções
+"Pra codar" e "Madrugada". O `tst_collections` compartilha UM banco entre todos os slots
+(`initTestCase` abre uma vez), e dois testes anteriores já criam essas duas. `createCollection`
+tem `UNIQUE COLLATE NOCASE`: o `QVERIFY(id > 0)` do plano falharia sozinho, sem defeito nenhum
+no código novo. Pelo mesmo motivo, o `cm.collections().first()` do plano lê a primeira coleção
+do banco INTEIRO em ordem alfabética — não a que o teste acabou de criar.
+
+**Decisão.** Nomes exclusivos ("Álbum inteiro", "Álbum repetido") e um auxiliar `countOf(cm,
+id)` que procura a coleção pelo id dentro de `collections()`. Mantive a intenção do plano —
+conferir o número que o PAINEL mostra, não um `COUNT(*)` cru — sem depender da ordem.
+Acrescentei também a conferência de `MAX(position)`, que é o que o nome
+`...IsIdempotentAndKeepsOrder` promete e o corpo do plano não cobrava.
+
+**Alternativa descartada.** Apagar as coleções no início de cada teste novo. Deixaria os testes
+anteriores dependentes da ordem de execução, que é justamente a armadilha que causou isto.
+
+**Custo de estar errada.** Nenhum: os dois testes passam por nome no transcript, e o que eles
+cobram (uma transação, um sinal, idempotência, régua de posição) é literalmente o contrato da
+função nova.
+
+## 25. Três `grep -c` do plano cobram números que o próprio código do plano não produz
+
+**Contexto.** Terceira vez nesta série (ver decisões nº 1 e nº 6). `grep -c` conta LINHAS
+casadas, e os planos contaram ocorrências mentalmente:
+
+| verificação | plano | real | por quê |
+|---|---|---|---|
+| `grep -c 'collection' src/SearchOverlay.qml` | 4 | 5 | o despacho em `activate` ocupa duas linhas |
+| `grep -c 'collectAllRequested\|groupSubtitle' src/LibraryPane.qml` | 4 | 5 | o subtítulo aparece em `visible:` e em `text:` |
+| `check-orfaos` sem `collectionsForTrack`, `clauseForSearch`, `bindingsForSearch` | some | continuam | nenhuma task desta fatia os chama |
+
+**Decisão.** Aceito os valores reais como verdes. Os dois primeiros são aritmética do plano; o
+terceiro é uma previsão errada sobre outra coisa (esses três invocáveis não pertencem a task
+nenhuma da fatia) e passa a ser tratado na Task 5 de `ajustes`, que é a dona da decisão sobre
+cada órfão restante.
+
+**Alternativa descartada.** Escrever código para o grep fechar no número do plano.
+
+**Custo de estar errada.** Nenhum: os números que medem COMPORTAMENTO
+(`grep -c 'addTracksToCollection' src/Main.qml` → 2, `src/collectionmanager.h` → 1,
+`collectGlyph` → 2 e 1) bateram exatamente, e as telas foram fotografadas.
+
+## 26. O cabeçalho de uma linha que o plano desenhou transbordava a janela. Empilhei, como o desenho
+
+**Contexto.** A Task 5 põe título, artista, contagem e o botão "+ Coleção" na MESMA linha.
+Fotografei com um álbum aberto e a tela estava quebrada: o miolo inteiro deslocado para a
+direita, o "Automáticas" cortado pela borda, as durações cortadas. Medido:
+`chipsvao` (a largura útil da coluna do meio) saltava de **604 para 648 px** com um álbum
+aberto — o cabeçalho pedia 44 px a mais do que a coluna tem, e o excesso empurrava tudo para
+fora da janela. O nome do álbum em corpo XL não tinha `elide` nem teto de largura.
+
+**A parte grave.** `tools/check-layout.sh` **passou verde** nesse estado, porque ele afere
+`chips <= chipsvao` e o vão inflado satisfaz a conta. O gate nunca abre um álbum. É o mesmo
+gênero de cegueira que originou este lote.
+
+**Decisão.** Empilhei título e ficha em duas linhas — que é como o desenho aprovado sempre
+mostrou (`design/Main.dc.html:79-82`: "Island Songs" em cima, "Ólafur Arnalds · 8 faixas ·
+35 min" embaixo). O título ganhou `elide` e `fillWidth`; o artista, teto de 40% e `elide`.
+Medido depois: `chipsvao` volta a 604 com álbum aberto, e a 720 px (janela mínima) o título
+elide e o botão continua inteiro. A referência mandava nesta ordem — desenho primeiro — e aqui
+o desenho e o defeito apontavam para o mesmo conserto.
+
+**Alternativa descartada.** Manter a linha única e só pôr `elide` no título. Continuaria
+estourando na soma artista + contagem + botão, e brigaria com o desenho para salvar uma linha
+de código.
+
+**Custo de estar errada.** O cabeçalho da biblioteca ficou uma linha mais alto que o do painel
+de coleções, que continua em linha única. Se isso incomodar, é o mesmo bloco de seis linhas
+aplicado lá.
+
+## 27. Duas bandeiras de medição novas, porque sem elas as duas metades desta fatia não têm foto
+
+**Contexto.** O cabeçalho com o artista e o botão "+ Coleção" só existe com um ÁLBUM aberto, e
+o app não tinha como abrir um em tela virtual. O resultado de busca do tipo coleção podia ser
+fotografado na lista, mas fotografar o resultado prova que a busca ACHA — não que ele LEVA a
+algum lugar, que é a metade que este lote existe para consertar.
+
+**Decisão.** `--open-album <id>`, que percorre o caminho do clique (carrega o eixo de álbuns e
+abre um grupo a partir dele, que é de onde o artista vem), e `--activate-hit`, que aperta Enter
+no resultado em destaque. As duas só agem sob `--measure`, no mesmo feitio das sete que o
+harness já tinha. A prova: `docs/telas/leva3-busca-abre-colecao.png` mostra o overlay fechado,
+o ícone de coleções aceso na tira e a coleção "Pra codar" aberta com as 8 faixas dentro.
+
+**Alternativa descartada.** Declarar a fatia pronta com a foto do resultado na lista de busca.
+É a inferência "compila, logo funciona" que produziu as 24 lacunas.
+
+**Custo de estar errada.** Duas funções de dez linhas num harness que já tinha sete iguais.
+
+## 28. Detalhes em que o código do plano não batia com o arquivo real
+
+**Contexto e decisão.** Três ajustes mecânicos, todos verificados contra o código:
+
+- `addTracksToCollection` usa o auxiliar `uiDb()` do próprio arquivo, não a chamada crua a
+  `QSqlDatabase::database(...)` que o plano escreveu — é o padrão das outras dez funções.
+- `added_at` entra por `bindValue(QDateTime::currentSecsSinceEpoch())`, como em
+  `addTrackToCollection`, e não pelo `CAST(strftime('%s','now') …)` do plano. Um `%s` dentro do
+  SQL num arquivo que trata data em C++ seria a única exceção da casa.
+- O despacho do tipo `collection` em `activate()` entrou como mais um `else if` da cadeia
+  existente, em vez do bloco com `close()` e `return` do plano: a função já fecha o overlay no
+  fim para todos os tipos casados.
+- `onCollectionChosen` chama `root.showPane("collections")` em vez de escrever `root.section`
+  direto. Mesmo efeito; `showPane` é a porta que a tira de ícones usa.
+
+**Custo de estar errada.** Nenhum medido: build, suíte, gates e as quatro fotos.
+
+## 29. Um teste a mais para `allTrackIds`, que o plano não pedia
+
+**Contexto.** A Task 4 fecha com `grep` e build, sem teste. O irmão dela, `allPaths`, tem
+teste (`allPathsFeedsThePlaylistInOrder`).
+
+**Decisão.** Escrevi `allTrackIdsFeedsCollectionsInTheSameOrder`, do mesmo tamanho e no mesmo
+lugar. A ordem importa: é ela que decide a ordem em que o álbum entra na coleção.
+
+**Custo de estar errada.** Seis linhas de teste a mais numa suíte que roda em 5 segundos.
