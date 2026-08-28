@@ -234,6 +234,15 @@ void AudioEngine::setShuffle(bool on)
 
     m_shuffle = on;
     reorderMpvPlaylist(ordemNoMpv);
+
+    // Quando NADA tinha começado a tocar (m_playlistPos < 0), o embaralhamento incluiu a
+    // primeira entrada — e o mpv, que já havia carregado a antiga, sai andando junto com
+    // ela para o lugar novo. Medido no app com 27 faixas: a entrada original parava no
+    // índice 24, e "tocar tudo em ordem aleatória" tocava três faixas em vez de tudo.
+    // Voltar ao topo só é certo neste caso; com música tocando, mexer aqui interromperia.
+    if (on && m_playlistPos < 0)
+        setPropertyString("playlist-pos", "0");
+
     emit shuffleChanged();
     emit queueChanged();
 }

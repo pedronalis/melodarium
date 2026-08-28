@@ -365,6 +365,43 @@ entender depois.
 
 **Custo de estar errada.** Zero: a hipótese virou teste em vez de virar código.
 
+**CORREÇÃO — a suspeita estava CERTA, e o teste é que mentia.** Ao fotografar os botões
+ligados, a tirinha mostrou "+21" com 27 na fila e 4 capas, o que só fecha com a posição em 1,
+não em 0. Instrumentei o app e a conta era pior: `pos=24 count=27`, tocando a faixa original
+nº 1, que o embaralhamento tinha levado para o índice 24. "Tocar tudo em ordem aleatória"
+tocava **três** faixas de 27. O teste passava porque com cinco tons de 1 s a reordenação
+termina antes de o mpv abrir o primeiro arquivo; com 27 MP3 de verdade, não termina — é uma
+corrida, e o tamanho da fila decide quem ganha. Escalei o teste para 26 entradas e **ainda
+assim passou**: arquivo minúsculo abre rápido demais para reproduzir. A evidência boa é a
+medição no app, não a suíte.
+
+**A correção.** Em `setShuffle`, quando `m_playlistPos < 0` (nada começou a tocar ainda),
+escrever `playlist-pos = 0` depois de reordenar. A guarda importa: com música tocando,
+`m_playlistPos >= 0` e mexer ali interromperia a faixa. Medido depois: `pos=0` e o arquivo
+tocando é o `queue[0]` da ordem nova, em quatro execuções seguidas com ordens diferentes.
+
+**Lição.** Um teste verde num fixture minúsculo não é evidência sobre um app que abre
+arquivos reais. Foi o "+21" numa foto — três pixels de texto — que denunciou o defeito, não a
+suíte.
+
+## 19. O teste do aleatório-parado ficou instável, e a instabilidade era dele
+
+**Contexto.** Depois da correção acima, `shuffleFromAStandstillStartsAtTheTopOfTheNewOrder`
+passou a falhar em 2 de 3 execuções, na linha que compara o arquivo tocando.
+
+**Decisão.** A corrida era do teste: escrever `playlist-pos` manda o mpv **carregar**, e o
+teste comparava o arquivo no instante seguinte, antes de o carregamento acontecer. Troquei a
+comparação imediata por `QTRY_COMPARE_WITH_TIMEOUT` — seguro aqui porque o teste pausa antes,
+e uma fila pausada não anda sozinha para passar pelo esperado por acaso (que foi o defeito da
+decisão nº 16). Conferido: 10 execuções isoladas e 5 da suíte inteira, todas
+`16 passed, 0 failed, 0 skipped`.
+
+**Alternativa descartada.** Aumentar um `qWait` fixo. Esconderia a corrida em vez de esperar
+pelo evento certo, e voltaria a falhar numa máquina mais lenta.
+
+**Custo de estar errada.** Um teste instável é pior que nenhum: ensina a ignorar vermelho.
+Por isso a conferência foi por repetição, não por uma execução verde.
+
 ## 18. Nota: o plano lista `src/EmptyPane.qml` como arquivo a modificar e nenhuma task o toca
 
 **Contexto.** A seção "Arquivos" de `shuffle-repeat` inclui `src/EmptyPane.qml`, mas as
@@ -379,3 +416,29 @@ pedido chegou inteiro sem tocar no arquivo.
 **Custo de estar errada.** Se faltasse algo lá, o botão "Tocar tudo em ordem aleatória" não
 ligaria o modo — e o portão `grep -c 'AudioEngine.setShuffle' src/Main.qml` → 1 mostra que a
 ligação está no lugar por onde o sinal passa.
+
+## 20. O "ligado" dos dois botões é visível, mas discreto — e fica como está, com a medida
+
+**Contexto.** Ampliei a fileira de transporte para conferir o estado aceso e, a olho, o
+aleatório parecia idêntico ligado e desligado. Medi os pixels do ícone em vez de julgar pela
+vista: desligado `#828282` (`mOnSurface`), ligado `#aaaaaa` (`mPrimary`). O `accent` está
+sendo aplicado — o que o deixa discreto é a paleta do Noctalia do próprio Pedro
+(`~/.config/noctalia/colors.json`), que é monocromática: entre `mPrimary` e `mOnSurface` há
+40 níveis de cinza e nenhuma cor. Na paleta de reserva do app (`mPrimary #fff59b`, amarelo)
+a diferença seria berrante.
+
+**Decisão.** Fica como o plano manda. Consultei a referência na ordem: o desenho
+(`design/Main.dc.html:61-69`) mostra os dois botões apagados e **nunca desenhou** o estado
+ligado; o padrão vigente do app para "ligado" é o `accent` do `IconButton`; e o plano escolheu
+exatamente esse. Os três apontam para o mesmo lugar. O terceiro estado do repetir (esta
+faixa) ganha o "1" sobreposto, que se distingue por forma e não só por cor — esse aparece bem
+na foto.
+
+**Alternativa descartada.** Marcar "ligado" com uma pílula de fundo, como a tira de ícones faz
+com o modo selecionado. Seria mais visível na paleta do Pedro, mas mudaria o `IconButton`,
+que é usado em todo o app, para resolver um contraste que vem do tema dele — e sem nenhum
+desenho aprovado pedindo.
+
+**Custo de estar errada.** Se o Pedro achar discreto demais na tela dele, é uma linha no
+`IconButton`. A medida está aqui para ele decidir sem precisar reabrir o assunto do zero:
+`#828282` → `#aaaaaa`.

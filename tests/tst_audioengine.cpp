@@ -285,10 +285,14 @@ private slots:
     // tudo e entrega um pedaço, sempre começando pela mesma faixa.
     void shuffleFromAStandstillStartsAtTheTopOfTheNewOrder()
     {
+        // Fila LONGA de propósito. Com cinco entradas o defeito não aparece: reordenar é
+        // rápido demais e o mpv ainda não começou a primeira faixa. Com vinte e poucas — o
+        // tamanho de uma biblioteca de verdade — ele já começou, e sai andando junto com a
+        // entrada que carregou. Foi assim que o defeito apareceu no app (pos=24 de 27).
         QStringList original = {m_toneA, m_toneB};
-        for (int i = 0; i < 3; ++i) {
+        for (int i = 0; i < 24; ++i) {
             const QString extra = makeTone(
-                m_dir.filePath(QStringLiteral("parado%1.flac").arg(i)), 500 + i * 90, 1.0);
+                m_dir.filePath(QStringLiteral("parado%1.flac").arg(i)), 300 + i * 30, 1.0);
             if (extra.isEmpty())
                 QSKIP("ffmpeg unavailable");
             original.append(extra);
@@ -309,6 +313,10 @@ private slots:
             // Pausado, senão a fila de tons de 1 s anda sozinha e passa pelo esperado.
             engine.pause();
             const QString esperado = engine.queue().at(0);
+            QTRY_COMPARE_WITH_TIMEOUT(engine.playlistPos(), 0, 5000);
+            // Esperar também pelo arquivo: escrever playlist-pos manda o mpv carregar, e
+            // comparar no instante seguinte é comparar antes de ele ter carregado. Pausado,
+            // esperar é seguro — a fila não anda sozinha para passar pelo esperado.
             QTRY_COMPARE_WITH_TIMEOUT(engine.currentFile(), esperado, 5000);
             return;
         }
