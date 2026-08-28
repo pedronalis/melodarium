@@ -654,3 +654,92 @@ teste (`allPathsFeedsThePlaylistInOrder`).
 lugar. A ordem importa: é ela que decide a ordem em que o álbum entra na coleção.
 
 **Custo de estar errada.** Seis linhas de teste a mais numa suíte que roda em 5 segundos.
+
+## 30. Os dois liga/desliga não são `Switch`, e a primeira tentativa (Chip) sumiu na foto
+
+**Contexto.** A Task 1 de `ajustes` usa `Switch` do QtQuick.Controls. O app não tem um único
+`Switch` — o estilo padrão dos Controls não segue o tema do Noctalia, e a peça entraria com
+cor e animação próprias no meio de uma interface monocromática.
+
+**Primeira decisão, e por que ela falhou.** Troquei por `Chip`, que é o "ligado/desligado" que
+o app já usa na linha de filtros. Fotografei: os dois controles **desapareceram**. O `Chip`
+desenha o estado selecionado com `Theme.mSurfaceVariant`, que é exatamente a cor de fundo
+desta gaveta; e a borda do não-selecionado é a mesma cor. Ficaram duas palavras soltas, sem
+nada que dissesse "isto é clicável".
+
+**Decisão final.** `MelodiaButton`, preenchido quando ligado e contornado quando desligado —
+o outro par de liga/desliga que o app já tem, e o mesmo componente dos botões "Trocar" e
+"Fechar" ao lado. Fotografado nos dois estados
+(`docs/telas/leva3-ajustes.png` e `leva3-ajustes-ligado.png`): distinguem-se por FORMA, não só
+por matiz, que é o defeito de contraste registrado na decisão nº 20.
+
+**Alternativa descartada.** Manter o `Chip` e mudar a cor de fundo da gaveta. Mexeria no
+contraste de um popup para acomodar um controle, em vez do contrário.
+
+**Custo de estar errada.** Nenhum medido: as duas fotos mostram os dois estados legíveis.
+
+## 31. `grep -c 'settingsRequested' src/Main.qml` dá 0, e está certo
+
+**Contexto.** A verificação da Task 2 pede 1. O handler de um sinal `settingsRequested` chama-se
+`onSettingsRequested` — com S maiúsculo. `grep` é sensível a caixa.
+
+**Decisão.** Conferi por `grep -c 'onSettingsRequested' src/Main.qml` → 1, e provei a ligação
+na tela: a engrenagem aparece no pé da tira e `--open-settings` abre a gaveta, fotografada.
+
+**Custo de estar errada.** Nenhum: a foto mostra a gaveta aberta pelo caminho real.
+
+## 32. O que fiz com os dez órfãos que sobraram — item a item
+
+**Contexto.** A decisão nº 22 da leva 2 previu que o detector não fecharia em zero só com as
+duas fatias que faltavam, e listou quatro sem dono. A Task 5 de `ajustes` é a dona desta
+escolha, e me dá duas saídas por item: ou existe caminho na tela (exceção), ou não existe
+(some do código). Depois das duas fatias sobraram dez. Decidi um a um, com evidência:
+
+**Saem do código — tela morta que o redesenho substituiu:**
+
+| item | prova |
+|---|---|
+| `src/LibraryEmptyState.qml` | é o antecessor do `EmptyPane`: mesmo texto ("Escolha a pasta onde sua música está"), mesmo botão, mesmo `FolderDialog`. Quem está no `StackLayout` é o `EmptyPane`. |
+| `src/SearchField.qml` | a barra da biblioteca hoje é um `Rectangle` próprio que abre o overlay, e o overlay tem o seu próprio campo. Nenhum QML o instancia, nenhum teste o toca. |
+| `LibraryBrowser::clauseForSearch` e `bindingsForSearch` | montavam a busca como FILTRO da lista; a busca do app é `searchGrouped`, que devolve cinco tipos agrupados. Sem chamador e sem teste — `toFtsPrefixQuery`, que os dois usavam, fica porque `searchGrouped` a usa. |
+
+**Ficam, em RESERVA DECLARADA — motor pronto e testado, sem tela pedida por spec ou desenho:**
+
+| item | por quê |
+|---|---|
+| `collectionsForTrack` | testado; marcaria no menu quais coleções já têm a faixa — não está em desenho nenhum |
+| `continueListening` | testado; "continuar ouvindo" não aparece em `design/Podcast.dc.html` |
+| `ingestDownloadedFile` | testado; pertence à fatia `download-youtube`, que está **travada** |
+| `moveTrackInCollection` | o plano `colecoes-tags` decide por escrito: arrastar para reordenar "entra só se a ordem manual se mostrar usada de fato" |
+| `setGaplessAggressive` | o gapless agressivo não está em desenho nenhum |
+| `unsubscribe` | o par de `subscribe`; desinscrever não tem tela nem desenho |
+
+**Como a reserva não vira esquecimento.** A objeção da decisão nº 23 era exata: pôr itens numa
+lista de exceções é enterrar funcionalidade atrás de um verde, que é o defeito que este lote
+existe para consertar. Por isso a reserva **não silencia**: é uma lista separada da de
+"coberto por outro caminho", cada item traz o motivo no próprio script, e o detector
+**imprime a reserva inteira a cada execução**, acima da linha de resultado. Quem rodar o
+portão vê os seis, com nome, sempre. Um item dispensado que ninguém mais vê é exatamente um
+item esquecido.
+
+**Prova de que o detector continua com dentes.** Injetei um `.qml` que ninguém instancia e um
+`Q_INVOKABLE` que ninguém chama: voltou a `2 item(ns)` e `rc=1`, nomeando os dois. Revertido,
+`0` e `rc=0`.
+
+**Alternativa descartada.** Inventar telas para os seis (um botão de desinscrever, uma faixa
+"continuar ouvindo", arrastar para reordenar). Seriam seis funcionalidades novas fora das 24
+lacunas auditadas e fora dos sete planos aprovados — deriva de escopo decidida por quem
+implementa.
+
+**Custo de estar errada.** Se algum dos seis devia mesmo ter tela, ele está nomeado na saída do
+portão, com o motivo, e volta à discussão na primeira vez que alguém rodar o detector.
+
+## 33. Dois ajustes mecânicos no diálogo, contra o arquivo real
+
+- `contentItem: ColumnLayout { … }` em vez de `ColumnLayout { anchors.fill: parent }`: com
+  âncoras, o conteúdo não dá altura ao `Popup`, e a gaveta abriria achatada. A foto é a prova
+  de que a forma escolhida mede certo.
+- `pastaDialog.selectedFolder` qualificado: com `pragma ComponentBehavior: Bound`, o
+  `selectedFolder` solto do plano não resolve dentro do handler.
+- Um espaçador na linha dos botões de varredura, para que "Reler a pasta" fique à direita
+  quando o aviso de varredura está invisível — sem ele o botão flutuava no meio da linha.
