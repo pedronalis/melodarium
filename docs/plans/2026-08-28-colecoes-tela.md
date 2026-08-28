@@ -603,7 +603,7 @@ git commit -m "feat(ui): a pane that lists, opens and manages collections"
 
 ### Task 4: A tira ganha o primeiro ícone e o miolo ganha o quarto painel
 
-- [ ] Em `src/IconRail.qml`, inserir coleções como **primeiro** item da lista `items`
+- [x] Em `src/IconRail.qml`, inserir coleções como **primeiro** item da lista `items`
       (o spec põe coleções no topo; a fatia `clique-responde` deixou a lista com três):
 
 ```qml
@@ -615,7 +615,7 @@ git commit -m "feat(ui): a pane that lists, opens and manages collections"
     ]
 ```
 
-- [ ] Em `src/Main.qml`, no `StackLayout { id: pane … }`, trocar o `currentIndex` para
+- [x] Em `src/Main.qml`, no `StackLayout { id: pane … }`, trocar o `currentIndex` para
       conhecer o painel novo:
 
 ```qml
@@ -630,7 +630,7 @@ git commit -m "feat(ui): a pane that lists, opens and manages collections"
                                 : (Database.libraryPath === "" ? 2 : 0)))
 ```
 
-- [ ] Em `src/Main.qml`, acrescentar o painel como **quarto** filho do `StackLayout`, depois
+- [x] Em `src/Main.qml`, acrescentar o painel como **quarto** filho do `StackLayout`, depois
       do `EmptyPane`:
 
 ```qml
@@ -654,11 +654,11 @@ git commit -m "feat(ui): a pane that lists, opens and manages collections"
             }
 ```
 
-- [ ] verificação mecânica da task:
+- [x] verificação mecânica da task:
       `grep -c 'collections' src/IconRail.qml src/Main.qml` →
       `src/IconRail.qml:1`, `src/Main.qml:3`
-- [ ] verificação mecânica da task: `quiet-run cmake --build build` → exit 0
-- [ ] commit:
+- [x] verificação mecânica da task: `quiet-run cmake --build build` → exit 0
+- [x] commit:
 
 ```bash
 git add src/IconRail.qml src/Main.qml docs/plans/2026-08-28-colecoes-tela.md
