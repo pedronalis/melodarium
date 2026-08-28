@@ -1,7 +1,7 @@
 ---
 slug: download-youtube
 feature: melodia
-status: concluido
+status: travado
 depende-de: [colecoes-tags]
 decisao-humana: nao
 spec: docs/specs/2026-08-27-player-musica-podcast.md
@@ -745,3 +745,12 @@ git commit -m "docs(download): record the external downloader and the quality li
 - Atualizar o `yt-dlp` a partir do app.
 - Re-baixar em qualidade melhor quando o vídeo mudar: não existe "melhor" no YouTube que
   atenda o requisito de alta resolução, então a promessa seria falsa.
+
+## Diagnóstico (2026-08-28)
+
+Reaberto pela auditoria de completude: o redesenho `melodia-capa-manda` trocou o shell da
+janela e o que esta fatia entregou perdeu a porta de entrada. O código continua no
+repositório e continua compilando — o que sumiu foi o caminho até ele.
+
+Reposto pela fatia `colecoes-tela` do lote `melodia-religa`. Volta a `concluido` quando
+`bash tools/check-orfaos.sh` não listar mais nada desta fatia.
