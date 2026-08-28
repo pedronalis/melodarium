@@ -202,6 +202,17 @@ tinha de tirar do `check-orfaos.sh`.
 inertes e não custam nada. Se estiver certo (e a foto com a fila carregada DEPOIS da
 construção da tela é a prova), sem elas a fatia não entregaria nada.
 
+**Correção, depois de medir.** A primeira versão da correção escrevia
+`void AudioEngine.queueCount` — ler a propriedade e descartar. Não funcionou: a foto saiu sem
+tirinha nenhuma. Instrumentei o componente e o sinal de mudança disparou UMA vez só, com
+`queueCount=0`. Uma expressão sem efeito colateral é eliminada pelo compilador, e a
+dependência morre junto com ela. A versão que funciona **usa** os dois valores
+(`const total = AudioEngine.queueCount; const pos = AudioEngine.playlistPos;` seguidos de uma
+guarda que os compara). Com ela o log mostrou a sequência inteira: `queueCount=0` na
+abertura, depois `queueCount=27 pos=0 restantes=22 visible=true`, e a tirinha aparece na
+foto. Lição para quem repetir isto: **ler a propriedade não basta — o valor lido tem de ser
+usado.**
+
 ## 11. O `hitAt()` do plano indexava a lista errada — Shift+Enter nunca teria enfileirado nada
 
 **Contexto.** A Task 3 do plano `fila-tirinha` propõe um `hitAt(index)` que monta

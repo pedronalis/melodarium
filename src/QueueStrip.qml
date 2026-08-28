@@ -17,12 +17,15 @@ Item {
     // Some inteira quando não há próximos: uma tirinha vazia rouba altura da lista, que é o
     // ponto da tela.
     readonly property var proximos: {
-        // O QML só rastreia LEITURA DE PROPRIEDADE. Uma chamada de método sozinha não cria
-        // dependência nenhuma, e esta ligação valeria para sempre o que valia ao nascer —
-        // uma tirinha congelada na fila vazia da abertura do app. Tocar em queueCount e
-        // playlistPos aqui é o que a faz recalcular quando a fila anda.
-        void AudioEngine.queueCount
-        void AudioEngine.playlistPos
+        // O QML só rastreia LEITURA DE PROPRIEDADE, e uma chamada de método invocável não
+        // cria dependência nenhuma: sem as duas leituras abaixo esta ligação valeria para
+        // sempre o que valia ao nascer — uma tirinha congelada na fila vazia da abertura do
+        // app. As leituras têm de ser USADAS, não descartadas: uma expressão sem efeito é
+        // eliminada pelo compilador e a dependência vai junto.
+        const total = AudioEngine.queueCount
+        const pos = AudioEngine.playlistPos
+        if (total <= 0 || pos + 1 >= total)
+            return []
         return AudioEngine.upcoming(root.lookahead)
     }
 

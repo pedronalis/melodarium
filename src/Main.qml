@@ -73,6 +73,11 @@ Window {
         return isNaN(id) ? 0 : id
     }
 
+    // `--play-queue`: carrega a biblioteca inteira como fila e toca a primeira. A tirinha
+    // "a seguir na fila" só existe quando há PRÓXIMOS, e `--play-track` monta uma fila de
+    // um só — com ela a tirinha ficaria corretamente invisível e não haveria o que provar.
+    readonly property bool measureQueue: Qt.application.arguments.indexOf("--play-queue") >= 0
+
     // `--no-search`: não abre o overlay antes de medir.
     readonly property bool measureSearch: Qt.application.arguments.indexOf("--no-search") < 0
 
@@ -409,6 +414,8 @@ Window {
                         AudioEngine.loadPlaylist([root.measureTrack], 0)
                         AudioEngine.play()
                     }
+                    if (root.measureQueue)
+                        root.startFromEmpty("all")
                     if (!root.measureSearch)
                         return
                     searchOverlay.open()
