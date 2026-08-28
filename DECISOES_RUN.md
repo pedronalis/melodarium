@@ -442,3 +442,58 @@ desenho aprovado pedindo.
 **Custo de estar errada.** Se o Pedro achar discreto demais na tela dele, é uma linha no
 `IconButton`. A medida está aqui para ele decidir sem precisar reabrir o assunto do zero:
 `#828282` → `#aaaaaa`.
+
+## 21. O RUN_GATE reprova em 2 linhas, e reprovar é o resultado correto desta leva
+
+**Contexto.** O `RUN_GATE` do worktree diz de si mesmo, na primeira linha: "Portão do lote
+melodia-religa. O lote só está PRONTO quando o trabalho está integrado em main NO REPO
+PRINCIPAL". Ele aponta para `/home/pedro/dev/active/melodia`, não para este worktree. As duas
+linhas vermelhas são:
+
+- `bash /home/pedro/dev/active/melodia/tools/check-orfaos.sh` → rc=127, o arquivo não existe
+  lá. O detector foi criado na leva 1, no commit `d1e1a88`, e
+  `git branch --contains d1e1a88` responde apenas `exec/melodia-religa` — o repo principal
+  está em `main` e ainda não o tem.
+- `test -f INTEGRADO.ok` → o marcador de integração.
+
+**Decisão.** Nenhum dos dois foi fabricado. A instrução desta leva é literal: "NÃO faça merge
+nem integração nesta leva — a leva 3 integra tudo", e a fronteira do repo é "commits locais,
+nunca push, nunca PR". Copiar o detector para o repo principal É integração; criar o
+`INTEGRADO.ok` é afirmar por escrito uma coisa que não aconteceu. O objetivo verificável
+DESTA leva tem nove linhas e as nove passam — elas estão no transcript com comando e saída.
+
+**Alternativa descartada.** Criar o arquivo vazio para o portão ficar verde. Seria falsificar
+o estado do lote para o único leitor que confia nele.
+
+**Custo de estar errada.** Se o portão devia mesmo fechar aqui, fechá-lo custa um `touch` na
+leva 3 — depois da integração de verdade, que é quando ele passa a ser verdade.
+
+## 22. Achado para a leva 3: o detector de órfãos NÃO fica verde só com este lote
+
+**Contexto.** Fui verificar se algum dos 14 órfãos restantes era responsabilidade das minhas
+três fatias. Nenhum era: os oito nomes que os planos `colecoes-tela`, `fila-tirinha` e
+`shuffle-repeat` mandavam limpar sumiram todos. Mas o mapeamento revelou outra coisa.
+
+**O achado.** Dos 14, dez pertencem às fatias que faltam (`colecoes-alcance` e `ajustes`).
+Os outros **quatro não pertencem a nenhuma fatia deste lote**:
+
+| órfão | vem de | status daquela fatia |
+|---|---|---|
+| `LibraryEmptyState` | `2026-08-27-tocador-ui` | concluido |
+| `SearchField` | `2026-08-27-navegacao-biblioteca` · `colecoes-tags` | concluido · **travado** |
+| `continueListening` | `2026-08-27-podcast-local` · `podcast-vazio` | concluido |
+| `ingestDownloadedFile` | `2026-08-27-download-youtube` | **travado** |
+
+Nenhum deles aparece em `docs/auditoria-completude.md`. São restos de um lote anterior, dois
+deles de fatias travadas.
+
+**Consequência prática.** A linha `bash …/tools/check-orfaos.sh` do `RUN_GATE` continuará
+saindo rc=1 mesmo depois de `colecoes-alcance` e `ajustes` — ou seja, mesmo com o lote
+melodia-religa inteiro pronto e integrado. Para a leva 3 isso significa uma escolha
+consciente entre três saídas, e nenhuma delas é "insistir e esperar ficar verde": pôr os
+quatro na lista de exceções do próprio detector (que já tem uma, `CPP_OK`/`QML_OK`), abrir uma
+fatia para eles, ou trocar a linha do portão por um piso ("não mais que N").
+
+**Correção do registro da leva 1.** O `ORQUESTRADOR.log` da leva 1 diz que os 20 órfãos eram
+"todos das levas 2 e 3". Não eram: quatro já estavam fora do alcance do lote naquele momento
+e continuam agora.
