@@ -103,9 +103,9 @@ Item {
                 Layout.alignment: Qt.AlignBaseline
                 text: root.openId > 0 ? root.openName : qsTr("Coleções")
                 font.family: Theme.fontFamily
-                font.pointSize: Theme.fontSizeXL
+                font.pixelSize: Theme.fontSizeXL
                 font.weight: Theme.fontWeightSemiBold
-                color: Theme.mOnSurface
+                color: Theme.cTitle
             }
 
             Text {
@@ -114,8 +114,8 @@ Item {
                       ? tracks.count + qsTr(" faixas")
                       : root.items.length + qsTr(" coleções")
                 font.family: Theme.fontFamilyFixed
-                font.pointSize: Theme.fontSizeS
-                color: Theme.mOutline
+                font.pixelSize: Theme.fontSizeS
+                color: Theme.cFaint
             }
 
             Item { Layout.fillWidth: true }
@@ -198,7 +198,7 @@ Item {
             text: ""
             wrapMode: Text.WordWrap
             font.family: Theme.fontFamily
-            font.pointSize: Theme.fontSizeXS
+            font.pixelSize: Theme.fontSizeXS
             color: Theme.mError
         }
 
@@ -223,10 +223,10 @@ Item {
                 height: Math.round(44 * Theme.uiScale)
                 radius: Theme.radiusXS
                 color: area.containsMouse
-                       ? Theme.mHover
+                       ? Theme.cPill
                        : (linha.index % 2 === 1
-                          ? Qt.rgba(Theme.mSurfaceVariant.r, Theme.mSurfaceVariant.g,
-                                    Theme.mSurfaceVariant.b, 0.45)
+                          ? Qt.rgba(Theme.cRaised.r, Theme.cRaised.g,
+                                    Theme.cRaised.b, 0.45)
                           : "transparent")
 
                 Behavior on color {
@@ -242,8 +242,8 @@ Item {
                     Text {
                         text: Icons.get("playlist")
                         font.family: Icons.fontFamily
-                        font.pointSize: Theme.fontSizeM
-                        color: area.containsMouse ? Theme.mOnHover : Theme.mTertiary
+                        font.pixelSize: Theme.fontSizeM
+                        color: area.containsMouse ? Theme.cTitle : Theme.cStrong
                     }
 
                     Text {
@@ -251,15 +251,15 @@ Item {
                         text: linha.modelData.name
                         elide: Text.ElideRight
                         font.family: Theme.fontFamily
-                        font.pointSize: Theme.fontSizeM
-                        color: area.containsMouse ? Theme.mOnHover : Theme.mOnSurface
+                        font.pixelSize: Theme.fontSizeM
+                        color: area.containsMouse ? Theme.cTitle : Theme.cTitle
                     }
 
                     Text {
                         text: linha.modelData.count + qsTr(" faixas")
                         font.family: Theme.fontFamilyFixed
-                        font.pointSize: Theme.fontSizeS
-                        color: area.containsMouse ? Theme.mOnHover : Theme.mOutline
+                        font.pixelSize: Theme.fontSizeS
+                        color: area.containsMouse ? Theme.cTitle : Theme.cFaint
                     }
                 }
 
@@ -280,8 +280,8 @@ Item {
                 wrapMode: Text.WordWrap
                 text: qsTr("Nenhuma coleção ainda.\nCrie uma e jogue faixas dentro pelo + da lista.")
                 font.family: Theme.fontFamily
-                font.pointSize: Theme.fontSizeM
-                color: Theme.mOnSurfaceVariant
+                font.pixelSize: Theme.fontSizeM
+                color: Theme.cMuted
             }
         }
 
@@ -333,8 +333,8 @@ Item {
                 visible: tracks.count === 0
                 text: qsTr("coleção vazia — jogue faixas nela pelo + da biblioteca")
                 font.family: Theme.fontFamily
-                font.pointSize: Theme.fontSizeM
-                color: Theme.mOnSurfaceVariant
+                font.pixelSize: Theme.fontSizeM
+                color: Theme.cMuted
             }
         }
     }

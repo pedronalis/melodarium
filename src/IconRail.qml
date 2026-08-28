@@ -18,7 +18,7 @@ Rectangle {
         anchors.right: parent.right
         width: Theme.borderS
         height: parent.height
-        color: Theme.mSurfaceVariant
+        color: Theme.cPanelTop
     }
 
     // A tira escolhe o MODO da tela; a fileira de chips do miolo escolhe o EIXO dentro da
@@ -50,8 +50,8 @@ Rectangle {
                 anchors.centerIn: parent
                 text: Icons.get("music")
                 font.family: Icons.fontFamily
-                font.pointSize: Theme.fontSizeL
-                color: Theme.mOutline
+                font.pixelSize: Theme.fontSizeL
+                color: Theme.cDim
             }
         }
 
@@ -67,8 +67,8 @@ Rectangle {
                 Layout.preferredHeight: Math.round(34 * Theme.uiScale)
                 radius: Theme.iRadiusS
                 color: root.current === cell.modelData.key
-                       ? Theme.mSurfaceVariant
-                       : (area.containsMouse ? Theme.mSurfaceVariant : "transparent")
+                       ? Theme.cPill
+                       : (area.containsMouse ? Theme.cRaised : "transparent")
                 opacity: root.current === cell.modelData.key || area.containsMouse ? 1.0 : 0.85
 
                 Behavior on color {
@@ -79,8 +79,8 @@ Rectangle {
                     anchors.centerIn: parent
                     text: Icons.get(cell.modelData.icon)
                     font.family: Icons.fontFamily
-                    font.pointSize: Theme.fontSizeL
-                    color: root.current === cell.modelData.key ? Theme.mTertiary : Theme.mOnSurfaceVariant
+                    font.pixelSize: Theme.fontSizeL
+                    color: root.current === cell.modelData.key ? Theme.cTitle : Theme.cDim
                 }
 
                 MouseArea {
@@ -102,7 +102,7 @@ Rectangle {
             Layout.preferredWidth: Math.round(34 * Theme.uiScale)
             Layout.preferredHeight: Math.round(34 * Theme.uiScale)
             radius: Theme.iRadiusS
-            color: engrenagemArea.containsMouse ? Theme.mSurfaceVariant : "transparent"
+            color: engrenagemArea.containsMouse ? Theme.cRaised : "transparent"
             opacity: engrenagemArea.containsMouse ? 1.0 : 0.7
 
             Behavior on color {
@@ -113,8 +113,8 @@ Rectangle {
                 anchors.centerIn: parent
                 text: Icons.get("settings")
                 font.family: Icons.fontFamily
-                font.pointSize: Theme.fontSizeL
-                color: Theme.mOnSurfaceVariant
+                font.pixelSize: Theme.fontSizeL
+                color: Theme.cDim
             }
 
             MouseArea {

@@ -26,8 +26,14 @@ ctest --test-dir build --output-on-failure
 Rodar sempre por `quiet-run <cmd>`. `ctest` sai **0** com `Total Tests: 0` — todo gate precisa do
 piso de contagem de alvos, senão lê verde num repo sem teste nenhum.
 
-Todo redesenho de tela roda `bash tools/check-orfaos.sh` antes do commit final: componente
-QML sem quem o instancie e `Q_INVOKABLE` sem quem o chame compilam verdes e somem da tela.
+Todo redesenho de tela roda **dois** gates antes do commit final:
+`bash tools/check-orfaos.sh` (componente QML sem quem o instancie e `Q_INVOKABLE` sem quem o
+chame compilam verdes e somem da tela) e `bash tools/check-fidelidade.sh` (mede a COR da tela
+contra os hex do desenho). Gate de geometria passa verde com a paleta inteira errada — foi
+assim que a tela deixou de ser o desenho sem nada reprovar.
+
+Cor de tela sai de `Theme`, pela escada de nomes de PAPEL (`cRowAlt`, `cPill`, `cTitle`, …),
+nunca das 16 chaves do tema do sistema: elas não têm os degraus que o desenho usa.
 
 ## Fronteiras
 

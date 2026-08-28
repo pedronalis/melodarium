@@ -92,9 +92,10 @@ Item {
                     text: root.groupTitle !== "" ? root.groupTitle : qsTr("Biblioteca")
                     elide: Text.ElideRight
                     font.family: Theme.fontFamily
-                    font.pointSize: Theme.fontSizeXL
+                    font.pixelSize: Theme.fontSizeXL
                     font.weight: Theme.fontWeightSemiBold
-                    color: Theme.mOnSurface
+                    font.letterSpacing: Theme.letterSpacingHeading * Theme.fontSizeXL
+                    color: Theme.cTitle
                 }
 
                 RowLayout {
@@ -109,8 +110,8 @@ Item {
                         text: root.groupSubtitle + " ·"
                         elide: Text.ElideRight
                         font.family: Theme.fontFamily
-                        font.pointSize: Theme.fontSizeS
-                        color: Theme.mOnSurfaceVariant
+                        font.pixelSize: Theme.fontSizeS
+                        color: Theme.cDim
                     }
 
                     Text {
@@ -120,8 +121,8 @@ Item {
                                 + (list.model !== null && list.model.totalDurationMs > 0
                                    ? " · " + root.formatTotal(list.model.totalDurationMs) : "")
                         font.family: Theme.fontFamilyFixed
-                        font.pointSize: Theme.fontSizeS
-                        color: Theme.mOutline
+                        font.pixelSize: Theme.fontSizeS
+                        color: Theme.cDim
                     }
 
                     Item { Layout.fillWidth: true }
@@ -133,8 +134,8 @@ Item {
                 visible: root.scanning
                 text: qsTr("varrendo…")
                 font.family: Theme.fontFamily
-                font.pointSize: Theme.fontSizeS
-                color: Theme.mOnSurfaceVariant
+                font.pixelSize: Theme.fontSizeS
+                color: Theme.cMuted
             }
 
             // Doze faixas numa coleção custavam doze idas ao menu da linha. Este botão joga
@@ -145,9 +146,9 @@ Item {
                 Layout.preferredWidth: rotuloColecao.implicitWidth + Theme.marginM * 2
                 visible: !root.showingGroups && list.count > 0
                 radius: Theme.iRadiusS
-                color: coletarArea.containsMouse ? Theme.mSurfaceVariant : "transparent"
+                color: coletarArea.containsMouse ? Theme.cRaised : "transparent"
                 border.width: Theme.borderS
-                border.color: Theme.mSurfaceVariant
+                border.color: Theme.cLine
 
                 Behavior on color {
                     ColorAnimation { duration: Theme.animationFast; easing.type: Theme.easingType }
@@ -162,15 +163,15 @@ Item {
                         anchors.verticalCenter: parent.verticalCenter
                         text: Icons.get("plus")
                         font.family: Icons.fontFamily
-                        font.pointSize: Theme.fontSizeXS
-                        color: Theme.mOnSurfaceVariant
+                        font.pixelSize: Theme.fontSizeXS
+                        color: Theme.cMuted
                     }
                     Text {
                         anchors.verticalCenter: parent.verticalCenter
                         text: qsTr("Coleção")
                         font.family: Theme.fontFamily
-                        font.pointSize: Theme.fontSizeS
-                        color: Theme.mOnSurfaceVariant
+                        font.pixelSize: Theme.fontSizeS
+                        color: Theme.cSubtle
                     }
                 }
 
@@ -202,12 +203,9 @@ Item {
             Layout.fillWidth: true
             implicitHeight: Math.round(30 * Theme.uiScale)
             radius: Theme.iRadiusS
-            color: searchArea.containsMouse
-                   ? Theme.mSurfaceVariant
-                   : Qt.rgba(Theme.mSurfaceVariant.r, Theme.mSurfaceVariant.g,
-                             Theme.mSurfaceVariant.b, 0.5)
+            color: searchArea.containsMouse ? Theme.cPill : Theme.cRaised
             border.width: Theme.borderS
-            border.color: Theme.mSurfaceVariant
+            border.color: Theme.cLine
 
             Behavior on color {
                 ColorAnimation { duration: Theme.animationFast; easing.type: Theme.easingType }
@@ -222,23 +220,22 @@ Item {
                 Text {
                     text: Icons.get("search")
                     font.family: Icons.fontFamily
-                    font.pointSize: Theme.fontSizeS
-                    color: Theme.mOnSurfaceVariant
+                    font.pixelSize: Theme.fontSizeS
+                    color: Theme.cMuted
                 }
                 Text {
                     Layout.fillWidth: true
                     text: qsTr("buscar por título, artista, álbum…")
                     elide: Text.ElideRight
                     font.family: Theme.fontFamily
-                    font.pointSize: Theme.fontSizeS
-                    color: Theme.mOutline
+                    font.pixelSize: Theme.fontSizeS
+                    color: Theme.cDim
                 }
                 Text {
                     text: "Ctrl+K"
                     font.family: Theme.fontFamilyFixed
-                    font.pointSize: Theme.fontSizeXS
-                    color: Theme.mOutline
-                    opacity: 0.7
+                    font.pixelSize: Theme.fontSizeXS
+                    color: Theme.cFaint
                 }
             }
 
@@ -302,8 +299,8 @@ Item {
                       ? qsTr("nenhuma pasta de música escolhida ainda")
                       : qsTr("nada nesta lista")
                 font.family: Theme.fontFamily
-                font.pointSize: Theme.fontSizeM
-                color: Theme.mOnSurfaceVariant
+                font.pixelSize: Theme.fontSizeM
+                color: Theme.cMuted
             }
         }
 
@@ -327,10 +324,10 @@ Item {
                 height: Math.round(38 * Theme.uiScale)
                 radius: Theme.radiusXS
                 color: groupArea.containsMouse
-                       ? Theme.mHover
+                       ? Theme.cPill
                        : (groupRow.index % 2 === 1
-                          ? Qt.rgba(Theme.mSurfaceVariant.r, Theme.mSurfaceVariant.g,
-                                    Theme.mSurfaceVariant.b, 0.45)
+                          ? Qt.rgba(Theme.cRaised.r, Theme.cRaised.g,
+                                    Theme.cRaised.b, 0.45)
                           : "transparent")
 
                 Behavior on color {
@@ -352,8 +349,8 @@ Item {
                             text: groupRow.modelData.name
                             elide: Text.ElideRight
                             font.family: Theme.fontFamily
-                            font.pointSize: Theme.fontSizeM
-                            color: groupArea.containsMouse ? Theme.mOnHover : Theme.mOnSurface
+                            font.pixelSize: Theme.fontSizeM
+                            color: groupArea.containsMouse ? Theme.cTitle : Theme.cTitle
                         }
                         Text {
                             Layout.fillWidth: true
@@ -362,16 +359,16 @@ Item {
                                   ? groupRow.modelData.subtitle : ""
                             elide: Text.ElideRight
                             font.family: Theme.fontFamily
-                            font.pointSize: Theme.fontSizeS
-                            color: groupArea.containsMouse ? Theme.mOnHover : Theme.mOutline
+                            font.pixelSize: Theme.fontSizeS
+                            color: groupArea.containsMouse ? Theme.cTitle : Theme.cFaint
                         }
                     }
 
                     Text {
                         text: groupRow.modelData.count + qsTr(" faixas")
                         font.family: Theme.fontFamilyFixed
-                        font.pointSize: Theme.fontSizeS
-                        color: groupArea.containsMouse ? Theme.mOnHover : Theme.mOutline
+                        font.pixelSize: Theme.fontSizeS
+                        color: groupArea.containsMouse ? Theme.cTitle : Theme.cFaint
                     }
                 }
 
@@ -394,8 +391,8 @@ Item {
                 visible: groupList.count === 0
                 text: qsTr("nada nesta lista")
                 font.family: Theme.fontFamily
-                font.pointSize: Theme.fontSizeM
-                color: Theme.mOnSurfaceVariant
+                font.pixelSize: Theme.fontSizeM
+                color: Theme.cMuted
             }
         }
 

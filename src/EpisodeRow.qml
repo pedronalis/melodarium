@@ -53,8 +53,8 @@ Item {
         anchors.leftMargin: Theme.marginXS
         anchors.rightMargin: Theme.marginXS
         radius: Theme.iRadiusS
-        color: mouse.containsMouse ? Theme.mHover
-                                   : (root.isCurrent ? Theme.mSurfaceVariant : "transparent")
+        color: mouse.containsMouse ? Theme.cPill
+                                   : (root.isCurrent ? Theme.cRaised : "transparent")
 
         Behavior on color {
             ColorAnimation { duration: Theme.animationFast; easing.type: Theme.easingType }
@@ -78,14 +78,14 @@ Item {
                 Layout.preferredWidth: Math.round(40 * Theme.uiScale)
                 Layout.preferredHeight: 40
                 radius: Theme.radiusXS
-                color: Theme.mSurfaceVariant
+                color: Theme.cRaised
 
                 Text {
                     anchors.centerIn: parent
                     text: Icons.get(root.played ? "playlist" : "microphone")
                     font.family: Icons.fontFamily
-                    font.pointSize: Theme.fontSizeM
-                    color: Theme.mOnSurfaceVariant
+                    font.pixelSize: Theme.fontSizeM
+                    color: Theme.cMuted
                 }
             }
 
@@ -98,12 +98,12 @@ Item {
                     text: root.title
                     elide: Text.ElideRight
                     font.family: Theme.fontFamily
-                    font.pointSize: Theme.fontSizeM
+                    font.pixelSize: Theme.fontSizeM
                     font.weight: root.isCurrent ? Theme.fontWeightSemiBold
                                                 : Theme.fontWeightMedium
                     color: mouse.containsMouse
-                           ? Theme.mOnHover
-                           : (root.isCurrent ? Theme.mOnSurface : Theme.mOnSurfaceVariant)
+                           ? Theme.cTitle
+                           : (root.isCurrent ? Theme.cTitle : Theme.cMuted)
                 }
                 Text {
                     Layout.fillWidth: true
@@ -112,8 +112,8 @@ Item {
                           .filter(function (p) { return p !== "" }).join(" · ")
                     elide: Text.ElideRight
                     font.family: Theme.fontFamily
-                    font.pointSize: Theme.fontSizeS
-                    color: mouse.containsMouse ? Theme.mOnHover : Theme.mOutline
+                    font.pixelSize: Theme.fontSizeS
+                    color: mouse.containsMouse ? Theme.cTitle : Theme.cFaint
                 }
             }
 
@@ -124,13 +124,13 @@ Item {
                 Layout.preferredHeight: 3
                 visible: root.downloadProgress < 0 && !root.played && root.progress > 0
                 radius: height / 2
-                color: Theme.mSurfaceVariant
+                color: Theme.cRaised
 
                 Rectangle {
                     width: parent.width * root.progress
                     height: parent.height
                     radius: parent.radius
-                    color: Theme.mOnSurfaceVariant
+                    color: Theme.cMuted
                 }
             }
 
@@ -140,8 +140,8 @@ Item {
                       ? Math.round(root.downloadProgress * 100) + "%"
                       : qsTr("baixando…")
                 font.family: Theme.fontFamilyFixed
-                font.pointSize: Theme.fontSizeXS
-                color: Theme.mOnSurfaceVariant
+                font.pixelSize: Theme.fontSizeXS
+                color: Theme.cMuted
             }
 
             IconButton {
@@ -163,9 +163,9 @@ Item {
                 visible: root.played
                 text: qsTr("ouvido")
                 font.family: Theme.fontFamily
-                font.pointSize: Theme.fontSizeXS
+                font.pixelSize: Theme.fontSizeXS
                 font.letterSpacing: 0.6
-                color: Theme.mOutline
+                color: Theme.cFaint
             }
 
             // Marcar ouvido à mão é o gesto que o app não consegue inferir — e o único jeito

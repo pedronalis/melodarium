@@ -16,9 +16,9 @@ Rectangle {
     implicitWidth: label.implicitWidth + Theme.marginL * 2
     implicitHeight: Math.round(26 * Theme.uiScale)
     radius: Theme.iRadiusS
-    color: area.containsMouse ? Theme.mSurfaceVariant : "transparent"
+    color: area.containsMouse ? Theme.cRaised : "transparent"
     border.width: Theme.borderS
-    border.color: Theme.mSurfaceVariant
+    border.color: Theme.cLine
 
     Behavior on color {
         ColorAnimation { duration: Theme.animationFast; easing.type: Theme.easingType }
@@ -34,8 +34,8 @@ Rectangle {
         anchors.centerIn: parent
         text: root.formatSpeed(root.speed)
         font.family: Theme.fontFamilyFixed
-        font.pointSize: Theme.fontSizeS
-        color: Math.abs(root.speed - 1.0) < 0.01 ? Theme.mOnSurfaceVariant : Theme.mOnSurface
+        font.pixelSize: Theme.fontSizeS
+        color: Math.abs(root.speed - 1.0) < 0.01 ? Theme.cMuted : Theme.cTitle
     }
 
     MouseArea {

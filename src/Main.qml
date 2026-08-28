@@ -140,7 +140,7 @@ Window {
     minimumHeight: 480
     visible: true
     title: qsTr("melodia")
-    color: Theme.mSurface
+    color: Theme.cBase
 
     // Which pane the icon rail is showing: "library" or "podcast". Search is an overlay,
     // not a pane. The axis inside the library ("albums", "tags", …) is the chips' job.
@@ -556,6 +556,14 @@ Window {
         // Finding out whether yt-dlp exists costs one process start; finding out at the moment
         // the user clicks costs a dialog that fails in their face.
         YtDlpDownloader.probe()
+    }
+
+    // O fundo da cena, e não só o da janela: `Window.color` pinta o "clear color", que existe
+    // na tela mas NÃO entra em nenhuma captura — e a conferência de fidelidade ao desenho é
+    // feita sobre a captura. Com ele, toda foto mostra a mesma tela que o Pedro vê.
+    Rectangle {
+        anchors.fill: parent
+        color: Theme.cBase
     }
 
     RowLayout {

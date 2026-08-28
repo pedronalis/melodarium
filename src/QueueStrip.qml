@@ -49,17 +49,20 @@ Item {
             spacing: Theme.marginS
 
             Text {
-                text: qsTr("A seguir na fila")
+                // Caixa alta, letra apertada e o tom mais apagado da escada: no desenho este
+                // rótulo é uma etiqueta de seção, não uma frase que compete com a lista.
+                text: qsTr("A seguir na fila").toUpperCase()
                 font.family: Theme.fontFamily
-                font.pointSize: Theme.fontSizeXS
-                font.weight: Theme.fontWeightSemiBold
-                color: Theme.mOnSurfaceVariant
+                font.pixelSize: Theme.fontSizeXXS
+                font.weight: Theme.fontWeightBold
+                font.letterSpacing: Theme.letterSpacingLabel * Theme.fontSizeXXS
+                color: Theme.cFaint
             }
             Text {
                 text: AudioEngine.queueCount + qsTr(" na fila")
                 font.family: Theme.fontFamilyFixed
-                font.pointSize: Theme.fontSizeXS
-                color: Theme.mOutline
+                font.pixelSize: Theme.fontSizeXS
+                color: Theme.cFaint
             }
             Item { Layout.fillWidth: true }
         }
@@ -71,7 +74,7 @@ Item {
             Repeater {
                 model: root.proximos
 
-                Rectangle {
+                Item {
                     id: quadro
 
                     required property string modelData
@@ -81,31 +84,22 @@ Item {
 
                     Layout.preferredWidth: quadro.lado
                     Layout.preferredHeight: quadro.lado
-                    radius: Theme.radiusXS
-                    color: Theme.mSurfaceVariant
-                    clip: true
-                    border.width: capaArea.containsMouse ? Theme.borderS : 0
-                    border.color: Theme.mTertiary
 
-                    Image {
-                        id: capa
+                    RoundedCover {
                         anchors.fill: parent
+                        radius: Theme.radiusS
+                        fallbackIconSize: Theme.fontSizeL
                         // O segundo argumento é ignorado pela implementação (a capa sai do
                         // caminho do arquivo). Passar 0 evita uma consulta por quadradinho.
                         source: CoverCache.coverUrlForTrack(quadro.modelData, 0)
-                        fillMode: Image.PreserveAspectCrop
-                        asynchronous: true
-                        visible: capa.status === Image.Ready
-                        sourceSize.width: quadro.lado
                     }
 
-                    Text {
-                        anchors.centerIn: parent
-                        visible: capa.status !== Image.Ready
-                        text: Icons.get("music")
-                        font.family: Icons.fontFamily
-                        font.pointSize: Theme.fontSizeL
-                        color: Theme.mOutline
+                    Rectangle {
+                        anchors.fill: parent
+                        radius: Theme.radiusS
+                        color: "transparent"
+                        border.width: capaArea.containsMouse ? Theme.borderS : 0
+                        border.color: Theme.cTitle
                     }
 
                     MouseArea {
@@ -127,17 +121,17 @@ Item {
                 Layout.preferredWidth: lado
                 Layout.preferredHeight: lado
                 visible: root.restantes > 0
-                radius: Theme.radiusXS
+                radius: Theme.radiusS
                 color: "transparent"
                 border.width: Theme.borderS
-                border.color: Theme.mSurfaceVariant
+                border.color: Theme.cLine
 
                 Text {
                     anchors.centerIn: parent
                     text: "+" + root.restantes
                     font.family: Theme.fontFamilyFixed
-                    font.pointSize: Theme.fontSizeS
-                    color: Theme.mOnSurfaceVariant
+                    font.pixelSize: Theme.fontSizeXS
+                    color: Theme.cFaint
                 }
             }
 

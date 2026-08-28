@@ -121,17 +121,17 @@ Item {
                 Text {
                     text: qsTr("Episódios")
                     font.family: Theme.fontFamily
-                    font.pointSize: Theme.fontSizeXL
+                    font.pixelSize: Theme.fontSizeXL
                     font.weight: Theme.fontWeightSemiBold
-                    color: Theme.mOnSurface
+                    color: Theme.cTitle
                 }
                 Text {
                     text: [root.shows.length + qsTr(" feeds"),
                            root.naoOuvidos + qsTr(" não ouvidos"),
                            root.baixados + qsTr(" baixados")].join(" · ")
                     font.family: Theme.fontFamily
-                    font.pointSize: Theme.fontSizeS
-                    color: Theme.mOutline
+                    font.pixelSize: Theme.fontSizeS
+                    color: Theme.cFaint
                 }
             }
 
@@ -270,8 +270,8 @@ Item {
                       ? qsTr("Nenhum programa ainda. Assine um feed, ou escolha a pasta de podcast: uma subpasta por programa.")
                       : qsTr("nenhum episódio nesta lista")
                 font.family: Theme.fontFamily
-                font.pointSize: Theme.fontSizeM
-                color: Theme.mOnSurfaceVariant
+                font.pixelSize: Theme.fontSizeM
+                color: Theme.cMuted
             }
         }
 
@@ -282,7 +282,7 @@ Item {
             wrapMode: Text.WordWrap
             text: ""
             font.family: Theme.fontFamily
-            font.pointSize: Theme.fontSizeS
+            font.pixelSize: Theme.fontSizeS
             color: Theme.mError
         }
 
@@ -298,10 +298,10 @@ Item {
                 Layout.fillWidth: true
                 implicitHeight: Math.round(40 * Theme.uiScale)
                 radius: Theme.iRadiusS
-                color: Qt.rgba(Theme.mSurfaceVariant.r, Theme.mSurfaceVariant.g,
-                               Theme.mSurfaceVariant.b, 0.5)
+                color: Qt.rgba(Theme.cRaised.r, Theme.cRaised.g,
+                               Theme.cRaised.b, 0.5)
                 border.width: Theme.borderS
-                border.color: Theme.mSurfaceVariant
+                border.color: Theme.cLine
 
                 readonly property var entrada: root.downloads[baixando.modelData]
                 readonly property real recebido: baixando.entrada !== undefined
@@ -326,8 +326,8 @@ Item {
                     Text {
                         text: Icons.get("download")
                         font.family: Icons.fontFamily
-                        font.pointSize: Theme.fontSizeS
-                        color: Theme.mOnSurfaceVariant
+                        font.pixelSize: Theme.fontSizeS
+                        color: Theme.cMuted
                     }
 
                     Text {
@@ -335,15 +335,15 @@ Item {
                         text: qsTr("Baixando ") + baixando.tituloDe(baixando.modelData)
                         elide: Text.ElideRight
                         font.family: Theme.fontFamily
-                        font.pointSize: Theme.fontSizeS
-                        color: Theme.mOnSurfaceVariant
+                        font.pixelSize: Theme.fontSizeS
+                        color: Theme.cMuted
                     }
 
                     Rectangle {
                         Layout.fillWidth: true
                         Layout.preferredHeight: 3
                         radius: height / 2
-                        color: Theme.mSurfaceVariant
+                        color: Theme.cRaised
 
                         // O servidor nem sempre declara o tamanho: sem ele, a barra mostra um
                         // sinal de vida em vez de uma porcentagem inventada.
@@ -353,7 +353,7 @@ Item {
                             width: baixando.total > 0
                                    ? parent.width * Math.min(1.0, baixando.recebido / baixando.total)
                                    : parent.width * 0.15
-                            color: Theme.mOnSurfaceVariant
+                            color: Theme.cMuted
                         }
                     }
 
@@ -362,8 +362,8 @@ Item {
                               ? (Math.round(baixando.total / 104857.6) / 10) + " MB"
                               : qsTr("baixando…")
                         font.family: Theme.fontFamilyFixed
-                        font.pointSize: Theme.fontSizeXS
-                        color: Theme.mOutline
+                        font.pixelSize: Theme.fontSizeXS
+                        color: Theme.cFaint
                     }
 
                     IconButton {

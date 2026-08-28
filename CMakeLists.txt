@@ -84,11 +84,14 @@ qt_add_qml_module(appmelodia
         src/AddFromLinkDialog.qml
         src/DownloadProgressRow.qml
         src/SourceBadge.qml
+        src/RoundedCover.qml
     RESOURCES
         assets/fonts/noctalia-tabler-icons.ttf
     SOURCES
         src/colorschemeprovider.h
         src/colorschemeprovider.cpp
+        src/roundedimage.h
+        src/roundedimage.cpp
         src/audioengine.h
         src/audioengine.cpp
         src/database.h

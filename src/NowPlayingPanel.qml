@@ -23,12 +23,15 @@ Rectangle {
     // panel at 392 while the cover drops to 200 would push the frame past a 720 px window and
     // send the right edge of the pane off screen.
     implicitWidth: root.coverSide + (Theme.marginXL + Theme.marginS) * 2 + 4
-    color: Theme.mSurface
+    color: Theme.cBase
 
-    // Um degradê muito sutil separa o painel do miolo sem precisar de borda.
+    // O degradê do desenho (design/Main.dc.html): claro no topo, fundo da janela no pé. Duas
+    // paradas achatavam a queda no meio da coluna e o painel lia como um retângulo chapado;
+    // são as TRÊS do desenho que fazem a luz cair atrás da capa.
     gradient: Gradient {
-        GradientStop { position: 0.0; color: Theme.mSurfaceVariant }
-        GradientStop { position: 0.6; color: Theme.mSurface }
+        GradientStop { position: 0.0; color: Theme.cPanelTop }
+        GradientStop { position: 0.55; color: Theme.cPanelMid }
+        GradientStop { position: 1.0; color: Theme.cBase }
     }
 
     readonly property int coverSide: root.compact ? Math.round(200 * Theme.uiScale) : Theme.panelCover
@@ -108,7 +111,7 @@ Rectangle {
         anchors.margins: Theme.marginXL + Theme.marginS
         spacing: Theme.marginXL
 
-        Rectangle {
+        Item {
             id: capaRect
 
             // O resto da coluna (título, progresso, controles, tags) ocupa ~330px. Quando a
@@ -122,11 +125,8 @@ Rectangle {
             Layout.preferredHeight: capaRect.lado
             Layout.maximumHeight: capaRect.lado
             Layout.alignment: Qt.AlignHCenter
-            radius: Theme.radiusM
             // Sem faixa, a capa não é um retângulo cinza: é uma moldura tracejada que diz o
             // que está acontecendo (design/SemMusica.dc.html).
-            color: root.hasTrack ? Theme.mSurfaceVariant : "transparent"
-            clip: true
 
             Canvas {
                 anchors.fill: parent
@@ -134,9 +134,9 @@ Rectangle {
                 onPaint: {
                     const ctx = getContext("2d")
                     ctx.reset()
-                    // mOutline, não mSurfaceVariant: no topo do painel o degradê tem
-                    // exatamente a cor de mSurfaceVariant, e a moldura sumiria ali.
-                    ctx.strokeStyle = Theme.mOutline
+                    // cLine, e não a cor do painel: no topo do degradê o painel tem quase
+                    // esse mesmo tom, e uma moldura mais escura sumiria ali.
+                    ctx.strokeStyle = Theme.cLine
                     ctx.lineWidth = Theme.borderS
                     ctx.setLineDash([6, 5])
                     const r = Theme.radiusM
@@ -165,21 +165,28 @@ Rectangle {
                     Layout.alignment: Qt.AlignHCenter
                     text: Icons.get("music")
                     font.family: Icons.fontFamily
-                    font.pointSize: Theme.fontSizeXXXL
-                    color: Theme.mSurfaceVariant
+                    font.pixelSize: Theme.fontSizeXXXL
+                    color: Theme.cRaised
                 }
                 Text {
                     Layout.alignment: Qt.AlignHCenter
                     text: qsTr("nada tocando")
                     font.family: Theme.fontFamily
-                    font.pointSize: Theme.fontSizeM
-                    color: Theme.mOutline
+                    font.pixelSize: Theme.fontSizeM
+                    color: Theme.cDim
                 }
             }
 
-            Image {
+            RoundedCover {
                 id: capaVazia
                 anchors.fill: parent
+                visible: root.hasTrack
+                radius: Theme.radiusM
+                // A única capa do app que projeta sombra: é ela que descola a arte do painel.
+                shadow: true
+                placeholderColor: Theme.cRaised
+                fallbackIcon: root.episodeMode ? "microphone" : "music"
+                fallbackIconColor: Theme.cLine
                 source: root.episodeMode
                         ? (root.episodeInfo.coverPath !== undefined
                            && root.episodeInfo.coverPath !== ""
@@ -188,19 +195,6 @@ Rectangle {
                            ? CoverCache.coverUrlForTrack(AudioEngine.currentFile,
                                                          root.info.albumId)
                            : "")
-                fillMode: Image.PreserveAspectCrop
-                asynchronous: true
-                visible: status === Image.Ready
-                sourceSize.width: capaRect.lado
-            }
-
-            Text {
-                anchors.centerIn: parent
-                visible: root.hasTrack && capaVazia.status !== Image.Ready
-                text: Icons.get(root.episodeMode ? "microphone" : "music")
-                font.family: Icons.fontFamily
-                font.pointSize: Theme.fontSizeXXXL
-                color: Theme.mOutline
             }
         }
 
@@ -229,9 +223,10 @@ Rectangle {
                     Layout.fillWidth: true
                     text: root.tituloAtual
                     font.family: Theme.fontFamily
-                    font.pointSize: Theme.fontSizeXXL
+                    font.pixelSize: Theme.fontSizeXXL
                     font.weight: Theme.fontWeightBold
-                    color: Theme.mOnSurface
+                    font.letterSpacing: Theme.letterSpacingTitle * Theme.fontSizeXXL
+                    color: Theme.cTitle
                     elide: Text.ElideRight
                 }
                 Text {
@@ -239,8 +234,8 @@ Rectangle {
                     visible: root.subtituloAtual !== ""
                     text: root.subtituloAtual
                     font.family: Theme.fontFamily
-                    font.pointSize: Theme.fontSizeL
-                    color: Theme.mOnSurfaceVariant
+                    font.pixelSize: Theme.fontSizeL
+                    color: Theme.cSecondary
                     elide: Text.ElideRight
                 }
                 Text {
@@ -258,8 +253,8 @@ Rectangle {
                                .join(" · ")
                              : "")
                     font.family: Theme.fontFamily
-                    font.pointSize: Theme.fontSizeS
-                    color: Theme.mOutline
+                    font.pixelSize: Theme.fontSizeS
+                    color: Theme.cDim
                     elide: Text.ElideRight
                 }
             }
@@ -281,16 +276,29 @@ Rectangle {
             Rectangle {
                 id: track
                 Layout.fillWidth: true
-                implicitHeight: 3
-                radius: Theme.radiusXXS
-                color: Theme.mSurfaceVariant
+                implicitHeight: Math.round(3 * Theme.uiScale)
+                radius: Theme.radiusTrack
+                color: Theme.cLine
 
                 Rectangle {
+                    id: percorrido
                     width: AudioEngine.duration > 0
                            ? parent.width * (AudioEngine.position / AudioEngine.duration) : 0
                     height: parent.height
                     radius: parent.radius
-                    color: Theme.mTertiary
+                    color: Theme.cStrong
+                }
+
+                // O botão na posição atual. Sem ele a barra é uma faixa que muda de tamanho;
+                // com ele a barra tem um lugar onde se pega (design/Main.dc.html).
+                Rectangle {
+                    width: Math.round(9 * Theme.uiScale)
+                    height: width
+                    radius: width / 2
+                    x: percorrido.width - width / 2
+                    anchors.verticalCenter: parent.verticalCenter
+                    visible: AudioEngine.duration > 0
+                    color: Theme.cTitle
                 }
 
                 MouseArea {
@@ -309,15 +317,15 @@ Rectangle {
                 Text {
                     text: root.formatTime(AudioEngine.position)
                     font.family: Theme.fontFamilyFixed
-                    font.pointSize: Theme.fontSizeXS
-                    color: Theme.mOnSurfaceVariant
+                    font.pixelSize: Theme.fontSizeXS
+                    color: Theme.cMuted
                 }
                 Item { Layout.fillWidth: true }
                 Text {
                     text: root.formatTime(AudioEngine.duration)
                     font.family: Theme.fontFamilyFixed
-                    font.pointSize: Theme.fontSizeXS
-                    color: Theme.mOnSurfaceVariant
+                    font.pixelSize: Theme.fontSizeXS
+                    color: Theme.cMuted
                 }
             }
         }
@@ -325,7 +333,7 @@ Rectangle {
         RowLayout {
             Layout.alignment: Qt.AlignHCenter
             visible: root.hasTrack
-            spacing: Theme.marginXL
+            spacing: Theme.marginL
 
             SpeedControl {
                 visible: root.episodeMode
@@ -337,6 +345,7 @@ Rectangle {
                 visible: !root.episodeMode
                 icon: "shuffle"
                 size: Theme.fontSizeL
+                baseColor: Theme.cMuted
                 // Sem estado visível, um botão ligado é indistinguível de um desligado.
                 accent: AudioEngine.shuffle
                 tooltip: AudioEngine.shuffle ? qsTr("aleatório ligado") : qsTr("aleatório")
@@ -359,14 +368,14 @@ Rectangle {
                 Layout.preferredWidth: Math.round(52 * Theme.uiScale)
                 Layout.preferredHeight: Math.round(52 * Theme.uiScale)
                 radius: Math.round(26 * Theme.uiScale)
-                color: Theme.mTertiary
+                color: Theme.cTitle
 
                 Text {
                     anchors.centerIn: parent
                     text: AudioEngine.playing && root.hasTrack ? Icons.get("pause") : Icons.get("play")
                     font.family: Icons.fontFamily
-                    font.pointSize: Theme.fontSizeXL
-                    color: Theme.mOnTertiary
+                    font.pixelSize: Theme.fontSizeXL
+                    color: Theme.cBase
                 }
 
                 MouseArea {
@@ -392,6 +401,7 @@ Rectangle {
                 visible: !root.episodeMode
                 icon: "repeat"
                 size: Theme.fontSizeL
+                baseColor: Theme.cMuted
                 accent: AudioEngine.repeatMode !== AudioEngine.RepeatOff
                 // O terceiro estado precisa se distinguir do segundo por mais do que a cor:
                 // um "1" sobreposto é o que diz "esta faixa" em vez de "a fila".
@@ -408,9 +418,9 @@ Rectangle {
                     visible: AudioEngine.repeatMode === AudioEngine.RepeatOne
                     text: "1"
                     font.family: Theme.fontFamilyFixed
-                    font.pointSize: Theme.fontSizeXXS
+                    font.pixelSize: Theme.fontSizeXXS
                     font.weight: Theme.fontWeightBold
-                    color: Theme.mPrimary
+                    color: Theme.cAccent
                 }
             }
 
@@ -423,61 +433,67 @@ Rectangle {
                 radius: Theme.iRadiusS
                 color: "transparent"
                 border.width: Theme.borderS
-                border.color: Theme.mSurfaceVariant
+                border.color: Theme.cLine
 
                 Text {
                     id: pulo
                     anchors.centerIn: parent
                     text: qsTr("30s")
                     font.family: Theme.fontFamily
-                    font.pointSize: Theme.fontSizeS
-                    color: Theme.mOutline
+                    font.pixelSize: Theme.fontSizeS
+                    color: Theme.cMuted
                 }
             }
 
-            // O volume saiu da tela quando a barra de transporte foi aposentada e nunca
-            // migrou para cá. Sem ele o único volume do app é o do sistema.
-            RowLayout {
-                spacing: Theme.marginS
+        }
 
-                IconButton {
-                    icon: root.mudo ? "volume-off"
-                                    : (AudioEngine.volume < 50 ? "volume-low" : "volume")
-                    size: Theme.fontSizeL
-                    tooltip: root.mudo ? qsTr("com som") : qsTr("mudo")
-                    onClicked: {
-                        if (root.mudo) {
-                            AudioEngine.setVolume(root.volumeAntesDoMudo)
-                        } else {
-                            root.volumeAntesDoMudo = AudioEngine.volume
-                            AudioEngine.setVolume(0)
-                        }
+        // O volume tem linha própria, encostado à direita. Dentro da fileira do transporte ele
+        // desequilibrava a única peça centrada da tela — e o desenho não o prevê ali.
+        RowLayout {
+            Layout.fillWidth: true
+            visible: root.hasTrack
+            spacing: Theme.marginS
+
+            Item { Layout.fillWidth: true }
+
+            IconButton {
+                icon: root.mudo ? "volume-off"
+                                : (AudioEngine.volume < 50 ? "volume-low" : "volume")
+                size: Theme.fontSizeS
+                baseColor: Theme.cMuted
+                tooltip: root.mudo ? qsTr("com som") : qsTr("mudo")
+                onClicked: {
+                    if (root.mudo) {
+                        AudioEngine.setVolume(root.volumeAntesDoMudo)
+                    } else {
+                        root.volumeAntesDoMudo = AudioEngine.volume
+                        AudioEngine.setVolume(0)
                     }
                 }
+            }
+
+            Rectangle {
+                id: trilhoVolume
+                Layout.preferredWidth: Math.round(72 * Theme.uiScale)
+                Layout.alignment: Qt.AlignVCenter
+                implicitHeight: Math.round(3 * Theme.uiScale)
+                radius: Theme.radiusTrack
+                color: Theme.cLine
 
                 Rectangle {
-                    id: trilhoVolume
-                    Layout.preferredWidth: Math.round(72 * Theme.uiScale)
-                    Layout.alignment: Qt.AlignVCenter
-                    implicitHeight: 3
-                    radius: Theme.radiusXXS
-                    color: Theme.mSurfaceVariant
+                    width: parent.width * (AudioEngine.volume / 100)
+                    height: parent.height
+                    radius: parent.radius
+                    color: Theme.cMuted
+                }
 
-                    Rectangle {
-                        width: parent.width * (AudioEngine.volume / 100)
-                        height: parent.height
-                        radius: parent.radius
-                        color: Theme.mOnSurfaceVariant
-                    }
-
-                    MouseArea {
-                        anchors.fill: parent
-                        anchors.margins: -Theme.marginS
-                        cursorShape: Qt.PointingHandCursor
-                        onClicked: function (mouse) {
-                            AudioEngine.setVolume(
-                                Math.max(0, Math.min(100, 100 * mouse.x / trilhoVolume.width)))
-                        }
+                MouseArea {
+                    anchors.fill: parent
+                    anchors.margins: -Theme.marginS
+                    cursorShape: Qt.PointingHandCursor
+                    onClicked: function (mouse) {
+                        AudioEngine.setVolume(
+                            Math.max(0, Math.min(100, 100 * mouse.x / trilhoVolume.width)))
                     }
                 }
             }
