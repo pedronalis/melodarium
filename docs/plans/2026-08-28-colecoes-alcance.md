@@ -190,7 +190,7 @@ git commit -m "feat(collections): add a whole list in one transaction and one si
 
 ### Task 2: A busca encontra coleções
 
-- [ ] Escrever o teste que falha, em `tests/tst_librarybrowser.cpp`, dentro de
+- [x] Escrever o teste que falha, em `tests/tst_librarybrowser.cpp`, dentro de
       `private slots:`:
 
 ```cpp
@@ -221,10 +221,10 @@ git commit -m "feat(collections): add a whole list in one transaction and one si
     }
 ```
 
-- [ ] Rodar e confirmar que falha pelo motivo certo:
+- [x] Rodar e confirmar que falha pelo motivo certo:
       `quiet-run ctest --test-dir build -R tst_librarybrowser --output-on-failure` →
       `Compared values are not the same … Actual (achadas): 0`
-- [ ] Em `src/librarybrowser.cpp`, dentro de `LibraryBrowser::searchGrouped`, inserir este
+- [x] Em `src/librarybrowser.cpp`, dentro de `LibraryBrowser::searchGrouped`, inserir este
       bloco **depois** da consulta de artistas (`arq`) e **antes** da de episódios (`eq`),
       para que a ordem dos grupos na tela fique faixas → álbuns → artistas → coleções →
       episódios:
@@ -248,10 +248,10 @@ git commit -m "feat(collections): add a whole list in one transaction and one si
     }
 ```
 
-- [ ] verificação mecânica da task:
+- [x] verificação mecânica da task:
       `quiet-run ctest --test-dir build -R tst_librarybrowser --output-on-failure`
       → `100% tests passed`
-- [ ] commit:
+- [x] commit:
 
 ```bash
 git add src/librarybrowser.cpp tests/tst_librarybrowser.cpp docs/plans/2026-08-28-colecoes-alcance.md

@@ -371,6 +371,24 @@ QVariantList LibraryBrowser::searchGrouped(const QString &text, int limitPerKind
         }
     }
 
+    // A collection nobody can search for only exists for whoever remembers where it is.
+    QSqlQuery cq(db);
+    cq.prepare(QStringLiteral(
+        "SELECT c.id, c.name, COUNT(ct.track_id) "
+        "FROM collections c "
+        "LEFT JOIN collection_tracks ct ON ct.collection_id = c.id "
+        "WHERE c.name LIKE ? GROUP BY c.id ORDER BY c.name COLLATE NOCASE LIMIT ?"));
+    cq.addBindValue(like);
+    cq.addBindValue(limitPerKind);
+    if (cq.exec()) {
+        while (cq.next()) {
+            append(QStringLiteral("collection"), cq.value(0).toInt(), cq.value(1).toString(),
+                   plural(cq.value(2).toInt(), QStringLiteral("faixa"),
+                          QStringLiteral("faixas")),
+                   QString());
+        }
+    }
+
     QSqlQuery eq(db);
     eq.prepare(QStringLiteral(
         "SELECT e.id, e.title, IFNULL(s.title,''), IFNULL(e.local_path,''), "
