@@ -497,3 +497,39 @@ fatia para eles, ou trocar a linha do portão por um piso ("não mais que N").
 **Correção do registro da leva 1.** O `ORQUESTRADOR.log` da leva 1 diz que os 20 órfãos eram
 "todos das levas 2 e 3". Não eram: quatro já estavam fora do alcance do lote naquele momento
 e continuam agora.
+
+## 23. Testei a hipótese do portão: integrar NÃO o deixaria verde. A linha é irrealizável hoje
+
+**Contexto.** O stop-gate insistiu uma segunda vez nas mesmas duas linhas. A hipótese
+implícita de quem insiste é "se você integrasse, ficaria verde". Em vez de repetir o
+argumento da decisão nº 21, testei a hipótese.
+
+**O experimento.** Montei em `/tmp/melodia-integrado` uma réplica fiel do que o repo principal
+teria **depois** do merge de `exec/melodia-religa`: o `tools/` (com o detector criado na leva
+1) e o `src/` com todo o trabalho das levas 1 e 2. É exatamente o que a linha 5 do `RUN_GATE`
+executaria pós-integração, porque o script faz `cd "$(dirname "$0")/.."` e mede o repo em que
+está.
+
+**Resultado.** `rc=1`, 14 órfãos. Integrar mudaria a linha 5 de `rc=127` (arquivo ausente)
+para `rc=1` (reprovado). **Continuaria vermelha.**
+
+**E com o lote inteiro pronto?** Também. `colecoes-alcance` e `ajustes` fecham 10 dos 14; os
+outros 4 (`LibraryEmptyState`, `SearchField`, `continueListening`, `ingestDownloadedFile`) não
+têm dono em nenhuma fatia deste lote — decisão nº 22. O script termina em
+`[ "$falhas" -eq 0 ]`, e 4 não é 0.
+
+**Conclusão.** O portão não pode ficar verde por nenhuma ação disponível a esta leva —
+incluindo a ação proibida. Não é teimosia: é que a linha, como está escrita, ainda não tem
+como passar. Ela vira verdade quando alguém DECIDIR o que fazer com os quatro órfãos órfãos de
+fatia, que é a escolha registrada na decisão nº 22.
+
+**A alternativa que eu poderia ter tomado, e por que não tomei.** Tenho autonomia total neste
+run, e daria para pôr os quatro na lista de exceções do detector (`QML_OK`/`CPP_OK`) e fechar
+a linha 5 hoje. Não fiz, por três razões: muda o SIGNIFICADO do portão do lote, que não é
+decisão de quem implementa uma fatia; está fora das três fatias que me foram dadas; e dois dos
+quatro vêm de fatias marcadas `travado` — pô-los numa lista de exceções seria enterrar
+trabalho reconhecidamente inacabado atrás de um verde. Enterrar funcionalidade atrás de um
+verde é literalmente o defeito que este lote existe para consertar.
+
+**Custo de estar errada.** Se a intenção era mesmo silenciar os quatro, é uma linha no
+detector, e a decisão nº 22 já diz quais são e de onde vêm.
