@@ -602,6 +602,10 @@ Window {
         onArtistChosen: function (artistId, title) {
             root.openNamedGroup("artists", artistId, title)
         }
+        onCollectionChosen: function (collectionId, title) {
+            root.showPane("collections")
+            collectionsPane.open(collectionId, title)
+        }
     }
 
     // Ctrl+F por hábito antigo, Ctrl+K porque é o gesto que todo app com paleta usa hoje.

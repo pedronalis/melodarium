@@ -260,13 +260,13 @@ git commit -m "feat(search): collections are a fifth kind of result"
 
 ### Task 3: O overlay sabe abrir uma coleção
 
-- [ ] Em `src/SearchOverlay.qml`, declarar o sinal junto dos outros quatro (linhas 23-26):
+- [x] Em `src/SearchOverlay.qml`, declarar o sinal junto dos outros quatro (linhas 23-26):
 
 ```qml
     signal collectionChosen(int collectionId, string title)
 ```
 
-- [ ] No mesmo arquivo, na função `glyphFor(kind)`, acrescentar o caso antes do `return`
+- [x] No mesmo arquivo, na função `glyphFor(kind)`, acrescentar o caso antes do `return`
       final:
 
 ```qml
@@ -274,14 +274,14 @@ git commit -m "feat(search): collections are a fifth kind of result"
             return Icons.get("playlist")
 ```
 
-- [ ] Na função `groupLabelFor(kind)`, acrescentar o caso antes do `return` final:
+- [x] Na função `groupLabelFor(kind)`, acrescentar o caso antes do `return` final:
 
 ```qml
         if (kind === "collection")
             return qsTr("Coleções")
 ```
 
-- [ ] Na função `activate(index)`, acrescentar o despacho junto dos outros tipos:
+- [x] Na função `activate(index)`, acrescentar o despacho junto dos outros tipos:
 
 ```qml
         if (hit.kind === "collection") {
@@ -291,7 +291,7 @@ git commit -m "feat(search): collections are a fifth kind of result"
         }
 ```
 
-- [ ] Em `src/Main.qml`, no `SearchOverlay { id: searchOverlay … }`, acrescentar o handler:
+- [x] Em `src/Main.qml`, no `SearchOverlay { id: searchOverlay … }`, acrescentar o handler:
 
 ```qml
         onCollectionChosen: function (collectionId, title) {
@@ -300,10 +300,10 @@ git commit -m "feat(search): collections are a fifth kind of result"
         }
 ```
 
-- [ ] verificação mecânica da task:
+- [x] verificação mecânica da task:
       `grep -c 'collection' src/SearchOverlay.qml` → `4`
-- [ ] verificação mecânica da task: `quiet-run cmake --build build` → exit 0
-- [ ] commit:
+- [x] verificação mecânica da task: `quiet-run cmake --build build` → exit 0
+- [x] commit:
 
 ```bash
 git add src/SearchOverlay.qml src/Main.qml docs/plans/2026-08-28-colecoes-alcance.md
