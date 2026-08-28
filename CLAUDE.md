@@ -26,6 +26,9 @@ ctest --test-dir build --output-on-failure
 Rodar sempre por `quiet-run <cmd>`. `ctest` sai **0** com `Total Tests: 0` — todo gate precisa do
 piso de contagem de alvos, senão lê verde num repo sem teste nenhum.
 
+Todo redesenho de tela roda `bash tools/check-orfaos.sh` antes do commit final: componente
+QML sem quem o instancie e `Q_INVOKABLE` sem quem o chame compilam verdes e somem da tela.
+
 ## Fronteiras
 
 - Commits locais. **Nunca push, nunca PR** — o repo ainda não foi publicado (é decisão do Pedro).
