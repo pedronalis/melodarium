@@ -157,7 +157,7 @@ git commit -m "feat(ui): the collection name dialog also renames"
 
 ### Task 2: Uma confirmação para o que não tem volta
 
-- [ ] Criar `src/ConfirmDialog.qml`. **Não redeclarar `opened`, `visible`, `width` nem
+- [x] Criar `src/ConfirmDialog.qml`. **Não redeclarar `opened`, `visible`, `width` nem
       `height`** — ver o PERIGO no topo deste plano:
 
 ```qml
@@ -222,15 +222,15 @@ Popup {
 }
 ```
 
-- [ ] Registrar em `CMakeLists.txt`, na lista `QML_FILES`, logo depois de
+- [x] Registrar em `CMakeLists.txt`, na lista `QML_FILES`, logo depois de
       `src/NewCollectionDialog.qml`:
 
 ```cmake
         src/ConfirmDialog.qml
 ```
 
-- [ ] verificação mecânica da task: `quiet-run cmake --build build` → exit 0
-- [ ] commit:
+- [x] verificação mecânica da task: `quiet-run cmake --build build` → exit 0
+- [x] commit:
 
 ```bash
 git add src/ConfirmDialog.qml CMakeLists.txt docs/plans/2026-08-28-colecoes-tela.md
