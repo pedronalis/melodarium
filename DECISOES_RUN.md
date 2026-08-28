@@ -201,3 +201,40 @@ tinha de tirar do `check-orfaos.sh`.
 **Custo de estar errada.** Se eu estiver errado sobre o rastreamento, as duas leituras são
 inertes e não custam nada. Se estiver certo (e a foto com a fila carregada DEPOIS da
 construção da tela é a prova), sem elas a fatia não entregaria nada.
+
+## 11. O `hitAt()` do plano indexava a lista errada — Shift+Enter nunca teria enfileirado nada
+
+**Contexto.** A Task 3 do plano `fila-tirinha` propõe um `hitAt(index)` que monta
+`root.buildRows(root.hits)` e indexa ESSA lista. Mas `buildRows` intercala cabeçalhos de
+grupo ("FAIXAS", "ÁLBUNS") entre os resultados, e o `highlighted` que o teclado move é índice
+de `hits`, não de linhas (`move()` o limita a `root.hits.length - 1`). Com o `hitAt` do
+plano, `highlighted = 0` cairia no cabeçalho da primeira linha, `linha.hit` seria `undefined`,
+e `queueAt` sairia calada. Shift+Enter não faria nada — de novo um botão que mente, que é o
+defeito que este lote existe para consertar.
+
+**Decisão.** `hitAt(index)` devolve `root.hits[index]` com a mesma guarda que o `activate`
+original já usava, e o `activate` passou a chamá-lo — assim as duas funções realmente
+compartilham UMA travessia, que era a intenção declarada do plano.
+
+**Alternativa descartada.** Colar o `hitAt` do plano como está. Passaria no `grep` de
+verificação da task (que conta `trackQueued|ShiftModifier`, não comportamento) e entregaria
+um atalho morto.
+
+**Custo de estar errada.** Nenhum: `activate` continua com a guarda idêntica à de antes, e os
+quatro tipos de resultado seguem o mesmo caminho.
+
+## 12. O rodapé da busca usa a peça `Dica`, não o `Text` solto do plano
+
+**Contexto.** O plano manda acrescentar ao rodapé um `Text` com o literal
+`"⇧↵ pôr na fila"`. O rodapé já é feito de `Dica { tecla: …; acao: … }`, uma peça declarada
+no próprio arquivo que pinta a tecla numa cor e a ação em outra. E o desenho
+(`design/Busca.dc.html:330`) mostra a dica nova exatamente na mesma forma das vizinhas.
+
+**Decisão.** `Dica { tecla: "⇧↵"; acao: qsTr("pôr na fila") }`, entre "tocar" e o espaçador —
+posição do desenho. A referência mandava nesta ordem: desenho primeiro, padrão do app
+depois, plano por último.
+
+**Alternativa descartada.** O `Text` do plano. Sairia numa cor só, sem separar tecla de ação,
+destoando das três dicas ao lado — e sem tradução.
+
+**Custo de estar errada.** Visual e reversível numa linha.

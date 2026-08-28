@@ -260,13 +260,13 @@ git commit -m "feat(ui): the up-next strip sits at the foot of the library list"
 
 ### Task 3: Shift+Enter põe o resultado da busca na fila
 
-- [ ] Em `src/SearchOverlay.qml`, declarar o sinal junto dos outros:
+- [x] Em `src/SearchOverlay.qml`, declarar o sinal junto dos outros:
 
 ```qml
     signal trackQueued(string path)
 ```
 
-- [ ] No mesmo arquivo, acrescentar a função que enfileira sem fechar o overlay — quem
+- [x] No mesmo arquivo, acrescentar a função que enfileira sem fechar o overlay — quem
       está montando uma fila quer montar várias de seguida:
 
 ```qml
@@ -279,7 +279,7 @@ git commit -m "feat(ui): the up-next strip sits at the foot of the library list"
     }
 ```
 
-- [ ] No mesmo arquivo, junto de `Keys.onReturnPressed` e `Keys.onEnterPressed` do
+- [x] No mesmo arquivo, junto de `Keys.onReturnPressed` e `Keys.onEnterPressed` do
       `TextInput` (linhas 193-194), acrescentar o atalho. `event.modifiers` é o que
       distingue os dois gestos na mesma tecla:
 
@@ -298,7 +298,7 @@ git commit -m "feat(ui): the up-next strip sits at the foot of the library list"
                 }
 ```
 
-- [ ] No mesmo arquivo, se ainda não existir uma função `hitAt(index)` que devolva o
+- [x] No mesmo arquivo, se ainda não existir uma função `hitAt(index)` que devolva o
       resultado destacado (a `activate(index)` já resolve isso internamente), extraí-la para
       as duas usarem a mesma travessia — declarar antes de `activate`:
 
@@ -313,13 +313,13 @@ git commit -m "feat(ui): the up-next strip sits at the foot of the library list"
     }
 ```
 
-- [ ] Em `src/Main.qml`, no `SearchOverlay { id: searchOverlay … }`, ligar o sinal:
+- [x] Em `src/Main.qml`, no `SearchOverlay { id: searchOverlay … }`, ligar o sinal:
 
 ```qml
         onTrackQueued: function (path) { AudioEngine.appendToQueue(path) }
 ```
 
-- [ ] Em `src/SearchOverlay.qml`, o rodapé de atalhos precisa anunciar o gesto novo — o
+- [x] Em `src/SearchOverlay.qml`, o rodapé de atalhos precisa anunciar o gesto novo — o
       desenho o lista (`design/Busca.dc.html:330`). Localizar o `Row`/`RowLayout` do rodapé
       que já mostra os atalhos e acrescentar:
 
@@ -332,10 +332,10 @@ git commit -m "feat(ui): the up-next strip sits at the foot of the library list"
             }
 ```
 
-- [ ] verificação mecânica da task:
+- [x] verificação mecânica da task:
       `grep -c 'trackQueued\|ShiftModifier' src/SearchOverlay.qml` → `4`
-- [ ] verificação mecânica da task: `quiet-run cmake --build build` → exit 0
-- [ ] commit:
+- [x] verificação mecânica da task: `quiet-run cmake --build build` → exit 0
+- [x] commit:
 
 ```bash
 git add src/SearchOverlay.qml src/Main.qml docs/plans/2026-08-28-fila-tirinha.md
