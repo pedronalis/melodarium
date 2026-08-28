@@ -24,6 +24,8 @@ Popup {
     signal episodeChosen(int episodeId)
     signal albumChosen(int albumId, string title)
     signal artistChosen(int artistId, string title)
+    signal trackQueued(string path)
+    signal collectionChosen(int collectionId, string title)
 
     modal: true
     focus: true
@@ -130,10 +132,26 @@ Popup {
         results.positionViewAtIndex(root.rowOfHit(root.highlighted), ListView.Contain)
     }
 
-    function activate(index) {
+    // A travessia única: `highlighted` é índice de HITS, não das linhas da tela — as linhas
+    // levam cabeçalhos de grupo no meio, e indexá-las aqui devolveria um cabeçalho.
+    function hitAt(index) {
         if (index < 0 || index >= root.hits.length)
+            return null
+        return root.hits[index]
+    }
+
+    // Pôr na fila não fecha a busca: quem enfileira quer enfileirar mais de uma.
+    function queueAt(index) {
+        const hit = root.hitAt(index)
+        if (hit === null || hit.path === undefined || hit.path === "")
             return
-        const hit = root.hits[index]
+        root.trackQueued(hit.path)
+    }
+
+    function activate(index) {
+        const hit = root.hitAt(index)
+        if (hit === null)
+            return
         if (hit.kind === "track" && hit.path !== "")
             root.trackChosen(hit.path)
         else if (hit.kind === "episode")
@@ -142,6 +160,8 @@ Popup {
             root.albumChosen(hit.id, hit.title)
         else if (hit.kind === "artist")
             root.artistChosen(hit.id, hit.title)
+        else if (hit.kind === "collection")
+            root.collectionChosen(hit.id, hit.title)
         else
             return
         root.close()
@@ -151,6 +171,7 @@ Popup {
         if (kind === "album") return Icons.get("disc")
         if (kind === "artist") return Icons.get("microphone")
         if (kind === "episode") return Icons.get("rss")
+        if (kind === "collection") return Icons.get("playlist")
         return Icons.get("music")
     }
 
@@ -158,6 +179,7 @@ Popup {
         if (kind === "album") return qsTr("Álbuns")
         if (kind === "artist") return qsTr("Artistas")
         if (kind === "episode") return qsTr("Episódios")
+        if (kind === "collection") return qsTr("Coleções")
         return qsTr("Faixas")
     }
 
@@ -190,8 +212,18 @@ Popup {
 
                 Keys.onDownPressed: root.move(1)
                 Keys.onUpPressed: root.move(-1)
-                Keys.onReturnPressed: root.activate(root.highlighted)
-                Keys.onEnterPressed: root.activate(root.highlighted)
+                Keys.onReturnPressed: function (event) {
+                    if (event.modifiers & Qt.ShiftModifier)
+                        root.queueAt(root.highlighted)
+                    else
+                        root.activate(root.highlighted)
+                }
+                Keys.onEnterPressed: function (event) {
+                    if (event.modifiers & Qt.ShiftModifier)
+                        root.queueAt(root.highlighted)
+                    else
+                        root.activate(root.highlighted)
+                }
 
                 Text {
                     anchors.verticalCenter: parent.verticalCenter
@@ -364,6 +396,7 @@ Popup {
 
             Dica { tecla: "↑↓"; acao: qsTr("navegar") }
             Dica { tecla: "↵"; acao: qsTr("tocar") }
+            Dica { tecla: "⇧↵"; acao: qsTr("pôr na fila") }
             Item { Layout.fillWidth: true }
             Dica { tecla: "esc"; acao: qsTr("fechar") }
         }

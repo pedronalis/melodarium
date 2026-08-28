@@ -163,6 +163,15 @@ QStringList TrackListModel::allPaths() const
     return paths;
 }
 
+QVariantList TrackListModel::allTrackIds() const
+{
+    QVariantList out;
+    out.reserve(m_rows.size());
+    for (const TrackRow &r : m_rows)
+        out.append(r.id);
+    return out;
+}
+
 QVariantMap TrackListModel::trackAt(int row) const
 {
     if (row < 0 || row >= m_rows.size())
@@ -174,6 +183,19 @@ QVariantMap TrackListModel::trackAt(int row) const
             {QStringLiteral("artist"), r.artist},
             {QStringLiteral("album"), r.album},
             {QStringLiteral("durationMs"), r.durationMs}};
+}
+
+void TrackListModel::applyLiked(int trackId, bool liked)
+{
+    for (int i = 0; i < m_rows.size(); ++i) {
+        if (m_rows[i].id != trackId)
+            continue;
+        if (m_rows[i].liked == liked)
+            return;
+        m_rows[i].liked = liked;
+        emit dataChanged(index(i), index(i), {LikedRole});
+        return;
+    }
 }
 
 void TrackListModel::setRowsForTesting(const QList<TrackRow> &rows)

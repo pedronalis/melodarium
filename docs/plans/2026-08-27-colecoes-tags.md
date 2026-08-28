@@ -1,7 +1,7 @@
 ---
 slug: colecoes-tags
 feature: melodia
-status: concluido
+status: travado
 depende-de: [navegacao-biblioteca]
 decisao-humana: sim
 spec: docs/specs/2026-08-27-player-musica-podcast.md
@@ -1127,3 +1127,12 @@ git commit -m "test(collections): multi-collection membership, ordering and tag 
 - Coleção inteligente (regra salva que se atualiza sozinha) — as quatro listas automáticas já
   cobrem o caso comum.
 - Exportar coleção como M3U.
+
+## Diagnóstico (2026-08-28)
+
+Reaberto pela auditoria de completude: o redesenho `melodia-capa-manda` trocou o shell da
+janela e o que esta fatia entregou perdeu a porta de entrada. O código continua no
+repositório e continua compilando — o que sumiu foi o caminho até ele.
+
+Reposto pela fatia `colecoes-tela` do lote `melodia-religa`. Volta a `concluido` quando
+`bash tools/check-orfaos.sh` não listar mais nada desta fatia.

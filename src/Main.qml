@@ -1,5 +1,6 @@
 pragma ComponentBehavior: Bound
 
+import QtCore
 import QtQuick
 import QtQuick.Controls
 import QtQuick.Layouts
@@ -20,7 +21,7 @@ Window {
                ? Qt.application.arguments[i + 1] : ""
     }
 
-    // `--pane <library|podcast|empty>`: qual miolo montar na hora de medir ou fotografar.
+    // `--pane <library|podcast|empty|collections>`: qual miolo montar ao medir ou fotografar.
     readonly property string measurePane: {
         const i = Qt.application.arguments.indexOf("--pane")
         return i >= 0 && Qt.application.arguments.length > i + 1
@@ -62,6 +63,66 @@ Window {
                ? Qt.application.arguments[i + 1] : ""
     }
 
+    // `--open-collection <id>`: abre uma coleção antes de fotografar. Sem isto o painel de
+    // coleções só pode ser fotografado no estado "nenhuma aberta", e a metade da fatia que
+    // importa — a coleção ABERTA, com as faixas dentro — não teria como ser provada.
+    readonly property int measureCollection: {
+        const i = Qt.application.arguments.indexOf("--open-collection")
+        if (i < 0 || Qt.application.arguments.length <= i + 1)
+            return 0
+        const id = parseInt(Qt.application.arguments[i + 1])
+        return isNaN(id) ? 0 : id
+    }
+
+    // `--open-album <id>`: entra no eixo de álbuns e abre um deles, pelo mesmo caminho do
+    // clique. O cabeçalho com o artista e o botão "+ Coleção" só existem com um álbum
+    // aberto: sem isto essa metade da tela não teria como ser fotografada.
+    readonly property int measureAlbum: {
+        const i = Qt.application.arguments.indexOf("--open-album")
+        if (i < 0 || Qt.application.arguments.length <= i + 1)
+            return 0
+        const id = parseInt(Qt.application.arguments[i + 1])
+        return isNaN(id) ? 0 : id
+    }
+
+    // `--play-queue`: carrega a biblioteca inteira como fila e toca a primeira. A tirinha
+    // "a seguir na fila" só existe quando há PRÓXIMOS, e `--play-track` monta uma fila de
+    // um só — com ela a tirinha ficaria corretamente invisível e não haveria o que provar.
+    readonly property bool measureQueue: Qt.application.arguments.indexOf("--play-queue") >= 0
+
+    // `--play-queue-mode <all|shuffle|never|forgotten>`: qual dos convites da tela vazia
+    // disparar. Com "shuffle" o modo aleatório fica LIGADO, que é o único jeito de
+    // fotografar o botão aceso — apagado ele não prova o estado visível que a fatia promete.
+    readonly property string measureQueueMode: {
+        const i = Qt.application.arguments.indexOf("--play-queue-mode")
+        return i >= 0 && Qt.application.arguments.length > i + 1
+               ? Qt.application.arguments[i + 1] : "all"
+    }
+
+    // `--repeat <n>`: avança o repetir n posições (1 = a fila, 2 = esta faixa), para o "1"
+    // sobreposto do terceiro estado poder ser visto na foto.
+    readonly property int measureRepeat: {
+        const i = Qt.application.arguments.indexOf("--repeat")
+        if (i < 0 || Qt.application.arguments.length <= i + 1)
+            return 0
+        const n = parseInt(Qt.application.arguments[i + 1])
+        return isNaN(n) ? 0 : n
+    }
+
+    // `--queue-hit`: manda o overlay pôr na fila o resultado em destaque e fecha, que é o
+    // gesto do Shift+Enter. Sem isto o atalho só poderia ser provado por alguém apertando a
+    // tecla — e um atalho que anuncia no rodapé e não faz nada é o defeito deste lote.
+    readonly property bool measureQueueHit: Qt.application.arguments.indexOf("--queue-hit") >= 0
+
+    // `--activate-hit`: aperta Enter no resultado em destaque. Fotografar o resultado na
+    // lista prova que a busca ACHA; só ativá-lo prova que o resultado LEVA a algum lugar —
+    // que é a metade que este lote existe para consertar.
+    readonly property bool measureActivateHit: Qt.application.arguments.indexOf("--activate-hit") >= 0
+
+    // `--open-settings`: abre a gaveta de ajustes antes de medir. Um Popup só é construído
+    // na primeira abertura: sem alguém abri-lo, nenhuma verificação o alcança.
+    readonly property bool measureSettings: Qt.application.arguments.indexOf("--open-settings") >= 0
+
     // `--no-search`: não abre o overlay antes de medir.
     readonly property bool measureSearch: Qt.application.arguments.indexOf("--no-search") < 0
 
@@ -81,7 +142,8 @@ Window {
     title: qsTr("melodia")
     color: Theme.mSurface
 
-    // Which pane the icon rail is showing: "library", "albums", "tags", "podcast", "search".
+    // Which pane the icon rail is showing: "library" or "podcast". Search is an overlay,
+    // not a pane. The axis inside the library ("albums", "tags", …) is the chips' job.
     property string section: "library"
 
     // A interface foi desenhada para 1100x700. Numa janela muito maior, tamanho fixo vira
@@ -98,6 +160,8 @@ Window {
     property bool showingGroups: false
     property var groups: []
     property string groupsTitle: ""
+    // O artista do álbum aberto, para o cabeçalho. Vazio em qualquer outra lista.
+    property string groupSubtitle: ""
     // The track the tag editor is looking at: the last one the user activated.
     property int selectedTrackId: 0
     // What the middle pane is querying right now, so a rescan can ask for it again. The rail
@@ -108,8 +172,6 @@ Window {
     property int currentEpisodeId: 0
     // Which chip of the filter row is lit. The rail picks the pane; this picks the list.
     property string libraryFilter: "all"
-    // The order the engine is playing, kept here because the queue drawer left this design.
-    property var queuePaths: []
 
     readonly property var filterTitles: ({
         "liked": qsTr("Curtidas"),
@@ -177,17 +239,27 @@ Window {
     // Opening a group keeps its name on screen: the list is no longer "Biblioteca".
     function openGroup(section, id) {
         let name = ""
+        let subtitle = ""
         for (let i = 0; i < root.groups.length; ++i) {
             if (root.groups[i].id === id) {
                 name = root.groups[i].name
+                // O artista já veio na consulta que montou a lista de grupos: buscá-lo de
+                // novo seria uma segunda varredura da tabela de álbuns por clique.
+                subtitle = root.groups[i].subtitle !== undefined
+                           ? root.groups[i].subtitle : ""
                 break
             }
         }
+        root.groupSubtitle = section === "albums" ? subtitle : ""
         root.openNamedGroup(section, id, name)
     }
 
     // Chegar por busca é chegar de fora da lista de grupos: o nome vem junto do resultado.
     function openNamedGroup(section, id, name) {
+        // Chegando pela busca não há grupo carregado de onde tirar o artista; chegando pela
+        // lista de grupos, openGroup já escreveu o subtítulo uma linha antes.
+        if (section !== "albums")
+            root.groupSubtitle = ""
         root.section = "library"
         root.libraryFilter = section
         root.currentSection = section
@@ -199,8 +271,7 @@ Window {
     }
 
     function activateTrack(index) {
-        root.queuePaths = trackModel.allPaths()
-        AudioEngine.loadPlaylist(root.queuePaths, index)
+        AudioEngine.loadPlaylist(trackModel.allPaths(), index)
         AudioEngine.play()
     }
 
@@ -232,26 +303,29 @@ Window {
                            ? root.filterTitles[root.currentSection] : ""
         root.showingGroups = false
 
-        let paths = trackModel.allPaths()
+        const paths = trackModel.allPaths()
         if (paths.length === 0)
             return
-        if (mode === "shuffle") {
-            // Fisher-Yates: sortear índice a cada passo, não ordenar por número aleatório.
-            for (let i = paths.length - 1; i > 0; --i) {
-                const j = Math.floor(Math.random() * (i + 1))
-                const tmp = paths[i]
-                paths[i] = paths[j]
-                paths[j] = tmp
-            }
-        }
-        root.queuePaths = paths
         AudioEngine.loadPlaylist(paths, 0)
+        // Antes daqui o embaralhamento era feito à mão e sumia da tela junto com o convite:
+        // ligar o modo do motor deixa o botão do painel aceso e desligável.
+        if (mode === "shuffle")
+            AudioEngine.setShuffle(true)
         AudioEngine.play()
     }
 
     function collectTrack(trackId) {
         root.selectedTrackId = trackId
         collectMenu.trackId = trackId
+        collectMenu.emLote = false
+        collectMenu.options = CollectionManager.collections()
+        collectMenu.popup()
+    }
+
+    // O mesmo menu, servindo a lista inteira que está na tela.
+    function collectAll() {
+        collectMenu.trackId = 0
+        collectMenu.emLote = true
         collectMenu.options = CollectionManager.collections()
         collectMenu.popup()
     }
@@ -263,6 +337,11 @@ Window {
             searchOverlay.open()
             return
         }
+        // Voltar para a biblioteca releva a lista que estava aberta: sem isto, sair do
+        // podcast e voltar mostrava a lista velha, e clicar em "Biblioteca" já estando
+        // nela não fazia absolutamente nada.
+        if (name === "library" && root.section === "library")
+            root.reloadCurrent()
         root.section = name
     }
 
@@ -272,6 +351,10 @@ Window {
 
     // Tags are picked by name, not by id, so they do not go through showSection().
     function showTag(name) {
+        root.section = "library"
+        root.libraryFilter = "tags"
+        root.currentSection = "tags"
+        root.currentId = 0
         trackModel.loadFromQuery(CollectionManager.clauseForTag(name),
                                  CollectionManager.bindingsForTag(name))
         root.groupsTitle = name
@@ -384,17 +467,37 @@ Window {
                 running: true
                 interval: 600
                 onTriggered: {
+                    if (root.measureCollection > 0)
+                        collectionsPane.openById(root.measureCollection)
+                    if (root.measureAlbum > 0) {
+                        // O caminho do clique: o eixo carrega os grupos, e o grupo abre a
+                        // partir deles — é de lá que o artista do cabeçalho vem.
+                        root.showSection("albums", 0)
+                        root.openGroup("albums", root.measureAlbum)
+                    }
                     if (root.measureEpisode > 0)
                         PodcastLibrary.playEpisode(root.measureEpisode)
                     if (root.measureTrack !== "") {
                         AudioEngine.loadPlaylist([root.measureTrack], 0)
                         AudioEngine.play()
                     }
+                    if (root.measureQueue)
+                        root.startFromEmpty(root.measureQueueMode)
+                    for (let r = 0; r < root.measureRepeat; ++r)
+                        AudioEngine.cycleRepeat()
+                    if (root.measureSettings)
+                        settingsDialog.open()
                     if (!root.measureSearch)
                         return
                     searchOverlay.open()
                     if (root.measureSearchText !== "")
                         searchOverlay.typeForMeasure(root.measureSearchText)
+                    if (root.measureQueueHit) {
+                        searchOverlay.queueAt(searchOverlay.highlighted)
+                        searchOverlay.close()
+                    }
+                    if (root.measureActivateHit)
+                        searchOverlay.activate(searchOverlay.highlighted)
                 }
             }
 
@@ -432,8 +535,22 @@ Window {
         }
     }
 
+    // As mesmas chaves que o SettingsDialog grava. Duplicadas de propósito: um Settings do
+    // QML é um par (categoria, propriedade), e a janela precisa lê-las antes de o diálogo
+    // existir.
+    Settings {
+        id: prefsAudio
+        category: "audio"
+        property bool replayGain: false
+        property bool exclusiveOutput: false
+    }
+
     Component.onCompleted: {
         Theme.uiScale = root.escalaDaJanela
+        // Preferência que não vale na partida não é preferência: o diálogo só aplica quando
+        // é aberto, e ninguém abre ajustes toda vez que liga o app.
+        AudioEngine.setReplayGainMode(prefsAudio.replayGain ? "track" : "no")
+        AudioEngine.setExclusiveOutput(prefsAudio.exclusiveOutput)
         if (Database.libraryPath !== "")
             trackModel.loadAllTracks()
         // Finding out whether yt-dlp exists costs one process start; finding out at the moment
@@ -450,6 +567,7 @@ Window {
             Layout.fillHeight: true
             current: root.section
             onChosen: function (name) { root.showPane(name) }
+            onSettingsRequested: settingsDialog.open()
         }
 
         NowPlayingPanel {
@@ -464,6 +582,7 @@ Window {
             episodeMode: root.currentEpisodeId > 0
             onLikeRequested: function (id) { LibraryBrowser.toggleLike(id) }
             onPlayRequested: function (mode) { root.startFromEmpty(mode) }
+            onTagChosen: function (name) { root.showTag(name) }
         }
 
         StackLayout {
@@ -476,10 +595,13 @@ Window {
             // resultado do gate de layout.
             currentIndex: root.measuring
                           ? (root.measurePane === "podcast"
-                             ? 1 : (root.measurePane === "empty" ? 2 : 0))
+                             ? 1 : (root.measurePane === "empty"
+                                    ? 2 : (root.measurePane === "collections" ? 3 : 0)))
                           : (root.section === "podcast"
                              ? 1
-                             : (Database.libraryPath === "" ? 2 : 0))
+                             : (root.section === "collections"
+                                ? 3
+                                : (Database.libraryPath === "" ? 2 : 0)))
 
             LibraryPane {
                 id: libraryPane
@@ -488,13 +610,19 @@ Window {
                 groups: root.groups
                 showingGroups: root.showingGroups
                 groupTitle: root.groupsTitle
+                groupSubtitle: root.groupSubtitle
                 scanning: Database.scanning
                 onGroupChosen: function (key) { root.chooseFilter(key) }
                 onGroupOpened: function (section, id) { root.openGroup(section, id) }
                 onTagOpened: function (name) { root.showTag(name) }
                 onTrackActivated: function (index) { root.activateTrack(index) }
                 onCollectRequested: function (trackId) { root.collectTrack(trackId) }
+                onCollectAllRequested: root.collectAll()
                 onSearchRequested: searchOverlay.open()
+                onQueueActivated: function (queueIndex) {
+                    AudioEngine.loadPlaylist(AudioEngine.queue, queueIndex)
+                    AudioEngine.play()
+                }
             }
 
             PodcastPane {
@@ -505,6 +633,31 @@ Window {
             EmptyPane {
                 framed: true
                 onPlayRequested: function (mode) { root.startFromEmpty(mode) }
+            }
+
+            CollectionsPane {
+                id: collectionsPane
+                model: trackModel
+                onCollectionOpened: function (id, name) {
+                    root.currentSection = "collection"
+                    root.currentId = id
+                    const q = root.clauseFor("collection", id)
+                    trackModel.loadFromQuery(q.clause, q.bindings)
+                }
+                onCloseRequested: {
+                    // Sair de uma coleção devolve a lista inteira ao modelo: o painel da
+                    // biblioteca compartilha este modelo e não pode herdar o filtro.
+                    root.currentSection = "all"
+                    root.currentId = 0
+                    root.showSection("all", 0)
+                }
+                onTrackActivated: function (index) { root.activateTrack(index) }
+                // Sem recarregar, a linha removida continua na tela até alguém trocar de
+                // painel — e o usuário clica de novo achando que o botão não funcionou.
+                onTrackRemoved: function (trackId) {
+                    const q = root.clauseFor("collection", collectionsPane.openId)
+                    trackModel.loadFromQuery(q.clause, q.bindings)
+                }
             }
         }
     }
@@ -517,11 +670,24 @@ Window {
             AudioEngine.play()
         }
         onEpisodeChosen: function (episodeId) { PodcastLibrary.playEpisode(episodeId) }
+        onTrackQueued: function (path) { AudioEngine.appendToQueue(path) }
         onAlbumChosen: function (albumId, title) {
             root.openNamedGroup("albums", albumId, title)
         }
         onArtistChosen: function (artistId, title) {
             root.openNamedGroup("artists", artistId, title)
+        }
+        onCollectionChosen: function (collectionId, title) {
+            root.showPane("collections")
+            collectionsPane.open(collectionId, title)
+        }
+    }
+
+    SettingsDialog {
+        id: settingsDialog
+        onLibraryPathPicked: function (path) {
+            // A pasta mudou: a lista aberta é da pasta antiga.
+            root.showSection("all", 0)
         }
     }
 
@@ -537,14 +703,22 @@ Window {
 
         property int trackId: 0
         property var options: []
+        // Com emLote, o alvo não é uma faixa: é tudo que a lista está mostrando.
+        property bool emLote: false
 
         Instantiator {
             model: collectMenu.options
             delegate: MenuItem {
                 required property var modelData
                 text: modelData.name
-                onTriggered: CollectionManager.addTrackToCollection(modelData.id,
-                                                                    collectMenu.trackId)
+                onTriggered: {
+                    if (collectMenu.emLote)
+                        CollectionManager.addTracksToCollection(modelData.id,
+                                                               trackModel.allTrackIds())
+                    else
+                        CollectionManager.addTrackToCollection(modelData.id,
+                                                               collectMenu.trackId)
+                }
             }
             onObjectAdded: function (index, object) { collectMenu.insertItem(index, object) }
             onObjectRemoved: function (index, object) { collectMenu.removeItem(object) }
@@ -554,6 +728,9 @@ Window {
             text: qsTr("Nova coleção…")
             onTriggered: {
                 newCollectionForTrack.pendingTrackId = collectMenu.trackId
+                newCollectionForTrack.pendingLote = collectMenu.emLote
+                newCollectionForTrack.renameId = 0
+                newCollectionForTrack.initialText = ""
                 newCollectionForTrack.open()
             }
         }
@@ -563,11 +740,15 @@ Window {
         id: newCollectionForTrack
 
         property int pendingTrackId: 0
+        property bool pendingLote: false
 
         onCreated: function (id, name) {
-            if (newCollectionForTrack.pendingTrackId > 0)
+            if (newCollectionForTrack.pendingLote)
+                CollectionManager.addTracksToCollection(id, trackModel.allTrackIds())
+            else if (newCollectionForTrack.pendingTrackId > 0)
                 CollectionManager.addTrackToCollection(id, newCollectionForTrack.pendingTrackId)
             newCollectionForTrack.pendingTrackId = 0
+            newCollectionForTrack.pendingLote = false
         }
     }
 }

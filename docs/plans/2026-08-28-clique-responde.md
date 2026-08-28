@@ -1,7 +1,7 @@
 ---
 slug: clique-responde
 feature: melodia-religa
-status: aprovado
+status: concluido
 depende-de: []
 decisao-humana: sim
 spec: docs/auditoria-completude.md (achados 1,2,3,4,7,8,9) · design/Main.dc.html
@@ -71,7 +71,7 @@ verdade na fatia `shuffle-repeat`, não removê-los agora.
 
 ### Task 1: O modelo aprende a atualizar uma curtida sozinho
 
-- [ ] Escrever o teste que falha, em `tests/tst_tracklistmodel.cpp`, dentro de
+- [x] Escrever o teste que falha, em `tests/tst_tracklistmodel.cpp`, dentro de
       `private slots:`, depois de `totalDurationSumsTheLoadedRows()`:
 
 ```cpp
@@ -109,10 +109,10 @@ verdade na fatia `shuffle-repeat`, não removê-los agora.
     }
 ```
 
-- [ ] Rodar e confirmar que falha pelo motivo certo:
+- [x] Rodar e confirmar que falha pelo motivo certo:
       `cmake --build build --target tst_tracklistmodel` → erro de compilação
       `no member named 'applyLiked' in 'TrackListModel'`
-- [ ] Declarar em `src/tracklistmodel.h`, logo depois de
+- [x] Declarar em `src/tracklistmodel.h`, logo depois de
       `Q_INVOKABLE QVariantMap trackAt(int row) const;`:
 
 ```cpp
@@ -121,7 +121,7 @@ verdade na fatia `shuffle-repeat`, não removê-los agora.
     Q_INVOKABLE void applyLiked(int trackId, bool liked);
 ```
 
-- [ ] Implementar em `src/tracklistmodel.cpp`, depois de `QVariantMap TrackListModel::trackAt`:
+- [x] Implementar em `src/tracklistmodel.cpp`, depois de `QVariantMap TrackListModel::trackAt`:
 
 ```cpp
 void TrackListModel::applyLiked(int trackId, bool liked)
@@ -138,10 +138,10 @@ void TrackListModel::applyLiked(int trackId, bool liked)
 }
 ```
 
-- [ ] verificação mecânica da task:
+- [x] verificação mecânica da task:
       `quiet-run ctest --test-dir build -R tst_tracklistmodel --output-on-failure`
       → `100% tests passed`
-- [ ] commit:
+- [x] commit:
 
 ```bash
 git add src/tracklistmodel.h src/tracklistmodel.cpp tests/tst_tracklistmodel.cpp docs/plans/2026-08-28-clique-responde.md
@@ -150,7 +150,7 @@ git commit -m "feat(library): update one liked row in place instead of reloading
 
 ### Task 2: A lista escuta e o coração reage na hora
 
-- [ ] Em `src/LibraryPane.qml`, substituir o bloco `Connections` que hoje só chama
+- [x] Em `src/LibraryPane.qml`, substituir o bloco `Connections` que hoje só chama
       `root.reload()` (o que atualiza apenas o contador dos chips):
 
 ```qml
@@ -166,10 +166,10 @@ git commit -m "feat(library): update one liked row in place instead of reloading
     }
 ```
 
-- [ ] verificação mecânica da task:
+- [x] verificação mecânica da task:
       `grep -c 'applyLiked' src/LibraryPane.qml` → `1`
-- [ ] verificação mecânica da task: `quiet-run cmake --build build` → exit 0
-- [ ] commit:
+- [x] verificação mecânica da task: `quiet-run cmake --build build` → exit 0
+- [x] commit:
 
 ```bash
 git add src/LibraryPane.qml docs/plans/2026-08-28-clique-responde.md
@@ -178,14 +178,14 @@ git commit -m "fix(ui): repaint the liked heart the moment the row is toggled"
 
 ### Task 3: O coração cheio, que já estava embarcado
 
-- [ ] Em `src/Icons.qml`, acrescentar a entrada logo depois da linha `"heart": ""…`
+- [x] Em `src/Icons.qml`, acrescentar a entrada logo depois da linha `"heart": ""…`
       (o glifo sólido existe na fonte em U+F67C — conferido com fontTools em 2026-08-28):
 
 ```qml
         "heart-filled": "",
 ```
 
-- [ ] Em `src/TrackRow.qml`, no `Text { id: heart … }`, trocar a linha do `text:` para que
+- [x] Em `src/TrackRow.qml`, no `Text { id: heart … }`, trocar a linha do `text:` para que
       curtido e não curtido sejam FORMAS diferentes, como no desenho aprovado, e não só
       cores diferentes:
 
@@ -193,7 +193,7 @@ git commit -m "fix(ui): repaint the liked heart the moment the row is toggled"
                     text: root.liked ? Icons.get("heart-filled") : Icons.get("heart")
 ```
 
-- [ ] Em `src/NowPlayingPanel.qml`, o `IconButton` do coração (o que tem
+- [x] Em `src/NowPlayingPanel.qml`, o `IconButton` do coração (o que tem
       `accent: root.info.liked === true`) passa a trocar de glifo também:
 
 ```qml
@@ -206,11 +206,11 @@ git commit -m "fix(ui): repaint the liked heart the moment the row is toggled"
             }
 ```
 
-- [ ] verificação mecânica da task:
+- [x] verificação mecânica da task:
       `grep -c 'heart-filled' src/Icons.qml src/TrackRow.qml src/NowPlayingPanel.qml`
       → `src/Icons.qml:1`, `src/TrackRow.qml:1`, `src/NowPlayingPanel.qml:2`
-- [ ] verificação mecânica da task: `quiet-run cmake --build build` → exit 0
-- [ ] commit:
+- [x] verificação mecânica da task: `quiet-run cmake --build build` → exit 0
+- [x] commit:
 
 ```bash
 git add src/Icons.qml src/TrackRow.qml src/NowPlayingPanel.qml docs/plans/2026-08-28-clique-responde.md
@@ -219,7 +219,7 @@ git commit -m "feat(ui): a liked heart is solid, not merely tinted"
 
 ### Task 4: A tira de ícones vira MODO — Álbuns e Tags saem dela
 
-- [ ] Em `src/IconRail.qml`, substituir a lista `items` inteira. Os chips acima da lista
+- [x] Em `src/IconRail.qml`, substituir a lista `items` inteira. Os chips acima da lista
       já entregam Álbuns e Tags e funcionam; repetir as mesmas palavras aqui, sem navegar,
       foi a queixa nº 1 do Pedro:
 
@@ -235,7 +235,7 @@ git commit -m "feat(ui): a liked heart is solid, not merely tinted"
     ]
 ```
 
-- [ ] Em `src/Main.qml`, na função `showPane`, tornar explícito que voltar para a
+- [x] Em `src/Main.qml`, na função `showPane`, tornar explícito que voltar para a
       biblioteca recarrega a lista que estava aberta — hoje o clique em "Biblioteca" não
       faz nada quando já se está nela:
 
@@ -256,10 +256,10 @@ git commit -m "feat(ui): a liked heart is solid, not merely tinted"
     }
 ```
 
-- [ ] verificação mecânica da task:
+- [x] verificação mecânica da task:
       `grep -cE '"(albums|tags)"' src/IconRail.qml` → `0`
-- [ ] verificação mecânica da task: `quiet-run cmake --build build` → exit 0
-- [ ] commit:
+- [x] verificação mecânica da task: `quiet-run cmake --build build` → exit 0
+- [x] commit:
 
 ```bash
 git add src/IconRail.qml src/Main.qml docs/plans/2026-08-28-clique-responde.md
@@ -268,7 +268,7 @@ git commit -m "fix(ui): the rail picks the mode, the chips pick the axis — no 
 
 ### Task 5: Clicar numa etiqueta filtra a biblioteca
 
-- [ ] Em `src/NowPlayingPanel.qml`, declarar o sinal junto dos outros dois, logo depois de
+- [x] Em `src/NowPlayingPanel.qml`, declarar o sinal junto dos outros dois, logo depois de
       `signal playRequested(string mode)`:
 
 ```qml
@@ -277,7 +277,7 @@ git commit -m "fix(ui): the rail picks the mode, the chips pick the axis — no 
     signal tagChosen(string name)
 ```
 
-- [ ] No mesmo arquivo, no `TagEditor { id: tagEd … }`, ligar o repasse:
+- [x] No mesmo arquivo, no `TagEditor { id: tagEd … }`, ligar o repasse:
 
 ```qml
         TagEditor {
@@ -289,14 +289,14 @@ git commit -m "fix(ui): the rail picks the mode, the chips pick the axis — no 
         }
 ```
 
-- [ ] Em `src/Main.qml`, no `NowPlayingPanel { id: nowPlaying … }`, acrescentar o handler
+- [x] Em `src/Main.qml`, no `NowPlayingPanel { id: nowPlaying … }`, acrescentar o handler
       junto dos outros dois:
 
 ```qml
             onTagChosen: function (name) { root.showTag(name) }
 ```
 
-- [ ] Em `src/Main.qml`, `showTag` precisa levar a tela junto: chegar numa etiqueta a
+- [x] Em `src/Main.qml`, `showTag` precisa levar a tela junto: chegar numa etiqueta a
       partir do painel é chegar de fora da lista de grupos, e hoje a função troca o
       conteúdo sem trocar o modo nem acender o chip:
 
@@ -314,11 +314,11 @@ git commit -m "fix(ui): the rail picks the mode, the chips pick the axis — no 
     }
 ```
 
-- [ ] verificação mecânica da task:
+- [x] verificação mecânica da task:
       `grep -c 'onTagChosen' src/NowPlayingPanel.qml src/Main.qml` →
       `src/NowPlayingPanel.qml:1`, `src/Main.qml:1`
-- [ ] verificação mecânica da task: `quiet-run cmake --build build` → exit 0
-- [ ] commit:
+- [x] verificação mecânica da task: `quiet-run cmake --build build` → exit 0
+- [x] commit:
 
 ```bash
 git add src/NowPlayingPanel.qml src/Main.qml docs/plans/2026-08-28-clique-responde.md
@@ -327,7 +327,7 @@ git commit -m "fix(ui): clicking a tag under the cover filters the library by it
 
 ### Task 6: O volume volta para a fileira de controles
 
-- [ ] Em `src/NowPlayingPanel.qml`, declarar o estado do mudo junto das outras propriedades
+- [x] Em `src/NowPlayingPanel.qml`, declarar o estado do mudo junto das outras propriedades
       do topo, logo depois de `property var episodeInfo: ({})`:
 
 ```qml
@@ -337,7 +337,7 @@ git commit -m "fix(ui): clicking a tag under the cover filters the library by it
     readonly property bool mudo: AudioEngine.volume <= 0
 ```
 
-- [ ] No mesmo arquivo, dentro do `RowLayout` dos controles (o que tem
+- [x] No mesmo arquivo, dentro do `RowLayout` dos controles (o que tem
       `Layout.alignment: Qt.AlignHCenter` e `visible: root.hasTrack`), acrescentar o
       controle de volume **como último filho**, depois do `Rectangle` do rótulo "30s":
 
@@ -390,10 +390,10 @@ git commit -m "fix(ui): clicking a tag under the cover filters the library by it
             }
 ```
 
-- [ ] verificação mecânica da task:
+- [x] verificação mecânica da task:
       `grep -c 'AudioEngine.setVolume' src/NowPlayingPanel.qml` → `3`
-- [ ] verificação mecânica da task: `quiet-run cmake --build build` → exit 0
-- [ ] commit:
+- [x] verificação mecânica da task: `quiet-run cmake --build build` → exit 0
+- [x] commit:
 
 ```bash
 git add src/NowPlayingPanel.qml docs/plans/2026-08-28-clique-responde.md
@@ -402,7 +402,7 @@ git commit -m "feat(ui): bring volume and mute back into the transport row"
 
 ### Task 7: O detector de órfãos vira portão do repositório
 
-- [ ] Criar `tools/check-orfaos.sh` com este conteúdo (é o detector já validado em
+- [x] Criar `tools/check-orfaos.sh` com este conteúdo (é o detector já validado em
       2026-08-28, que achou as 24 lacunas; a lição está em
       `docs/solutions/ui/2026-08-28-redesenho-deixa-funcionalidade-orfa.md`):
 
@@ -446,7 +446,7 @@ echo "check-orfaos: $falhas item(ns) sem porta de entrada"
 [ "$falhas" -eq 0 ]
 ```
 
-- [ ] Tornar executável e registrar a contagem de partida (esta fatia NÃO zera a lista: as
+- [x] Tornar executável e registrar a contagem de partida (esta fatia NÃO zera a lista: as
       fatias seguintes é que religam coleções, fila e ajustes):
 
 ```bash
@@ -454,10 +454,10 @@ chmod +x tools/check-orfaos.sh
 bash tools/check-orfaos.sh; echo "exit=$?"
 ```
 
-- [ ] verificação mecânica da task: `bash tools/check-orfaos.sh | tail -1` →
+- [x] verificação mecânica da task: `bash tools/check-orfaos.sh | tail -1` →
       linha começando com `check-orfaos:` (a contagem cai a zero só ao fim do lote; aqui o
       que se exige é que o script RODE e liste)
-- [ ] commit:
+- [x] commit:
 
 ```bash
 git add tools/check-orfaos.sh docs/plans/2026-08-28-clique-responde.md
@@ -466,7 +466,7 @@ git commit -m "test(tools): detect orphan QML and unreachable invokables"
 
 ### Task 8: Reabrir o ledger que mente [sem-código]
 
-- [ ] Três planos antigos estão `status: concluido` e o que eles entregaram não está mais na
+- [x] Três planos antigos estão `status: concluido` e o que eles entregaram não está mais na
       tela — o ledger registra o dia da entrega, não o estado de hoje. Reabri-los é o que
       impede o próximo `/retoma` de ler "tudo pronto":
 
@@ -476,7 +476,7 @@ python3 ~/.claude/scripts/planos-lote.py set-status docs/plans/2026-08-27-downlo
 python3 ~/.claude/scripts/planos-lote.py set-status docs/plans/2026-08-27-moldura-capa.md travado --dir docs/plans
 ```
 
-- [ ] Acrescentar ao **fim** de cada um dos três planos o diagnóstico que o estado `travado`
+- [x] Acrescentar ao **fim** de cada um dos três planos o diagnóstico que o estado `travado`
       exige, colando este bloco (com o slug da fatia que o repõe trocado em cada arquivo:
       `colecoes-tela` para os dois primeiros, `clique-responde` para `moldura-capa`):
 
@@ -491,12 +491,12 @@ Reposto pela fatia `<slug-que-repoe>` do lote `melodia-religa`. Volta a `conclui
 `bash tools/check-orfaos.sh` não listar mais nada desta fatia.
 ```
 
-- [ ] verificação mecânica da task:
+- [x] verificação mecânica da task:
       `grep -c 'status: travado' docs/plans/2026-08-27-colecoes-tags.md docs/plans/2026-08-27-download-youtube.md docs/plans/2026-08-27-moldura-capa.md`
       → `1` em cada um dos três
-- [ ] verificação mecânica da task:
+- [x] verificação mecânica da task:
       `grep -c 'Diagnóstico (2026-08-28)' docs/plans/2026-08-27-*.md | grep -c ':1'` → `3`
-- [ ] commit:
+- [x] commit:
 
 ```bash
 git add docs/plans/2026-08-27-colecoes-tags.md docs/plans/2026-08-27-download-youtube.md docs/plans/2026-08-27-moldura-capa.md docs/plans/2026-08-28-clique-responde.md

@@ -27,9 +27,7 @@ public:
     Q_INVOKABLE QString clauseForAlbum(int albumId);
     Q_INVOKABLE QString clauseForGenre(int genreId);
     Q_INVOKABLE QString clauseForAll();
-    Q_INVOKABLE QString clauseForSearch(const QString &text);
     Q_INVOKABLE QVariantList bindingsFor(int id);
-    Q_INVOKABLE QVariantList bindingsForSearch(const QString &text);
 
     Q_INVOKABLE QString clauseRecent();
     Q_INVOKABLE QString clauseMostPlayed();

@@ -24,6 +24,10 @@ public:
     Q_INVOKABLE bool renameCollection(int collectionId, const QString &newName);
     Q_INVOKABLE bool deleteCollection(int collectionId);
     Q_INVOKABLE bool addTrackToCollection(int collectionId, int trackId);
+    // A twelve-track album cost twelve trips to the row menu. One transaction, one signal;
+    // returns how many actually ENTERED (already-present tracks do not count, and are not
+    // an error).
+    Q_INVOKABLE int addTracksToCollection(int collectionId, const QVariantList &trackIds);
     Q_INVOKABLE bool removeTrackFromCollection(int collectionId, int trackId);
     Q_INVOKABLE QVariantList collectionsForTrack(int trackId);
     Q_INVOKABLE QString clauseForCollection(int collectionId);

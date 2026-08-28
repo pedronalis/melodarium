@@ -121,6 +121,56 @@ bool CollectionManager::addTrackToCollection(int collectionId, int trackId)
     return true;
 }
 
+int CollectionManager::addTracksToCollection(int collectionId, const QVariantList &trackIds)
+{
+    if (collectionId <= 0 || trackIds.isEmpty())
+        return 0;
+
+    QSqlDatabase db = uiDb();
+
+    QSqlQuery posQ(db);
+    posQ.prepare(QStringLiteral(
+        "SELECT IFNULL(MAX(position), 0) FROM collection_tracks WHERE collection_id = ?"));
+    posQ.addBindValue(collectionId);
+    int position = (posQ.exec() && posQ.next()) ? posQ.value(0).toInt() : 0;
+
+    // One transaction: twelve INSERTs in autocommit are twelve fsyncs, and a failure halfway
+    // would leave half a collection written.
+    db.transaction();
+
+    QSqlQuery ins(db);
+    ins.prepare(QStringLiteral(
+        "INSERT OR IGNORE INTO collection_tracks (collection_id, track_id, position, added_at) "
+        "VALUES (?, ?, ?, ?)"));
+
+    const qint64 now = QDateTime::currentSecsSinceEpoch();
+    int inserted = 0;
+    for (const QVariant &raw : trackIds) {
+        const int trackId = raw.toInt();
+        if (trackId <= 0)
+            continue;
+        position += kPositionStep;
+        ins.bindValue(0, collectionId);
+        ins.bindValue(1, trackId);
+        ins.bindValue(2, position);
+        ins.bindValue(3, now);
+        if (ins.exec() && ins.numRowsAffected() > 0)
+            ++inserted;
+        else
+            position -= kPositionStep; // do not spend a position slot on a row that stayed out
+    }
+
+    if (!db.commit()) {
+        db.rollback();
+        return 0;
+    }
+
+    // One signal for the whole album: the collections pane reloads on every one of them.
+    if (inserted > 0)
+        emit collectionsChanged();
+    return inserted;
+}
+
 bool CollectionManager::removeTrackFromCollection(int collectionId, int trackId)
 {
     QSqlQuery q(uiDb());

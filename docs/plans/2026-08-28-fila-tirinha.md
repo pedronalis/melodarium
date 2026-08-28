@@ -1,7 +1,7 @@
 ---
 slug: fila-tirinha
 feature: melodia-religa
-status: aprovado
+status: concluido
 depende-de: [fila-motor, clique-responde]
 decisao-humana: sim
 spec: design/Main.dc.html:141-152 · design/Busca.dc.html:330 · docs/auditoria-completude.md (achados 13,14,15)
@@ -64,7 +64,7 @@ fila acaba.
 
 ### Task 1: A tirinha de capas
 
-- [ ] Criar `src/QueueStrip.qml`:
+- [x] Criar `src/QueueStrip.qml`:
 
 ```qml
 pragma ComponentBehavior: Bound
@@ -204,14 +204,14 @@ Item {
 }
 ```
 
-- [ ] Registrar em `CMakeLists.txt`, na lista `QML_FILES`, depois de `src/LibraryPane.qml`:
+- [x] Registrar em `CMakeLists.txt`, na lista `QML_FILES`, depois de `src/LibraryPane.qml`:
 
 ```cmake
         src/QueueStrip.qml
 ```
 
-- [ ] verificação mecânica da task: `quiet-run cmake --build build` → exit 0
-- [ ] commit:
+- [x] verificação mecânica da task: `quiet-run cmake --build build` → exit 0
+- [x] commit:
 
 ```bash
 git add src/QueueStrip.qml CMakeLists.txt docs/plans/2026-08-28-fila-tirinha.md
@@ -220,13 +220,13 @@ git commit -m "feat(ui): the up-next strip with covers and a +N tile"
 
 ### Task 2: A tirinha ganha o pé da lista
 
-- [ ] Em `src/LibraryPane.qml`, declarar o sinal junto dos outros:
+- [x] Em `src/LibraryPane.qml`, declarar o sinal junto dos outros:
 
 ```qml
     signal queueActivated(int queueIndex)
 ```
 
-- [ ] No mesmo arquivo, acrescentar a tirinha como **último filho** do `ColumnLayout`
+- [x] No mesmo arquivo, acrescentar a tirinha como **último filho** do `ColumnLayout`
       principal, depois do `ListView { id: groupList … }`:
 
 ```qml
@@ -237,7 +237,7 @@ git commit -m "feat(ui): the up-next strip with covers and a +N tile"
         }
 ```
 
-- [ ] Em `src/Main.qml`, no `LibraryPane { id: libraryPane … }`, ligar o pulo na fila:
+- [x] Em `src/Main.qml`, no `LibraryPane { id: libraryPane … }`, ligar o pulo na fila:
 
 ```qml
                 onQueueActivated: function (queueIndex) {
@@ -246,12 +246,12 @@ git commit -m "feat(ui): the up-next strip with covers and a +N tile"
                 }
 ```
 
-- [ ] verificação mecânica da task:
+- [x] verificação mecânica da task:
       `grep -c 'QueueStrip\|queueActivated' src/LibraryPane.qml` → `3`
-- [ ] verificação mecânica da task:
+- [x] verificação mecânica da task:
       `bash tools/check-layout.sh` → 11 medidas ok (a tirinha não pode empurrar o layout;
       ela some quando a fila está vazia, que é o caso do gate)
-- [ ] commit:
+- [x] commit:
 
 ```bash
 git add src/LibraryPane.qml src/Main.qml docs/plans/2026-08-28-fila-tirinha.md
@@ -260,13 +260,13 @@ git commit -m "feat(ui): the up-next strip sits at the foot of the library list"
 
 ### Task 3: Shift+Enter põe o resultado da busca na fila
 
-- [ ] Em `src/SearchOverlay.qml`, declarar o sinal junto dos outros:
+- [x] Em `src/SearchOverlay.qml`, declarar o sinal junto dos outros:
 
 ```qml
     signal trackQueued(string path)
 ```
 
-- [ ] No mesmo arquivo, acrescentar a função que enfileira sem fechar o overlay — quem
+- [x] No mesmo arquivo, acrescentar a função que enfileira sem fechar o overlay — quem
       está montando uma fila quer montar várias de seguida:
 
 ```qml
@@ -279,7 +279,7 @@ git commit -m "feat(ui): the up-next strip sits at the foot of the library list"
     }
 ```
 
-- [ ] No mesmo arquivo, junto de `Keys.onReturnPressed` e `Keys.onEnterPressed` do
+- [x] No mesmo arquivo, junto de `Keys.onReturnPressed` e `Keys.onEnterPressed` do
       `TextInput` (linhas 193-194), acrescentar o atalho. `event.modifiers` é o que
       distingue os dois gestos na mesma tecla:
 
@@ -298,7 +298,7 @@ git commit -m "feat(ui): the up-next strip sits at the foot of the library list"
                 }
 ```
 
-- [ ] No mesmo arquivo, se ainda não existir uma função `hitAt(index)` que devolva o
+- [x] No mesmo arquivo, se ainda não existir uma função `hitAt(index)` que devolva o
       resultado destacado (a `activate(index)` já resolve isso internamente), extraí-la para
       as duas usarem a mesma travessia — declarar antes de `activate`:
 
@@ -313,13 +313,13 @@ git commit -m "feat(ui): the up-next strip sits at the foot of the library list"
     }
 ```
 
-- [ ] Em `src/Main.qml`, no `SearchOverlay { id: searchOverlay … }`, ligar o sinal:
+- [x] Em `src/Main.qml`, no `SearchOverlay { id: searchOverlay … }`, ligar o sinal:
 
 ```qml
         onTrackQueued: function (path) { AudioEngine.appendToQueue(path) }
 ```
 
-- [ ] Em `src/SearchOverlay.qml`, o rodapé de atalhos precisa anunciar o gesto novo — o
+- [x] Em `src/SearchOverlay.qml`, o rodapé de atalhos precisa anunciar o gesto novo — o
       desenho o lista (`design/Busca.dc.html:330`). Localizar o `Row`/`RowLayout` do rodapé
       que já mostra os atalhos e acrescentar:
 
@@ -332,10 +332,10 @@ git commit -m "feat(ui): the up-next strip sits at the foot of the library list"
             }
 ```
 
-- [ ] verificação mecânica da task:
+- [x] verificação mecânica da task:
       `grep -c 'trackQueued\|ShiftModifier' src/SearchOverlay.qml` → `4`
-- [ ] verificação mecânica da task: `quiet-run cmake --build build` → exit 0
-- [ ] commit:
+- [x] verificação mecânica da task: `quiet-run cmake --build build` → exit 0
+- [x] commit:
 
 ```bash
 git add src/SearchOverlay.qml src/Main.qml docs/plans/2026-08-28-fila-tirinha.md
@@ -344,23 +344,23 @@ git commit -m "feat(search): shift+enter queues a hit without interrupting playb
 
 ### Task 4: Apagar a lista de fila que nunca foi a tirinha
 
-- [ ] Confirmar que continua sem consumidor antes de apagar:
+- [x] Confirmar que continua sem consumidor antes de apagar:
 
 ```bash
 grep -lE '(^|[^A-Za-z])QueuePanel[[:space:]]*\{' src/*.qml
 ```
 
-- [ ] O comando acima tem de sair **vazio**. Só então:
+- [x] O comando acima tem de sair **vazio**. Só então:
 
 ```bash
 git rm src/QueuePanel.qml
 sed -i '/src\/QueuePanel\.qml/d' CMakeLists.txt
 ```
 
-- [ ] verificação mecânica da task:
+- [x] verificação mecânica da task:
       `grep -c 'QueuePanel' CMakeLists.txt` → `0`
-- [ ] verificação mecânica da task: `quiet-run cmake --build build` → exit 0
-- [ ] commit:
+- [x] verificação mecânica da task: `quiet-run cmake --build build` → exit 0
+- [x] commit:
 
 ```bash
 git add -A src CMakeLists.txt docs/plans/2026-08-28-fila-tirinha.md

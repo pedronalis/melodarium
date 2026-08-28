@@ -27,6 +27,20 @@ private:
         return (q.exec(sql) && q.next()) ? q.value(0).toInt() : -1;
     }
 
+    // What the collections pane actually shows for one collection: its track count as the
+    // model reports it, not a raw COUNT(*). A bulk insert that skips the signal would still
+    // pass a raw count, and the pane would keep showing the old number.
+    static int countOf(CollectionManager &cm, int collectionId)
+    {
+        const QVariantList all = cm.collections();
+        for (const QVariant &entry : all) {
+            const QVariantMap row = entry.toMap();
+            if (row.value(QStringLiteral("id")).toInt() == collectionId)
+                return row.value(QStringLiteral("count")).toInt();
+        }
+        return -1;
+    }
+
     // collections() is ordered by name, not by insertion, so a collection is looked up by
     // name here instead of by position.
     static int idOf(CollectionManager &cm, const QString &name)
@@ -135,6 +149,46 @@ private slots:
         const QStringList hits = cm.completeTag(QStringLiteral("co"));
         QCOMPARE(hits.size(), 2);
         QVERIFY(cm.completeTag(QStringLiteral("zzz")).isEmpty());
+    }
+
+    // Twelve tracks into one collection cannot cost twelve transactions nor twelve signals:
+    // the collections pane listens to collectionsChanged and would reload on every track.
+    void addTracksInBulkInsertsOnceAndSignalsOnce()
+    {
+        CollectionManager cm;
+        const int id = cm.createCollection(QStringLiteral("Álbum inteiro"));
+        QVERIFY(id > 0);
+
+        QSignalSpy spy(&cm, &CollectionManager::collectionsChanged);
+        const int inseridos = cm.addTracksToCollection(id, QVariantList{1, 2});
+        QCOMPARE(inseridos, 2);
+        QCOMPARE(spy.count(), 1);
+
+        QCOMPARE(countOf(cm, id), 2);
+        // The bulk path must honour the same ruler the one-by-one path uses.
+        QCOMPARE(scalar(QStringLiteral(
+                     "SELECT MAX(position) FROM collection_tracks WHERE collection_id = %1").arg(id)),
+                 2 * CollectionManager::kPositionStep);
+    }
+
+    // Adding the same album twice must neither duplicate nor blow up: the primary key
+    // already refuses it, and the user has to see "0 new" instead of an error.
+    void addTracksInBulkIsIdempotentAndKeepsOrder()
+    {
+        CollectionManager cm;
+        const int id = cm.createCollection(QStringLiteral("Álbum repetido"));
+        QVERIFY(id > 0);
+        QCOMPARE(cm.addTracksToCollection(id, QVariantList{1, 2}), 2);
+
+        QSignalSpy spy(&cm, &CollectionManager::collectionsChanged);
+        QCOMPARE(cm.addTracksToCollection(id, QVariantList{1, 2}), 0);
+        QCOMPARE(spy.count(), 0);
+
+        QCOMPARE(countOf(cm, id), 2);
+        // Nothing entered, so nothing may have eaten a position slot either.
+        QCOMPARE(scalar(QStringLiteral(
+                     "SELECT MAX(position) FROM collection_tracks WHERE collection_id = %1").arg(id)),
+                 2 * CollectionManager::kPositionStep);
     }
 
     void removingTheLastUseDropsTheOrphanTag()

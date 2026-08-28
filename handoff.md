@@ -48,17 +48,30 @@
 
 ## Em voo
 
-**Lote `melodia-religa` — run headless em 3 levas, despachado 2026-08-28 10:40.**
+**Lote `melodia-religa` (7 fatias) — TERMINADO e integrado em `main` local, 2026-08-28.**
+Nada pendente dele. Rodou como run headless autônomo em 3 levas, no worktree
+`~/dev/active/melodia-religa-run` (branch `exec/melodia-religa`), sem checkpoint humano.
 
-- cwd do run: `/home/pedro/dev/active/melodia-religa-run` (worktree, branch `exec/melodia-religa`)
-- objetivo: as 7 fatias de `docs/plans/2026-08-28-*.md` executadas, integradas em `main`
-  local e verificadas DEPOIS do merge. Autonomia total — sem checkpoint humano, os gates
-  `decisao-humana: sim` são do agente.
-- orquestrador: 3 levas em série (folhas → UI → alcance+ajustes+integração);
-  log em `ORQUESTRADOR.log`, saída por leva em `leva{1,2,3}.out` no cwd do run.
-- conferir: RUN_GATE ausente = verde · `.run_gate_count` presente = FAIL (ver
-  `RESUMO_RUN.md`/transcript) · RUN_GATE presente sem count = em voo
-- decisões que o run tomou sozinho ficam em `DECISOES_RUN.md` no cwd do run.
+As sete fatias: `clique-responde`, `fila-motor`, `colecoes-tela`, `fila-tirinha`,
+`shuffle-repeat`, `colecoes-alcance`, `ajustes` — todas com status `concluido`.
+
+O que mudou na tela: o coração e a lateral respondem ao clique; as coleções têm um modo
+próprio, com tela que abre, renomeia, apaga e tira faixa pela linha; a fila aparece no pé da
+lista com as capas do que vem; aleatório e repetir ligam de verdade; um álbum inteiro entra
+numa coleção com um clique; a busca acha coleção pelo nome e abre; e existe uma gaveta de
+ajustes (engrenagem no pé da tira) onde se troca a pasta de música e se ligam os dois
+compromissos de qualidade de áudio.
+
+**Uma decisão que o run tomou sozinho e vale você conferir** (está inteira em
+`DECISOES_RUN.md` do worktree, nº 32): sobraram seis pedaços de motor prontos e testados que
+nenhum desenho pede — desinscrever de um podcast, "continuar ouvindo", arrastar para
+reordenar dentro de uma coleção, entre outros. Em vez de inventar telas para eles ou apagá-los,
+o run os pôs numa **reserva declarada**, que o detector de órfãos imprime toda vez que roda.
+Eles não somem da vista; esperam você decidir se merecem tela. Quatro peças realmente mortas
+(duas telas substituídas pelo redesenho e a busca antiga) saíram do disco.
+
+O run do redesenho (fatias 3-5) foi colhido antes: **PASSOU** — 9 commits, gate de 19 linhas
+verde, 9/9 alvos de teste, integrado em `main`. As capturas estão em `docs/telas/`.
 
 ## Verificação
 
@@ -157,6 +170,20 @@ QT_FORCE_STDERR_LOGGING=1` — mas o log fica enorme (845 KB num único start).
 - [ ] 2026-08-28 · **Arquivo de áudio corrompido não entra na biblioteca e não avisa** — dois
       MP3 vieram truncados do download e a varredura simplesmente os ignorou. `ffprobe` no
       arquivo diz se é o arquivo ou o scanner.
+
+- [ ] 2026-08-28 · **Chamada de método numa ligação QML não cria dependência** — e ler a
+      propriedade sem USAR o valor também não (`void X` é eliminado). Componente nasce vazio e
+      congela, com build verde e o gate de erros de QML passando. Lição em
+      `docs/solutions/ui/2026-08-28-chamada-de-metodo-nao-cria-dependencia-qml.md`.
+- [ ] 2026-08-28 · **`ctest` roda o binário que existe, não o código do disco** — depois de um
+      teste que não compilou, ele devolve `100% tests passed` do executável anterior. Sempre
+      `cmake --build build` antes, e conferir o teste novo com `-functions`. `QSKIP` também sai
+      verde. Lição em `docs/solutions/test-failures/`.
+- [ ] 2026-08-28 · **`loadfile … replace` REINICIA a faixa que está tocando** — medido: 3,0 s
+      viravam 0,7 s. Para reordenar a fila sem interromper, `playlist-move` entrada por entrada.
+- [ ] 2026-08-28 · **`cp` do `melodia.db` copia um banco VAZIO** — o SQLite está em modo WAL e os
+      dados vivem no `-wal`. Use `sqlite3 orig ".backup copia"`. Para fotografar com dados de
+      teste sem tocar no banco do Pedro: `XDG_DATA_HOME=/tmp/algo`.
 
 ## Legado (arquivado)
 

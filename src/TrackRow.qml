@@ -17,6 +17,9 @@ Item {
     property bool isCurrent: false
     property int trackId: 0
     property bool showCollectButton: false
+    // "plus" in the library (put into a collection), "close" inside a collection (take it
+    // out of this one).
+    property string collectGlyph: "plus"
     property bool liked: false
     // Posição na lista, não o número da faixa no álbum: a lista é uma fila, e é a ordem dela
     // que o usuário vê.
@@ -145,7 +148,7 @@ Item {
             IconButton {
                 Layout.preferredWidth: Math.round(18 * Theme.uiScale)
                 Layout.preferredHeight: 18
-                icon: "plus"
+                icon: root.collectGlyph
                 size: Theme.fontSizeS
                 visible: root.showCollectButton
                 opacity: mouse.containsMouse ? 1.0 : 0.35
@@ -165,7 +168,7 @@ Item {
                 Text {
                     id: heart
                     anchors.centerIn: parent
-                    text: Icons.get("heart")
+                    text: root.liked ? Icons.get("heart-filled") : Icons.get("heart")
                     font.family: Icons.fontFamily
                     font.pointSize: Theme.fontSizeS
                     color: root.liked ? Theme.mPrimary

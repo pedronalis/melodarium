@@ -17,6 +17,9 @@ Item {
     property var groups: []
     property bool showingGroups: false
     property string groupTitle: ""
+    // The design puts "Ólafur Arnalds · 8 faixas · 35 min" in the header: without the artist,
+    // two same-named albums by different artists are indistinguishable (design/Main.dc.html:82).
+    property string groupSubtitle: ""
     property bool scanning: false
 
     // Lidas por `appmelodia --measure`: a linha de filtros nunca pode pedir mais largura do
@@ -30,6 +33,8 @@ Item {
     signal trackActivated(int index)
     signal collectRequested(int trackId)
     signal searchRequested
+    signal queueActivated(int queueIndex)
+    signal collectAllRequested
 
     function reload() {
         chips.likedCount = LibraryBrowser.likedCount()
@@ -54,7 +59,13 @@ Item {
 
     Connections {
         target: LibraryBrowser
-        function onLikedChanged(id, liked) { root.reload() }
+        function onLikedChanged(id, liked) {
+            root.reload()
+            // O contador do chip já se atualizava; a LINHA não. Sem esta chamada o
+            // coração só muda quando a lista inteira é recarregada por outro motivo.
+            if (list.model !== null)
+                list.model.applyLiked(id, liked)
+        }
     }
 
     ColumnLayout {
@@ -68,31 +79,57 @@ Item {
             Layout.fillWidth: true
             spacing: Theme.marginM
 
-            Text {
-                Layout.alignment: Qt.AlignBaseline
-                text: root.groupTitle !== "" ? root.groupTitle : qsTr("Biblioteca")
-                font.family: Theme.fontFamily
-                font.pointSize: Theme.fontSizeXL
-                font.weight: Theme.fontWeightSemiBold
-                color: Theme.mOnSurface
+            // O desenho empilha o nome da lista e a ficha dela (design/Main.dc.html:79-82).
+            // Medido em 2026-08-28: em UMA linha, "Curses From Past Times (EP)" com o artista
+            // e o botão pedia 44 px a mais do que a coluna tem, e o miolo inteiro transbordava
+            // para fora da janela. Empilhado, cabe em qualquer largura.
+            ColumnLayout {
+                Layout.fillWidth: true
+                spacing: 0
+
+                Text {
+                    Layout.fillWidth: true
+                    text: root.groupTitle !== "" ? root.groupTitle : qsTr("Biblioteca")
+                    elide: Text.ElideRight
+                    font.family: Theme.fontFamily
+                    font.pointSize: Theme.fontSizeXL
+                    font.weight: Theme.fontWeightSemiBold
+                    color: Theme.mOnSurface
+                }
+
+                RowLayout {
+                    Layout.fillWidth: true
+                    spacing: Theme.marginS
+
+                    // O artista do álbum, antes da contagem, para o cabeçalho ler como uma
+                    // frase: "Ólafur Arnalds · 8 faixas · 35 min".
+                    Text {
+                        Layout.maximumWidth: root.width * 0.4
+                        visible: root.groupSubtitle !== "" && !root.showingGroups
+                        text: root.groupSubtitle + " ·"
+                        elide: Text.ElideRight
+                        font.family: Theme.fontFamily
+                        font.pointSize: Theme.fontSizeS
+                        color: Theme.mOnSurfaceVariant
+                    }
+
+                    Text {
+                        text: root.showingGroups
+                              ? root.groups.length + qsTr(" itens")
+                              : root.withThousands(list.count) + qsTr(" faixas")
+                                + (list.model !== null && list.model.totalDurationMs > 0
+                                   ? " · " + root.formatTotal(list.model.totalDurationMs) : "")
+                        font.family: Theme.fontFamilyFixed
+                        font.pointSize: Theme.fontSizeS
+                        color: Theme.mOutline
+                    }
+
+                    Item { Layout.fillWidth: true }
+                }
             }
 
             Text {
-                Layout.alignment: Qt.AlignBaseline
-                text: root.showingGroups
-                      ? root.groups.length + qsTr(" itens")
-                      : root.withThousands(list.count) + qsTr(" faixas")
-                        + (list.model !== null && list.model.totalDurationMs > 0
-                           ? " · " + root.formatTotal(list.model.totalDurationMs) : "")
-                font.family: Theme.fontFamilyFixed
-                font.pointSize: Theme.fontSizeS
-                color: Theme.mOutline
-            }
-
-            Item { Layout.fillWidth: true }
-
-            Text {
-                Layout.alignment: Qt.AlignBaseline
+                Layout.alignment: Qt.AlignVCenter
                 visible: root.scanning
                 text: qsTr("varrendo…")
                 font.family: Theme.fontFamily
@@ -100,8 +137,55 @@ Item {
                 color: Theme.mOnSurfaceVariant
             }
 
+            // Doze faixas numa coleção custavam doze idas ao menu da linha. Este botão joga
+            // a lista inteira que está na tela de uma vez (design/Main.dc.html:84-87).
+            Rectangle {
+                Layout.alignment: Qt.AlignVCenter
+                Layout.preferredHeight: Math.round(24 * Theme.uiScale)
+                Layout.preferredWidth: rotuloColecao.implicitWidth + Theme.marginM * 2
+                visible: !root.showingGroups && list.count > 0
+                radius: Theme.iRadiusS
+                color: coletarArea.containsMouse ? Theme.mSurfaceVariant : "transparent"
+                border.width: Theme.borderS
+                border.color: Theme.mSurfaceVariant
+
+                Behavior on color {
+                    ColorAnimation { duration: Theme.animationFast; easing.type: Theme.easingType }
+                }
+
+                Row {
+                    id: rotuloColecao
+                    anchors.centerIn: parent
+                    spacing: Theme.marginS
+
+                    Text {
+                        anchors.verticalCenter: parent.verticalCenter
+                        text: Icons.get("plus")
+                        font.family: Icons.fontFamily
+                        font.pointSize: Theme.fontSizeXS
+                        color: Theme.mOnSurfaceVariant
+                    }
+                    Text {
+                        anchors.verticalCenter: parent.verticalCenter
+                        text: qsTr("Coleção")
+                        font.family: Theme.fontFamily
+                        font.pointSize: Theme.fontSizeS
+                        color: Theme.mOnSurfaceVariant
+                    }
+                }
+
+                MouseArea {
+                    id: coletarArea
+                    anchors.fill: parent
+                    hoverEnabled: true
+                    cursorShape: Qt.PointingHandCursor
+                    onClicked: root.collectAllRequested()
+                }
+            }
+
             // Reler a pasta é raro, então o botão é discreto: só o ícone, sem rótulo.
             IconButton {
+                Layout.alignment: Qt.AlignVCenter
                 Layout.preferredWidth: Math.round(22 * Theme.uiScale)
                 Layout.preferredHeight: 22
                 icon: "history"
@@ -313,6 +397,12 @@ Item {
                 font.pointSize: Theme.fontSizeM
                 color: Theme.mOnSurfaceVariant
             }
+        }
+
+        // O pé da lista, como no desenho: a fila mora aqui, não no painel da capa.
+        QueueStrip {
+            Layout.fillWidth: true
+            onEntryActivated: function (queueIndex) { root.queueActivated(queueIndex) }
         }
     }
 }
