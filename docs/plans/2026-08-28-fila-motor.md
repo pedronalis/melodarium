@@ -1,7 +1,7 @@
 ---
 slug: fila-motor
 feature: melodia-religa
-status: aprovado
+status: concluido
 depende-de: []
 decisao-humana: nao
 spec: docs/auditoria-completude.md (achados 13,14,15) · design/Main.dc.html:141-152
