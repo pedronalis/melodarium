@@ -15,6 +15,10 @@ Rectangle {
     signal likeRequested(int trackId)
     signal playRequested(string mode)
 
+    // O TagEditor emite tagChosen desde sempre; o painel nunca repassou, e o clique na
+    // etiqueta morria aqui dentro (regressão do commit 202b7bb).
+    signal tagChosen(string name)
+
     // Compact does not just shrink the cover: the whole panel narrows with it. Leaving the
     // panel at 392 while the cover drops to 200 would push the frame past a 720 px window and
     // send the right edge of the pane off screen.
@@ -410,6 +414,7 @@ Rectangle {
             Layout.fillWidth: true
             visible: root.hasTrack && root.trackId > 0 && !root.episodeMode
             trackId: root.trackId
+            onTagChosen: function (name) { root.tagChosen(name) }
         }
 
         // Sempre presente: é ele que mantém a capa no topo quando o resto da coluna encolhe.

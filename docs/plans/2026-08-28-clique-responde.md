@@ -268,7 +268,7 @@ git commit -m "fix(ui): the rail picks the mode, the chips pick the axis — no 
 
 ### Task 5: Clicar numa etiqueta filtra a biblioteca
 
-- [ ] Em `src/NowPlayingPanel.qml`, declarar o sinal junto dos outros dois, logo depois de
+- [x] Em `src/NowPlayingPanel.qml`, declarar o sinal junto dos outros dois, logo depois de
       `signal playRequested(string mode)`:
 
 ```qml
@@ -277,7 +277,7 @@ git commit -m "fix(ui): the rail picks the mode, the chips pick the axis — no 
     signal tagChosen(string name)
 ```
 
-- [ ] No mesmo arquivo, no `TagEditor { id: tagEd … }`, ligar o repasse:
+- [x] No mesmo arquivo, no `TagEditor { id: tagEd … }`, ligar o repasse:
 
 ```qml
         TagEditor {
@@ -289,14 +289,14 @@ git commit -m "fix(ui): the rail picks the mode, the chips pick the axis — no 
         }
 ```
 
-- [ ] Em `src/Main.qml`, no `NowPlayingPanel { id: nowPlaying … }`, acrescentar o handler
+- [x] Em `src/Main.qml`, no `NowPlayingPanel { id: nowPlaying … }`, acrescentar o handler
       junto dos outros dois:
 
 ```qml
             onTagChosen: function (name) { root.showTag(name) }
 ```
 
-- [ ] Em `src/Main.qml`, `showTag` precisa levar a tela junto: chegar numa etiqueta a
+- [x] Em `src/Main.qml`, `showTag` precisa levar a tela junto: chegar numa etiqueta a
       partir do painel é chegar de fora da lista de grupos, e hoje a função troca o
       conteúdo sem trocar o modo nem acender o chip:
 
@@ -314,11 +314,11 @@ git commit -m "fix(ui): the rail picks the mode, the chips pick the axis — no 
     }
 ```
 
-- [ ] verificação mecânica da task:
+- [x] verificação mecânica da task:
       `grep -c 'onTagChosen' src/NowPlayingPanel.qml src/Main.qml` →
       `src/NowPlayingPanel.qml:1`, `src/Main.qml:1`
-- [ ] verificação mecânica da task: `quiet-run cmake --build build` → exit 0
-- [ ] commit:
+- [x] verificação mecânica da task: `quiet-run cmake --build build` → exit 0
+- [x] commit:
 
 ```bash
 git add src/NowPlayingPanel.qml src/Main.qml docs/plans/2026-08-28-clique-responde.md

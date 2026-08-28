@@ -278,6 +278,10 @@ Window {
 
     // Tags are picked by name, not by id, so they do not go through showSection().
     function showTag(name) {
+        root.section = "library"
+        root.libraryFilter = "tags"
+        root.currentSection = "tags"
+        root.currentId = 0
         trackModel.loadFromQuery(CollectionManager.clauseForTag(name),
                                  CollectionManager.bindingsForTag(name))
         root.groupsTitle = name
@@ -470,6 +474,7 @@ Window {
             episodeMode: root.currentEpisodeId > 0
             onLikeRequested: function (id) { LibraryBrowser.toggleLike(id) }
             onPlayRequested: function (mode) { root.startFromEmpty(mode) }
+            onTagChosen: function (name) { root.showTag(name) }
         }
 
         StackLayout {
