@@ -132,6 +132,32 @@ private slots:
         QVERIFY(sawTrack);
     }
 
+    // A collection nobody can search for is a collection that only exists for whoever
+    // remembers where it is.
+    void searchAlsoFindsCollections()
+    {
+        exec(QStringLiteral(
+            "INSERT INTO collections (id, name, created_at) VALUES (7, 'Pra codar', 1000)"));
+        exec(QStringLiteral(
+            "INSERT INTO collection_tracks (collection_id, track_id, position, added_at) "
+            "VALUES (7, 1, 1000, 1000)"));
+
+        LibraryBrowser browser;
+        const QVariantList hits = browser.searchGrouped(QStringLiteral("codar"), 4);
+
+        int achadas = 0;
+        for (const QVariant &raw : hits) {
+            const QVariantMap row = raw.toMap();
+            if (row.value(QStringLiteral("kind")).toString() != QLatin1String("collection"))
+                continue;
+            ++achadas;
+            QCOMPARE(row.value(QStringLiteral("id")).toInt(), 7);
+            QCOMPARE(row.value(QStringLiteral("title")).toString(), QStringLiteral("Pra codar"));
+            QVERIFY(row.value(QStringLiteral("subtitle")).toString().contains(QStringLiteral("1")));
+        }
+        QCOMPARE(achadas, 1);
+    }
+
     void searchQuerySanitisesUserInput()
     {
         // Raw FTS5 syntax in user input must not reach the engine as syntax.
