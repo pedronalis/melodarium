@@ -76,6 +76,7 @@ qt_add_qml_module(appmelodia
         src/SearchField.qml
         src/NewCollectionDialog.qml
         src/ConfirmDialog.qml
+        src/SettingsDialog.qml
         src/TagChip.qml
         src/TagEditor.qml
         src/EpisodeRow.qml
