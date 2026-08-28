@@ -64,7 +64,7 @@ fila acaba.
 
 ### Task 1: A tirinha de capas
 
-- [ ] Criar `src/QueueStrip.qml`:
+- [x] Criar `src/QueueStrip.qml`:
 
 ```qml
 pragma ComponentBehavior: Bound
@@ -204,14 +204,14 @@ Item {
 }
 ```
 
-- [ ] Registrar em `CMakeLists.txt`, na lista `QML_FILES`, depois de `src/LibraryPane.qml`:
+- [x] Registrar em `CMakeLists.txt`, na lista `QML_FILES`, depois de `src/LibraryPane.qml`:
 
 ```cmake
         src/QueueStrip.qml
 ```
 
-- [ ] verificação mecânica da task: `quiet-run cmake --build build` → exit 0
-- [ ] commit:
+- [x] verificação mecânica da task: `quiet-run cmake --build build` → exit 0
+- [x] commit:
 
 ```bash
 git add src/QueueStrip.qml CMakeLists.txt docs/plans/2026-08-28-fila-tirinha.md

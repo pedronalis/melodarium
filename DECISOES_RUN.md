@@ -177,3 +177,27 @@ e os dados vivem no `-wal`. Só `.backup` (ou copiar os três arquivos) traz os 
 
 **Custo de estar errada.** Nenhum: as fotos provam o código, não o acervo. Se o Pedro criar
 coleções de verdade, a mesma tela as mostra.
+
+## 10. A tirinha da fila teria congelado: `upcoming()` é método, e método não cria dependência
+
+**Contexto.** A Task 1 do plano `fila-tirinha` traz
+`readonly property var proximos: AudioEngine.upcoming(root.lookahead)`. O QML só registra
+dependência em LEITURA DE PROPRIEDADE; uma chamada de método invocável não é rastreada. Essa
+ligação seria avaliada uma vez, ao nascer o componente — quando a fila ainda está vazia — e
+nunca mais. A tirinha ficaria invisível para sempre, com build verde e sem um único aviso.
+É o mesmo gênero de defeito que produziu este lote: funciona por dentro, não chega à tela.
+
+**Decisão.** Mantive a chamada a `upcoming()` (é a interface que o plano contratou e o que
+tira o invocável da lista de órfãos) e acrescentei duas leituras explícitas das propriedades
+que decidem a resposta, `AudioEngine.queueCount` e `AudioEngine.playlistPos`, com comentário
+dizendo por quê. As duas têm NOTIFY (`queueChanged`, `playlistPosChanged`), então a ligação
+recalcula quando a fila é trocada e quando ela anda.
+
+**Alternativa descartada.** Calcular a fatia em QML a partir de `AudioEngine.queue` e
+`playlistPos`, sem chamar `upcoming()`. Duplicaria em JavaScript uma regra que já existe em
+C++ testado, e deixaria `upcoming` órfão — que é justamente um dos itens que esta fatia
+tinha de tirar do `check-orfaos.sh`.
+
+**Custo de estar errada.** Se eu estiver errado sobre o rastreamento, as duas leituras são
+inertes e não custam nada. Se estiver certo (e a foto com a fila carregada DEPOIS da
+construção da tela é a prova), sem elas a fatia não entregaria nada.
