@@ -466,7 +466,7 @@ git commit -m "test(tools): detect orphan QML and unreachable invokables"
 
 ### Task 8: Reabrir o ledger que mente [sem-código]
 
-- [ ] Três planos antigos estão `status: concluido` e o que eles entregaram não está mais na
+- [x] Três planos antigos estão `status: concluido` e o que eles entregaram não está mais na
       tela — o ledger registra o dia da entrega, não o estado de hoje. Reabri-los é o que
       impede o próximo `/retoma` de ler "tudo pronto":
 
@@ -476,7 +476,7 @@ python3 ~/.claude/scripts/planos-lote.py set-status docs/plans/2026-08-27-downlo
 python3 ~/.claude/scripts/planos-lote.py set-status docs/plans/2026-08-27-moldura-capa.md travado --dir docs/plans
 ```
 
-- [ ] Acrescentar ao **fim** de cada um dos três planos o diagnóstico que o estado `travado`
+- [x] Acrescentar ao **fim** de cada um dos três planos o diagnóstico que o estado `travado`
       exige, colando este bloco (com o slug da fatia que o repõe trocado em cada arquivo:
       `colecoes-tela` para os dois primeiros, `clique-responde` para `moldura-capa`):
 
@@ -491,12 +491,12 @@ Reposto pela fatia `<slug-que-repoe>` do lote `melodia-religa`. Volta a `conclui
 `bash tools/check-orfaos.sh` não listar mais nada desta fatia.
 ```
 
-- [ ] verificação mecânica da task:
+- [x] verificação mecânica da task:
       `grep -c 'status: travado' docs/plans/2026-08-27-colecoes-tags.md docs/plans/2026-08-27-download-youtube.md docs/plans/2026-08-27-moldura-capa.md`
       → `1` em cada um dos três
-- [ ] verificação mecânica da task:
+- [x] verificação mecânica da task:
       `grep -c 'Diagnóstico (2026-08-28)' docs/plans/2026-08-27-*.md | grep -c ':1'` → `3`
-- [ ] commit:
+- [x] commit:
 
 ```bash
 git add docs/plans/2026-08-27-colecoes-tags.md docs/plans/2026-08-27-download-youtube.md docs/plans/2026-08-27-moldura-capa.md docs/plans/2026-08-28-clique-responde.md
