@@ -1,7 +1,7 @@
 ---
 slug: colecoes-tela
 feature: melodia-religa
-status: aprovado
+status: concluido
 depende-de: [clique-responde]
 decisao-humana: sim
 spec: docs/specs/2026-08-27-player-musica-podcast.md §Como fica organizado · docs/auditoria-completude.md (achados 4,5,22)
