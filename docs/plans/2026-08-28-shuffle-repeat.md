@@ -1,7 +1,7 @@
 ---
 slug: shuffle-repeat
 feature: melodia-religa
-status: aprovado
+status: concluido
 depende-de: [fila-motor]
 decisao-humana: sim
 spec: docs/auditoria-completude.md (achados 10,11,12) · design/Main.dc.html
