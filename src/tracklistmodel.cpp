@@ -163,6 +163,15 @@ QStringList TrackListModel::allPaths() const
     return paths;
 }
 
+QVariantList TrackListModel::allTrackIds() const
+{
+    QVariantList out;
+    out.reserve(m_rows.size());
+    for (const TrackRow &r : m_rows)
+        out.append(r.id);
+    return out;
+}
+
 QVariantMap TrackListModel::trackAt(int row) const
 {
     if (row < 0 || row >= m_rows.size())

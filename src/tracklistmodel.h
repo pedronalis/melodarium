@@ -72,6 +72,9 @@ public:
     Q_INVOKABLE void loadAllTracks();
     Q_INVOKABLE void loadFromQuery(const QString &whereClause, const QVariantList &bindings);
     Q_INVOKABLE QStringList allPaths() const;
+    // The header's "+ Coleção" button throws the list on screen into a collection — and what
+    // a collection stores is an id, not a path.
+    Q_INVOKABLE QVariantList allTrackIds() const;
     Q_INVOKABLE QVariantMap trackAt(int row) const;
 
     // Curtir é um clique numa linha, não um motivo para recarregar a lista: isto altera a
