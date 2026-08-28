@@ -139,6 +139,8 @@ Window {
     property bool showingGroups: false
     property var groups: []
     property string groupsTitle: ""
+    // O artista do álbum aberto, para o cabeçalho. Vazio em qualquer outra lista.
+    property string groupSubtitle: ""
     // The track the tag editor is looking at: the last one the user activated.
     property int selectedTrackId: 0
     // What the middle pane is querying right now, so a rescan can ask for it again. The rail
@@ -216,17 +218,27 @@ Window {
     // Opening a group keeps its name on screen: the list is no longer "Biblioteca".
     function openGroup(section, id) {
         let name = ""
+        let subtitle = ""
         for (let i = 0; i < root.groups.length; ++i) {
             if (root.groups[i].id === id) {
                 name = root.groups[i].name
+                // O artista já veio na consulta que montou a lista de grupos: buscá-lo de
+                // novo seria uma segunda varredura da tabela de álbuns por clique.
+                subtitle = root.groups[i].subtitle !== undefined
+                           ? root.groups[i].subtitle : ""
                 break
             }
         }
+        root.groupSubtitle = section === "albums" ? subtitle : ""
         root.openNamedGroup(section, id, name)
     }
 
     // Chegar por busca é chegar de fora da lista de grupos: o nome vem junto do resultado.
     function openNamedGroup(section, id, name) {
+        // Chegando pela busca não há grupo carregado de onde tirar o artista; chegando pela
+        // lista de grupos, openGroup já escreveu o subtítulo uma linha antes.
+        if (section !== "albums")
+            root.groupSubtitle = ""
         root.section = "library"
         root.libraryFilter = section
         root.currentSection = section
@@ -284,6 +296,15 @@ Window {
     function collectTrack(trackId) {
         root.selectedTrackId = trackId
         collectMenu.trackId = trackId
+        collectMenu.emLote = false
+        collectMenu.options = CollectionManager.collections()
+        collectMenu.popup()
+    }
+
+    // O mesmo menu, servindo a lista inteira que está na tela.
+    function collectAll() {
+        collectMenu.trackId = 0
+        collectMenu.emLote = true
         collectMenu.options = CollectionManager.collections()
         collectMenu.popup()
     }
@@ -543,12 +564,14 @@ Window {
                 groups: root.groups
                 showingGroups: root.showingGroups
                 groupTitle: root.groupsTitle
+                groupSubtitle: root.groupSubtitle
                 scanning: Database.scanning
                 onGroupChosen: function (key) { root.chooseFilter(key) }
                 onGroupOpened: function (section, id) { root.openGroup(section, id) }
                 onTagOpened: function (name) { root.showTag(name) }
                 onTrackActivated: function (index) { root.activateTrack(index) }
                 onCollectRequested: function (trackId) { root.collectTrack(trackId) }
+                onCollectAllRequested: root.collectAll()
                 onSearchRequested: searchOverlay.open()
                 onQueueActivated: function (queueIndex) {
                     AudioEngine.loadPlaylist(AudioEngine.queue, queueIndex)
@@ -620,14 +643,22 @@ Window {
 
         property int trackId: 0
         property var options: []
+        // Com emLote, o alvo não é uma faixa: é tudo que a lista está mostrando.
+        property bool emLote: false
 
         Instantiator {
             model: collectMenu.options
             delegate: MenuItem {
                 required property var modelData
                 text: modelData.name
-                onTriggered: CollectionManager.addTrackToCollection(modelData.id,
-                                                                    collectMenu.trackId)
+                onTriggered: {
+                    if (collectMenu.emLote)
+                        CollectionManager.addTracksToCollection(modelData.id,
+                                                               trackModel.allTrackIds())
+                    else
+                        CollectionManager.addTrackToCollection(modelData.id,
+                                                               collectMenu.trackId)
+                }
             }
             onObjectAdded: function (index, object) { collectMenu.insertItem(index, object) }
             onObjectRemoved: function (index, object) { collectMenu.removeItem(object) }
@@ -637,6 +668,9 @@ Window {
             text: qsTr("Nova coleção…")
             onTriggered: {
                 newCollectionForTrack.pendingTrackId = collectMenu.trackId
+                newCollectionForTrack.pendingLote = collectMenu.emLote
+                newCollectionForTrack.renameId = 0
+                newCollectionForTrack.initialText = ""
                 newCollectionForTrack.open()
             }
         }
@@ -646,11 +680,15 @@ Window {
         id: newCollectionForTrack
 
         property int pendingTrackId: 0
+        property bool pendingLote: false
 
         onCreated: function (id, name) {
-            if (newCollectionForTrack.pendingTrackId > 0)
+            if (newCollectionForTrack.pendingLote)
+                CollectionManager.addTracksToCollection(id, trackModel.allTrackIds())
+            else if (newCollectionForTrack.pendingTrackId > 0)
                 CollectionManager.addTrackToCollection(id, newCollectionForTrack.pendingTrackId)
             newCollectionForTrack.pendingTrackId = 0
+            newCollectionForTrack.pendingLote = false
         }
     }
 }
