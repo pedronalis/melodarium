@@ -295,3 +295,52 @@ o código foi compilado.
 
 **Custo de estar errada.** Se eu não tivesse conferido, esta fatia teria fechado com um teste
 fantasma e uma função possivelmente quebrada.
+
+## 15. O aleatório do plano reiniciava a música. Medido, trocado por `playlist-move`
+
+**Contexto.** A Task 2 do plano `shuffle-repeat` implementa `reloadQueueKeepingCurrent()`
+reescrevendo a playlist do mpv com `loadfile <arquivo> replace` seguido de `append`. No mpv,
+`replace` limpa a lista e **começa o arquivo do zero**. Apertar aleatório no meio de uma
+faixa mandaria a faixa de volta ao início — num tocador de música, o gesto mais visível que
+existe.
+
+**Prova.** Escrevi `shuffleDoesNotRestartWhatIsPlaying`: toca um tom de 8 s, espera passar de
+3 s, liga o aleatório, espera 800 ms. Com o código do plano:
+`a faixa voltou ao início: 3.01639 s -> 0.691546 s`.
+
+**Decisão.** Troquei por `reorderMpvPlaylist(const QStringList &atual)`, que leva a lista do
+mpv da ordem antiga para a nova com `playlist-move`, entrada por entrada. O mpv move as
+entradas sem interromper nada e leva o índice do que toca junto. Com ele o teste passa. O
+nome mudou junto com o mecanismo: `reloadQueueKeepingCurrent` descrevia recarregar, e não é
+mais isso que acontece.
+
+**Alternativa descartada.** Manter o `replace` e recuperar a posição com um `seek` depois do
+arquivo carregar. Seria uma corrida contra o carregamento do mpv para desfazer um estrago que
+não precisava acontecer.
+
+**Custo de estar errada.** `playlist-move` é uma operação de lista; se a permutação estivesse
+errada, tocaria a faixa errada a seguir — que é justamente o que o teste da decisão nº 16
+cobre.
+
+## 16. O primeiro teste do reordenador era vacuoso — passava com o reordenador desligado
+
+**Contexto.** Escrevi `shuffleReordersWhatMpvPlaysNext` para provar que embaralhar mexe na
+fila do mpv, e não só no espelho que a tela lê (se mexesse só no espelho, a tirinha mostraria
+uma ordem e o som seguiria outra — exatamente o gênero de defeito deste lote). A primeira
+versão dava `next()` com a música tocando e esperava o arquivo esperado com
+`QTRY_COMPARE_WITH_TIMEOUT(…, 10000)`.
+
+**Prova de que não prestava.** Desliguei o reordenador com um `return` no topo, recompilei, e
+o teste **passou assim mesmo** (2642 ms). A causa: com tons de 1 s a fila anda sozinha e em
+10 s passa por TODOS os arquivos — esperar por um deles sempre acaba dando certo.
+
+**Decisão.** A versão final pausa antes de pular, espera `playlistPos == 1` e compara o
+arquivo UMA vez, num instante só. Repeti a mutação: com o reordenador desligado agora dá
+`FAIL! Compared values are not the same`; com ele ligado, passa. O `return` foi revertido e a
+conferência refeita.
+
+**Alternativa descartada.** Aceitar o verde da primeira versão. Teria fechado a fatia com um
+teste que não testava nada — a definição do problema que este lote existe para corrigir.
+
+**Custo de estar errada.** Nenhum: os dois estados (mutado e são) foram medidos no
+transcript, não inferidos.

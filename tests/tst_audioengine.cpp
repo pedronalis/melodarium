@@ -164,6 +164,120 @@ private slots:
         QCOMPARE(engine.repeatMode(), AudioEngine::RepeatOff);
         QCOMPARE(spy.count(), 3);
     }
+
+    // O aleatório age sobre a FILA, não sobre a biblioteca — e desligar volta à ordem
+    // original, que é o que faltava no aleatório da tela de boas-vindas.
+    void shuffleReordersTheQueueAndCanBeUndone()
+    {
+        AudioEngine engine(nullptr, true);
+        if (!engine.isAvailable())
+            QSKIP("mpv unavailable");
+
+        const QStringList original = {m_toneA, m_toneB};
+        engine.loadPlaylist(original, 0);
+        QCOMPARE(engine.shuffle(), false);
+
+        QSignalSpy spy(&engine, &AudioEngine::shuffleChanged);
+        engine.setShuffle(true);
+        QCOMPARE(engine.shuffle(), true);
+        QCOMPARE(spy.count(), 1);
+        // A fila continua com as mesmas entradas, em qualquer ordem.
+        QCOMPARE(engine.queue().size(), 2);
+        QVERIFY(engine.queue().contains(m_toneA));
+        QVERIFY(engine.queue().contains(m_toneB));
+
+        engine.setShuffle(false);
+        QCOMPARE(engine.shuffle(), false);
+        QCOMPARE(engine.queue(), original);
+    }
+
+    // Carregar uma fila nova zera o aleatório: a ordem guardada era da fila anterior, e
+    // restaurar sobre a nova devolveria faixas que não estão mais lá.
+    void loadingANewPlaylistClearsShuffle()
+    {
+        AudioEngine engine(nullptr, true);
+        if (!engine.isAvailable())
+            QSKIP("mpv unavailable");
+
+        engine.loadPlaylist({m_toneA, m_toneB}, 0);
+        engine.setShuffle(true);
+        engine.loadPlaylist({m_toneB}, 0);
+        QCOMPARE(engine.shuffle(), false);
+    }
+
+    // Mexer na ORDEM da fila não pode mexer na MÚSICA: quem aperta aleatório no meio de uma
+    // faixa quer o resto da fila embaralhado, não a faixa de volta ao início.
+    void shuffleDoesNotRestartWhatIsPlaying()
+    {
+        AudioEngine engine(nullptr, true);
+        if (!engine.isAvailable())
+            QSKIP("mpv unavailable");
+
+        // Um tom longo de propósito: com os fixtures de 1 s a faixa acabaria sozinha
+        // durante a espera e o teste falharia por outro motivo.
+        const QString longo = makeTone(m_dir.filePath(QStringLiteral("longo.flac")), 440, 8.0);
+        if (longo.isEmpty())
+            QSKIP("ffmpeg unavailable");
+
+        engine.loadPlaylist({longo, m_toneA, m_toneB}, 0);
+        engine.play();
+        // Esperar bem além do que a folga do teste vai correr: se a faixa reiniciar, os
+        // 800 ms seguintes não a trazem nem perto daqui, e a diferença fica gritante.
+        QTRY_VERIFY_WITH_TIMEOUT(engine.position() > 3.0, 15000);
+        const QString tocando = engine.currentFile();
+        const double antes = engine.position();
+
+        engine.setShuffle(true);
+        QTest::qWait(800);
+
+        QCOMPARE(engine.currentFile(), tocando);
+        QVERIFY2(engine.position() >= antes,
+                 qPrintable(QStringLiteral("a faixa voltou ao início: %1 s -> %2 s")
+                            .arg(antes).arg(engine.position())));
+    }
+
+    // Embaralhar tem de mexer na fila do mpv, não só no espelho que a tela lê. Sem este
+    // teste, um reordenador que não fizesse nada passaria em todos os outros: a fila
+    // mostraria uma ordem e o som seguiria outra — e ninguém veria até tocar.
+    void shuffleReordersWhatMpvPlaysNext()
+    {
+        AudioEngine engine(nullptr, true);
+        if (!engine.isAvailable())
+            QSKIP("mpv unavailable");
+
+        QStringList original = {m_toneA, m_toneB};
+        for (int i = 0; i < 3; ++i) {
+            const QString extra = makeTone(
+                m_dir.filePath(QStringLiteral("extra%1.flac").arg(i)), 500 + i * 90, 1.0);
+            if (extra.isEmpty())
+                QSKIP("ffmpeg unavailable");
+            original.append(extra);
+        }
+
+        engine.loadPlaylist(original, 0);
+        engine.play();
+        QTRY_COMPARE_WITH_TIMEOUT(engine.playlistPos(), 0, 10000);
+
+        // Insistir até a SEGUNDA entrada mudar. Sem isso o teste poderia comparar a fila
+        // nova com uma posição que por acaso não se mexeu, e passaria sem provar nada.
+        int tentativas = 0;
+        do {
+            engine.setShuffle(false);
+            engine.setShuffle(true);
+        } while (engine.queue().at(1) == original.at(1) && ++tentativas < 30);
+        QVERIFY2(engine.queue().at(1) != original.at(1),
+                 "trinta embaralhamentos e a segunda entrada nunca mudou");
+
+        const QString esperado = engine.queue().at(1);
+
+        // PAUSAR antes de pular é o que torna este teste honesto: tocando, a fila de tons
+        // de 1 s anda sozinha e passa por TODOS os arquivos, então esperar pelo esperado
+        // acabaria dando certo mesmo com o reordenador desligado (medido).
+        engine.pause();
+        engine.next();
+        QTRY_COMPARE_WITH_TIMEOUT(engine.playlistPos(), 1, 5000);
+        QCOMPARE(engine.currentFile(), esperado);
+    }
 };
 
 QTEST_MAIN(TstAudioEngine)
