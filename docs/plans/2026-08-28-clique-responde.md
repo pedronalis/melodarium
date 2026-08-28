@@ -150,7 +150,7 @@ git commit -m "feat(library): update one liked row in place instead of reloading
 
 ### Task 2: A lista escuta e o coração reage na hora
 
-- [ ] Em `src/LibraryPane.qml`, substituir o bloco `Connections` que hoje só chama
+- [x] Em `src/LibraryPane.qml`, substituir o bloco `Connections` que hoje só chama
       `root.reload()` (o que atualiza apenas o contador dos chips):
 
 ```qml
@@ -166,10 +166,10 @@ git commit -m "feat(library): update one liked row in place instead of reloading
     }
 ```
 
-- [ ] verificação mecânica da task:
+- [x] verificação mecânica da task:
       `grep -c 'applyLiked' src/LibraryPane.qml` → `1`
-- [ ] verificação mecânica da task: `quiet-run cmake --build build` → exit 0
-- [ ] commit:
+- [x] verificação mecânica da task: `quiet-run cmake --build build` → exit 0
+- [x] commit:
 
 ```bash
 git add src/LibraryPane.qml docs/plans/2026-08-28-clique-responde.md
