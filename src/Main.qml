@@ -62,6 +62,17 @@ Window {
                ? Qt.application.arguments[i + 1] : ""
     }
 
+    // `--open-collection <id>`: abre uma coleção antes de fotografar. Sem isto o painel de
+    // coleções só pode ser fotografado no estado "nenhuma aberta", e a metade da fatia que
+    // importa — a coleção ABERTA, com as faixas dentro — não teria como ser provada.
+    readonly property int measureCollection: {
+        const i = Qt.application.arguments.indexOf("--open-collection")
+        if (i < 0 || Qt.application.arguments.length <= i + 1)
+            return 0
+        const id = parseInt(Qt.application.arguments[i + 1])
+        return isNaN(id) ? 0 : id
+    }
+
     // `--no-search`: não abre o overlay antes de medir.
     readonly property bool measureSearch: Qt.application.arguments.indexOf("--no-search") < 0
 
@@ -390,6 +401,8 @@ Window {
                 running: true
                 interval: 600
                 onTriggered: {
+                    if (root.measureCollection > 0)
+                        collectionsPane.openById(root.measureCollection)
                     if (root.measureEpisode > 0)
                         PodcastLibrary.playEpisode(root.measureEpisode)
                     if (root.measureTrack !== "") {

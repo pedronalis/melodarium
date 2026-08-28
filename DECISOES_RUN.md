@@ -140,3 +140,40 @@ que ele não acrescenta nada: o tipo já falha na instanciação do painel, não
 **Custo de estar errada.** Se um defeito de popup escapasse assim mesmo, o sintoma seria um
 diálogo que não abre no app real. Mas a prova foi feita com o defeito real, no arquivo real,
 com o comando real do portão — não é inferência.
+
+## 8. Acrescentei a bandeira de medição `--open-collection`, que o plano não previu
+
+**Contexto.** A aceitação visual do run exige provar que a tela aparece. O painel de coleções
+tem DOIS estados, e o segundo — a coleção aberta com as faixas dentro — é a metade da fatia
+que o Pedro reclamou ("dá para criar e não dá para abrir"). Em tela virtual não há clique:
+sem uma bandeira, esse estado não tem como ser fotografado, e a prova seria só do estado
+vazio.
+
+**Decisão.** Acrescentei `--open-collection <id>`, idêntica em forma e propósito às quatro
+bandeiras de medição que o app já tinha (`--play-track`, `--play-episode`, `--search-text`,
+`--pane`), mais o auxiliar `openById(id)` no painel. As duas fotos estão em
+`docs/telas/leva2-colecoes-lista.png` e `docs/telas/leva2-colecoes-aberta.png`.
+
+**Alternativa descartada.** Fotografar só o estado vazio e afirmar que o resto funciona
+porque compila. É exatamente o raciocínio que produziu este lote inteiro de 24 lacunas.
+
+**Custo de estar errada.** A bandeira só age em `--measure`; no app normal ela não existe. Se
+sobrar, é uma função de dez linhas num harness que já tem quatro iguais.
+
+## 9. As fotos saem de uma CÓPIA do banco, nunca do banco do Pedro
+
+**Contexto.** O banco real (`~/.local/share/melodia/melodia/melodia.db`) tem 27 faixas e
+**zero** coleções. Fotografar a lista de coleções exigia dados que ele não tem.
+
+**Decisão.** Copiei o banco com `sqlite3 .backup` para `/tmp/mel-shot/…` e semeei três
+coleções lá, rodando o app com `XDG_DATA_HOME=/tmp/mel-shot`. O banco do Pedro continua com
+zero coleções — conferido depois de cada escrita.
+
+**Alternativa descartada.** Semear direto no banco dele. Seriam três coleções falsas
+aparecendo no app dele amanhã, criadas por um run que ele não estava acompanhando.
+
+**Nota de armadilha.** `cp` do arquivo `.db` copia um banco VAZIO: o SQLite está em modo WAL
+e os dados vivem no `-wal`. Só `.backup` (ou copiar os três arquivos) traz os dados.
+
+**Custo de estar errada.** Nenhum: as fotos provam o código, não o acervo. Se o Pedro criar
+coleções de verdade, a mesma tela as mostra.
