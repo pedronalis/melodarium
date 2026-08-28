@@ -348,7 +348,7 @@ git commit -m "feat(library): expose the ids of the rows currently listed"
 
 ### Task 5: O cabeçalho ganha o artista e o botão de álbum inteiro
 
-- [ ] Em `src/LibraryPane.qml`, declarar as duas novidades junto das outras propriedades do
+- [x] Em `src/LibraryPane.qml`, declarar as duas novidades junto das outras propriedades do
       topo, depois de `property string groupTitle: ""`:
 
 ```qml
@@ -357,13 +357,13 @@ git commit -m "feat(library): expose the ids of the rows currently listed"
     property string groupSubtitle: ""
 ```
 
-- [ ] No mesmo arquivo, declarar o sinal junto dos outros seis:
+- [x] No mesmo arquivo, declarar o sinal junto dos outros seis:
 
 ```qml
     signal collectAllRequested
 ```
 
-- [ ] Substituir o `RowLayout` do cabeçalho (o que começa com o `Text` do `groupTitle`)
+- [x] Substituir o `RowLayout` do cabeçalho (o que começa com o `Text` do `groupTitle`)
       acrescentando o subtítulo e o botão. O botão vem **antes** do de reler a pasta:
 
 ```qml
@@ -472,12 +472,12 @@ git commit -m "feat(library): expose the ids of the rows currently listed"
         }
 ```
 
-- [ ] verificação mecânica da task:
+- [x] verificação mecânica da task:
       `grep -c 'collectAllRequested\|groupSubtitle' src/LibraryPane.qml` → `4`
-- [ ] verificação mecânica da task:
+- [x] verificação mecânica da task:
       `bash tools/check-layout.sh` → 11 medidas ok (o cabeçalho cresceu: se a linha de
       chips estourar a largura mínima, o gate falha aqui e não na tela do Pedro)
-- [ ] commit:
+- [x] commit:
 
 ```bash
 git add src/LibraryPane.qml docs/plans/2026-08-28-colecoes-alcance.md
