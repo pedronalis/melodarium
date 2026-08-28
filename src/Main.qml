@@ -251,19 +251,14 @@ Window {
                            ? root.filterTitles[root.currentSection] : ""
         root.showingGroups = false
 
-        let paths = trackModel.allPaths()
+        const paths = trackModel.allPaths()
         if (paths.length === 0)
             return
-        if (mode === "shuffle") {
-            // Fisher-Yates: sortear índice a cada passo, não ordenar por número aleatório.
-            for (let i = paths.length - 1; i > 0; --i) {
-                const j = Math.floor(Math.random() * (i + 1))
-                const tmp = paths[i]
-                paths[i] = paths[j]
-                paths[j] = tmp
-            }
-        }
         AudioEngine.loadPlaylist(paths, 0)
+        // Antes daqui o embaralhamento era feito à mão e sumia da tela junto com o convite:
+        // ligar o modo do motor deixa o botão do painel aceso e desligável.
+        if (mode === "shuffle")
+            AudioEngine.setShuffle(true)
         AudioEngine.play()
     }
 

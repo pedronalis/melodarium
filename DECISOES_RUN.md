@@ -344,3 +344,38 @@ teste que não testava nada — a definição do problema que este lote existe p
 
 **Custo de estar errada.** Nenhum: os dois estados (mutado e são) foram medidos no
 transcript, não inferidos.
+
+## 17. Testei uma suspeita sobre o aleatório da tela vazia; estava errada, e fica registrado
+
+**Contexto.** A Task 4 faz `loadPlaylist(paths, 0)` e só então `setShuffle(true)`. Nesse
+instante o mpv já recebeu a ordem antiga e começou a primeira entrada dela. Suspeitei que ele
+ficasse presa nela — e aí "Tocar tudo em ordem aleatória" tocaria só um pedaço da fila,
+sempre começando pela mesma faixa.
+
+**Decisão.** Em vez de "consertar" por precaução, escrevi o teste
+`shuffleFromAStandstillStartsAtTheTopOfTheNewOrder`, que monta a situação exata (motor novo,
+nada tocando, carrega, embaralha, pausa) e cobra que o arquivo tocado seja `queue[0]` da
+ordem NOVA. **Passou.** A suspeita estava errada: com a reordenação por `playlist-move`, o
+mpv acompanha. Nenhuma linha foi acrescentada por precaução, e o teste ficou — com a mutação
+conferida (`FAIL! Compared values are not the same` com o reordenador desligado).
+
+**Alternativa descartada.** Acrescentar um `playlist-pos = 0` "por garantia" depois do
+embaralhamento. Seria código sem defeito que o justificasse, e mais uma linha para alguém
+entender depois.
+
+**Custo de estar errada.** Zero: a hipótese virou teste em vez de virar código.
+
+## 18. Nota: o plano lista `src/EmptyPane.qml` como arquivo a modificar e nenhuma task o toca
+
+**Contexto.** A seção "Arquivos" de `shuffle-repeat` inclui `src/EmptyPane.qml`, mas as
+quatro tasks só mexem em `audioengine.{h,cpp}`, `NowPlayingPanel.qml`, `Main.qml` e o teste.
+
+**Decisão.** Não mexi. O `EmptyPane` já emite `playRequested("shuffle")` e quem trata isso é
+o `startFromEmpty` do `Main.qml`, que é justamente o que a Task 4 mudou. O comportamento
+pedido chegou inteiro sem tocar no arquivo.
+
+**Alternativa descartada.** Inventar uma mudança no `EmptyPane` para cumprir a lista.
+
+**Custo de estar errada.** Se faltasse algo lá, o botão "Tocar tudo em ordem aleatória" não
+ligaria o modo — e o portão `grep -c 'AudioEngine.setShuffle' src/Main.qml` → 1 mostra que a
+ligação está no lugar por onde o sinal passa.

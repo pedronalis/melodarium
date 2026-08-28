@@ -381,7 +381,7 @@ git commit -m "feat(ui): shuffle and repeat do what they show, and show what the
 
 ### Task 4: O aleatório da tela vazia passa a ligar o modo
 
-- [ ] Em `src/Main.qml`, a função `startFromEmpty` embaralhava a lista uma vez, sem estado.
+- [x] Em `src/Main.qml`, a função `startFromEmpty` embaralhava a lista uma vez, sem estado.
       Agora ela liga o modo do motor, que fica visível e desligável. Substituir o bloco do
       `mode === "shuffle"`:
 
@@ -396,12 +396,12 @@ git commit -m "feat(ui): shuffle and repeat do what they show, and show what the
         AudioEngine.play()
 ```
 
-- [ ] verificação mecânica da task:
+- [x] verificação mecânica da task:
       `grep -c 'Fisher-Yates' src/Main.qml` → `0`
-- [ ] verificação mecânica da task:
+- [x] verificação mecânica da task:
       `grep -c 'AudioEngine.setShuffle' src/Main.qml` → `1`
-- [ ] verificação mecânica da task: `quiet-run cmake --build build` → exit 0
-- [ ] commit:
+- [x] verificação mecânica da task: `quiet-run cmake --build build` → exit 0
+- [x] commit:
 
 ```bash
 git add src/Main.qml docs/plans/2026-08-28-shuffle-repeat.md
