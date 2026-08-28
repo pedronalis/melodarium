@@ -1,7 +1,7 @@
 ---
 slug: fila-tirinha
 feature: melodia-religa
-status: aprovado
+status: concluido
 depende-de: [fila-motor, clique-responde]
 decisao-humana: sim
 spec: design/Main.dc.html:141-152 · design/Busca.dc.html:330 · docs/auditoria-completude.md (achados 13,14,15)
