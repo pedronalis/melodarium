@@ -87,24 +87,9 @@ QString LibraryBrowser::clauseForAll()
     return QStringLiteral("t.removed_at IS NULL");
 }
 
-QString LibraryBrowser::clauseForSearch(const QString &text)
-{
-    if (text.trimmed().isEmpty())
-        return clauseForAll();
-    return QStringLiteral(
-        "t.removed_at IS NULL AND t.id IN (SELECT rowid FROM tracks_fts WHERE tracks_fts MATCH ?)");
-}
-
 QVariantList LibraryBrowser::bindingsFor(int id)
 {
     return id > 0 ? QVariantList{id} : QVariantList{};
-}
-
-QVariantList LibraryBrowser::bindingsForSearch(const QString &text)
-{
-    if (text.trimmed().isEmpty())
-        return {};
-    return QVariantList{toFtsPrefixQuery(text)};
 }
 
 QString LibraryBrowser::toFtsPrefixQuery(const QString &text)
