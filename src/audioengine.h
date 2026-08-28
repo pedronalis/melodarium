@@ -14,6 +14,13 @@ class AudioEngine : public QObject
     QML_ELEMENT
     QML_SINGLETON
 
+public:
+    // Três posições porque o mpv tem duas propriedades distintas: loop-playlist (a fila) e
+    // loop-file (a faixa). Um par de booleanos deixaria as duas ligadas ao mesmo tempo.
+    enum RepeatMode { RepeatOff, RepeatAll, RepeatOne };
+    Q_ENUM(RepeatMode)
+
+private:
     Q_PROPERTY(double position READ position NOTIFY positionChanged)
     Q_PROPERTY(double duration READ duration NOTIFY durationChanged)
     Q_PROPERTY(bool playing READ playing NOTIFY playingChanged)
@@ -23,6 +30,7 @@ class AudioEngine : public QObject
     Q_PROPERTY(double speed READ speed WRITE setSpeed NOTIFY speedChanged)
     Q_PROPERTY(QStringList queue READ queue NOTIFY queueChanged)
     Q_PROPERTY(int queueCount READ queueCount NOTIFY queueChanged)
+    Q_PROPERTY(RepeatMode repeatMode READ repeatMode NOTIFY repeatModeChanged)
 
 public:
     // headlessAo = true forces --ao=null: never opens a real device, for automated tests.
@@ -38,6 +46,7 @@ public:
     double speed() const { return m_speed; }
     QStringList queue() const { return m_queue; }
     int queueCount() const { return m_queue.size(); }
+    RepeatMode repeatMode() const { return m_repeatMode; }
 
     // Q_INVOKABLE and not just a Q_PROPERTY WRITE: the podcast slice calls
     // AudioEngine.setSpeed(x) as a function. A bare WRITE method is invisible to QML.
@@ -57,6 +66,8 @@ public:
     Q_INVOKABLE void appendToQueue(const QString &file);
     // Os próximos `limit` caminhos, sem incluir o que toca — é o que a tirinha desenha.
     Q_INVOKABLE QStringList upcoming(int limit) const;
+    // Avança Off → All → One → Off. Um botão só, como no desenho.
+    Q_INVOKABLE void cycleRepeat();
     Q_INVOKABLE void setGaplessAggressive(bool on);
     Q_INVOKABLE void setReplayGainMode(const QString &mode);
     Q_INVOKABLE void setExclusiveOutput(bool on);
@@ -74,6 +85,7 @@ signals:
     void playlistPosChanged();
     void speedChanged();
     void queueChanged();
+    void repeatModeChanged();
     void trackFinished(const QString &path);
     void playbackError(const QString &path, const QString &message);
     void engineUnavailable(const QString &message);
@@ -99,4 +111,5 @@ private:
     // Espelho do que foi mandado ao mpv. Ler playlist/N/filename seria uma consulta por
     // entrada a cada repintura da tirinha de capas.
     QStringList m_queue;
+    RepeatMode m_repeatMode = RepeatOff;
 };
