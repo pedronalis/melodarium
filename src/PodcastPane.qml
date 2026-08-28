@@ -296,7 +296,7 @@ Item {
                 required property var modelData
 
                 Layout.fillWidth: true
-                implicitHeight: 40
+                implicitHeight: Math.round(40 * Theme.uiScale)
                 radius: Theme.iRadiusS
                 color: Qt.rgba(Theme.mSurfaceVariant.r, Theme.mSurfaceVariant.g,
                                Theme.mSurfaceVariant.b, 0.5)

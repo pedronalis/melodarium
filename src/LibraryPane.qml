@@ -102,7 +102,7 @@ Item {
 
             // Reler a pasta é raro, então o botão é discreto: só o ícone, sem rótulo.
             IconButton {
-                Layout.preferredWidth: 22
+                Layout.preferredWidth: Math.round(22 * Theme.uiScale)
                 Layout.preferredHeight: 22
                 icon: "history"
                 size: Theme.fontSizeS
@@ -116,7 +116,7 @@ Item {
         // --- A busca mora aqui, mas quem procura é o overlay ---
         Rectangle {
             Layout.fillWidth: true
-            implicitHeight: 30
+            implicitHeight: Math.round(30 * Theme.uiScale)
             radius: Theme.iRadiusS
             color: searchArea.containsMouse
                    ? Theme.mSurfaceVariant
@@ -240,7 +240,7 @@ Item {
                 required property int index
 
                 width: ListView.view.width
-                height: 38
+                height: Math.round(38 * Theme.uiScale)
                 radius: Theme.radiusXS
                 color: groupArea.containsMouse
                        ? Theme.mHover

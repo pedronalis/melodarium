@@ -63,7 +63,7 @@ Item {
 
         signal clicked
 
-        implicitHeight: 40
+        implicitHeight: Math.round(40 * Theme.uiScale)
         radius: Theme.iRadiusS
         color: atalhoArea.containsMouse
                ? Qt.rgba(Theme.mSurfaceVariant.r, Theme.mSurfaceVariant.g,
@@ -165,7 +165,7 @@ Item {
 
             Rectangle {
                 Layout.fillWidth: true
-                implicitHeight: 68
+                implicitHeight: Math.round(68 * Theme.uiScale)
                 radius: Theme.iRadiusS
                 color: retomarArea.containsMouse
                        ? Theme.mSurfaceVariant

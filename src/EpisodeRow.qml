@@ -31,7 +31,7 @@ Item {
     signal playedToggled
     signal downloadRequested
 
-    implicitHeight: 58
+    implicitHeight: Math.round(58 * Theme.uiScale)
 
     function formatLength(ms) {
         if (ms <= 0)
@@ -75,7 +75,7 @@ Item {
             spacing: Theme.marginL
 
             Rectangle {
-                Layout.preferredWidth: 40
+                Layout.preferredWidth: Math.round(40 * Theme.uiScale)
                 Layout.preferredHeight: 40
                 radius: Theme.radiusXS
                 color: Theme.mSurfaceVariant
@@ -120,7 +120,7 @@ Item {
             // Um episódio começado mostra a barra; um que falta baixar mostra a seta; um já
             // ouvido só diz que foi. Nunca os três juntos.
             Rectangle {
-                Layout.preferredWidth: 62
+                Layout.preferredWidth: Math.round(62 * Theme.uiScale)
                 Layout.preferredHeight: 3
                 visible: root.downloadProgress < 0 && !root.played && root.progress > 0
                 radius: height / 2
@@ -145,7 +145,7 @@ Item {
             }
 
             IconButton {
-                Layout.preferredWidth: 22
+                Layout.preferredWidth: Math.round(22 * Theme.uiScale)
                 Layout.preferredHeight: 22
                 icon: "download"
                 size: Theme.fontSizeS
@@ -171,7 +171,7 @@ Item {
             // Marcar ouvido à mão é o gesto que o app não consegue inferir — e o único jeito
             // de desfazer um "ouvido" que ele inferiu errado.
             IconButton {
-                Layout.preferredWidth: 22
+                Layout.preferredWidth: Math.round(22 * Theme.uiScale)
                 Layout.preferredHeight: 22
                 icon: "playlist"
                 size: Theme.fontSizeS

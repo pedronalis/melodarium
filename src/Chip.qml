@@ -16,7 +16,7 @@ Rectangle {
     signal clicked
 
     implicitWidth: row.implicitWidth + Theme.marginM * 2
-    implicitHeight: 24
+    implicitHeight: Math.round(24 * Theme.uiScale)
     radius: Theme.iRadiusS
     color: root.selected ? Theme.mSurfaceVariant
                          : (area.containsMouse ? Theme.mSurfaceVariant : "transparent")
