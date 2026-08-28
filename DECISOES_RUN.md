@@ -74,3 +74,19 @@ de medição que os 11 gates de layout usam, dentro de uma fatia que não tem na
 **Custo de estar errada.** Se fosse defeito de verdade, apareceria como ícone aceso errado ao
 navegar no app real — e não aparece, porque `showPane` escreve `section` e o rail lê `section`
 (`current: root.section`, `src/Main.qml`).
+
+## 5. `RESUMO_RUN.md` fica fora do git; `DECISOES_RUN.md` fica dentro
+
+**Contexto.** `git add RESUMO_RUN.md` foi recusado: o arquivo está listado no
+`.git/info/exclude` do repositório principal, junto de `RUN_GATE` e afins. `DECISOES_RUN.md`
+não está.
+
+**Decisão.** Respeitei a exclusão em vez de forçar com `-f`. O resumo existe no disco do
+worktree, que é de onde quem despachou o run vai lê-lo. As decisões continuam versionadas,
+porque explicam escolhas feitas no código e sobrevivem ao run.
+
+**Alternativa descartada.** `git add -f RESUMO_RUN.md`. A exclusão é anterior a este run e
+foi escrita de propósito — passar por cima dela seria decidir por quem a escreveu.
+
+**Custo de estar errada.** Se o resumo devia mesmo ser versionado, basta um `git add -f`
+depois; o arquivo está pronto e intacto no worktree.
