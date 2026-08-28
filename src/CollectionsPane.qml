@@ -34,6 +34,16 @@ Item {
         root.collectionOpened(id, name)
     }
 
+    // Abrir por id: quem chama de fora (a medição) tem o id, não o nome.
+    function openById(id) {
+        for (let i = 0; i < root.items.length; ++i) {
+            if (root.items[i].id === id) {
+                root.open(id, root.items[i].name)
+                return
+            }
+        }
+    }
+
     function close() {
         root.openId = 0
         root.openName = ""
