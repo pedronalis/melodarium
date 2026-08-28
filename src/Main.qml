@@ -84,6 +84,15 @@ Window {
     // Which pane the icon rail is showing: "library", "albums", "tags", "podcast", "search".
     property string section: "library"
 
+    // A interface foi desenhada para 1100x700. Numa janela muito maior, tamanho fixo vira
+    // interface minúscula perdida no canto; numa muito menor, vira conteúdo cortado. O fator
+    // sai da menor razão entre a janela real e o desenho, preso entre 1 e 1,7 para o texto
+    // não virar cartaz numa tela de 4K.
+    readonly property real escalaDaJanela:
+        Math.max(1.0, Math.min(1.7, Math.min(root.width / 1100, root.height / 700)))
+
+    onEscalaDaJanelaChanged: Theme.uiScale = root.escalaDaJanela
+
     // When a section is a group axis (artists/albums/genres) with no group picked yet, the
     // middle column lists the groups instead of the tracks.
     property bool showingGroups: false
@@ -424,6 +433,7 @@ Window {
     }
 
     Component.onCompleted: {
+        Theme.uiScale = root.escalaDaJanela
         if (Database.libraryPath !== "")
             trackModel.loadAllTracks()
         // Finding out whether yt-dlp exists costs one process start; finding out at the moment
@@ -461,7 +471,7 @@ Window {
             Layout.fillWidth: true
             Layout.fillHeight: true
             // A lista é o ponto da tela: nunca cede espaço ao painel.
-            Layout.minimumWidth: 360
+            Layout.minimumWidth: Theme.paneMinWidth
             // Medir mede a tela da biblioteca: qual banco a máquina tem não pode mudar o
             // resultado do gate de layout.
             currentIndex: root.measuring

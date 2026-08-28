@@ -9,7 +9,7 @@ Rectangle {
 
     signal chosen(string section)
 
-    implicitWidth: 56
+    implicitWidth: Theme.railWidth
     color: "transparent"
 
     Rectangle {
@@ -35,8 +35,8 @@ Rectangle {
 
         // A marca, no topo da barra: não é botão, é de onde o olho parte (design/Main.dc.html).
         Item {
-            Layout.preferredWidth: 34
-            Layout.preferredHeight: 34
+            Layout.preferredWidth: Math.round(34 * Theme.uiScale)
+            Layout.preferredHeight: Math.round(34 * Theme.uiScale)
             Layout.bottomMargin: Theme.marginXS
 
             Text {
@@ -56,8 +56,8 @@ Rectangle {
 
                 required property var modelData
 
-                Layout.preferredWidth: 34
-                Layout.preferredHeight: 34
+                Layout.preferredWidth: Math.round(34 * Theme.uiScale)
+                Layout.preferredHeight: Math.round(34 * Theme.uiScale)
                 radius: Theme.iRadiusS
                 color: root.current === cell.modelData.key
                        ? Theme.mSurfaceVariant

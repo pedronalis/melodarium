@@ -31,7 +31,7 @@ Item {
     signal collectRequested
     signal likeToggled
 
-    implicitHeight: 38
+    implicitHeight: Math.round(38 * Theme.uiScale)
 
     function formatDuration(ms) {
         if (ms <= 0)
@@ -79,7 +79,7 @@ Item {
             // A faixa que toca troca o número por um triângulo: é a única marca de estado que
             // a lista precisa.
             Item {
-                Layout.preferredWidth: 22
+                Layout.preferredWidth: Math.round(22 * Theme.uiScale)
                 Layout.fillHeight: true
 
                 Text {
@@ -122,9 +122,13 @@ Item {
             }
 
             Text {
-                Layout.preferredWidth: 132
-                Layout.maximumWidth: 132
-                visible: root.width > 420
+                // Elástica em vez de fixa: numa janela larga sobra espaço de sobra e o nome do
+                // álbum ficava cortado em "Brick City ..." com metade da tela vazia ao lado.
+                Layout.fillWidth: true
+                Layout.preferredWidth: Math.round(132 * Theme.uiScale)
+                Layout.maximumWidth: Math.round(320 * Theme.uiScale)
+                horizontalAlignment: Text.AlignRight
+                visible: root.width > Math.round(420 * Theme.uiScale)
                 text: root.album
                 elide: Text.ElideRight
                 font.family: Theme.fontFamily
@@ -139,7 +143,7 @@ Item {
             // The one manual gesture of the whole product. Always visible when enabled —
             // a control that only appears on hover is a control the user never finds.
             IconButton {
-                Layout.preferredWidth: 18
+                Layout.preferredWidth: Math.round(18 * Theme.uiScale)
                 Layout.preferredHeight: 18
                 icon: "plus"
                 size: Theme.fontSizeS
@@ -155,7 +159,7 @@ Item {
             // Curtir mora na linha, não num menu: o coração apagado é discreto o bastante para
             // não competir com o título, e presente o bastante para ser achado sem hover.
             Item {
-                Layout.preferredWidth: 16
+                Layout.preferredWidth: Math.round(16 * Theme.uiScale)
                 Layout.fillHeight: true
 
                 Text {
@@ -184,7 +188,7 @@ Item {
             }
 
             Text {
-                Layout.preferredWidth: 46
+                Layout.preferredWidth: Math.round(46 * Theme.uiScale)
                 horizontalAlignment: Text.AlignRight
                 text: root.formatDuration(root.durationMs)
                 font.family: Theme.fontFamilyFixed

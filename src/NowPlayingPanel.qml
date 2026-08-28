@@ -27,7 +27,7 @@ Rectangle {
         GradientStop { position: 0.6; color: Theme.mSurface }
     }
 
-    readonly property int coverSide: root.compact ? 200 : 340
+    readonly property int coverSide: root.compact ? Math.round(200 * Theme.uiScale) : Theme.panelCover
 
     // Lidos por `appmelodia --measure`: a capa quadrada é uma das linhas do gate de layout.
     readonly property alias coverWidth: capaRect.width
@@ -106,7 +106,8 @@ Rectangle {
             // janela é mais baixa que isso + 340, a capa cede espaço — mas cede QUADRADA:
             // sem amarrar largura à altura, o Layout encolheria só a altura e a arte sairia
             // deformada. Salvaguarda: numa janela de 1384 a medida confirma 340x340.
-            readonly property int lado: Math.max(120, Math.min(root.coverSide, root.height - 330))
+            readonly property int lado: Math.max(Math.round(120 * Theme.uiScale),
+                                                Math.min(root.coverSide, root.height - Math.round(330 * Theme.uiScale)))
 
             Layout.preferredWidth: capaRect.lado
             Layout.preferredHeight: capaRect.lado
@@ -343,9 +344,9 @@ Rectangle {
             }
 
             Rectangle {
-                Layout.preferredWidth: 52
-                Layout.preferredHeight: 52
-                radius: 26
+                Layout.preferredWidth: Math.round(52 * Theme.uiScale)
+                Layout.preferredHeight: Math.round(52 * Theme.uiScale)
+                radius: Math.round(26 * Theme.uiScale)
                 color: Theme.mTertiary
 
                 Text {
@@ -387,7 +388,7 @@ Rectangle {
             Rectangle {
                 visible: root.episodeMode
                 implicitWidth: pulo.implicitWidth + Theme.marginL * 2
-                implicitHeight: 26
+                implicitHeight: Math.round(26 * Theme.uiScale)
                 radius: Theme.iRadiusS
                 color: "transparent"
                 border.width: Theme.borderS

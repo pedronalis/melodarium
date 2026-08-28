@@ -14,7 +14,7 @@ Rectangle {
     readonly property var opcoes: [0.8, 1.0, 1.25, 1.5, 1.75, 2.0]
 
     implicitWidth: label.implicitWidth + Theme.marginL * 2
-    implicitHeight: 26
+    implicitHeight: Math.round(26 * Theme.uiScale)
     radius: Theme.iRadiusS
     color: area.containsMouse ? Theme.mSurfaceVariant : "transparent"
     border.width: Theme.borderS
