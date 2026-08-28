@@ -31,6 +31,7 @@ private:
     Q_PROPERTY(QStringList queue READ queue NOTIFY queueChanged)
     Q_PROPERTY(int queueCount READ queueCount NOTIFY queueChanged)
     Q_PROPERTY(RepeatMode repeatMode READ repeatMode NOTIFY repeatModeChanged)
+    Q_PROPERTY(bool shuffle READ shuffle NOTIFY shuffleChanged)
 
 public:
     // headlessAo = true forces --ao=null: never opens a real device, for automated tests.
@@ -47,6 +48,7 @@ public:
     QStringList queue() const { return m_queue; }
     int queueCount() const { return m_queue.size(); }
     RepeatMode repeatMode() const { return m_repeatMode; }
+    bool shuffle() const { return m_shuffle; }
 
     // Q_INVOKABLE and not just a Q_PROPERTY WRITE: the podcast slice calls
     // AudioEngine.setSpeed(x) as a function. A bare WRITE method is invisible to QML.
@@ -68,6 +70,9 @@ public:
     Q_INVOKABLE QStringList upcoming(int limit) const;
     // Avança Off → All → One → Off. Um botão só, como no desenho.
     Q_INVOKABLE void cycleRepeat();
+    // Embaralha a fila a partir da PRÓXIMA entrada (o que toca não muda de lugar), ou
+    // devolve a ordem original.
+    Q_INVOKABLE void setShuffle(bool on);
     Q_INVOKABLE void setGaplessAggressive(bool on);
     Q_INVOKABLE void setReplayGainMode(const QString &mode);
     Q_INVOKABLE void setExclusiveOutput(bool on);
@@ -86,6 +91,7 @@ signals:
     void speedChanged();
     void queueChanged();
     void repeatModeChanged();
+    void shuffleChanged();
     void trackFinished(const QString &path);
     void playbackError(const QString &path, const QString &message);
     void engineUnavailable(const QString &message);
@@ -99,6 +105,7 @@ private:
     void setOptionString(const char *name, const char *value);
     void setPropertyString(const char *name, const char *value);
     void command(const QStringList &args);
+    void reorderMpvPlaylist(const QStringList &atual);
 
     mpv_handle *m_mpv = nullptr;
     double m_position = 0.0;
@@ -112,4 +119,7 @@ private:
     // entrada a cada repintura da tirinha de capas.
     QStringList m_queue;
     RepeatMode m_repeatMode = RepeatOff;
+    bool m_shuffle = false;
+    // Sem isto, desligar o aleatório não tem para onde voltar.
+    QStringList m_queueOriginal;
 };
