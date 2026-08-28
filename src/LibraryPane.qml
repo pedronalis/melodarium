@@ -54,7 +54,13 @@ Item {
 
     Connections {
         target: LibraryBrowser
-        function onLikedChanged(id, liked) { root.reload() }
+        function onLikedChanged(id, liked) {
+            root.reload()
+            // O contador do chip já se atualizava; a LINHA não. Sem esta chamada o
+            // coração só muda quando a lista inteira é recarregada por outro motivo.
+            if (list.model !== null)
+                list.model.applyLiked(id, liked)
+        }
     }
 
     ColumnLayout {
