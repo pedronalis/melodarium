@@ -65,6 +65,7 @@ qt_add_qml_module(appmelodia
         src/TrackRow.qml
         src/NowPlayingPanel.qml
         src/LibraryPane.qml
+        src/CollectionsPane.qml
         src/Chip.qml
         src/FilterChips.qml
         src/SearchOverlay.qml

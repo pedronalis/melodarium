@@ -239,7 +239,7 @@ git commit -m "feat(ui): a confirmation popup for what cannot be undone"
 
 ### Task 3: O painel das coleções
 
-- [ ] Criar `src/CollectionsPane.qml`:
+- [x] Criar `src/CollectionsPane.qml`:
 
 ```qml
 pragma ComponentBehavior: Bound
@@ -587,14 +587,14 @@ Item {
 }
 ```
 
-- [ ] Registrar em `CMakeLists.txt`, na lista `QML_FILES`, depois de `src/LibraryPane.qml`:
+- [x] Registrar em `CMakeLists.txt`, na lista `QML_FILES`, depois de `src/LibraryPane.qml`:
 
 ```cmake
         src/CollectionsPane.qml
 ```
 
-- [ ] verificação mecânica da task: `quiet-run cmake --build build` → exit 0
-- [ ] commit:
+- [x] verificação mecânica da task: `quiet-run cmake --build build` → exit 0
+- [x] commit:
 
 ```bash
 git add src/CollectionsPane.qml CMakeLists.txt docs/plans/2026-08-28-colecoes-tela.md
