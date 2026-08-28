@@ -74,7 +74,6 @@ qt_add_qml_module(appmelodia
         src/EmptyPane.qml
         src/LibraryEmptyState.qml
         src/SearchField.qml
-        src/QueuePanel.qml
         src/NewCollectionDialog.qml
         src/ConfirmDialog.qml
         src/TagChip.qml

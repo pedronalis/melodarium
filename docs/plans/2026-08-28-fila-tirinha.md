@@ -344,23 +344,23 @@ git commit -m "feat(search): shift+enter queues a hit without interrupting playb
 
 ### Task 4: Apagar a lista de fila que nunca foi a tirinha
 
-- [ ] Confirmar que continua sem consumidor antes de apagar:
+- [x] Confirmar que continua sem consumidor antes de apagar:
 
 ```bash
 grep -lE '(^|[^A-Za-z])QueuePanel[[:space:]]*\{' src/*.qml
 ```
 
-- [ ] O comando acima tem de sair **vazio**. Só então:
+- [x] O comando acima tem de sair **vazio**. Só então:
 
 ```bash
 git rm src/QueuePanel.qml
 sed -i '/src\/QueuePanel\.qml/d' CMakeLists.txt
 ```
 
-- [ ] verificação mecânica da task:
+- [x] verificação mecânica da task:
       `grep -c 'QueuePanel' CMakeLists.txt` → `0`
-- [ ] verificação mecânica da task: `quiet-run cmake --build build` → exit 0
-- [ ] commit:
+- [x] verificação mecânica da task: `quiet-run cmake --build build` → exit 0
+- [x] commit:
 
 ```bash
 git add -A src CMakeLists.txt docs/plans/2026-08-28-fila-tirinha.md
