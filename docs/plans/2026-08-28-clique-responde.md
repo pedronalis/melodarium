@@ -178,14 +178,14 @@ git commit -m "fix(ui): repaint the liked heart the moment the row is toggled"
 
 ### Task 3: O coração cheio, que já estava embarcado
 
-- [ ] Em `src/Icons.qml`, acrescentar a entrada logo depois da linha `"heart": ""…`
+- [x] Em `src/Icons.qml`, acrescentar a entrada logo depois da linha `"heart": ""…`
       (o glifo sólido existe na fonte em U+F67C — conferido com fontTools em 2026-08-28):
 
 ```qml
         "heart-filled": "",
 ```
 
-- [ ] Em `src/TrackRow.qml`, no `Text { id: heart … }`, trocar a linha do `text:` para que
+- [x] Em `src/TrackRow.qml`, no `Text { id: heart … }`, trocar a linha do `text:` para que
       curtido e não curtido sejam FORMAS diferentes, como no desenho aprovado, e não só
       cores diferentes:
 
@@ -193,7 +193,7 @@ git commit -m "fix(ui): repaint the liked heart the moment the row is toggled"
                     text: root.liked ? Icons.get("heart-filled") : Icons.get("heart")
 ```
 
-- [ ] Em `src/NowPlayingPanel.qml`, o `IconButton` do coração (o que tem
+- [x] Em `src/NowPlayingPanel.qml`, o `IconButton` do coração (o que tem
       `accent: root.info.liked === true`) passa a trocar de glifo também:
 
 ```qml
@@ -206,11 +206,11 @@ git commit -m "fix(ui): repaint the liked heart the moment the row is toggled"
             }
 ```
 
-- [ ] verificação mecânica da task:
+- [x] verificação mecânica da task:
       `grep -c 'heart-filled' src/Icons.qml src/TrackRow.qml src/NowPlayingPanel.qml`
       → `src/Icons.qml:1`, `src/TrackRow.qml:1`, `src/NowPlayingPanel.qml:2`
-- [ ] verificação mecânica da task: `quiet-run cmake --build build` → exit 0
-- [ ] commit:
+- [x] verificação mecânica da task: `quiet-run cmake --build build` → exit 0
+- [x] commit:
 
 ```bash
 git add src/Icons.qml src/TrackRow.qml src/NowPlayingPanel.qml docs/plans/2026-08-28-clique-responde.md

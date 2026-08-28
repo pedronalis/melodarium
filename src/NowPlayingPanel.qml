@@ -257,7 +257,7 @@ Rectangle {
 
             IconButton {
                 visible: root.trackId > 0 && !root.episodeMode
-                icon: "heart"
+                icon: root.info.liked === true ? "heart-filled" : "heart"
                 size: Theme.fontSizeXL
                 accent: root.info.liked === true
                 onClicked: root.likeRequested(root.trackId)

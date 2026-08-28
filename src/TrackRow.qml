@@ -165,7 +165,7 @@ Item {
                 Text {
                     id: heart
                     anchors.centerIn: parent
-                    text: Icons.get("heart")
+                    text: root.liked ? Icons.get("heart-filled") : Icons.get("heart")
                     font.family: Icons.fontFamily
                     font.pointSize: Theme.fontSizeS
                     color: root.liked ? Theme.mPrimary
