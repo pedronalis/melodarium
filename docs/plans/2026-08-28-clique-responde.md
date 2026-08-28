@@ -219,7 +219,7 @@ git commit -m "feat(ui): a liked heart is solid, not merely tinted"
 
 ### Task 4: A tira de ícones vira MODO — Álbuns e Tags saem dela
 
-- [ ] Em `src/IconRail.qml`, substituir a lista `items` inteira. Os chips acima da lista
+- [x] Em `src/IconRail.qml`, substituir a lista `items` inteira. Os chips acima da lista
       já entregam Álbuns e Tags e funcionam; repetir as mesmas palavras aqui, sem navegar,
       foi a queixa nº 1 do Pedro:
 
@@ -235,7 +235,7 @@ git commit -m "feat(ui): a liked heart is solid, not merely tinted"
     ]
 ```
 
-- [ ] Em `src/Main.qml`, na função `showPane`, tornar explícito que voltar para a
+- [x] Em `src/Main.qml`, na função `showPane`, tornar explícito que voltar para a
       biblioteca recarrega a lista que estava aberta — hoje o clique em "Biblioteca" não
       faz nada quando já se está nela:
 
@@ -256,10 +256,10 @@ git commit -m "feat(ui): a liked heart is solid, not merely tinted"
     }
 ```
 
-- [ ] verificação mecânica da task:
+- [x] verificação mecânica da task:
       `grep -cE '"(albums|tags)"' src/IconRail.qml` → `0`
-- [ ] verificação mecânica da task: `quiet-run cmake --build build` → exit 0
-- [ ] commit:
+- [x] verificação mecânica da task: `quiet-run cmake --build build` → exit 0
+- [x] commit:
 
 ```bash
 git add src/IconRail.qml src/Main.qml docs/plans/2026-08-28-clique-responde.md

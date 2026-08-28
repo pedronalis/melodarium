@@ -19,12 +19,14 @@ Rectangle {
         color: Theme.mSurfaceVariant
     }
 
+    // A tira escolhe o MODO da tela; a fileira de chips do miolo escolhe o EIXO dentro da
+    // biblioteca. Álbuns e Tags viviam aqui SEM navegar, repetindo palavras que os chips já
+    // entregam — decisão do Pedro em 2026-08-28: saem daqui. A fatia colecoes-tela insere
+    // "collections" como PRIMEIRO item; a fatia ajustes acrescenta "settings" no pé.
     readonly property var items: [
-        { key: "library", icon: "list",     tip: qsTr("Biblioteca") },
-        { key: "albums",  icon: "disc",     tip: qsTr("Álbuns") },
-        { key: "tags",    icon: "tags",     tip: qsTr("Tags") },
+        { key: "library", icon: "list",       tip: qsTr("Biblioteca") },
         { key: "podcast", icon: "microphone", tip: qsTr("Podcast") },
-        { key: "search",  icon: "search",   tip: qsTr("Buscar") }
+        { key: "search",  icon: "search",     tip: qsTr("Buscar") }
     ]
 
     ColumnLayout {
