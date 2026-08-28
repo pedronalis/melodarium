@@ -667,7 +667,7 @@ git commit -m "feat(ui): collections get the top slot of the rail and a pane of 
 
 ### Task 5: Apagar o que o redesenho abandonou
 
-- [ ] Confirmar que os três arquivos continuam sem nenhum consumidor vivo antes de apagar
+- [x] Confirmar que os três arquivos continuam sem nenhum consumidor vivo antes de apagar
       (o painel novo os substituiu):
 
 ```bash
@@ -675,17 +675,17 @@ grep -lE '(^|[^A-Za-z])(Sidebar|SidebarItem|CollectionsSection)[[:space:]]*\{' s
   | grep -vE 'src/(Sidebar|SidebarItem|CollectionsSection)\.qml'
 ```
 
-- [ ] O comando acima tem de sair **vazio**. Só então, apagar os arquivos e desregistrá-los:
+- [x] O comando acima tem de sair **vazio**. Só então, apagar os arquivos e desregistrá-los:
 
 ```bash
 git rm src/Sidebar.qml src/SidebarItem.qml src/CollectionsSection.qml
 sed -i '/src\/Sidebar\.qml/d;/src\/SidebarItem\.qml/d;/src\/CollectionsSection\.qml/d' CMakeLists.txt
 ```
 
-- [ ] verificação mecânica da task:
+- [x] verificação mecânica da task:
       `grep -cE 'Sidebar|CollectionsSection' CMakeLists.txt` → `0`
-- [ ] verificação mecânica da task: `quiet-run cmake --build build` → exit 0
-- [ ] commit:
+- [x] verificação mecânica da task: `quiet-run cmake --build build` → exit 0
+- [x] commit:
 
 ```bash
 git add -A src CMakeLists.txt docs/plans/2026-08-28-colecoes-tela.md
