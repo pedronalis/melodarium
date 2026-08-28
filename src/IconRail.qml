@@ -8,6 +8,8 @@ Rectangle {
     property string current: "library"
 
     signal chosen(string section)
+    // Separado de `chosen` de propósito: ajustes abre POR CIMA da tela, não troca de tela.
+    signal settingsRequested
 
     implicitWidth: Theme.railWidth
     color: "transparent"
@@ -33,7 +35,9 @@ Rectangle {
     ColumnLayout {
         anchors.horizontalCenter: parent.horizontalCenter
         anchors.top: parent.top
+        anchors.bottom: parent.bottom
         anchors.topMargin: Theme.marginXL
+        anchors.bottomMargin: Theme.marginXL
         spacing: Theme.marginS
 
         // A marca, no topo da barra: não é botão, é de onde o olho parte (design/Main.dc.html).
@@ -86,6 +90,39 @@ Rectangle {
                     cursorShape: Qt.PointingHandCursor
                     onClicked: root.chosen(cell.modelData.key)
                 }
+            }
+        }
+
+        // Empurra a engrenagem para o pé: ela não pertence à lista de modos.
+        Item { Layout.fillHeight: true }
+
+        Rectangle {
+            id: engrenagem
+
+            Layout.preferredWidth: Math.round(34 * Theme.uiScale)
+            Layout.preferredHeight: Math.round(34 * Theme.uiScale)
+            radius: Theme.iRadiusS
+            color: engrenagemArea.containsMouse ? Theme.mSurfaceVariant : "transparent"
+            opacity: engrenagemArea.containsMouse ? 1.0 : 0.7
+
+            Behavior on color {
+                ColorAnimation { duration: Theme.animationFast; easing.type: Theme.easingType }
+            }
+
+            Text {
+                anchors.centerIn: parent
+                text: Icons.get("settings")
+                font.family: Icons.fontFamily
+                font.pointSize: Theme.fontSizeL
+                color: Theme.mOnSurfaceVariant
+            }
+
+            MouseArea {
+                id: engrenagemArea
+                anchors.fill: parent
+                hoverEnabled: true
+                cursorShape: Qt.PointingHandCursor
+                onClicked: root.settingsRequested()
             }
         }
     }

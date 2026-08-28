@@ -546,6 +546,7 @@ Window {
             Layout.fillHeight: true
             current: root.section
             onChosen: function (name) { root.showPane(name) }
+            onSettingsRequested: settingsDialog.open()
         }
 
         NowPlayingPanel {
@@ -658,6 +659,14 @@ Window {
         onCollectionChosen: function (collectionId, title) {
             root.showPane("collections")
             collectionsPane.open(collectionId, title)
+        }
+    }
+
+    SettingsDialog {
+        id: settingsDialog
+        onLibraryPathPicked: function (path) {
+            // A pasta mudou: a lista aberta é da pasta antiga.
+            root.showSection("all", 0)
         }
     }
 
