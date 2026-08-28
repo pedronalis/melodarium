@@ -72,11 +72,8 @@ qt_add_qml_module(appmelodia
         src/PodcastPane.qml
         src/EmptyPane.qml
         src/LibraryEmptyState.qml
-        src/Sidebar.qml
-        src/SidebarItem.qml
         src/SearchField.qml
         src/QueuePanel.qml
-        src/CollectionsSection.qml
         src/NewCollectionDialog.qml
         src/ConfirmDialog.qml
         src/TagChip.qml
