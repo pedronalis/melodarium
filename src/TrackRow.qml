@@ -34,7 +34,7 @@ Item {
     signal collectRequested
     signal likeToggled
 
-    implicitHeight: Math.round(38 * Theme.uiScale)
+    implicitHeight: Math.round(34 * Theme.uiScale)
 
     function formatDuration(ms) {
         if (ms <= 0)
@@ -50,13 +50,14 @@ Item {
         anchors.leftMargin: Theme.marginXS
         anchors.rightMargin: Theme.marginXS
         radius: Theme.radiusXS
+        // Os três estados do desenho são três tons vizinhos, e não um só com transparência:
+        // a listra é quase invisível de propósito (só guia o olho na linha larga), a faixa
+        // tocando é um degrau acima dela, e o hover é o degrau seguinte. Colapsados no mesmo
+        // `mSurfaceVariant`, a lista virava um teclado de piano.
         color: mouse.containsMouse
-               ? Theme.mHover
-               : (root.isCurrent ? Theme.mSurfaceVariant
-                                 : (root.alternate ? Qt.rgba(Theme.mSurfaceVariant.r,
-                                                             Theme.mSurfaceVariant.g,
-                                                             Theme.mSurfaceVariant.b, 0.45)
-                                                   : "transparent"))
+               ? Theme.cPill
+               : (root.isCurrent ? Theme.cRowCurrent
+                                 : (root.alternate ? Theme.cRowAlt : "transparent"))
 
         Behavior on color {
             ColorAnimation { duration: Theme.animationFast; easing.type: Theme.easingType }
@@ -91,10 +92,8 @@ Item {
                     text: root.isCurrent ? Icons.get("play")
                                          : (root.position > 0 ? String(root.position) : "")
                     font.family: root.isCurrent ? Icons.fontFamily : Theme.fontFamilyFixed
-                    font.pointSize: root.isCurrent ? Theme.fontSizeXS : Theme.fontSizeS
-                    color: mouse.containsMouse
-                           ? Theme.mOnHover
-                           : (root.isCurrent ? Theme.mPrimary : Theme.mOutline)
+                    font.pixelSize: root.isCurrent ? Theme.fontSizeXS : Theme.fontSizeS
+                    color: root.isCurrent ? Theme.cStrong : Theme.cFaint
                 }
             }
 
@@ -107,20 +106,18 @@ Item {
                     text: root.title
                     elide: Text.ElideRight
                     font.family: Theme.fontFamily
-                    font.pointSize: Theme.fontSizeM
+                    font.pixelSize: Theme.fontSizeM
                     font.weight: root.isCurrent ? Theme.fontWeightSemiBold
                                                 : Theme.fontWeightRegular
-                    color: mouse.containsMouse ? Theme.mOnHover
-                                               : (root.isCurrent ? Theme.mOnSurface
-                                                                 : Theme.mOnSurfaceVariant)
+                    color: root.isCurrent ? Theme.cTitle : Theme.cBody
                 }
                 Text {
                     Layout.fillWidth: true
                     text: root.artist
                     elide: Text.ElideRight
                     font.family: Theme.fontFamily
-                    font.pointSize: Theme.fontSizeS
-                    color: mouse.containsMouse ? Theme.mOnHover : Theme.mOutline
+                    font.pixelSize: Theme.fontSizeS
+                    color: root.isCurrent ? Theme.cSecondary : Theme.cMuted
                 }
             }
 
@@ -135,8 +132,8 @@ Item {
                 text: root.album
                 elide: Text.ElideRight
                 font.family: Theme.fontFamily
-                font.pointSize: Theme.fontSizeS
-                color: mouse.containsMouse ? Theme.mOnHover : Theme.mOutline
+                font.pixelSize: Theme.fontSizeS
+                color: Theme.cDim
             }
 
             SourceBadge {
@@ -170,9 +167,8 @@ Item {
                     anchors.centerIn: parent
                     text: root.liked ? Icons.get("heart-filled") : Icons.get("heart")
                     font.family: Icons.fontFamily
-                    font.pointSize: Theme.fontSizeS
-                    color: root.liked ? Theme.mPrimary
-                                      : (mouse.containsMouse ? Theme.mOnHover : Theme.mOutline)
+                    font.pixelSize: Theme.fontSizeS
+                    color: root.liked ? Theme.cStrong : Theme.cGhost
                     opacity: root.liked ? 1.0 : (heartArea.containsMouse ? 0.9 : 0.45)
 
                     Behavior on opacity {
@@ -195,8 +191,8 @@ Item {
                 horizontalAlignment: Text.AlignRight
                 text: root.formatDuration(root.durationMs)
                 font.family: Theme.fontFamilyFixed
-                font.pointSize: Theme.fontSizeS
-                color: mouse.containsMouse ? Theme.mOnHover : Theme.mOutline
+                font.pixelSize: Theme.fontSizeS
+                color: Theme.cMuted
             }
         }
     }

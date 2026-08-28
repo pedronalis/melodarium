@@ -12,7 +12,7 @@ Rectangle {
     radius: height / 2
     color: "transparent"
     border.width: Theme.borderS
-    border.color: Theme.mOutline
+    border.color: Theme.cLine
 
     Text {
         id: label
@@ -21,7 +21,7 @@ Rectangle {
         // as the lossless files next to it.
         text: qsTr("YouTube")
         font.family: Theme.fontFamily
-        font.pointSize: Theme.fontSizeXXS
-        color: Theme.mOnSurfaceVariant
+        font.pixelSize: Theme.fontSizeXXS
+        color: Theme.cMuted
     }
 }

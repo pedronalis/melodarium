@@ -21,10 +21,10 @@ Popup {
     width: 360
 
     background: Rectangle {
-        color: Theme.mSurfaceVariant
+        color: Theme.cRaised
         radius: Theme.radiusM
         border.width: Theme.borderS
-        border.color: Theme.mOutline
+        border.color: Theme.cLine
     }
 
     onOpened: {
@@ -41,18 +41,18 @@ Popup {
         Text {
             text: root.renameId > 0 ? qsTr("Renomear coleção") : qsTr("Nova coleção")
             font.family: Theme.fontFamily
-            font.pointSize: Theme.fontSizeL
+            font.pixelSize: Theme.fontSizeL
             font.weight: Theme.fontWeightSemiBold
-            color: Theme.mOnSurface
+            color: Theme.cTitle
         }
 
         Rectangle {
             Layout.fillWidth: true
             implicitHeight: Theme.marginXL * 2
             radius: Theme.iRadiusS
-            color: Theme.mSurface
+            color: Theme.cBase
             border.width: Theme.borderS
-            border.color: nameInput.activeFocus ? Theme.mPrimary : Theme.mOutline
+            border.color: nameInput.activeFocus ? Theme.cAccent : Theme.cFaint
 
             TextInput {
                 id: nameInput
@@ -61,10 +61,10 @@ Popup {
                 anchors.rightMargin: Theme.marginM
                 verticalAlignment: TextInput.AlignVCenter
                 font.family: Theme.fontFamily
-                font.pointSize: Theme.fontSizeM
-                color: Theme.mOnSurface
-                selectionColor: Theme.mPrimary
-                selectedTextColor: Theme.mOnPrimary
+                font.pixelSize: Theme.fontSizeM
+                color: Theme.cTitle
+                selectionColor: Theme.cAccent
+                selectedTextColor: Theme.cBase
                 onAccepted: confirm.clicked()
             }
         }
@@ -76,7 +76,7 @@ Popup {
             text: ""
             wrapMode: Text.WordWrap
             font.family: Theme.fontFamily
-            font.pointSize: Theme.fontSizeS
+            font.pixelSize: Theme.fontSizeS
             color: Theme.mError
         }
 

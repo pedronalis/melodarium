@@ -25,15 +25,15 @@ RowLayout {
             text: root.title !== "" ? root.title : root.url
             elide: Text.ElideRight
             font.family: Theme.fontFamily
-            font.pointSize: Theme.fontSizeS
-            color: Theme.mOnSurface
+            font.pixelSize: Theme.fontSizeS
+            color: Theme.cTitle
         }
 
         Rectangle {
             Layout.fillWidth: true
             Layout.preferredHeight: Theme.borderL
             radius: height / 2
-            color: Theme.mSurface
+            color: Theme.cBase
 
             // The server does not always declare a size. When it does not, the bar shows a
             // steady sliver instead of a fake percentage — an invented number is worse than
@@ -41,7 +41,7 @@ RowLayout {
             Rectangle {
                 height: parent.height
                 radius: parent.radius
-                color: Theme.mPrimary
+                color: Theme.cAccent
                 width: root.sizeKnown
                        ? parent.width * Math.min(1.0, root.received / root.total)
                        : parent.width * 0.15
@@ -54,8 +54,8 @@ RowLayout {
               ? Math.round(root.received / root.total * 100) + "%"
               : qsTr("baixando…")
         font.family: Theme.fontFamilyFixed
-        font.pointSize: Theme.fontSizeXS
-        color: Theme.mOnSurfaceVariant
+        font.pixelSize: Theme.fontSizeXS
+        color: Theme.cMuted
     }
 
     IconButton {

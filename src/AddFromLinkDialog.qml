@@ -23,10 +23,10 @@ Popup {
     width: 520
 
     background: Rectangle {
-        color: Theme.mSurfaceVariant
+        color: Theme.cRaised
         radius: Theme.radiusM
         border.width: Theme.borderS
-        border.color: Theme.mOutline
+        border.color: Theme.cLine
     }
 
     onOpened: {
@@ -72,9 +72,9 @@ Popup {
         Text {
             text: qsTr("Adicionar link")
             font.family: Theme.fontFamily
-            font.pointSize: Theme.fontSizeL
+            font.pixelSize: Theme.fontSizeL
             font.weight: Theme.fontWeightSemiBold
-            color: Theme.mOnSurface
+            color: Theme.cTitle
         }
 
         // Without yt-dlp there is nothing to do here, and saying so beats a button that fails.
@@ -88,8 +88,8 @@ Popup {
                 wrapMode: Text.WordWrap
                 text: qsTr("O melodia não baixa nada sozinho: ele chama o yt-dlp que estiver instalado na sua máquina. Instale pelo gerenciador de pacotes da sua distro e reabra o melodia.")
                 font.family: Theme.fontFamily
-                font.pointSize: Theme.fontSizeS
-                color: Theme.mOnSurfaceVariant
+                font.pixelSize: Theme.fontSizeS
+                color: Theme.cMuted
             }
         }
 
@@ -103,17 +103,17 @@ Popup {
                 wrapMode: Text.WordWrap
                 text: qsTr("O áudio do YouTube é comprimido e nunca terá a qualidade dos seus arquivos. Ele entra marcado como tal.")
                 font.family: Theme.fontFamily
-                font.pointSize: Theme.fontSizeS
-                color: Theme.mOnSurfaceVariant
+                font.pixelSize: Theme.fontSizeS
+                color: Theme.cMuted
             }
 
             Rectangle {
                 Layout.fillWidth: true
                 implicitHeight: Theme.marginXL * 2
                 radius: Theme.iRadiusS
-                color: Theme.mSurface
+                color: Theme.cBase
                 border.width: Theme.borderS
-                border.color: linkInput.activeFocus ? Theme.mPrimary : Theme.mOutline
+                border.color: linkInput.activeFocus ? Theme.cAccent : Theme.cFaint
 
                 TextInput {
                     id: linkInput
@@ -122,10 +122,10 @@ Popup {
                     anchors.rightMargin: Theme.marginM
                     verticalAlignment: TextInput.AlignVCenter
                     font.family: Theme.fontFamily
-                    font.pointSize: Theme.fontSizeM
-                    color: Theme.mOnSurface
-                    selectionColor: Theme.mPrimary
-                    selectedTextColor: Theme.mOnPrimary
+                    font.pixelSize: Theme.fontSizeM
+                    color: Theme.cTitle
+                    selectionColor: Theme.cAccent
+                    selectedTextColor: Theme.cBase
                     onAccepted: lookup.clicked()
                 }
             }
@@ -135,20 +135,13 @@ Popup {
                 spacing: Theme.marginM
                 visible: root.hasInfo
 
-                Rectangle {
+                RoundedCover {
                     Layout.preferredWidth: Theme.marginXL * 4
                     Layout.preferredHeight: Theme.marginXL * 2.5
                     radius: Theme.radiusXS
-                    color: Theme.mSurface
-                    clip: true
-
-                    Image {
-                        anchors.fill: parent
-                        source: root.infoThumbnail
-                        fillMode: Image.PreserveAspectCrop
-                        asynchronous: true
-                        visible: root.infoThumbnail !== ""
-                    }
+                    fallbackIcon: "download"
+                    fallbackIconSize: Theme.fontSizeM
+                    source: root.infoThumbnail
                 }
 
                 ColumnLayout {
@@ -160,9 +153,9 @@ Popup {
                         text: root.infoTitle
                         elide: Text.ElideRight
                         font.family: Theme.fontFamily
-                        font.pointSize: Theme.fontSizeM
+                        font.pixelSize: Theme.fontSizeM
                         font.weight: Theme.fontWeightMedium
-                        color: Theme.mOnSurface
+                        color: Theme.cTitle
                     }
                     Text {
                         Layout.fillWidth: true
@@ -171,8 +164,8 @@ Popup {
                                  ? " — " + root.formatDuration(root.infoDuration) : "")
                         elide: Text.ElideRight
                         font.family: Theme.fontFamily
-                        font.pointSize: Theme.fontSizeS
-                        color: Theme.mOnSurfaceVariant
+                        font.pixelSize: Theme.fontSizeS
+                        color: Theme.cMuted
                     }
                 }
             }
@@ -183,8 +176,8 @@ Popup {
             visible: root.waitingForInfo
             text: qsTr("consultando o vídeo…")
             font.family: Theme.fontFamily
-            font.pointSize: Theme.fontSizeS
-            color: Theme.mOnSurfaceVariant
+            font.pixelSize: Theme.fontSizeS
+            color: Theme.cMuted
         }
 
         Text {
@@ -194,7 +187,7 @@ Popup {
             text: ""
             wrapMode: Text.WordWrap
             font.family: Theme.fontFamily
-            font.pointSize: Theme.fontSizeS
+            font.pixelSize: Theme.fontSizeS
             color: Theme.mError
         }
 
@@ -205,8 +198,8 @@ Popup {
             visible: YtDlpDownloader.toolVersion !== ""
             text: qsTr("yt-dlp %1").arg(YtDlpDownloader.toolVersion)
             font.family: Theme.fontFamilyFixed
-            font.pointSize: Theme.fontSizeXXS
-            color: Theme.mOnSurfaceVariant
+            font.pixelSize: Theme.fontSizeXXS
+            color: Theme.cMuted
         }
 
         RowLayout {

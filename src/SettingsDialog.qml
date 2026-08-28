@@ -20,10 +20,10 @@ Popup {
     width: Math.round(460 * Theme.uiScale)
 
     background: Rectangle {
-        color: Theme.mSurfaceVariant
+        color: Theme.cRaised
         radius: Theme.radiusM
         border.width: Theme.borderS
-        border.color: Theme.mOutline
+        border.color: Theme.cLine
     }
 
     contentItem: ColumnLayout {
@@ -32,9 +32,9 @@ Popup {
         Text {
             text: qsTr("Ajustes")
             font.family: Theme.fontFamily
-            font.pointSize: Theme.fontSizeXL
+            font.pixelSize: Theme.fontSizeXL
             font.weight: Theme.fontWeightSemiBold
-            color: Theme.mOnSurface
+            color: Theme.cTitle
         }
 
         // --- Pasta da biblioteca ---
@@ -45,9 +45,9 @@ Popup {
             Text {
                 text: qsTr("Pasta de música")
                 font.family: Theme.fontFamily
-                font.pointSize: Theme.fontSizeS
+                font.pixelSize: Theme.fontSizeS
                 font.weight: Theme.fontWeightSemiBold
-                color: Theme.mOnSurfaceVariant
+                color: Theme.cMuted
             }
 
             RowLayout {
@@ -60,8 +60,8 @@ Popup {
                                                       : qsTr("nenhuma escolhida")
                     elide: Text.ElideMiddle
                     font.family: Theme.fontFamilyFixed
-                    font.pointSize: Theme.fontSizeS
-                    color: Theme.mOnSurface
+                    font.pixelSize: Theme.fontSizeS
+                    color: Theme.cTitle
                 }
 
                 MelodiaButton {
@@ -81,8 +81,8 @@ Popup {
                     visible: Database.scanning
                     text: qsTr("varrendo a pasta…")
                     font.family: Theme.fontFamily
-                    font.pointSize: Theme.fontSizeXS
-                    color: Theme.mOnSurfaceVariant
+                    font.pixelSize: Theme.fontSizeXS
+                    color: Theme.cMuted
                 }
 
                 Item { Layout.fillWidth: true; visible: !Database.scanning }
@@ -106,7 +106,7 @@ Popup {
         Rectangle {
             Layout.fillWidth: true
             Layout.preferredHeight: Theme.borderS
-            color: Theme.mOutline
+            color: Theme.cFaint
         }
 
         // --- Qualidade de áudio ---
@@ -117,9 +117,9 @@ Popup {
             Text {
                 text: qsTr("Qualidade de áudio")
                 font.family: Theme.fontFamily
-                font.pointSize: Theme.fontSizeS
+                font.pixelSize: Theme.fontSizeS
                 font.weight: Theme.fontWeightSemiBold
-                color: Theme.mOnSurfaceVariant
+                color: Theme.cMuted
             }
 
             RowLayout {
@@ -133,8 +133,8 @@ Popup {
                     Text {
                         text: qsTr("Nivelar o volume entre faixas")
                         font.family: Theme.fontFamily
-                        font.pointSize: Theme.fontSizeM
-                        color: Theme.mOnSurface
+                        font.pixelSize: Theme.fontSizeM
+                        color: Theme.cTitle
                     }
                     Text {
                         Layout.fillWidth: true
@@ -143,8 +143,8 @@ Popup {
                         // nenhuma das faixas do acervo traz esse dado gravado dentro.
                         text: qsTr("Usa o nível gravado dentro do arquivo. Só tem efeito em arquivos que o trazem — nenhum da sua biblioteca traz hoje.")
                         font.family: Theme.fontFamily
-                        font.pointSize: Theme.fontSizeXS
-                        color: Theme.mOutline
+                        font.pixelSize: Theme.fontSizeXS
+                        color: Theme.cFaint
                     }
                 }
 
@@ -177,16 +177,16 @@ Popup {
                     Text {
                         text: qsTr("Saída exclusiva")
                         font.family: Theme.fontFamily
-                        font.pointSize: Theme.fontSizeM
-                        color: Theme.mOnSurface
+                        font.pixelSize: Theme.fontSizeM
+                        color: Theme.cTitle
                     }
                     Text {
                         Layout.fillWidth: true
                         wrapMode: Text.WordWrap
                         text: qsTr("Pede à placa de som o sinal sem mistura do sistema. Enquanto estiver ligada, outros programas podem ficar sem áudio.")
                         font.family: Theme.fontFamily
-                        font.pointSize: Theme.fontSizeXS
-                        color: Theme.mOutline
+                        font.pixelSize: Theme.fontSizeXS
+                        color: Theme.cFaint
                     }
                 }
 

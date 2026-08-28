@@ -19,10 +19,10 @@ Popup {
     width: Math.round(360 * Theme.uiScale)
 
     background: Rectangle {
-        color: Theme.mSurfaceVariant
+        color: Theme.cRaised
         radius: Theme.radiusM
         border.width: Theme.borderS
-        border.color: Theme.mOutline
+        border.color: Theme.cLine
     }
 
     ColumnLayout {
@@ -34,8 +34,8 @@ Popup {
             text: root.message
             wrapMode: Text.WordWrap
             font.family: Theme.fontFamily
-            font.pointSize: Theme.fontSizeM
-            color: Theme.mOnSurface
+            font.pixelSize: Theme.fontSizeM
+            color: Theme.cTitle
         }
 
         RowLayout {

@@ -12,10 +12,10 @@ Popup {
     width: 460
 
     background: Rectangle {
-        color: Theme.mSurfaceVariant
+        color: Theme.cRaised
         radius: Theme.radiusM
         border.width: Theme.borderS
-        border.color: Theme.mOutline
+        border.color: Theme.cLine
     }
 
     onOpened: {
@@ -42,9 +42,9 @@ Popup {
         Text {
             text: qsTr("Assinar podcast")
             font.family: Theme.fontFamily
-            font.pointSize: Theme.fontSizeL
+            font.pixelSize: Theme.fontSizeL
             font.weight: Theme.fontWeightSemiBold
-            color: Theme.mOnSurface
+            color: Theme.cTitle
         }
 
         Text {
@@ -52,17 +52,17 @@ Popup {
             wrapMode: Text.WordWrap
             text: qsTr("Cole o endereço do feed RSS do programa.")
             font.family: Theme.fontFamily
-            font.pointSize: Theme.fontSizeS
-            color: Theme.mOnSurfaceVariant
+            font.pixelSize: Theme.fontSizeS
+            color: Theme.cMuted
         }
 
         Rectangle {
             Layout.fillWidth: true
             implicitHeight: Theme.marginXL * 2
             radius: Theme.iRadiusS
-            color: Theme.mSurface
+            color: Theme.cBase
             border.width: Theme.borderS
-            border.color: urlInput.activeFocus ? Theme.mPrimary : Theme.mOutline
+            border.color: urlInput.activeFocus ? Theme.cAccent : Theme.cFaint
 
             TextInput {
                 id: urlInput
@@ -71,10 +71,10 @@ Popup {
                 anchors.rightMargin: Theme.marginM
                 verticalAlignment: TextInput.AlignVCenter
                 font.family: Theme.fontFamily
-                font.pointSize: Theme.fontSizeM
-                color: Theme.mOnSurface
-                selectionColor: Theme.mPrimary
-                selectedTextColor: Theme.mOnPrimary
+                font.pixelSize: Theme.fontSizeM
+                color: Theme.cTitle
+                selectionColor: Theme.cAccent
+                selectedTextColor: Theme.cBase
                 onAccepted: confirm.clicked()
             }
         }
@@ -86,7 +86,7 @@ Popup {
             text: ""
             wrapMode: Text.WordWrap
             font.family: Theme.fontFamily
-            font.pointSize: Theme.fontSizeS
+            font.pixelSize: Theme.fontSizeS
             color: Theme.mError
         }
 

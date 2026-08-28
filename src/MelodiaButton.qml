@@ -16,11 +16,17 @@ Item {
     Rectangle {
         anchors.fill: parent
         radius: Theme.iRadiusS
+        // O desenho não tem botão sólido claro em lugar nenhum — o único disco claro da tela é
+        // o de tocar. Com fundo de acento, "Trocar", "Reler a pasta" e os dois interruptores de
+        // qualidade ficavam mais claros que o título da faixa e puxavam o olho para o canto
+        // errado; um deles, desligado, ainda lia como ligado.
+        // Preenchido e contornado precisam continuar sendo dois estados VISÍVEIS: é esse par
+        // que diz ligado/desligado nos dois interruptores de qualidade de áudio.
         color: root.outlined
-               ? (mouse.containsMouse ? Theme.mHover : "transparent")
-               : (mouse.containsMouse ? Theme.mHover : Theme.mPrimary)
+               ? (mouse.containsMouse ? Theme.cPill : "transparent")
+               : (mouse.containsMouse ? Theme.cPill : Theme.cLine)
         border.width: root.outlined ? Theme.borderS : 0
-        border.color: Theme.mOutline
+        border.color: Theme.cLine
 
         Behavior on color {
             ColorAnimation { duration: Theme.animationFast; easing.type: Theme.easingType }
@@ -31,11 +37,11 @@ Item {
             anchors.centerIn: parent
             text: root.text
             font.family: Theme.fontFamily
-            font.pointSize: Theme.fontSizeM
-            font.weight: Theme.fontWeightSemiBold
+            font.pixelSize: Theme.fontSizeM
+            font.weight: Theme.fontWeightMedium
             color: mouse.containsMouse
-                   ? Theme.mOnHover
-                   : (root.outlined ? Theme.mOnSurface : Theme.mOnPrimary)
+                   ? Theme.cTitle
+                   : (root.outlined ? Theme.cMuted : Theme.cTitle)
 
             Behavior on color {
                 ColorAnimation { duration: Theme.animationFast; easing.type: Theme.easingType }

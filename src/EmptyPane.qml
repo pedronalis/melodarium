@@ -66,11 +66,11 @@ Item {
         implicitHeight: Math.round(40 * Theme.uiScale)
         radius: Theme.iRadiusS
         color: atalhoArea.containsMouse
-               ? Qt.rgba(Theme.mSurfaceVariant.r, Theme.mSurfaceVariant.g,
-                         Theme.mSurfaceVariant.b, 0.6)
+               ? Qt.rgba(Theme.cRaised.r, Theme.cRaised.g,
+                         Theme.cRaised.b, 0.6)
                : "transparent"
         border.width: Theme.borderS
-        border.color: Theme.mSurfaceVariant
+        border.color: Theme.cLine
 
         Behavior on color {
             ColorAnimation { duration: Theme.animationFast; easing.type: Theme.easingType }
@@ -85,23 +85,23 @@ Item {
             Text {
                 text: atalho.glyph
                 font.family: Icons.fontFamily
-                font.pointSize: Theme.fontSizeM
-                color: Theme.mOnSurfaceVariant
+                font.pixelSize: Theme.fontSizeM
+                color: Theme.cMuted
             }
             Text {
                 Layout.fillWidth: true
                 text: atalho.label
                 elide: Text.ElideRight
                 font.family: Theme.fontFamily
-                font.pointSize: Theme.fontSizeS
-                color: atalhoArea.containsMouse ? Theme.mOnSurface : Theme.mOnSurfaceVariant
+                font.pixelSize: Theme.fontSizeS
+                color: atalhoArea.containsMouse ? Theme.cTitle : Theme.cMuted
             }
             Text {
                 visible: atalho.badge !== ""
                 text: atalho.badge
                 font.family: Theme.fontFamilyFixed
-                font.pointSize: Theme.fontSizeXS
-                color: Theme.mOutline
+                font.pixelSize: Theme.fontSizeXS
+                color: Theme.cFaint
             }
         }
 
@@ -134,8 +134,8 @@ Item {
                 Layout.alignment: Qt.AlignHCenter
                 text: Icons.get("music")
                 font.family: Icons.fontFamily
-                font.pointSize: Theme.fontSizeXXXL
-                color: Theme.mSurfaceVariant
+                font.pixelSize: Theme.fontSizeXXXL
+                color: Theme.cRaised
             }
             Text {
                 Layout.fillWidth: true
@@ -143,8 +143,8 @@ Item {
                 text: root.temBiblioteca ? qsTr("Nada tocando")
                                          : qsTr("Sua biblioteca ainda está vazia")
                 font.family: Theme.fontFamily
-                font.pointSize: Theme.fontSizeL
-                color: Theme.mOnSurfaceVariant
+                font.pixelSize: Theme.fontSizeL
+                color: Theme.cMuted
             }
         }
 
@@ -157,10 +157,10 @@ Item {
             Text {
                 text: qsTr("Continuar de onde parou").toUpperCase()
                 font.family: Theme.fontFamily
-                font.pointSize: Theme.fontSizeXS
+                font.pixelSize: Theme.fontSizeXS
                 font.weight: Theme.fontWeightBold
                 font.letterSpacing: 1.0
-                color: Theme.mOutline
+                color: Theme.cFaint
             }
 
             Rectangle {
@@ -168,11 +168,11 @@ Item {
                 implicitHeight: Math.round(68 * Theme.uiScale)
                 radius: Theme.iRadiusS
                 color: retomarArea.containsMouse
-                       ? Theme.mSurfaceVariant
-                       : Qt.rgba(Theme.mSurfaceVariant.r, Theme.mSurfaceVariant.g,
-                                 Theme.mSurfaceVariant.b, 0.55)
+                       ? Theme.cRaised
+                       : Qt.rgba(Theme.cRaised.r, Theme.cRaised.g,
+                                 Theme.cRaised.b, 0.55)
                 border.width: Theme.borderS
-                border.color: Theme.mSurfaceVariant
+                border.color: Theme.cLine
 
                 Behavior on color {
                     ColorAnimation { duration: Theme.animationFast; easing.type: Theme.easingType }
@@ -183,36 +183,18 @@ Item {
                     anchors.margins: Theme.marginM
                     spacing: Theme.marginL
 
-                    Rectangle {
-                        Layout.preferredWidth: 46
-                        Layout.preferredHeight: 46
+                    RoundedCover {
+                        Layout.preferredWidth: Math.round(46 * Theme.uiScale)
+                        Layout.preferredHeight: Math.round(46 * Theme.uiScale)
                         radius: Theme.radiusXS
-                        color: Theme.mSurface
-                        clip: true
-
-                        Image {
-                            id: capaRetomar
-                            anchors.fill: parent
-                            source: root.temRetomar
-                                    ? CoverCache.coverUrlForTrack(
-                                          root.resumeInfo.path,
-                                          root.resumeInfo.albumId !== undefined
-                                          ? root.resumeInfo.albumId : 0)
-                                    : ""
-                            fillMode: Image.PreserveAspectCrop
-                            asynchronous: true
-                            visible: status === Image.Ready
-                            sourceSize.width: 92
-                        }
-
-                        Text {
-                            anchors.centerIn: parent
-                            visible: capaRetomar.status !== Image.Ready
-                            text: Icons.get("music")
-                            font.family: Icons.fontFamily
-                            font.pointSize: Theme.fontSizeM
-                            color: Theme.mOutline
-                        }
+                        fallbackIconSize: Theme.fontSizeM
+                        fallbackIconColor: Theme.cFaint
+                        source: root.temRetomar
+                                ? CoverCache.coverUrlForTrack(
+                                      root.resumeInfo.path,
+                                      root.resumeInfo.albumId !== undefined
+                                      ? root.resumeInfo.albumId : 0)
+                                : ""
                     }
 
                     ColumnLayout {
@@ -225,9 +207,9 @@ Item {
                                   ? root.resumeInfo.title : ""
                             elide: Text.ElideRight
                             font.family: Theme.fontFamily
-                            font.pointSize: Theme.fontSizeM
+                            font.pixelSize: Theme.fontSizeM
                             font.weight: Theme.fontWeightSemiBold
-                            color: Theme.mOnSurface
+                            color: Theme.cTitle
                         }
                         Text {
                             Layout.fillWidth: true
@@ -243,23 +225,23 @@ Item {
                             }
                             elide: Text.ElideRight
                             font.family: Theme.fontFamily
-                            font.pointSize: Theme.fontSizeS
-                            color: Theme.mOutline
+                            font.pixelSize: Theme.fontSizeS
+                            color: Theme.cFaint
                         }
                     }
 
                     Rectangle {
-                        Layout.preferredWidth: 34
-                        Layout.preferredHeight: 34
-                        radius: 17
-                        color: Theme.mTertiary
+                        Layout.preferredWidth: Math.round(34 * Theme.uiScale)
+                        Layout.preferredHeight: Math.round(34 * Theme.uiScale)
+                        radius: Math.round(17 * Theme.uiScale)
+                        color: Theme.cTitle
 
                         Text {
                             anchors.centerIn: parent
                             text: Icons.get("play")
                             font.family: Icons.fontFamily
-                            font.pointSize: Theme.fontSizeS
-                            color: Theme.mOnTertiary
+                            font.pixelSize: Theme.fontSizeS
+                            color: Theme.cBase
                         }
                     }
                 }
@@ -312,8 +294,8 @@ Item {
             wrapMode: Text.WordWrap
             text: qsTr("Escolha a pasta onde sua música está: o melodia lê os arquivos, nunca escreve neles.")
             font.family: Theme.fontFamily
-            font.pointSize: Theme.fontSizeS
-            color: Theme.mOutline
+            font.pixelSize: Theme.fontSizeS
+            color: Theme.cFaint
         }
 
         MelodiaButton {

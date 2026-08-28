@@ -74,8 +74,8 @@ RowLayout {
         visible: root.likedCount > 0
         text: root.likedCount
         font.family: Theme.fontFamilyFixed
-        font.pointSize: Theme.fontSizeXS
-        color: Theme.mOutline
+        font.pixelSize: Theme.fontSizeXS
+        color: Theme.cFaint
     }
 
     Item { Layout.fillWidth: true }

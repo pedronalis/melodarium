@@ -33,8 +33,8 @@ ColumnLayout {
                   ? qsTr("verificando…")
                   : root.formatLastChecked(root.lastCheckedAt)
             font.family: Theme.fontFamily
-            font.pointSize: Theme.fontSizeXS
-            color: Theme.mOnSurfaceVariant
+            font.pixelSize: Theme.fontSizeXS
+            color: Theme.cMuted
         }
 
         IconButton {
@@ -50,7 +50,7 @@ ColumnLayout {
         wrapMode: Text.WordWrap
         text: qsTr("Verifica novos episódios enquanto o melodia está aberto.")
         font.family: Theme.fontFamily
-        font.pointSize: Theme.fontSizeXS
-        color: Theme.mOnSurfaceVariant
+        font.pixelSize: Theme.fontSizeXS
+        color: Theme.cMuted
     }
 }

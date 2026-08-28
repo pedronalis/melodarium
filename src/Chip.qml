@@ -16,12 +16,14 @@ Rectangle {
     signal clicked
 
     implicitWidth: row.implicitWidth + Theme.marginM * 2
-    implicitHeight: Math.round(24 * Theme.uiScale)
+    implicitHeight: Math.round(22 * Theme.uiScale)
     radius: Theme.iRadiusS
-    color: root.selected ? Theme.mSurfaceVariant
-                         : (area.containsMouse ? Theme.mSurfaceVariant : "transparent")
+    // Escolhida: fundo cheio um degrau acima da borda das outras. Antes as duas usavam o
+    // mesmo tom e a pílula acesa não se distinguia do contorno das apagadas.
+    color: root.selected ? Theme.cLine
+                         : (area.containsMouse ? Theme.cPill : "transparent")
     border.width: root.selected ? 0 : Theme.borderS
-    border.color: Theme.mSurfaceVariant
+    border.color: Theme.cPill
 
     Behavior on color {
         ColorAnimation { duration: Theme.animationFast; easing.type: Theme.easingType }
@@ -38,17 +40,17 @@ Rectangle {
             text: root.glyph
             rotation: root.glyphPointsDown ? 90 : 0
             font.family: Icons.fontFamily
-            font.pointSize: Theme.fontSizeXS
-            color: root.selected ? Theme.mOnSurface : Theme.mOnSurfaceVariant
+            font.pixelSize: Theme.fontSizeXS
+            color: root.selected ? Theme.cTitle : Theme.cMuted
         }
         Text {
             anchors.verticalCenter: parent.verticalCenter
             visible: root.label !== ""
             text: root.label
             font.family: Theme.fontFamily
-            font.pointSize: Theme.fontSizeS
+            font.pixelSize: Theme.fontSizeS
             font.weight: root.selected ? Theme.fontWeightSemiBold : Theme.fontWeightRegular
-            color: root.selected ? Theme.mOnSurface : Theme.mOnSurfaceVariant
+            color: root.selected ? Theme.cTitle : Theme.cMuted
         }
     }
 

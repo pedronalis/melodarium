@@ -40,10 +40,10 @@ Popup {
     padding: 0
 
     background: Rectangle {
-        color: Theme.mSurface
+        color: Theme.cRowAlt
         radius: Theme.radiusL
         border.width: Theme.borderS
-        border.color: Theme.mOutline
+        border.color: Theme.cLine
     }
 
     Overlay.modal: Rectangle {
@@ -63,14 +63,14 @@ Popup {
             // Sem font.family de propósito: JetBrains Mono não traz ↑↓ nem ↵, e uma família
             // fixa impede o Qt de cair numa fonte que traga.
             text: dica.tecla
-            font.pointSize: Theme.fontSizeS
-            color: Theme.mOnSurfaceVariant
+            font.pixelSize: Theme.fontSizeS
+            color: Theme.cMuted
         }
         Text {
             text: dica.acao
             font.family: Theme.fontFamily
-            font.pointSize: Theme.fontSizeS
-            color: Theme.mOutline
+            font.pixelSize: Theme.fontSizeS
+            color: Theme.cFaint
         }
     }
 
@@ -196,16 +196,16 @@ Popup {
             Text {
                 text: Icons.get("search")
                 font.family: Icons.fontFamily
-                font.pointSize: Theme.fontSizeL
-                color: Theme.mOnSurfaceVariant
+                font.pixelSize: Theme.fontSizeL
+                color: Theme.cMuted
             }
 
             TextInput {
                 id: input
                 Layout.fillWidth: true
                 font.family: Theme.fontFamily
-                font.pointSize: Theme.fontSizeXL
-                color: Theme.mOnSurface
+                font.pixelSize: Theme.fontSizeXL
+                color: Theme.cTitle
                 selectByMouse: true
                 clip: true
                 onTextChanged: debounce.restart()
@@ -230,23 +230,23 @@ Popup {
                     visible: input.text === ""
                     text: qsTr("buscar faixa, álbum, artista, episódio…")
                     font.family: Theme.fontFamily
-                    font.pointSize: Theme.fontSizeM
-                    color: Theme.mOutline
+                    font.pixelSize: Theme.fontSizeM
+                    color: Theme.cFaint
                 }
             }
 
             Text {
                 text: root.hits.length + qsTr(" resultados")
                 font.family: Theme.fontFamilyFixed
-                font.pointSize: Theme.fontSizeXS
-                color: Theme.mOutline
+                font.pixelSize: Theme.fontSizeXS
+                color: Theme.cFaint
             }
         }
 
         Rectangle {
             Layout.fillWidth: true
             implicitHeight: Theme.borderS
-            color: Theme.mSurfaceVariant
+            color: Theme.cRaised
         }
 
         // --- Os resultados, agrupados por tipo ---
@@ -278,10 +278,10 @@ Popup {
                     visible: linha.modelData.header
                     text: linha.modelData.header ? linha.modelData.label.toUpperCase() : ""
                     font.family: Theme.fontFamily
-                    font.pointSize: Theme.fontSizeXS
+                    font.pixelSize: Theme.fontSizeXS
                     font.weight: Theme.fontWeightBold
                     font.letterSpacing: 1.2
-                    color: Theme.mOutline
+                    color: Theme.cFaint
                 }
 
                 Rectangle {
@@ -289,11 +289,8 @@ Popup {
                     visible: !linha.modelData.header
                     radius: Theme.iRadiusS
                     color: root.highlighted === linha.modelData.hitIndex
-                           ? Theme.mSurfaceVariant
-                           : (hitArea.containsMouse
-                              ? Qt.rgba(Theme.mSurfaceVariant.r, Theme.mSurfaceVariant.g,
-                                        Theme.mSurfaceVariant.b, 0.5)
-                              : "transparent")
+                           ? Theme.cPill
+                           : (hitArea.containsMouse ? Theme.cRaised : "transparent")
 
                     Behavior on color {
                         ColorAnimation { duration: Theme.animationFaster; easing.type: Theme.easingType }
@@ -313,15 +310,15 @@ Popup {
                             radius: linha.modelData.header
                                     ? 0
                                     : (linha.modelData.hit.kind === "artist" ? 17 : Theme.radiusXS)
-                            color: Theme.mSurfaceVariant
+                            color: Theme.cRaised
 
                             Text {
                                 anchors.centerIn: parent
                                 text: linha.modelData.header
                                       ? "" : root.glyphFor(linha.modelData.hit.kind)
                                 font.family: Icons.fontFamily
-                                font.pointSize: Theme.fontSizeM
-                                color: Theme.mOnSurfaceVariant
+                                font.pixelSize: Theme.fontSizeM
+                                color: Theme.cMuted
                             }
                         }
 
@@ -334,27 +331,27 @@ Popup {
                                 text: linha.modelData.header ? "" : linha.modelData.hit.title
                                 elide: Text.ElideRight
                                 font.family: Theme.fontFamily
-                                font.pointSize: Theme.fontSizeM
+                                font.pixelSize: Theme.fontSizeM
                                 font.weight: root.highlighted === linha.modelData.hitIndex
                                              ? Theme.fontWeightSemiBold : Theme.fontWeightMedium
                                 color: root.highlighted === linha.modelData.hitIndex
-                                       ? Theme.mOnSurface : Theme.mOnSurfaceVariant
+                                       ? Theme.cTitle : Theme.cMuted
                             }
                             Text {
                                 Layout.fillWidth: true
                                 text: linha.modelData.header ? "" : linha.modelData.hit.subtitle
                                 elide: Text.ElideRight
                                 font.family: Theme.fontFamily
-                                font.pointSize: Theme.fontSizeS
-                                color: Theme.mOutline
+                                font.pixelSize: Theme.fontSizeS
+                                color: Theme.cFaint
                             }
                         }
 
                         Text {
                             visible: root.highlighted === linha.modelData.hitIndex
                             text: "↵"
-                            font.pointSize: Theme.fontSizeS
-                            color: Theme.mOnSurfaceVariant
+                            font.pixelSize: Theme.fontSizeS
+                            color: Theme.cMuted
                         }
                     }
 
@@ -375,15 +372,15 @@ Popup {
                 text: input.text === "" ? qsTr("digite para procurar")
                                         : qsTr("nada encontrado")
                 font.family: Theme.fontFamily
-                font.pointSize: Theme.fontSizeM
-                color: Theme.mOutline
+                font.pixelSize: Theme.fontSizeM
+                color: Theme.cFaint
             }
         }
 
         Rectangle {
             Layout.fillWidth: true
             implicitHeight: Theme.borderS
-            color: Theme.mSurfaceVariant
+            color: Theme.cRaised
         }
 
         // --- O rodapé de atalhos: o overlay é feito para o teclado ---
