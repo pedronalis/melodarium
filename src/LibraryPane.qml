@@ -30,6 +30,7 @@ Item {
     signal trackActivated(int index)
     signal collectRequested(int trackId)
     signal searchRequested
+    signal queueActivated(int queueIndex)
 
     function reload() {
         chips.likedCount = LibraryBrowser.likedCount()
@@ -319,6 +320,12 @@ Item {
                 font.pointSize: Theme.fontSizeM
                 color: Theme.mOnSurfaceVariant
             }
+        }
+
+        // O pé da lista, como no desenho: a fila mora aqui, não no painel da capa.
+        QueueStrip {
+            Layout.fillWidth: true
+            onEntryActivated: function (queueIndex) { root.queueActivated(queueIndex) }
         }
     }
 }
