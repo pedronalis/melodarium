@@ -72,7 +72,14 @@ public:
     Q_INVOKABLE void loadAllTracks();
     Q_INVOKABLE void loadFromQuery(const QString &whereClause, const QVariantList &bindings);
     Q_INVOKABLE QStringList allPaths() const;
+    // The header's "+ Coleção" button throws the list on screen into a collection — and what
+    // a collection stores is an id, not a path.
+    Q_INVOKABLE QVariantList allTrackIds() const;
     Q_INVOKABLE QVariantMap trackAt(int row) const;
+
+    // Curtir é um clique numa linha, não um motivo para recarregar a lista: isto altera a
+    // linha em memória e avisa a ListView de UM papel de UMA linha.
+    Q_INVOKABLE void applyLiked(int trackId, bool liked);
 
     // Test seam: fill the model without touching SQLite.
     void setRowsForTesting(const QList<TrackRow> &rows);

@@ -1,7 +1,7 @@
 ---
 slug: shuffle-repeat
 feature: melodia-religa
-status: aprovado
+status: concluido
 depende-de: [fila-motor]
 decisao-humana: sim
 spec: docs/auditoria-completude.md (achados 10,11,12) · design/Main.dc.html
@@ -61,7 +61,7 @@ conversão de áudio entra no construtor (contrato de qualidade do spec).
 
 ### Task 1: Repetir em três posições, no motor
 
-- [ ] Escrever o teste que falha, em `tests/tst_audioengine.cpp`, dentro de
+- [x] Escrever o teste que falha, em `tests/tst_audioengine.cpp`, dentro de
       `private slots:`:
 
 ```cpp
@@ -86,10 +86,10 @@ conversão de áudio entra no construtor (contrato de qualidade do spec).
     }
 ```
 
-- [ ] Rodar e confirmar que falha pelo motivo certo:
+- [x] Rodar e confirmar que falha pelo motivo certo:
       `cmake --build build --target tst_audioengine` → erro de compilação
       `no member named 'repeatMode' in 'AudioEngine'`
-- [ ] Declarar em `src/audioengine.h`, no bloco `public:` **antes** do construtor (um
+- [x] Declarar em `src/audioengine.h`, no bloco `public:` **antes** do construtor (um
       `Q_ENUM` precisa do tipo declarado antes de qualquer `Q_PROPERTY` que o use):
 
 ```cpp
@@ -99,38 +99,38 @@ conversão de áudio entra no construtor (contrato de qualidade do spec).
     Q_ENUM(RepeatMode)
 ```
 
-- [ ] No mesmo arquivo, junto das outras `Q_PROPERTY`:
+- [x] No mesmo arquivo, junto das outras `Q_PROPERTY`:
 
 ```cpp
     Q_PROPERTY(RepeatMode repeatMode READ repeatMode NOTIFY repeatModeChanged)
 ```
 
-- [ ] No mesmo arquivo, junto dos getters inline:
+- [x] No mesmo arquivo, junto dos getters inline:
 
 ```cpp
     RepeatMode repeatMode() const { return m_repeatMode; }
 ```
 
-- [ ] No mesmo arquivo, junto dos `Q_INVOKABLE`:
+- [x] No mesmo arquivo, junto dos `Q_INVOKABLE`:
 
 ```cpp
     // Avança Off → All → One → Off. Um botão só, como no desenho.
     Q_INVOKABLE void cycleRepeat();
 ```
 
-- [ ] No mesmo arquivo, junto dos sinais:
+- [x] No mesmo arquivo, junto dos sinais:
 
 ```cpp
     void repeatModeChanged();
 ```
 
-- [ ] No mesmo arquivo, junto dos membros privados:
+- [x] No mesmo arquivo, junto dos membros privados:
 
 ```cpp
     RepeatMode m_repeatMode = RepeatOff;
 ```
 
-- [ ] Implementar em `src/audioengine.cpp`, depois de `AudioEngine::upcoming`:
+- [x] Implementar em `src/audioengine.cpp`, depois de `AudioEngine::upcoming`:
 
 ```cpp
 void AudioEngine::cycleRepeat()
@@ -150,10 +150,10 @@ void AudioEngine::cycleRepeat()
 }
 ```
 
-- [ ] verificação mecânica da task:
+- [x] verificação mecânica da task:
       `quiet-run ctest --test-dir build -R tst_audioengine --output-on-failure`
       → `100% tests passed`
-- [ ] commit:
+- [x] commit:
 
 ```bash
 git add src/audioengine.h src/audioengine.cpp tests/tst_audioengine.cpp docs/plans/2026-08-28-shuffle-repeat.md
@@ -162,7 +162,7 @@ git commit -m "feat(audio): repeat in three positions, playlist and single file"
 
 ### Task 2: Aleatório sobre a fila corrente, reversível
 
-- [ ] Escrever o teste que falha, em `tests/tst_audioengine.cpp`:
+- [x] Escrever o teste que falha, em `tests/tst_audioengine.cpp`:
 
 ```cpp
     // O aleatório age sobre a FILA, não sobre a biblioteca — e desligar volta à ordem
@@ -206,19 +206,19 @@ git commit -m "feat(audio): repeat in three positions, playlist and single file"
     }
 ```
 
-- [ ] Declarar em `src/audioengine.h`, junto das `Q_PROPERTY`:
+- [x] Declarar em `src/audioengine.h`, junto das `Q_PROPERTY`:
 
 ```cpp
     Q_PROPERTY(bool shuffle READ shuffle NOTIFY shuffleChanged)
 ```
 
-- [ ] No mesmo arquivo, junto dos getters inline:
+- [x] No mesmo arquivo, junto dos getters inline:
 
 ```cpp
     bool shuffle() const { return m_shuffle; }
 ```
 
-- [ ] No mesmo arquivo, junto dos `Q_INVOKABLE`:
+- [x] No mesmo arquivo, junto dos `Q_INVOKABLE`:
 
 ```cpp
     // Embaralha a fila a partir da PRÓXIMA entrada (o que toca não muda de lugar), ou
@@ -226,13 +226,13 @@ git commit -m "feat(audio): repeat in three positions, playlist and single file"
     Q_INVOKABLE void setShuffle(bool on);
 ```
 
-- [ ] No mesmo arquivo, junto dos sinais:
+- [x] No mesmo arquivo, junto dos sinais:
 
 ```cpp
     void shuffleChanged();
 ```
 
-- [ ] No mesmo arquivo, junto dos membros privados:
+- [x] No mesmo arquivo, junto dos membros privados:
 
 ```cpp
     bool m_shuffle = false;
@@ -240,7 +240,7 @@ git commit -m "feat(audio): repeat in three positions, playlist and single file"
     QStringList m_queueOriginal;
 ```
 
-- [ ] Implementar em `src/audioengine.cpp`, depois de `cycleRepeat`. Note o
+- [x] Implementar em `src/audioengine.cpp`, depois de `cycleRepeat`. Note o
       `#include <QRandomGenerator>` no topo do arquivo, junto dos outros includes:
 
 ```cpp
@@ -288,14 +288,14 @@ void AudioEngine::reloadQueueKeepingCurrent()
 }
 ```
 
-- [ ] Declarar o auxiliar em `src/audioengine.h`, junto dos outros métodos privados
+- [x] Declarar o auxiliar em `src/audioengine.h`, junto dos outros métodos privados
       (depois de `void command(const QStringList &args);`):
 
 ```cpp
     void reloadQueueKeepingCurrent();
 ```
 
-- [ ] Em `src/audioengine.cpp`, no fim de `loadPlaylist`, zerar o aleatório — a ordem
+- [x] Em `src/audioengine.cpp`, no fim de `loadPlaylist`, zerar o aleatório — a ordem
       guardada era da fila anterior. Substituir as duas últimas linhas da função por:
 
 ```cpp
@@ -310,10 +310,10 @@ void AudioEngine::reloadQueueKeepingCurrent()
     emit queueChanged();
 ```
 
-- [ ] verificação mecânica da task:
+- [x] verificação mecânica da task:
       `quiet-run ctest --test-dir build -R tst_audioengine --output-on-failure`
       → `100% tests passed`
-- [ ] commit:
+- [x] commit:
 
 ```bash
 git add src/audioengine.h src/audioengine.cpp tests/tst_audioengine.cpp docs/plans/2026-08-28-shuffle-repeat.md
@@ -322,7 +322,7 @@ git commit -m "feat(audio): shuffle the current queue, reversibly"
 
 ### Task 3: Os dois botões passam a fazer e a mostrar
 
-- [ ] Em `src/NowPlayingPanel.qml`, substituir o `IconButton` do aleatório (o que hoje tem
+- [x] Em `src/NowPlayingPanel.qml`, substituir o `IconButton` do aleatório (o que hoje tem
       `onClicked: {}`) por:
 
 ```qml
@@ -337,7 +337,7 @@ git commit -m "feat(audio): shuffle the current queue, reversibly"
             }
 ```
 
-- [ ] No mesmo arquivo, substituir o `IconButton` do repetir (o outro `onClicked: {}`) por:
+- [x] No mesmo arquivo, substituir o `IconButton` do repetir (o outro `onClicked: {}`) por:
 
 ```qml
             IconButton {
@@ -367,12 +367,12 @@ git commit -m "feat(audio): shuffle the current queue, reversibly"
             }
 ```
 
-- [ ] verificação mecânica da task:
+- [x] verificação mecânica da task:
       `grep -c 'onClicked: {}' src/NowPlayingPanel.qml` → `0`
-- [ ] verificação mecânica da task:
+- [x] verificação mecânica da task:
       `grep -c 'AudioEngine.setShuffle\|AudioEngine.cycleRepeat' src/NowPlayingPanel.qml` → `2`
-- [ ] verificação mecânica da task: `quiet-run cmake --build build` → exit 0
-- [ ] commit:
+- [x] verificação mecânica da task: `quiet-run cmake --build build` → exit 0
+- [x] commit:
 
 ```bash
 git add src/NowPlayingPanel.qml docs/plans/2026-08-28-shuffle-repeat.md
@@ -381,7 +381,7 @@ git commit -m "feat(ui): shuffle and repeat do what they show, and show what the
 
 ### Task 4: O aleatório da tela vazia passa a ligar o modo
 
-- [ ] Em `src/Main.qml`, a função `startFromEmpty` embaralhava a lista uma vez, sem estado.
+- [x] Em `src/Main.qml`, a função `startFromEmpty` embaralhava a lista uma vez, sem estado.
       Agora ela liga o modo do motor, que fica visível e desligável. Substituir o bloco do
       `mode === "shuffle"`:
 
@@ -396,12 +396,12 @@ git commit -m "feat(ui): shuffle and repeat do what they show, and show what the
         AudioEngine.play()
 ```
 
-- [ ] verificação mecânica da task:
+- [x] verificação mecânica da task:
       `grep -c 'Fisher-Yates' src/Main.qml` → `0`
-- [ ] verificação mecânica da task:
+- [x] verificação mecânica da task:
       `grep -c 'AudioEngine.setShuffle' src/Main.qml` → `1`
-- [ ] verificação mecânica da task: `quiet-run cmake --build build` → exit 0
-- [ ] commit:
+- [x] verificação mecânica da task: `quiet-run cmake --build build` → exit 0
+- [x] commit:
 
 ```bash
 git add src/Main.qml docs/plans/2026-08-28-shuffle-repeat.md

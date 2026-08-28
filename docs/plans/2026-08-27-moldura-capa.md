@@ -1,7 +1,7 @@
 ---
 slug: moldura-capa
 feature: melodia-capa-manda
-status: concluido
+status: travado
 depende-de: [like-faixas]
 decisao-humana: sim
 spec: design/Main.dc.html (tela 1 aprovada em 2026-08-27)
@@ -614,3 +614,12 @@ git commit -m "fix(ui): keep the pane above its minimum width"
 - Embaralhar e repetir: os botões existem e ficam inertes; ligar é fatia futura, e o
   `AudioEngine` ainda não expõe esses modos.
 - Arrastar a divisa entre painel e miolo. Larguras fixas nesta fatia.
+
+## Diagnóstico (2026-08-28)
+
+Reaberto pela auditoria de completude: o redesenho `melodia-capa-manda` trocou o shell da
+janela e o que esta fatia entregou perdeu a porta de entrada. O código continua no
+repositório e continua compilando — o que sumiu foi o caminho até ele.
+
+Reposto pela fatia `clique-responde` do lote `melodia-religa`. Volta a `concluido` quando
+`bash tools/check-orfaos.sh` não listar mais nada desta fatia.

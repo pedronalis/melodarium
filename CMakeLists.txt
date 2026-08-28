@@ -65,18 +65,16 @@ qt_add_qml_module(appmelodia
         src/TrackRow.qml
         src/NowPlayingPanel.qml
         src/LibraryPane.qml
+        src/QueueStrip.qml
+        src/CollectionsPane.qml
         src/Chip.qml
         src/FilterChips.qml
         src/SearchOverlay.qml
         src/PodcastPane.qml
         src/EmptyPane.qml
-        src/LibraryEmptyState.qml
-        src/Sidebar.qml
-        src/SidebarItem.qml
-        src/SearchField.qml
-        src/QueuePanel.qml
-        src/CollectionsSection.qml
         src/NewCollectionDialog.qml
+        src/ConfirmDialog.qml
+        src/SettingsDialog.qml
         src/TagChip.qml
         src/TagEditor.qml
         src/EpisodeRow.qml

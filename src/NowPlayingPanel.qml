@@ -15,6 +15,10 @@ Rectangle {
     signal likeRequested(int trackId)
     signal playRequested(string mode)
 
+    // O TagEditor emite tagChosen desde sempre; o painel nunca repassou, e o clique na
+    // etiqueta morria aqui dentro (regressão do commit 202b7bb).
+    signal tagChosen(string name)
+
     // Compact does not just shrink the cover: the whole panel narrows with it. Leaving the
     // panel at 392 while the cover drops to 200 would push the frame past a 720 px window and
     // send the right edge of the pane off screen.
@@ -40,6 +44,11 @@ Rectangle {
     // O que está tocando pode ser um episódio, e aí os metadados vêm do podcast, não da
     // biblioteca: um episódio não tem artista nem álbum, tem programa e data.
     property var episodeInfo: ({})
+
+    // O motor não tem mudo: o botão antigo alternava entre 0 e 100 e perdia o valor que o
+    // usuário tinha escolhido. Guardar o volume anterior é o que faz o mudo ser reversível.
+    property real volumeAntesDoMudo: 100
+    readonly property bool mudo: AudioEngine.volume <= 0
 
     readonly property string tituloAtual: root.episodeMode
                                           ? (root.episodeInfo.title !== undefined
@@ -257,7 +266,7 @@ Rectangle {
 
             IconButton {
                 visible: root.trackId > 0 && !root.episodeMode
-                icon: "heart"
+                icon: root.info.liked === true ? "heart-filled" : "heart"
                 size: Theme.fontSizeXL
                 accent: root.info.liked === true
                 onClicked: root.likeRequested(root.trackId)
@@ -328,7 +337,10 @@ Rectangle {
                 visible: !root.episodeMode
                 icon: "shuffle"
                 size: Theme.fontSizeL
-                onClicked: {}
+                // Sem estado visível, um botão ligado é indistinguível de um desligado.
+                accent: AudioEngine.shuffle
+                tooltip: AudioEngine.shuffle ? qsTr("aleatório ligado") : qsTr("aleatório")
+                onClicked: AudioEngine.setShuffle(!AudioEngine.shuffle)
             }
 
             IconButton {
@@ -380,7 +392,26 @@ Rectangle {
                 visible: !root.episodeMode
                 icon: "repeat"
                 size: Theme.fontSizeL
-                onClicked: {}
+                accent: AudioEngine.repeatMode !== AudioEngine.RepeatOff
+                // O terceiro estado precisa se distinguir do segundo por mais do que a cor:
+                // um "1" sobreposto é o que diz "esta faixa" em vez de "a fila".
+                tooltip: AudioEngine.repeatMode === AudioEngine.RepeatOne
+                         ? qsTr("repetir esta faixa")
+                         : (AudioEngine.repeatMode === AudioEngine.RepeatAll
+                            ? qsTr("repetir a fila") : qsTr("repetir"))
+                onClicked: AudioEngine.cycleRepeat()
+
+                Text {
+                    anchors.right: parent.right
+                    anchors.bottom: parent.bottom
+                    anchors.rightMargin: Math.round(2 * Theme.uiScale)
+                    visible: AudioEngine.repeatMode === AudioEngine.RepeatOne
+                    text: "1"
+                    font.family: Theme.fontFamilyFixed
+                    font.pointSize: Theme.fontSizeXXS
+                    font.weight: Theme.fontWeightBold
+                    color: Theme.mPrimary
+                }
             }
 
             // O rótulo do pulo: sem ele, as duas setas viriam a ser "faixa anterior" aos olhos
@@ -403,6 +434,53 @@ Rectangle {
                     color: Theme.mOutline
                 }
             }
+
+            // O volume saiu da tela quando a barra de transporte foi aposentada e nunca
+            // migrou para cá. Sem ele o único volume do app é o do sistema.
+            RowLayout {
+                spacing: Theme.marginS
+
+                IconButton {
+                    icon: root.mudo ? "volume-off"
+                                    : (AudioEngine.volume < 50 ? "volume-low" : "volume")
+                    size: Theme.fontSizeL
+                    tooltip: root.mudo ? qsTr("com som") : qsTr("mudo")
+                    onClicked: {
+                        if (root.mudo) {
+                            AudioEngine.setVolume(root.volumeAntesDoMudo)
+                        } else {
+                            root.volumeAntesDoMudo = AudioEngine.volume
+                            AudioEngine.setVolume(0)
+                        }
+                    }
+                }
+
+                Rectangle {
+                    id: trilhoVolume
+                    Layout.preferredWidth: Math.round(72 * Theme.uiScale)
+                    Layout.alignment: Qt.AlignVCenter
+                    implicitHeight: 3
+                    radius: Theme.radiusXXS
+                    color: Theme.mSurfaceVariant
+
+                    Rectangle {
+                        width: parent.width * (AudioEngine.volume / 100)
+                        height: parent.height
+                        radius: parent.radius
+                        color: Theme.mOnSurfaceVariant
+                    }
+
+                    MouseArea {
+                        anchors.fill: parent
+                        anchors.margins: -Theme.marginS
+                        cursorShape: Qt.PointingHandCursor
+                        onClicked: function (mouse) {
+                            AudioEngine.setVolume(
+                                Math.max(0, Math.min(100, 100 * mouse.x / trilhoVolume.width)))
+                        }
+                    }
+                }
+            }
         }
 
         TagEditor {
@@ -410,6 +488,7 @@ Rectangle {
             Layout.fillWidth: true
             visible: root.hasTrack && root.trackId > 0 && !root.episodeMode
             trackId: root.trackId
+            onTagChosen: function (name) { root.tagChosen(name) }
         }
 
         // Sempre presente: é ele que mantém a capa no topo quando o resto da coluna encolhe.

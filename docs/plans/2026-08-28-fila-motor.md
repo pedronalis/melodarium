@@ -1,7 +1,7 @@
 ---
 slug: fila-motor
 feature: melodia-religa
-status: aprovado
+status: concluido
 depende-de: []
 decisao-humana: nao
 spec: docs/auditoria-completude.md (achados 13,14,15) · design/Main.dc.html:141-152
@@ -61,7 +61,7 @@ comentário explicando por que esses nomes não aparecem nele.
 
 ### Task 1: A fila vira estado consultável do motor
 
-- [ ] Escrever o teste que falha, em `tests/tst_audioengine.cpp`, dentro de
+- [x] Escrever o teste que falha, em `tests/tst_audioengine.cpp`, dentro de
       `private slots:`:
 
 ```cpp
@@ -115,10 +115,10 @@ comentário explicando por que esses nomes não aparecem nele.
     }
 ```
 
-- [ ] Rodar e confirmar que falha pelo motivo certo:
+- [x] Rodar e confirmar que falha pelo motivo certo:
       `cmake --build build --target tst_audioengine` → erro de compilação
       `no member named 'queue' in 'AudioEngine'`
-- [ ] Declarar em `src/audioengine.h`. Junto das outras `Q_PROPERTY`, depois da linha do
+- [x] Declarar em `src/audioengine.h`. Junto das outras `Q_PROPERTY`, depois da linha do
       `speed`:
 
 ```cpp
@@ -126,7 +126,7 @@ comentário explicando por que esses nomes não aparecem nele.
     Q_PROPERTY(int queueCount READ queueCount NOTIFY queueChanged)
 ```
 
-- [ ] No mesmo arquivo, junto dos outros getters inline, depois de
+- [x] No mesmo arquivo, junto dos outros getters inline, depois de
       `double speed() const { return m_speed; }`:
 
 ```cpp
@@ -134,7 +134,7 @@ comentário explicando por que esses nomes não aparecem nele.
     int queueCount() const { return m_queue.size(); }
 ```
 
-- [ ] No mesmo arquivo, junto dos `Q_INVOKABLE`, depois de
+- [x] No mesmo arquivo, junto dos `Q_INVOKABLE`, depois de
       `Q_INVOKABLE void loadPlaylist(const QStringList &files, int startIndex = 0);`:
 
 ```cpp
@@ -145,13 +145,13 @@ comentário explicando por que esses nomes não aparecem nele.
     Q_INVOKABLE QStringList upcoming(int limit) const;
 ```
 
-- [ ] No mesmo arquivo, junto dos sinais, depois de `void speedChanged();`:
+- [x] No mesmo arquivo, junto dos sinais, depois de `void speedChanged();`:
 
 ```cpp
     void queueChanged();
 ```
 
-- [ ] No mesmo arquivo, junto dos membros privados, depois de `double m_speed = 1.0;`:
+- [x] No mesmo arquivo, junto dos membros privados, depois de `double m_speed = 1.0;`:
 
 ```cpp
     // Espelho do que foi mandado ao mpv. Ler playlist/N/filename seria uma consulta por
@@ -159,7 +159,7 @@ comentário explicando por que esses nomes não aparecem nele.
     QStringList m_queue;
 ```
 
-- [ ] Em `src/audioengine.cpp`, substituir `loadPlaylist` inteiro para manter o espelho:
+- [x] Em `src/audioengine.cpp`, substituir `loadPlaylist` inteiro para manter o espelho:
 
 ```cpp
 void AudioEngine::loadPlaylist(const QStringList &files, int startIndex)
@@ -180,7 +180,7 @@ void AudioEngine::loadPlaylist(const QStringList &files, int startIndex)
 }
 ```
 
-- [ ] No mesmo arquivo, acrescentar as duas funções novas logo depois de `loadPlaylist`:
+- [x] No mesmo arquivo, acrescentar as duas funções novas logo depois de `loadPlaylist`:
 
 ```cpp
 void AudioEngine::appendToQueue(const QString &file)
@@ -205,12 +205,12 @@ QStringList AudioEngine::upcoming(int limit) const
 }
 ```
 
-- [ ] verificação mecânica da task:
+- [x] verificação mecânica da task:
       `quiet-run ctest --test-dir build -R tst_audioengine --output-on-failure`
       → `100% tests passed`
-- [ ] verificação mecânica da task — o contrato de qualidade continua intacto:
+- [x] verificação mecânica da task — o contrato de qualidade continua intacto:
       `grep -cE 'audio-samplerate|audio-format|af=' src/audioengine.cpp` → `0`
-- [ ] commit:
+- [x] commit:
 
 ```bash
 git add src/audioengine.h src/audioengine.cpp tests/tst_audioengine.cpp docs/plans/2026-08-28-fila-motor.md
@@ -219,7 +219,7 @@ git commit -m "feat(audio): the queue becomes readable state with append and loo
 
 ### Task 2: A tela para de guardar uma fila que ninguém lê
 
-- [ ] Em `src/Main.qml`, apagar a propriedade `queuePaths` — ela era escrita em três
+- [x] Em `src/Main.qml`, apagar a propriedade `queuePaths` — ela era escrita em três
       lugares e lida em nenhum. Remover a declaração:
 
 ```qml
@@ -227,7 +227,7 @@ git commit -m "feat(audio): the queue becomes readable state with append and loo
     property var queuePaths: []
 ```
 
-- [ ] No mesmo arquivo, em `activateTrack`, tirar a escrita morta:
+- [x] No mesmo arquivo, em `activateTrack`, tirar a escrita morta:
 
 ```qml
     function activateTrack(index) {
@@ -236,7 +236,7 @@ git commit -m "feat(audio): the queue becomes readable state with append and loo
     }
 ```
 
-- [ ] No mesmo arquivo, em `startFromEmpty`, tirar a outra escrita morta — a linha
+- [x] No mesmo arquivo, em `startFromEmpty`, tirar a outra escrita morta — a linha
       `root.queuePaths = paths` some, e `AudioEngine.loadPlaylist(paths, 0)` fica:
 
 ```qml
@@ -255,10 +255,10 @@ git commit -m "feat(audio): the queue becomes readable state with append and loo
         AudioEngine.play()
 ```
 
-- [ ] verificação mecânica da task:
+- [x] verificação mecânica da task:
       `grep -c 'queuePaths' src/Main.qml` → `0`
-- [ ] verificação mecânica da task: `quiet-run cmake --build build` → exit 0
-- [ ] commit:
+- [x] verificação mecânica da task: `quiet-run cmake --build build` → exit 0
+- [x] commit:
 
 ```bash
 git add src/Main.qml docs/plans/2026-08-28-fila-motor.md

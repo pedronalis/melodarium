@@ -1,7 +1,7 @@
 ---
 slug: colecoes-tela
 feature: melodia-religa
-status: aprovado
+status: concluido
 depende-de: [clique-responde]
 decisao-humana: sim
 spec: docs/specs/2026-08-27-player-musica-podcast.md §Como fica organizado · docs/auditoria-completude.md (achados 4,5,22)
@@ -81,7 +81,7 @@ nem rodar o app pega. Lição completa em
 
 ### Task 1: O diálogo de nome aprende a renomear
 
-- [ ] Em `src/NewCollectionDialog.qml`, acrescentar as duas linhas de estado logo depois de
+- [x] Em `src/NewCollectionDialog.qml`, acrescentar as duas linhas de estado logo depois de
       `signal created(int id, string name)`:
 
 ```qml
@@ -93,7 +93,7 @@ nem rodar o app pega. Lição completa em
     signal renamed(int id, string name)
 ```
 
-- [ ] No mesmo arquivo, substituir o `onOpened` para que o campo já venha preenchido ao
+- [x] No mesmo arquivo, substituir o `onOpened` para que o campo já venha preenchido ao
       renomear:
 
 ```qml
@@ -105,7 +105,7 @@ nem rodar o app pega. Lição completa em
     }
 ```
 
-- [ ] Trocar o texto do título para acompanhar o modo (o `Text` cujo `text` é hoje
+- [x] Trocar o texto do título para acompanhar o modo (o `Text` cujo `text` é hoje
       `qsTr("Nova coleção")`):
 
 ```qml
@@ -118,7 +118,7 @@ nem rodar o app pega. Lição completa em
         }
 ```
 
-- [ ] Substituir o `MelodiaButton { id: confirm … }` inteiro:
+- [x] Substituir o `MelodiaButton { id: confirm … }` inteiro:
 
 ```qml
             MelodiaButton {
@@ -145,10 +145,10 @@ nem rodar o app pega. Lição completa em
             }
 ```
 
-- [ ] verificação mecânica da task:
+- [x] verificação mecânica da task:
       `grep -c 'renameId' src/NewCollectionDialog.qml` → `5`
-- [ ] verificação mecânica da task: `quiet-run cmake --build build` → exit 0
-- [ ] commit:
+- [x] verificação mecânica da task: `quiet-run cmake --build build` → exit 0
+- [x] commit:
 
 ```bash
 git add src/NewCollectionDialog.qml docs/plans/2026-08-28-colecoes-tela.md
@@ -157,7 +157,7 @@ git commit -m "feat(ui): the collection name dialog also renames"
 
 ### Task 2: Uma confirmação para o que não tem volta
 
-- [ ] Criar `src/ConfirmDialog.qml`. **Não redeclarar `opened`, `visible`, `width` nem
+- [x] Criar `src/ConfirmDialog.qml`. **Não redeclarar `opened`, `visible`, `width` nem
       `height`** — ver o PERIGO no topo deste plano:
 
 ```qml
@@ -222,15 +222,15 @@ Popup {
 }
 ```
 
-- [ ] Registrar em `CMakeLists.txt`, na lista `QML_FILES`, logo depois de
+- [x] Registrar em `CMakeLists.txt`, na lista `QML_FILES`, logo depois de
       `src/NewCollectionDialog.qml`:
 
 ```cmake
         src/ConfirmDialog.qml
 ```
 
-- [ ] verificação mecânica da task: `quiet-run cmake --build build` → exit 0
-- [ ] commit:
+- [x] verificação mecânica da task: `quiet-run cmake --build build` → exit 0
+- [x] commit:
 
 ```bash
 git add src/ConfirmDialog.qml CMakeLists.txt docs/plans/2026-08-28-colecoes-tela.md
@@ -239,7 +239,7 @@ git commit -m "feat(ui): a confirmation popup for what cannot be undone"
 
 ### Task 3: O painel das coleções
 
-- [ ] Criar `src/CollectionsPane.qml`:
+- [x] Criar `src/CollectionsPane.qml`:
 
 ```qml
 pragma ComponentBehavior: Bound
@@ -587,14 +587,14 @@ Item {
 }
 ```
 
-- [ ] Registrar em `CMakeLists.txt`, na lista `QML_FILES`, depois de `src/LibraryPane.qml`:
+- [x] Registrar em `CMakeLists.txt`, na lista `QML_FILES`, depois de `src/LibraryPane.qml`:
 
 ```cmake
         src/CollectionsPane.qml
 ```
 
-- [ ] verificação mecânica da task: `quiet-run cmake --build build` → exit 0
-- [ ] commit:
+- [x] verificação mecânica da task: `quiet-run cmake --build build` → exit 0
+- [x] commit:
 
 ```bash
 git add src/CollectionsPane.qml CMakeLists.txt docs/plans/2026-08-28-colecoes-tela.md
@@ -603,7 +603,7 @@ git commit -m "feat(ui): a pane that lists, opens and manages collections"
 
 ### Task 4: A tira ganha o primeiro ícone e o miolo ganha o quarto painel
 
-- [ ] Em `src/IconRail.qml`, inserir coleções como **primeiro** item da lista `items`
+- [x] Em `src/IconRail.qml`, inserir coleções como **primeiro** item da lista `items`
       (o spec põe coleções no topo; a fatia `clique-responde` deixou a lista com três):
 
 ```qml
@@ -615,7 +615,7 @@ git commit -m "feat(ui): a pane that lists, opens and manages collections"
     ]
 ```
 
-- [ ] Em `src/Main.qml`, no `StackLayout { id: pane … }`, trocar o `currentIndex` para
+- [x] Em `src/Main.qml`, no `StackLayout { id: pane … }`, trocar o `currentIndex` para
       conhecer o painel novo:
 
 ```qml
@@ -630,7 +630,7 @@ git commit -m "feat(ui): a pane that lists, opens and manages collections"
                                 : (Database.libraryPath === "" ? 2 : 0)))
 ```
 
-- [ ] Em `src/Main.qml`, acrescentar o painel como **quarto** filho do `StackLayout`, depois
+- [x] Em `src/Main.qml`, acrescentar o painel como **quarto** filho do `StackLayout`, depois
       do `EmptyPane`:
 
 ```qml
@@ -654,11 +654,11 @@ git commit -m "feat(ui): a pane that lists, opens and manages collections"
             }
 ```
 
-- [ ] verificação mecânica da task:
+- [x] verificação mecânica da task:
       `grep -c 'collections' src/IconRail.qml src/Main.qml` →
       `src/IconRail.qml:1`, `src/Main.qml:3`
-- [ ] verificação mecânica da task: `quiet-run cmake --build build` → exit 0
-- [ ] commit:
+- [x] verificação mecânica da task: `quiet-run cmake --build build` → exit 0
+- [x] commit:
 
 ```bash
 git add src/IconRail.qml src/Main.qml docs/plans/2026-08-28-colecoes-tela.md
@@ -667,7 +667,7 @@ git commit -m "feat(ui): collections get the top slot of the rail and a pane of 
 
 ### Task 5: Apagar o que o redesenho abandonou
 
-- [ ] Confirmar que os três arquivos continuam sem nenhum consumidor vivo antes de apagar
+- [x] Confirmar que os três arquivos continuam sem nenhum consumidor vivo antes de apagar
       (o painel novo os substituiu):
 
 ```bash
@@ -675,17 +675,17 @@ grep -lE '(^|[^A-Za-z])(Sidebar|SidebarItem|CollectionsSection)[[:space:]]*\{' s
   | grep -vE 'src/(Sidebar|SidebarItem|CollectionsSection)\.qml'
 ```
 
-- [ ] O comando acima tem de sair **vazio**. Só então, apagar os arquivos e desregistrá-los:
+- [x] O comando acima tem de sair **vazio**. Só então, apagar os arquivos e desregistrá-los:
 
 ```bash
 git rm src/Sidebar.qml src/SidebarItem.qml src/CollectionsSection.qml
 sed -i '/src\/Sidebar\.qml/d;/src\/SidebarItem\.qml/d;/src\/CollectionsSection\.qml/d' CMakeLists.txt
 ```
 
-- [ ] verificação mecânica da task:
+- [x] verificação mecânica da task:
       `grep -cE 'Sidebar|CollectionsSection' CMakeLists.txt` → `0`
-- [ ] verificação mecânica da task: `quiet-run cmake --build build` → exit 0
-- [ ] commit:
+- [x] verificação mecânica da task: `quiet-run cmake --build build` → exit 0
+- [x] commit:
 
 ```bash
 git add -A src CMakeLists.txt docs/plans/2026-08-28-colecoes-tela.md

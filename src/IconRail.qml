@@ -8,6 +8,8 @@ Rectangle {
     property string current: "library"
 
     signal chosen(string section)
+    // Separado de `chosen` de propósito: ajustes abre POR CIMA da tela, não troca de tela.
+    signal settingsRequested
 
     implicitWidth: Theme.railWidth
     color: "transparent"
@@ -19,18 +21,23 @@ Rectangle {
         color: Theme.mSurfaceVariant
     }
 
+    // A tira escolhe o MODO da tela; a fileira de chips do miolo escolhe o EIXO dentro da
+    // biblioteca. Álbuns e Tags viviam aqui SEM navegar, repetindo palavras que os chips já
+    // entregam — decisão do Pedro em 2026-08-28: saem daqui. A fatia colecoes-tela insere
+    // "collections" como PRIMEIRO item; a fatia ajustes acrescenta "settings" no pé.
     readonly property var items: [
-        { key: "library", icon: "list",     tip: qsTr("Biblioteca") },
-        { key: "albums",  icon: "disc",     tip: qsTr("Álbuns") },
-        { key: "tags",    icon: "tags",     tip: qsTr("Tags") },
-        { key: "podcast", icon: "microphone", tip: qsTr("Podcast") },
-        { key: "search",  icon: "search",   tip: qsTr("Buscar") }
+        { key: "collections", icon: "playlist",   tip: qsTr("Coleções") },
+        { key: "library",     icon: "list",       tip: qsTr("Biblioteca") },
+        { key: "podcast",     icon: "microphone", tip: qsTr("Podcast") },
+        { key: "search",      icon: "search",     tip: qsTr("Buscar") }
     ]
 
     ColumnLayout {
         anchors.horizontalCenter: parent.horizontalCenter
         anchors.top: parent.top
+        anchors.bottom: parent.bottom
         anchors.topMargin: Theme.marginXL
+        anchors.bottomMargin: Theme.marginXL
         spacing: Theme.marginS
 
         // A marca, no topo da barra: não é botão, é de onde o olho parte (design/Main.dc.html).
@@ -83,6 +90,39 @@ Rectangle {
                     cursorShape: Qt.PointingHandCursor
                     onClicked: root.chosen(cell.modelData.key)
                 }
+            }
+        }
+
+        // Empurra a engrenagem para o pé: ela não pertence à lista de modos.
+        Item { Layout.fillHeight: true }
+
+        Rectangle {
+            id: engrenagem
+
+            Layout.preferredWidth: Math.round(34 * Theme.uiScale)
+            Layout.preferredHeight: Math.round(34 * Theme.uiScale)
+            radius: Theme.iRadiusS
+            color: engrenagemArea.containsMouse ? Theme.mSurfaceVariant : "transparent"
+            opacity: engrenagemArea.containsMouse ? 1.0 : 0.7
+
+            Behavior on color {
+                ColorAnimation { duration: Theme.animationFast; easing.type: Theme.easingType }
+            }
+
+            Text {
+                anchors.centerIn: parent
+                text: Icons.get("settings")
+                font.family: Icons.fontFamily
+                font.pointSize: Theme.fontSizeL
+                color: Theme.mOnSurfaceVariant
+            }
+
+            MouseArea {
+                id: engrenagemArea
+                anchors.fill: parent
+                hoverEnabled: true
+                cursorShape: Qt.PointingHandCursor
+                onClicked: root.settingsRequested()
             }
         }
     }

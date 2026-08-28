@@ -2,6 +2,7 @@
 
 #include <QtGlobal>
 #include <QMetaObject>
+#include <QRandomGenerator>
 #include <QVarLengthArray>
 #include <clocale>
 #include <mpv/client.h>
@@ -157,6 +158,115 @@ void AudioEngine::loadPlaylist(const QStringList &files, int startIndex)
     }
     if (startIndex > 0 && startIndex < files.size())
         setPropertyString("playlist-pos", QByteArray::number(startIndex).constData());
+
+    m_queue = files;
+    // A ordem guardada era da fila que acabou de sair; restaurá-la sobre esta devolveria
+    // faixas que não estão mais aqui.
+    if (m_shuffle) {
+        m_shuffle = false;
+        emit shuffleChanged();
+    }
+    m_queueOriginal.clear();
+    emit queueChanged();
+}
+
+void AudioEngine::appendToQueue(const QString &file)
+{
+    if (!m_mpv || file.isEmpty())
+        return;
+    // "append" e não "append-play": pôr no fim é um gesto de organizar a fila, não de
+    // mandar tocar. Quem quiser tocar chama play().
+    command({QStringLiteral("loadfile"), file, QStringLiteral("append")});
+    m_queue.append(file);
+    emit queueChanged();
+}
+
+QStringList AudioEngine::upcoming(int limit) const
+{
+    if (limit <= 0 || m_queue.isEmpty())
+        return {};
+    const int first = m_playlistPos < 0 ? 0 : m_playlistPos + 1;
+    if (first >= m_queue.size())
+        return {};
+    return m_queue.mid(first, limit);
+}
+
+void AudioEngine::cycleRepeat()
+{
+    switch (m_repeatMode) {
+    case RepeatOff:  m_repeatMode = RepeatAll; break;
+    case RepeatAll:  m_repeatMode = RepeatOne; break;
+    case RepeatOne:  m_repeatMode = RepeatOff; break;
+    }
+
+    // As duas propriedades são escritas sempre, as duas: deixar a anterior ligada faria
+    // "repetir a faixa" e "repetir a fila" valerem ao mesmo tempo.
+    setPropertyString("loop-playlist", m_repeatMode == RepeatAll ? "inf" : "no");
+    setPropertyString("loop-file", m_repeatMode == RepeatOne ? "inf" : "no");
+
+    emit repeatModeChanged();
+}
+
+void AudioEngine::setShuffle(bool on)
+{
+    if (!m_mpv || m_shuffle == on)
+        return;
+
+    // A ordem que o mpv tem agora é exatamente a que estamos prestes a substituir.
+    const QStringList ordemNoMpv = m_queue;
+
+    if (on) {
+        m_queueOriginal = m_queue;
+        const int atual = m_playlistPos < 0 ? -1 : m_playlistPos;
+        // Fisher-Yates a partir da PRÓXIMA entrada: embaralhar o que já está tocando
+        // faria o mpv recarregar o arquivo no meio da faixa.
+        for (int i = m_queue.size() - 1; i > atual + 1; --i) {
+            const int j = atual + 1
+                          + int(QRandomGenerator::global()->bounded(i - atual));
+            m_queue.swapItemsAt(i, j);
+        }
+    } else {
+        if (m_queueOriginal.isEmpty())
+            return;
+        m_queue = m_queueOriginal;
+        m_queueOriginal.clear();
+    }
+
+    m_shuffle = on;
+    reorderMpvPlaylist(ordemNoMpv);
+
+    // Quando NADA tinha começado a tocar (m_playlistPos < 0), o embaralhamento incluiu a
+    // primeira entrada — e o mpv, que já havia carregado a antiga, sai andando junto com
+    // ela para o lugar novo. Medido no app com 27 faixas: a entrada original parava no
+    // índice 24, e "tocar tudo em ordem aleatória" tocava três faixas em vez de tudo.
+    // Voltar ao topo só é certo neste caso; com música tocando, mexer aqui interromperia.
+    if (on && m_playlistPos < 0)
+        setPropertyString("playlist-pos", "0");
+
+    emit shuffleChanged();
+    emit queueChanged();
+}
+
+// Leva a playlist do mpv da ordem `atual` para a de m_queue, uma entrada por vez.
+// Reconstruir a lista com `loadfile … replace` daria a mesma ordem final e reiniciaria a
+// faixa do zero — medido no teste shuffleDoesNotRestartWhatIsPlaying: 3,0 s viravam 0,7 s.
+// `playlist-move` só troca entradas de lugar, e o mpv leva o índice do que toca junto.
+void AudioEngine::reorderMpvPlaylist(const QStringList &atual)
+{
+    if (!m_mpv || m_queue.size() != atual.size())
+        return;
+
+    QStringList ordem = atual;
+    for (int alvo = 0; alvo < m_queue.size(); ++alvo) {
+        // A busca começa em `alvo` porque tudo antes dele já está no lugar certo. É também
+        // o que mantém isto correto quando a mesma faixa aparece duas vezes na fila.
+        const int de = ordem.indexOf(m_queue.at(alvo), alvo);
+        if (de < 0 || de == alvo)
+            continue;
+        command({QStringLiteral("playlist-move"), QString::number(de),
+                 QString::number(alvo)});
+        ordem.move(de, alvo);
+    }
 }
 
 void AudioEngine::setVolume(double v)

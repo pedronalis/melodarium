@@ -29,6 +29,7 @@ QtObject {
         "microphone": "",
         "playlist": "",
         "heart": "",
+        "heart-filled": "",
         "clock": "",
         "star": "",
         "download": "",

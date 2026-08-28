@@ -1,7 +1,7 @@
 ---
 slug: colecoes-alcance
 feature: melodia-religa
-status: aprovado
+status: concluido
 depende-de: [colecoes-tela]
 decisao-humana: nao
 spec: docs/auditoria-completude.md (achados 16,17,22,23) · design/Main.dc.html:78-88
@@ -76,7 +76,7 @@ faz.
 
 ### Task 1: Uma transação para o álbum inteiro
 
-- [ ] Escrever o teste que falha, em `tests/tst_collections.cpp`, dentro de
+- [x] Escrever o teste que falha, em `tests/tst_collections.cpp`, dentro de
       `private slots:`:
 
 ```cpp
@@ -114,10 +114,10 @@ faz.
     }
 ```
 
-- [ ] Rodar e confirmar que falha pelo motivo certo:
+- [x] Rodar e confirmar que falha pelo motivo certo:
       `cmake --build build --target tst_collections` → erro de compilação
       `no member named 'addTracksToCollection'`
-- [ ] Declarar em `src/collectionmanager.h`, logo depois de
+- [x] Declarar em `src/collectionmanager.h`, logo depois de
       `Q_INVOKABLE bool addTrackToCollection(int collectionId, int trackId);`:
 
 ```cpp
@@ -126,7 +126,7 @@ faz.
     Q_INVOKABLE int addTracksToCollection(int collectionId, const QVariantList &trackIds);
 ```
 
-- [ ] Implementar em `src/collectionmanager.cpp`, depois de
+- [x] Implementar em `src/collectionmanager.cpp`, depois de
       `bool CollectionManager::addTrackToCollection(...)`:
 
 ```cpp
@@ -178,10 +178,10 @@ int CollectionManager::addTracksToCollection(int collectionId, const QVariantLis
 }
 ```
 
-- [ ] verificação mecânica da task:
+- [x] verificação mecânica da task:
       `quiet-run ctest --test-dir build -R tst_collections --output-on-failure`
       → `100% tests passed`
-- [ ] commit:
+- [x] commit:
 
 ```bash
 git add src/collectionmanager.h src/collectionmanager.cpp tests/tst_collections.cpp docs/plans/2026-08-28-colecoes-alcance.md
@@ -190,7 +190,7 @@ git commit -m "feat(collections): add a whole list in one transaction and one si
 
 ### Task 2: A busca encontra coleções
 
-- [ ] Escrever o teste que falha, em `tests/tst_librarybrowser.cpp`, dentro de
+- [x] Escrever o teste que falha, em `tests/tst_librarybrowser.cpp`, dentro de
       `private slots:`:
 
 ```cpp
@@ -221,10 +221,10 @@ git commit -m "feat(collections): add a whole list in one transaction and one si
     }
 ```
 
-- [ ] Rodar e confirmar que falha pelo motivo certo:
+- [x] Rodar e confirmar que falha pelo motivo certo:
       `quiet-run ctest --test-dir build -R tst_librarybrowser --output-on-failure` →
       `Compared values are not the same … Actual (achadas): 0`
-- [ ] Em `src/librarybrowser.cpp`, dentro de `LibraryBrowser::searchGrouped`, inserir este
+- [x] Em `src/librarybrowser.cpp`, dentro de `LibraryBrowser::searchGrouped`, inserir este
       bloco **depois** da consulta de artistas (`arq`) e **antes** da de episódios (`eq`),
       para que a ordem dos grupos na tela fique faixas → álbuns → artistas → coleções →
       episódios:
@@ -248,10 +248,10 @@ git commit -m "feat(collections): add a whole list in one transaction and one si
     }
 ```
 
-- [ ] verificação mecânica da task:
+- [x] verificação mecânica da task:
       `quiet-run ctest --test-dir build -R tst_librarybrowser --output-on-failure`
       → `100% tests passed`
-- [ ] commit:
+- [x] commit:
 
 ```bash
 git add src/librarybrowser.cpp tests/tst_librarybrowser.cpp docs/plans/2026-08-28-colecoes-alcance.md
@@ -260,13 +260,13 @@ git commit -m "feat(search): collections are a fifth kind of result"
 
 ### Task 3: O overlay sabe abrir uma coleção
 
-- [ ] Em `src/SearchOverlay.qml`, declarar o sinal junto dos outros quatro (linhas 23-26):
+- [x] Em `src/SearchOverlay.qml`, declarar o sinal junto dos outros quatro (linhas 23-26):
 
 ```qml
     signal collectionChosen(int collectionId, string title)
 ```
 
-- [ ] No mesmo arquivo, na função `glyphFor(kind)`, acrescentar o caso antes do `return`
+- [x] No mesmo arquivo, na função `glyphFor(kind)`, acrescentar o caso antes do `return`
       final:
 
 ```qml
@@ -274,14 +274,14 @@ git commit -m "feat(search): collections are a fifth kind of result"
             return Icons.get("playlist")
 ```
 
-- [ ] Na função `groupLabelFor(kind)`, acrescentar o caso antes do `return` final:
+- [x] Na função `groupLabelFor(kind)`, acrescentar o caso antes do `return` final:
 
 ```qml
         if (kind === "collection")
             return qsTr("Coleções")
 ```
 
-- [ ] Na função `activate(index)`, acrescentar o despacho junto dos outros tipos:
+- [x] Na função `activate(index)`, acrescentar o despacho junto dos outros tipos:
 
 ```qml
         if (hit.kind === "collection") {
@@ -291,7 +291,7 @@ git commit -m "feat(search): collections are a fifth kind of result"
         }
 ```
 
-- [ ] Em `src/Main.qml`, no `SearchOverlay { id: searchOverlay … }`, acrescentar o handler:
+- [x] Em `src/Main.qml`, no `SearchOverlay { id: searchOverlay … }`, acrescentar o handler:
 
 ```qml
         onCollectionChosen: function (collectionId, title) {
@@ -300,10 +300,10 @@ git commit -m "feat(search): collections are a fifth kind of result"
         }
 ```
 
-- [ ] verificação mecânica da task:
+- [x] verificação mecânica da task:
       `grep -c 'collection' src/SearchOverlay.qml` → `4`
-- [ ] verificação mecânica da task: `quiet-run cmake --build build` → exit 0
-- [ ] commit:
+- [x] verificação mecânica da task: `quiet-run cmake --build build` → exit 0
+- [x] commit:
 
 ```bash
 git add src/SearchOverlay.qml src/Main.qml docs/plans/2026-08-28-colecoes-alcance.md
@@ -312,7 +312,7 @@ git commit -m "feat(search): opening a collection hit opens the collection"
 
 ### Task 4: O modelo devolve os ids que a lista tem na tela
 
-- [ ] Declarar em `src/tracklistmodel.h`, logo depois de
+- [x] Declarar em `src/tracklistmodel.h`, logo depois de
       `Q_INVOKABLE QStringList allPaths() const;`:
 
 ```cpp
@@ -321,7 +321,7 @@ git commit -m "feat(search): opening a collection hit opens the collection"
     Q_INVOKABLE QVariantList allTrackIds() const;
 ```
 
-- [ ] Implementar em `src/tracklistmodel.cpp`, depois de `QStringList TrackListModel::allPaths`:
+- [x] Implementar em `src/tracklistmodel.cpp`, depois de `QStringList TrackListModel::allPaths`:
 
 ```cpp
 QVariantList TrackListModel::allTrackIds() const
@@ -334,12 +334,12 @@ QVariantList TrackListModel::allTrackIds() const
 }
 ```
 
-- [ ] verificação mecânica da task:
+- [x] verificação mecânica da task:
       `quiet-run cmake --build build` → exit 0
-- [ ] verificação mecânica da task:
+- [x] verificação mecânica da task:
       `grep -c 'allTrackIds' src/tracklistmodel.h src/tracklistmodel.cpp` →
       `src/tracklistmodel.h:1`, `src/tracklistmodel.cpp:1`
-- [ ] commit:
+- [x] commit:
 
 ```bash
 git add src/tracklistmodel.h src/tracklistmodel.cpp docs/plans/2026-08-28-colecoes-alcance.md
@@ -348,7 +348,7 @@ git commit -m "feat(library): expose the ids of the rows currently listed"
 
 ### Task 5: O cabeçalho ganha o artista e o botão de álbum inteiro
 
-- [ ] Em `src/LibraryPane.qml`, declarar as duas novidades junto das outras propriedades do
+- [x] Em `src/LibraryPane.qml`, declarar as duas novidades junto das outras propriedades do
       topo, depois de `property string groupTitle: ""`:
 
 ```qml
@@ -357,13 +357,13 @@ git commit -m "feat(library): expose the ids of the rows currently listed"
     property string groupSubtitle: ""
 ```
 
-- [ ] No mesmo arquivo, declarar o sinal junto dos outros seis:
+- [x] No mesmo arquivo, declarar o sinal junto dos outros seis:
 
 ```qml
     signal collectAllRequested
 ```
 
-- [ ] Substituir o `RowLayout` do cabeçalho (o que começa com o `Text` do `groupTitle`)
+- [x] Substituir o `RowLayout` do cabeçalho (o que começa com o `Text` do `groupTitle`)
       acrescentando o subtítulo e o botão. O botão vem **antes** do de reler a pasta:
 
 ```qml
@@ -472,12 +472,12 @@ git commit -m "feat(library): expose the ids of the rows currently listed"
         }
 ```
 
-- [ ] verificação mecânica da task:
+- [x] verificação mecânica da task:
       `grep -c 'collectAllRequested\|groupSubtitle' src/LibraryPane.qml` → `4`
-- [ ] verificação mecânica da task:
+- [x] verificação mecânica da task:
       `bash tools/check-layout.sh` → 11 medidas ok (o cabeçalho cresceu: se a linha de
       chips estourar a largura mínima, o gate falha aqui e não na tela do Pedro)
-- [ ] commit:
+- [x] commit:
 
 ```bash
 git add src/LibraryPane.qml docs/plans/2026-08-28-colecoes-alcance.md
@@ -486,7 +486,7 @@ git commit -m "feat(ui): album header shows the artist and collects the whole li
 
 ### Task 6: O menu de coleção atende a lista inteira
 
-- [ ] Em `src/Main.qml`, o menu de coleções precisa saber se está atendendo uma faixa ou a
+- [x] Em `src/Main.qml`, o menu de coleções precisa saber se está atendendo uma faixa ou a
       lista inteira. Substituir a função `collectTrack` e acrescentar a irmã:
 
 ```qml
@@ -507,7 +507,7 @@ git commit -m "feat(ui): album header shows the artist and collects the whole li
     }
 ```
 
-- [ ] No mesmo arquivo, no `Menu { id: collectMenu … }`, acrescentar a propriedade e trocar
+- [x] No mesmo arquivo, no `Menu { id: collectMenu … }`, acrescentar a propriedade e trocar
       o que o item do menu faz:
 
 ```qml
@@ -550,7 +550,7 @@ git commit -m "feat(ui): album header shows the artist and collects the whole li
     }
 ```
 
-- [ ] No mesmo arquivo, o diálogo de criação precisa honrar o lote:
+- [x] No mesmo arquivo, o diálogo de criação precisa honrar o lote:
 
 ```qml
     NewCollectionDialog {
@@ -570,7 +570,7 @@ git commit -m "feat(ui): album header shows the artist and collects the whole li
     }
 ```
 
-- [ ] No `LibraryPane { id: libraryPane … }` do mesmo arquivo, ligar o sinal novo e o
+- [x] No `LibraryPane { id: libraryPane … }` do mesmo arquivo, ligar o sinal novo e o
       subtítulo (o nome do artista do álbum aberto):
 
 ```qml
@@ -578,7 +578,7 @@ git commit -m "feat(ui): album header shows the artist and collects the whole li
                 groupSubtitle: root.groupSubtitle
 ```
 
-- [ ] Declarar a propriedade que alimenta o subtítulo, junto das outras do topo de
+- [x] Declarar a propriedade que alimenta o subtítulo, junto das outras do topo de
       `Main.qml`, depois de `property string groupsTitle: ""`:
 
 ```qml
@@ -586,7 +586,7 @@ git commit -m "feat(ui): album header shows the artist and collects the whole li
     property string groupSubtitle: ""
 ```
 
-- [ ] O artista já vem junto do grupo: `LibraryBrowser.albums()` devolve
+- [x] O artista já vem junto do grupo: `LibraryBrowser.albums()` devolve
       `{id, name, count, subtitle}`, com `subtitle` = nome do artista do álbum (verificado
       em `src/librarybrowser.cpp`, função `runLookup`). Basta carregá-lo junto do nome em
       vez de consultar de novo. Substituir `openGroup` inteiro:
@@ -611,7 +611,7 @@ git commit -m "feat(ui): album header shows the artist and collects the whole li
     }
 ```
 
-- [ ] `openNamedGroup` é o outro caminho de entrada (a busca) e não tem o subtítulo em mãos.
+- [x] `openNamedGroup` é o outro caminho de entrada (a busca) e não tem o subtítulo em mãos.
       Ele **não** pode limpar o que `openGroup` acabou de escrever, então a limpeza é
       condicional. Acrescentar como primeira linha do corpo de `openNamedGroup`:
 
@@ -622,10 +622,10 @@ git commit -m "feat(ui): album header shows the artist and collects the whole li
             root.groupSubtitle = ""
 ```
 
-- [ ] verificação mecânica da task:
+- [x] verificação mecânica da task:
       `grep -c 'addTracksToCollection' src/Main.qml` → `2`
-- [ ] verificação mecânica da task: `quiet-run cmake --build build` → exit 0
-- [ ] commit:
+- [x] verificação mecânica da task: `quiet-run cmake --build build` → exit 0
+- [x] commit:
 
 ```bash
 git add src/Main.qml docs/plans/2026-08-28-colecoes-alcance.md
@@ -634,7 +634,7 @@ git commit -m "feat(ui): one click puts the whole open list into a collection"
 
 ### Task 7: Tirar uma faixa da coleção pela própria linha
 
-- [ ] Em `src/CollectionsPane.qml`, no `TrackRow` do `ListView { id: tracks … }`, ligar o
+- [x] Em `src/CollectionsPane.qml`, no `TrackRow` do `ListView { id: tracks … }`, ligar o
       gesto de sair da coleção ao botão que a biblioteca usa para entrar numa. Substituir as
       duas linhas `showCollectButton: false` e `onLikeToggled:` por:
 
@@ -653,7 +653,7 @@ git commit -m "feat(ui): one click puts the whole open list into a collection"
                 }
 ```
 
-- [ ] Em `src/TrackRow.qml`, o botão da linha precisa poder trocar de glifo — declarar a
+- [x] Em `src/TrackRow.qml`, o botão da linha precisa poder trocar de glifo — declarar a
       propriedade junto das outras, depois de `property bool showCollectButton: false`:
 
 ```qml
@@ -661,13 +661,13 @@ git commit -m "feat(ui): one click puts the whole open list into a collection"
     property string collectGlyph: "plus"
 ```
 
-- [ ] No mesmo arquivo, o `IconButton` do `showCollectButton` passa a usar a propriedade:
+- [x] No mesmo arquivo, o `IconButton` do `showCollectButton` passa a usar a propriedade:
 
 ```qml
                 icon: root.collectGlyph
 ```
 
-- [ ] Em `src/Main.qml`, no `CollectionsPane { id: collectionsPane … }`, recarregar a lista
+- [x] Em `src/Main.qml`, no `CollectionsPane { id: collectionsPane … }`, recarregar a lista
       quando uma faixa sai — sem isto a linha continua na tela depois de removida:
 
 ```qml
@@ -677,11 +677,11 @@ git commit -m "feat(ui): one click puts the whole open list into a collection"
                 }
 ```
 
-- [ ] verificação mecânica da task:
+- [x] verificação mecânica da task:
       `grep -c 'collectGlyph' src/TrackRow.qml src/CollectionsPane.qml` →
       `src/TrackRow.qml:2`, `src/CollectionsPane.qml:1`
-- [ ] verificação mecânica da task: `quiet-run cmake --build build` → exit 0
-- [ ] commit:
+- [x] verificação mecânica da task: `quiet-run cmake --build build` → exit 0
+- [x] commit:
 
 ```bash
 git add src/TrackRow.qml src/CollectionsPane.qml src/Main.qml docs/plans/2026-08-28-colecoes-alcance.md
