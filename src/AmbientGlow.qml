@@ -18,6 +18,10 @@ import Melodarium.App
 Item {
     id: root
 
+    // Sem o corte, as molduras que compõem a luz saem do painel e passam a se ver COMO
+    // molduras: um retângulo arredondado gigante desenhado por cima do rail e da lista.
+    // Medido nas duas versões em 2026-08-29. A luz termina onde o painel termina — é uma
+    // janela iluminada, e a moldura dela é a borda da coluna.
     clip: true
 
     // A cor que a capa "é". A última cor válida FICA: apagar o halo é trabalho da opacidade

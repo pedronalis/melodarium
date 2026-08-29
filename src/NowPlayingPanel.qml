@@ -204,7 +204,11 @@ Rectangle {
 
     AmbientGlow {
         anchors.fill: parent
-        z: -1
+        // Sem `z`, e declarado ANTES da coluna: no Qt Quick um filho com z NEGATIVO é
+        // desenhado atrás do conteúdo do próprio pai, e o pai aqui é o painel — cujo degradê
+        // é opaco. Com `z: -1` o halo existia, respondia, e não aparecia em pixel nenhum
+        // (medido: zero diferença de cor com ele ligado e desligado). A ordem de declaração
+        // já o põe atrás da capa, que é o único lugar em que ele precisa ficar.
         cor: root.corDoHalo
         // A capa é o primeiro item da coluna e está centrada nela: a posição sai da conta, e
         // não de mapToItem, porque mapeamento não é reativo e a capa muda de tamanho com a
