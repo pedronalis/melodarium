@@ -171,7 +171,7 @@ git commit -m "feat(collections): wire collection playback and expose queue size
 
 ### Task 3: Provar com uma coleção de verdade e fotografar
 
-- [ ] Criar a coleção-fixture no banco do app (NÃO existe nenhuma coleção hoje — verificado em
+- [x] Criar a coleção-fixture no banco do app (NÃO existe nenhuma coleção hoje — verificado em
       2026-08-29 —, então o gate precisa criar a sua):
 
 ```bash
@@ -185,7 +185,7 @@ sqlite3 "$DB" "SELECT COUNT(*) FROM collection_tracks WHERE collection_id = 999"
 
 → `6`
 
-- [ ] Rodar o gesto e ler a fila:
+- [x] Rodar o gesto e ler a fila:
 
 ```bash
 QT_QPA_PLATFORM=offscreen ./build/melodarium --measure 1100 --pane collections \
@@ -195,8 +195,8 @@ QT_QPA_PLATFORM=offscreen ./build/melodarium --measure 1100 --pane collections \
 
 → `fila=6` (as seis faixas da coleção entraram na fila pelo botão, não pela lista)
 
-- [ ] verificação mecânica da task: `test -s docs/telas/10-colecao-toca.png && echo ok` → `ok`
-- [ ] commit:
+- [x] verificação mecânica da task: `test -s docs/telas/10-colecao-toca.png && echo ok` → `ok`
+- [x] commit:
 
 ```bash
 git add docs/telas/10-colecao-toca.png
