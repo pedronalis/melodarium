@@ -1003,3 +1003,33 @@ revogou a espera; e o número a mexer, se incomodar, é um só e está comentado
 
 **Custo de estar errada.** Baixo: se o botão parecer lento, o ajuste é a escala (0,94), não a
 duração — está escrito no próprio código.
+
+## 9. `grep -c 'onLikedChanged'` cobra 0 e dá 1 — pelo comentário que o próprio plano manda escrever
+
+**Contexto.** A fatia do coração exige que o pulo saia do CLIQUE e nunca de um aviso de
+mudança de estado (senão a lista inteira pula durante a rolagem, porque a lista recicla as
+linhas). A verificação é contar `onLikedChanged` e esperar zero. O comentário que o plano
+prescreve para o código diz, com essas letras, "nunca de `onLikedChanged`".
+
+**Decisão.** 1 é o número certo, e a substância está entregue: fora de comentário há **zero**
+ocorrências — nenhum tratador de mudança de estado dispara o pulo. Provado no transcript.
+
+**Alternativa descartada.** Reescrever o comentário para não conter a palavra. Seria mexer no
+código para agradar a contagem, e o comentário perderia o nome exato da armadilha.
+
+**Custo de estar errada.** Nenhum: a regra que importa é a que está no código.
+
+## 10. Os avisos do verificador de QML cresceram, e são todos da mesma família que já existia
+
+**Contexto.** Rodei o verificador estático do Qt (que não é gate deste projeto) nos arquivos
+tocados. Antes do lote: 13 avisos. Depois: 29.
+
+**Decisão.** Deixei como está. Todos os 16 novos são da MESMA classe que o repo já tinha —
+"acesso não qualificado", que é o que acontece quando um bloco interno lê um nome declarado
+fora dele. Nenhuma classe nova apareceu, nenhum ERRO apareceu, e a tela foi fotografada
+funcionando nos dois estados. Silenciar essa família exige mudar o modo de ligação de
+componentes do app inteiro, o que muda a semântica de todas as listas — trabalho de outra
+fatia, não deste lote.
+
+**Custo de estar errada.** Baixo: são avisos de estilo, não de comportamento, e o mesmo padrão
+já roda em produção neste app desde as primeiras telas.
