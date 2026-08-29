@@ -43,7 +43,7 @@ duração nem para as capas — a lista mentiria o tamanho da coleção.
 
 ### Task 1: Teste que falha — duração total e capas na lista
 
-- [ ] Em `tests/tst_collections.cpp`, acrescentar ao `initTestCase()`, logo depois do laço
+- [x] Em `tests/tst_collections.cpp`, acrescentar ao `initTestCase()`, logo depois do laço
       que insere as três faixas, três faixas com duração e álbum (as de hoje não têm
       `duration_ms`, e um teste de soma precisa de números):
 
@@ -58,7 +58,7 @@ duração nem para as capas — a lista mentiria o tamanho da coleção.
         }
 ```
 
-- [ ] Acrescentar o teste como novo `private slots:` do mesmo arquivo:
+- [x] Acrescentar o teste como novo `private slots:` do mesmo arquivo:
 
 ```cpp
     void collectionsCarryTotalDurationAndCovers()
@@ -105,11 +105,11 @@ duração nem para as capas — a lista mentiria o tamanho da coleção.
     }
 ```
 
-- [ ] Rodar e confirmar que falha pelo motivo certo:
+- [x] Rodar e confirmar que falha pelo motivo certo:
       `ctest --test-dir build -R tst_collections --output-on-failure 2>&1 | grep -c FAIL` → `1`
       (falha em `QCOMPARE(totalMs, 15000)`: a chave não existe e o QVariant vazio vira 0 —
       o teste de coleção vazia passa desde já, e é ele que trava a regressão inversa)
-- [ ] commit:
+- [x] commit:
 
 ```bash
 git add tests/tst_collections.cpp
