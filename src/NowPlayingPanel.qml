@@ -547,18 +547,27 @@ Rectangle {
 
             Layout.fillWidth: true
             Layout.topMargin: Theme.marginM
-            // Ela vive do que SOBRA, e só disso: a conta desconta a capa inteira e o resto da
-            // coluna antes de perguntar se ela cabe. Na janela do desenho (700) não sobra nada
-            // e ela não aparece — encolher a capa para caber uma lista seria trocar o assunto
-            // do painel, que é a arte do que está tocando.
-            visible: root.hasTrack && proximas.temProximos
-                     && root.height - Math.round(330 * Theme.uiScale) - root.coverSide
-                        >= proximas.alturaCheia + Theme.marginM
+            // Ela vive do que SOBRA, e só disso. O espaço disponível é o vazio do pé da coluna
+            // MAIS o que ela própria já ocupa — sem essa soma a conta se morderia: crescer uma
+            // linha diminuiria o vazio, que encolheria a lista de volta. Somados, o total é
+            // constante e a conta assenta. Na janela do desenho (700) não sobra nada e ela não
+            // aparece — encolher a capa para caber uma lista seria trocar o assunto do painel,
+            // que é a arte do que está tocando.
+            readonly property int espacoLivre: sobra.height + proximas.height
+            lookahead: Math.max(0, Math.min(3, Math.floor(
+                (proximas.espacoLivre - Theme.marginM - proximas.alturaCabecalho)
+                / proximas.alturaLinha)))
+            visible: root.hasTrack && proximas.temProximos && proximas.lookahead > 0
             onEntryActivated: function (queueIndex) { root.queueJumpRequested(queueIndex) }
             onExpandRequested: root.queueOpenRequested()
         }
 
         // Sempre presente: é ele que mantém a capa no topo quando o resto da coluna encolhe.
-        Item { Layout.fillHeight: true }
+        // Sempre presente: é ele que mantém a capa no topo quando o resto da coluna encolhe.
+        // A altura DELE é o vazio de verdade que sobra na coluna — é dela que a lista de cima
+        // tira quantas linhas cabem, em vez de estimar quanto o transporte ocupa. Estimar
+        // errava: com a interface escalada em 1,7 a conta reservava 561 px para um resto que
+        // media 380, e a lista sumia por uma falta de espaço que não existia.
+        Item { id: sobra; Layout.fillHeight: true }
     }
 }

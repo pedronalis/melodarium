@@ -15,9 +15,16 @@ import Melodarium.App
 Item {
     id: root
 
-    // Três, não quatro: a tirinha do miolo mostra quatro porque lá cabe em uma faixa
-    // horizontal. Aqui cada uma custa uma linha inteira da coluna.
+    // Quantas linhas mostrar. Quem instancia mede a coluna e diz — a interface escala com a
+    // janela, e numa tela larga tudo cresce 1,7x enquanto a altura continua a mesma: o que
+    // cabia em três linhas passa a caber em uma. Tudo-ou-nada aqui fazia a lista sumir
+    // inteira justamente na janela grande, que é onde ela existe para servir.
     property int lookahead: 3
+
+    // As medidas de uma linha e do cabeçalho, para quem instancia conseguir dividir o espaço
+    // que sobra sem repetir estes números do lado de fora.
+    readonly property int alturaLinha: Math.round(52 * Theme.uiScale) + Theme.marginS
+    readonly property int alturaCabecalho: Math.round(18 * Theme.uiScale) + Theme.marginS
 
     signal entryActivated(int queueIndex)
     // O contador é a porta da fila inteira, como na tirinha: dizer quantas faltam sem dar
