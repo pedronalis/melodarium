@@ -44,7 +44,7 @@ pede (regra já vigente em `startFromEmpty`).
 
 ### Task 1: O disco de tocar e o embaralhar no cabeçalho da coleção
 
-- [ ] Em `src/CollectionsPane.qml`, declarar o sinal junto dos outros (logo abaixo de
+- [x] Em `src/CollectionsPane.qml`, declarar o sinal junto dos outros (logo abaixo de
       `signal trackRemoved(int trackId)`):
 
 ```qml
@@ -53,7 +53,7 @@ pede (regra já vigente em `startFromEmpty`).
     signal playRequested(bool shuffled)
 ```
 
-- [ ] No mesmo arquivo, dentro do `RowLayout` do cabeçalho, IMEDIATAMENTE depois do bloco
+- [x] No mesmo arquivo, dentro do `RowLayout` do cabeçalho, IMEDIATAMENTE depois do bloco
       `Text` que mostra a contagem (`text: root.openId > 0 ? tracks.count + qsTr(" faixas") …`)
       e ANTES do `Item { Layout.fillWidth: true }`, inserir:
 
@@ -99,9 +99,9 @@ pede (regra já vigente em `startFromEmpty`).
             }
 ```
 
-- [ ] verificação mecânica da task:
+- [x] verificação mecânica da task:
       `grep -c "playRequested" src/CollectionsPane.qml` → `3`
-- [ ] commit:
+- [x] commit:
 
 ```bash
 git add src/CollectionsPane.qml
