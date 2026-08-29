@@ -53,7 +53,7 @@ fixo a 16 px da capa com tolerância de 3 níveis por canal (§ Restrições, ar
 
 ### Task 1: O componente do halo
 
-- [ ] Criar `src/AmbientGlow.qml`:
+- [x] Criar `src/AmbientGlow.qml`:
 
 ```qml
 import QtQuick
@@ -129,15 +129,15 @@ Item {
 }
 ```
 
-- [ ] Registrar `src/AmbientGlow.qml` na lista `QML_FILES` do
+- [x] Registrar `src/AmbientGlow.qml` na lista `QML_FILES` do
       `qt_add_qml_module(melodarium ...)` em `CMakeLists.txt`, junto das outras telas:
 
 ```cmake
         src/AmbientGlow.qml
 ```
 
-- [ ] verificação mecânica da task: `cmake --build build` → exit 0
-- [ ] commit:
+- [x] verificação mecânica da task: `cmake --build build` → exit 0
+- [x] commit:
 
 ```bash
 git add src/AmbientGlow.qml CMakeLists.txt
