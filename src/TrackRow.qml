@@ -26,6 +26,9 @@ Item {
     property int position: 0
     // Zebra: uma listra a cada duas linhas guia o olho por linhas largas sem desenhar grade.
     property bool alternate: false
+    // Arrastar só faz sentido onde a ordem é do usuário: dentro de uma coleção. Na biblioteca
+    // a ordem vem da consulta, e uma alça lá prometeria uma gravação que não existe.
+    property bool draggable: false
     // "local_file" or "youtube". The badge is how the spec's honest limit reaches the eye:
     // compressed audio lives next to the real files without passing for one.
     property string sourceKind: "local_file"
@@ -79,6 +82,21 @@ Item {
             anchors.leftMargin: Theme.marginL
             anchors.rightMargin: Theme.marginL
             spacing: Theme.marginL
+
+            // Seis pontos: o desenho universal de "isto se arrasta". Some sem hover para não
+            // competir com o número na lista em repouso.
+            Text {
+                Layout.preferredWidth: root.draggable ? Math.round(12 * Theme.uiScale) : 0
+                visible: root.draggable
+                opacity: mouse.containsMouse ? 0.9 : 0.25
+                text: "⠿"
+                font.pixelSize: Theme.fontSizeM
+                color: Theme.cMuted
+
+                Behavior on opacity {
+                    NumberAnimation { duration: Theme.animationFast; easing.type: Theme.easingType }
+                }
+            }
 
             // A faixa que toca troca o número por um triângulo: é a única marca de estado que
             // a lista precisa.

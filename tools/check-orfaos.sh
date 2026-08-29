@@ -21,12 +21,10 @@ CPP_OK="pause stop trackAt episodeAt loadForShow isLiked recordSkip downloadDire
 #   collectionsForTrack   · marcar no menu quais coleções já têm a faixa: sem desenho
 #   continueListening     · "continuar ouvindo" não aparece em design/Podcast.dc.html
 #   ingestDownloadedFile  · pertence à fatia download-youtube, que está travada
-#   moveTrackInCollection · o plano colecoes-tags decide: arrastar para reordenar entra só
-#                           se a ordem manual se mostrar usada de fato
 #   setGaplessAggressive  · o gapless agressivo não está em desenho nenhum
 #   unsubscribe           · o par de subscribe; desinscrever não tem tela nem desenho
 CPP_RESERVA="collectionsForTrack continueListening ingestDownloadedFile \
-moveTrackInCollection setGaplessAggressive unsubscribe"
+setGaplessAggressive unsubscribe"
 
 falhas=0
 reserva=""
