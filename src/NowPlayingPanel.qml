@@ -30,7 +30,13 @@ Rectangle {
     // Compact does not just shrink the cover: the whole panel narrows with it. Leaving the
     // panel at 392 while the cover drops to 200 would push the frame past a 720 px window and
     // send the right edge of the pane off screen.
-    implicitWidth: root.coverSide + (Theme.marginXL + Theme.marginS) * 2 + 4
+    //
+    // E não é só o modo compacto: quando o cartão do pé entra, a capa paga por ele em altura,
+    // e uma capa menor dentro de uma coluna larga como antes ficaria boiando entre duas faixas
+    // de vazio — que é justamente o defeito que o cartão veio fechar. Sem cartão a largura é a
+    // de sempre, e a janela do desenho continua medindo 392.
+    implicitWidth: (root.cabeCartao ? capaRect.lado : root.coverSide)
+                   + (Theme.marginXL + Theme.marginS) * 2 + 4
     color: Theme.cBase
 
     // O degradê do desenho (design/Main.dc.html): claro no topo, fundo da janela no pé. Duas
@@ -51,6 +57,34 @@ Rectangle {
     // mpv reports pause=false while it is idle, so AudioEngine.playing is true before any file
     // is loaded. Without this guard the transport shows a pause button with nothing playing.
     readonly property bool hasTrack: AudioEngine.currentFile !== ""
+
+    // O que a coluna gasta abaixo da capa: título, progresso, transporte, volume, etiquetas e
+    // os espaçamentos entre eles. MEDIDO, não estimado — o app imprime a soma real com
+    // `--measure`, e ela dá 309 px na escala 1 em qualquer altura de janela. O número antigo
+    // (330) era chute, e o chute só não aparecia porque a conta usava a altura da JANELA
+    // inteira: as margens da coluna, 48 px, cobriam o erro. Contra a altura da coluna, que é
+    // o espaço que existe de verdade, o erro vira cartão transbordando pelo pé.
+    readonly property int reservaAbaixoDaCapa: Math.round(310 * Theme.uiScale)
+
+    // O cartão do pé custa altura, e quem paga é a capa — é o único bloco elástico da coluna.
+    // A conta sai da altura da COLUNA e de mais nada: medir o vazio que sobra seria circular
+    // (o cartão mediria o espaço que ele próprio ocupa), e o QML corta uma ligação circular no
+    // meio — o que aparece na tela é um buraco do tamanho do cartão, no lugar do cartão.
+    readonly property int custoDoCartao: proxima.alturaCheia + Theme.marginXL
+    readonly property int capaComCartao: Math.min(root.coverSide,
+                                                  col.height - root.reservaAbaixoDaCapa
+                                                  - root.custoDoCartao)
+
+    // 340 px de tela, sem escala: é a capa do desenho. Abaixo disso o cartão estaria comprando
+    // espaço com a arte, que é o assunto do painel — então em janela baixa ele não entra, e
+    // quem fala da fila é a tirinha do pé da lista. Numa janela alta a capa paga sem sentir:
+    // ela já tinha crescido junto com a interface.
+    readonly property bool cabeCartao: proxima.temProximo && root.capaComCartao >= 340
+
+    // Se o que vem a seguir já está dito AQUI. A janela lê isto para não repetir o assunto no
+    // pé da lista: a fila tem um lugar só na tela, e o lugar muda com a altura da janela —
+    // numa janela baixa o cartão não cabe e a tirinha do pé volta a ser esse lugar.
+    readonly property bool mostrandoProxima: root.hasTrack && root.cabeCartao
 
     // O que está tocando pode ser um episódio, e aí os metadados vêm do podcast, não da
     // biblioteca: um episódio não tem artista nem álbum, tem programa e data.
@@ -122,12 +156,15 @@ Rectangle {
         Item {
             id: capaRect
 
-            // O resto da coluna (título, progresso, controles, tags) ocupa ~330px. Quando a
-            // janela é mais baixa que isso + 340, a capa cede espaço — mas cede QUADRADA:
-            // sem amarrar largura à altura, o Layout encolheria só a altura e a arte sairia
-            // deformada. Salvaguarda: numa janela de 1384 a medida confirma 340x340.
+            // O resto da coluna (título, progresso, controles, tags) ocupa 310px, mais o
+            // cartão do pé quando ele entra. Quando a janela é mais baixa que isso + 340, a
+            // capa cede espaço — mas cede QUADRADA: sem amarrar largura à altura, o Layout
+            // encolheria só a altura e a arte sairia deformada. Salvaguarda: numa janela de
+            // 1384 a medida confirma 340x340.
             readonly property int lado: Math.max(Math.round(120 * Theme.uiScale),
-                                                Math.min(root.coverSide, root.height - Math.round(330 * Theme.uiScale)))
+                                                Math.min(root.coverSide,
+                                                         col.height - root.reservaAbaixoDaCapa
+                                                         - (root.cabeCartao ? root.custoDoCartao : 0)))
 
             Layout.preferredWidth: capaRect.lado
             Layout.preferredHeight: capaRect.lado
@@ -249,6 +286,11 @@ Rectangle {
                     font.weight: Theme.fontWeightBold
                     font.letterSpacing: Theme.letterSpacingTitle * Theme.fontSizeXXL
                     color: Theme.cTitle
+                    // Encolher antes de cortar: a coluna estreita quando o cartão do pé entra,
+                    // e um nome de treze letras que cabia inteiro virava "One Mor…". Só depois
+                    // de chegar ao tamanho do subtítulo é que o corte volta a valer.
+                    fontSizeMode: Text.HorizontalFit
+                    minimumPixelSize: Theme.fontSizeXL
                     elide: Text.ElideRight
                 }
                 Text {
@@ -532,6 +574,15 @@ Rectangle {
             }
         }
 
+        // O primeiro pedaço do que sobra, e no máximo isto: o transporte deixa de encostar nas
+        // etiquetas sem que uma janela muito alta abra um corredor entre os dois.
+        Item {
+            id: folga
+            Layout.fillHeight: true
+            Layout.maximumHeight: Theme.marginXL * 2
+            visible: root.hasTrack
+        }
+
         TagEditor {
             id: tagEd
             Layout.fillWidth: true
@@ -540,34 +591,24 @@ Rectangle {
             onTagChosen: function (name) { root.tagChosen(name) }
         }
 
-        // O que ocupa a coluna enquanto toca. Sem isto o painel entrega capa, transporte e
-        // etiquetas e devolve o resto da altura ao vazio — numa janela alta, mais da metade.
-        UpNextList {
-            id: proximas
+        // O resto do vazio, entre as etiquetas e o cartão do pé: é ele que separa o bloco do
+        // que toca do bloco do que vem, e é ele que segura a capa no topo quando a coluna
+        // encolhe. Numa janela que só dá para o mínimo, ele fica em zero e a coluna fecha
+        // cheia; numa janela alta, ele é o respiro.
+        Item { id: sobra; Layout.fillHeight: true }
+
+        // O pé da coluna enquanto toca. Sem ele o painel entrega capa, transporte e etiquetas
+        // e devolve o resto da altura ao vazio — numa janela alta, mais da metade.
+        NextUpCard {
+            id: proxima
 
             Layout.fillWidth: true
-            Layout.topMargin: Theme.marginM
-            // Ela vive do que SOBRA, e só disso. O espaço disponível é o vazio do pé da coluna
-            // MAIS o que ela própria já ocupa — sem essa soma a conta se morderia: crescer uma
-            // linha diminuiria o vazio, que encolheria a lista de volta. Somados, o total é
-            // constante e a conta assenta. Na janela do desenho (700) não sobra nada e ela não
-            // aparece — encolher a capa para caber uma lista seria trocar o assunto do painel,
-            // que é a arte do que está tocando.
-            readonly property int espacoLivre: sobra.height + proximas.height
-            lookahead: Math.max(0, Math.min(3, Math.floor(
-                (proximas.espacoLivre - Theme.marginM - proximas.alturaCabecalho)
-                / proximas.alturaLinha)))
-            visible: root.hasTrack && proximas.temProximos && proximas.lookahead > 0
+            // Quem decide se ele entra é a altura da janela (`cabeCartao`), lá em cima: na
+            // janela do desenho (700) a capa teria de cair abaixo do tamanho aprovado para
+            // pagar por ele, e aí quem fala da fila é a tirinha do pé da lista.
+            visible: root.hasTrack && root.cabeCartao
             onEntryActivated: function (queueIndex) { root.queueJumpRequested(queueIndex) }
             onExpandRequested: root.queueOpenRequested()
         }
-
-        // Sempre presente: é ele que mantém a capa no topo quando o resto da coluna encolhe.
-        // Sempre presente: é ele que mantém a capa no topo quando o resto da coluna encolhe.
-        // A altura DELE é o vazio de verdade que sobra na coluna — é dela que a lista de cima
-        // tira quantas linhas cabem, em vez de estimar quanto o transporte ocupa. Estimar
-        // errava: com a interface escalada em 1,7 a conta reservava 561 px para um resto que
-        // media 380, e a lista sumia por uma falta de espaço que não existia.
-        Item { id: sobra; Layout.fillHeight: true }
     }
 }

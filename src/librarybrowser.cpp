@@ -202,7 +202,8 @@ QVariantMap LibraryBrowser::trackForPath(const QString &path)
     q.prepare(QStringLiteral(
         "SELECT t.id, IFNULL(t.title,''), IFNULL(ar.name,''), IFNULL(al.title,''), "
         "IFNULL(t.album_id,0), IFNULL(t.year,0), IFNULL(t.codec,''), "
-        "IFNULL(t.sample_rate,0), IFNULL(t.bits_per_sample,0), t.liked_at IS NOT NULL "
+        "IFNULL(t.sample_rate,0), IFNULL(t.bits_per_sample,0), t.liked_at IS NOT NULL, "
+        "IFNULL(t.duration_ms,0) "
         "FROM tracks t "
         "LEFT JOIN artists ar ON ar.id = t.artist_id "
         "LEFT JOIN albums al ON al.id = t.album_id "
@@ -221,6 +222,9 @@ QVariantMap LibraryBrowser::trackForPath(const QString &path)
     out.insert(QStringLiteral("sampleRate"), q.value(7).toInt());
     out.insert(QStringLiteral("bitsPerSample"), q.value(8).toInt());
     out.insert(QStringLiteral("liked"), q.value(9).toBool());
+    // The next-up card names the track and says how long it is; without this the card would
+    // have to ask the engine, which only knows the duration of the file it has open.
+    out.insert(QStringLiteral("durationMs"), q.value(10).toLongLong());
     return out;
 }
 
