@@ -42,7 +42,7 @@ em **dois** lugares (o miolo e o painel sem faixa): a animação roda nos dois.
 
 ### Task 1: O Atalho sabe entrar
 
-- [ ] Em `src/EmptyPane.qml`, dentro de `component Atalho: Rectangle`, acrescentar logo
+- [x] Em `src/EmptyPane.qml`, dentro de `component Atalho: Rectangle`, acrescentar logo
       depois da propriedade `property bool vazio: false` (hoje na **linha 66**):
 
 ```qml
@@ -53,7 +53,7 @@ em **dois** lugares (o miolo e o painel sem faixa): a animação roda nos dois.
         property int ordem: 0
 ```
 
-- [ ] Ainda em `component Atalho: Rectangle`, acrescentar logo depois do bloco
+- [x] Ainda em `component Atalho: Rectangle`, acrescentar logo depois do bloco
       `Behavior on color { ... }` do próprio `Atalho` (hoje nas **linhas 79-81**, não o da
       linha 184):
 
@@ -92,9 +92,9 @@ em **dois** lugares (o miolo e o painel sem faixa): a animação roda nos dois.
         Component.onCompleted: entradaDoAtalho.start()
 ```
 
-- [ ] verificação mecânica da task: `cmake --build build` → exit 0
-- [ ] verificação mecânica da task: `grep -c 'deslocDoAtalho' src/EmptyPane.qml` → `2`
-- [ ] commit:
+- [x] verificação mecânica da task: `cmake --build build` → exit 0
+- [x] verificação mecânica da task: `grep -c 'deslocDoAtalho' src/EmptyPane.qml` → `2`
+- [x] commit:
 
 ```bash
 git add src/EmptyPane.qml
