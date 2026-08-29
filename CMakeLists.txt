@@ -69,6 +69,7 @@ qt_add_qml_module(melodarium
         src/LibraryPane.qml
         src/QueueStrip.qml
         src/UpNextList.qml
+        src/ListFade.qml
         src/QueueOverlay.qml
         src/CollectionsPane.qml
         src/Chip.qml

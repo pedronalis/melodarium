@@ -264,6 +264,28 @@ Popup {
             model: root.linhas
             boundsBehavior: Flickable.StopAtBounds
 
+            // As duas bordas dissolvem no fundo em vez de cortar a linha ao meio. Filhos diretos da
+            // lista, não do conteúdo dela: o conteúdo rola, estes ficam.
+            ListFade {
+                parent: results
+                anchors.left: parent.left
+                anchors.right: parent.right
+                anchors.top: parent.top
+                paraCima: true
+                corDeFundo: Theme.cRowAlt
+                opacity: results.atYBeginning ? 0 : 1
+                Behavior on opacity { NumberAnimation { duration: Theme.animationFast } }
+            }
+            ListFade {
+                parent: results
+                anchors.left: parent.left
+                anchors.right: parent.right
+                anchors.bottom: parent.bottom
+                corDeFundo: Theme.cRowAlt
+                opacity: results.atYEnd ? 0 : 1
+                Behavior on opacity { NumberAnimation { duration: Theme.animationFast } }
+            }
+
             delegate: Item {
                 id: linha
 

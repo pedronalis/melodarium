@@ -107,6 +107,28 @@ Popup {
             // A fila é do motor: uma cópia local envelheceria na primeira faixa que terminasse.
             model: AudioEngine.queue
 
+            // As duas bordas dissolvem no fundo do diálogo em vez de cortar a linha ao meio.
+            // Filhos diretos da lista, não do conteúdo dela: o conteúdo rola, estes ficam.
+            ListFade {
+                parent: lista
+                anchors.left: parent.left
+                anchors.right: parent.right
+                anchors.top: parent.top
+                paraCima: true
+                corDeFundo: Theme.cRowAlt
+                opacity: lista.atYBeginning ? 0 : 1
+                Behavior on opacity { NumberAnimation { duration: Theme.animationFast } }
+            }
+            ListFade {
+                parent: lista
+                anchors.left: parent.left
+                anchors.right: parent.right
+                anchors.bottom: parent.bottom
+                corDeFundo: Theme.cRowAlt
+                opacity: lista.atYEnd ? 0 : 1
+                Behavior on opacity { NumberAnimation { duration: Theme.animationFast } }
+            }
+
             delegate: Rectangle {
                 id: linha
 
