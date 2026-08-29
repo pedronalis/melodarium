@@ -103,7 +103,7 @@ git commit -m "feat(empty): staggered entrance for the three shortcuts"
 
 ### Task 2: Os três atalhos declaram a vez
 
-- [ ] Em `src/EmptyPane.qml`, no `ColumnLayout` das outras duas saídas (hoje a partir da
+- [x] Em `src/EmptyPane.qml`, no `ColumnLayout` das outras duas saídas (hoje a partir da
       **linha 266**), acrescentar `ordem:` aos três `Atalho`. O bloco passa a ser:
 
 ```qml
@@ -143,12 +143,12 @@ git commit -m "feat(empty): staggered entrance for the three shortcuts"
         }
 ```
 
-- [ ] verificação mecânica da task: `cmake --build build` → exit 0
-- [ ] verificação mecânica da task: `grep -c 'ordem:' src/EmptyPane.qml` → `3`
-- [ ] verificação mecânica da task — a foto da tela vazia continua fiel ao desenho, o que só
+- [x] verificação mecânica da task: `cmake --build build` → exit 0
+- [x] verificação mecânica da task: `grep -c 'ordem:' src/EmptyPane.qml` → `3`
+- [x] verificação mecânica da task — a foto da tela vazia continua fiel ao desenho, o que só
       acontece se os três atalhos estiverem em `opacity: 1` quando ela é tirada:
       `bash tools/check-fidelidade.sh` → exit 0
-- [ ] commit:
+- [x] commit:
 
 ```bash
 git add src/EmptyPane.qml
