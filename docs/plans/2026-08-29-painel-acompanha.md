@@ -287,7 +287,7 @@ git commit -m "feat(panel): cross-fade the artwork instead of swapping it in one
 
 ### Task 4: O halo atrás da capa
 
-- [ ] Em `src/NowPlayingPanel.qml`, acrescentar ao bloco de propriedades do `root`, logo
+- [x] Em `src/NowPlayingPanel.qml`, acrescentar ao bloco de propriedades do `root`, logo
       depois de `capaDeTras`:
 
 ```qml
@@ -310,7 +310,7 @@ git commit -m "feat(panel): cross-fade the artwork instead of swapping it in one
         !Theme.medindo && root.hasTrack && root.corDaCapaAtual.a > 0
 ```
 
-- [ ] Acrescentar o halo como primeiro filho do `root`, ANTES do `ColumnLayout { id: col }`
+- [x] Acrescentar o halo como primeiro filho do `root`, ANTES do `ColumnLayout { id: col }`
       (hoje na **linha 154**). `z: -1` o põe atrás de todo o conteúdo e ainda por cima do degradê
       do painel, que é pintado pelo próprio `Rectangle`:
 
@@ -334,18 +334,18 @@ git commit -m "feat(panel): cross-fade the artwork instead of swapping it in one
     }
 ```
 
-- [ ] Acrescentar o campo à linha `diag` do `root` (hoje na **linha 84**), no fim da expressão:
+- [x] Acrescentar o campo à linha `diag` do `root` (hoje na **linha 84**), no fim da expressão:
 
 ```qml
                                    + " halo=" + (root.mostrarHalo ? "on" : "off")
 ```
 
-- [ ] verificação mecânica da task: `cmake --build build` → exit 0
-- [ ] verificação mecânica da task — o halo está desligado ao medir:
+- [x] verificação mecânica da task: `cmake --build build` → exit 0
+- [x] verificação mecânica da task — o halo está desligado ao medir:
       `QT_QPA_PLATFORM=offscreen ./build/melodarium --measure 1100 --no-search --play-queue --delay 1800 2>&1 | grep -c 'halo=off'` → `1`
-- [ ] verificação mecânica da task: `bash tools/check-orfaos.sh` → exit 0 (`AmbientGlow` tem
+- [x] verificação mecânica da task: `bash tools/check-orfaos.sh` → exit 0 (`AmbientGlow` tem
       quem o instancie)
-- [ ] commit:
+- [x] commit:
 
 ```bash
 git add src/NowPlayingPanel.qml

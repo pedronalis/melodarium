@@ -76,6 +76,24 @@ Rectangle {
     readonly property var capaDaFrente: root.capaAnaFrente ? capaA : capaB
     readonly property var capaDeTras: root.capaAnaFrente ? capaB : capaA
 
+    // A cor que o halo pinta. Guardada em vez de derivada: quando a faixa nova não tem cor a
+    // dar (capa ausente, capa em escala de cinza) o halo apaga pela opacidade e a última cor
+    // fica parada onde estava, em vez de desabar para preto no meio do caminho.
+    property color corDoHalo: Theme.cCoverMid
+
+    readonly property color corDaCapaAtual: root.capaDaFrente.dominantColor
+
+    onCorDaCapaAtualChanged: {
+        if (root.corDaCapaAtual.a > 0)
+            root.corDoHalo = root.corDaCapaAtual
+    }
+
+    // O halo sai da foto do gate: a cor dele vem do acervo de quem roda, e o gate de
+    // fidelidade mede 15 pontos fixos com 3 níveis de tolerância por canal — um deles a
+    // 16 px da capa. Ou o halo sai da foto, ou o gate passa a medir sorte.
+    readonly property bool mostrarHalo:
+        !Theme.medindo && root.hasTrack && root.corDaCapaAtual.a > 0
+
     onFonteDaCapaChanged: {
         root.capaDeTras.source = root.fonteDaCapa
         // Uma faixa sem capa nenhuma nunca fica "pronta": o relógio garante que a troca
@@ -179,6 +197,24 @@ Rectangle {
         const m = Math.floor(total / 60)
         const s = total % 60
         return m + ":" + (s < 10 ? "0" : "") + s
+    }
+
+    AmbientGlow {
+        anchors.fill: parent
+        z: -1
+        cor: root.corDoHalo
+        // A capa é o primeiro item da coluna e está centrada nela: a posição sai da conta, e
+        // não de mapToItem, porque mapeamento não é reativo e a capa muda de tamanho com a
+        // altura da janela.
+        capaX: Math.round((root.width - capaRect.lado) / 2)
+        capaY: Theme.marginXL + Theme.marginS
+        capaLado: capaRect.lado
+        raioBase: Theme.radiusM
+        opacity: root.mostrarHalo ? 1 : 0
+
+        Behavior on opacity {
+            NumberAnimation { duration: Theme.animationSlowest; easing.type: Theme.easingType }
+        }
     }
 
     ColumnLayout {
