@@ -334,7 +334,7 @@ git commit -m "feat(cover): expose the loaded artwork's dominant color to QML"
 
 - `cmake -B build -G Ninja && cmake --build build` → exit 0
 - `ctest --test-dir build --output-on-failure` → exit 0
-- `ctest --test-dir build -N | grep -c 'Test #'` → `11` (piso de contagem: eram 10, esta
+- `ctest --test-dir build -N | awk '/Total Tests:/ {print $3}'` → `11` (piso de contagem: eram 10, esta
   fatia acrescenta 1; `ctest` sai 0 com `Total Tests: 0` e um gate sem piso lê verde num
   build sem teste nenhum)
 - `ctest --test-dir build -R tst_dominantcolor --output-on-failure` → `100% tests passed`

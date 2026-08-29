@@ -159,7 +159,7 @@ git commit -m "feat(empty): declare the entrance order of the three shortcuts"
 
 - `cmake -B build -G Ninja && cmake --build build` → exit 0
 - `ctest --test-dir build --output-on-failure` → exit 0
-- `ctest --test-dir build -N | grep -c 'Test #'` → `11` (piso de contagem)
+- `ctest --test-dir build -N | awk '/Total Tests:/ {print $3}'` → `11` (piso de contagem)
 - `bash tools/check-orfaos.sh` → exit 0
 - `bash tools/check-fidelidade.sh` → exit 0 (o ponto `fundo da janela (vazia)` e o
   `painel: topo (vazia)` saem da foto `--pane empty`: se a entrada prender os atalhos
