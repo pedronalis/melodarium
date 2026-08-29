@@ -141,7 +141,7 @@ git commit -m "feat(collections): drag a track to a new place inside the collect
 
 ### Task 3: Gravar a ordem e recarregar do banco
 
-- [ ] Em `src/Main.qml`, no bloco `CollectionsPane { id: collectionsPane … }`, acrescentar:
+- [x] Em `src/Main.qml`, no bloco `CollectionsPane { id: collectionsPane … }`, acrescentar:
 
 ```qml
                 onTrackMoved: function (trackId, newIndex) {
@@ -155,10 +155,10 @@ git commit -m "feat(collections): drag a track to a new place inside the collect
                 }
 ```
 
-- [ ] verificação mecânica da task:
+- [x] verificação mecânica da task:
       `cmake --build build 2>&1 | tail -1 && grep -c "onTrackMoved" src/Main.qml`
       → build `exit 0` e `1`
-- [ ] commit:
+- [x] commit:
 
 ```bash
 git add src/Main.qml
