@@ -1,7 +1,7 @@
 ---
 slug: cor-dominante
 feature: melodarium-anima
-status: aprovado
+status: concluido
 depende-de: []
 decisao-humana: nao
 spec: docs/plans/research/2026-08-29-anima-varredura.md
