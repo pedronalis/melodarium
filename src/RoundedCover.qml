@@ -18,8 +18,14 @@ Item {
     property int radius: Theme.radiusM
     property string fallbackIcon: "music"
     property color placeholderColor: Theme.cRaised
+    // Os dois tons de cima vêm do desenho (design/Main.dc.html:39), não de um clareamento
+    // calculado: Qt.lighter multiplica o V do HSV, e partindo de #191919 ele chegava a
+    // #2f2f2f onde o desenho manda #3a3a3a — o bloco nascia um terço mais fraco que o
+    // aprovado, que é justamente o degradê que o olho registra nesta tela.
+    property color placeholderTop: Theme.cCoverTop
+    property color placeholderMid: Theme.cCoverMid
     property real fallbackIconSize: Theme.fontSizeXXXL
-    property color fallbackIconColor: Theme.cLine
+    property color fallbackIconColor: Theme.cCoverIcon
     // A capa grande do painel é a única que projeta sombra (design/Main.dc.html).
     property bool shadow: false
 
@@ -47,25 +53,65 @@ Item {
         }
     }
 
-    Rectangle {
+    // O desenho não põe retângulo cinza no lugar da capa que falta: põe um degradê, que é o
+    // que faz o quadrado vazio parecer arte e não buraco. E o degradê dele é DIAGONAL
+    // (`linear-gradient(145deg, …)`): a luz entra pelo canto de cima à esquerda e cai no de
+    // baixo à direita. O `Gradient` do QML só sabe descer reto, e o placeholder vertical não
+    // era o desenho — era a aproximação possível dentro do Rectangle.
+    //
+    // Quem dá o ângulo é este Canvas: por baixo ele é QPainter, o mesmo caminho do
+    // RoundedImage, que é o único que sobrevive ao adaptador de software neste projeto (a
+    // saída por shader some, e some junto a capa inteira).
+    Canvas {
+        id: placeholder
+
         anchors.fill: parent
-        radius: root.radius
         visible: !root.ready
-        // O desenho não põe retângulo cinza no lugar da capa que falta: põe um degradê, que é
-        // o que faz o quadrado vazio parecer arte e não buraco.
-        gradient: Gradient {
-            GradientStop { position: 0.0; color: Qt.lighter(root.placeholderColor, 1.9) }
-            GradientStop { position: 0.45; color: Qt.lighter(root.placeholderColor, 1.35) }
-            GradientStop { position: 1.0; color: root.placeholderColor }
+
+        onWidthChanged: requestPaint()
+        onHeightChanged: requestPaint()
+        Connections {
+            target: root
+            function onPlaceholderTopChanged() { placeholder.requestPaint() }
+            function onPlaceholderMidChanged() { placeholder.requestPaint() }
+            function onPlaceholderColorChanged() { placeholder.requestPaint() }
         }
 
-        Text {
-            anchors.centerIn: parent
-            text: Icons.get(root.fallbackIcon)
-            font.family: Icons.fontFamily
-            font.pixelSize: root.fallbackIconSize
-            color: root.fallbackIconColor
+        onPaint: {
+            const ctx = getContext("2d")
+            ctx.reset()
+
+            // O ângulo do CSS conta a partir do "para cima" e cresce no sentido horário, e a
+            // linha do degradê é centrada na caixa — por isso o vetor sai do centro para os
+            // dois lados, e não de canto a canto: em 145° num quadrado ela mede 473 px numa
+            // caixa de 340, e cortar isso nos cantos deslocaria as paradas de cor.
+            const a = 145 * Math.PI / 180
+            const dx = Math.sin(a)
+            const dy = -Math.cos(a)
+            const comprimento = Math.abs(width * dx) + Math.abs(height * dy)
+            const cx = width / 2
+            const cy = height / 2
+
+            const g = ctx.createLinearGradient(cx - dx * comprimento / 2, cy - dy * comprimento / 2,
+                                               cx + dx * comprimento / 2, cy + dy * comprimento / 2)
+            g.addColorStop(0.0, root.placeholderTop)
+            g.addColorStop(0.45, root.placeholderMid)
+            g.addColorStop(1.0, root.placeholderColor)
+
+            ctx.fillStyle = g
+            ctx.beginPath()
+            ctx.roundedRect(0, 0, width, height, root.radius, root.radius)
+            ctx.fill()
         }
+    }
+
+    Text {
+        anchors.centerIn: parent
+        visible: !root.ready && root.fallbackIcon !== ""
+        text: Icons.get(root.fallbackIcon)
+        font.family: Icons.fontFamily
+        font.pixelSize: root.fallbackIconSize
+        color: root.fallbackIconColor
     }
 
     RoundedImage {

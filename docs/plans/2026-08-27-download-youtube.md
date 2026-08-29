@@ -1,7 +1,7 @@
 ---
 slug: download-youtube
 feature: melodarium
-status: travado
+status: concluido
 depende-de: [colecoes-tags]
 decisao-humana: nao
 spec: docs/specs/2026-08-27-player-musica-podcast.md
@@ -754,3 +754,10 @@ repositório e continua compilando — o que sumiu foi o caminho até ele.
 
 Reposto pela fatia `colecoes-tela` do lote `melodia-religa`. Volta a `concluido` quando
 `bash tools/check-orfaos.sh` não listar mais nada desta fatia.
+
+**Destravada em 2026-08-28.** Colar link, ver progresso e cancelar existem na tela
+(`AddFromLinkDialog.qml`, `DownloadProgressRow.qml`, `CollectionsPane.qml`), e o arquivo baixado
+chega ao catálogo por `ingestDownloadedFile`, chamado pelo próprio baixador em C++ ao fim do
+processo. O que a mantinha travada era o detector de órfãos, que só varre chamadas vindas do
+QML e por isso listava esse caminho como reserva — com a razão circular "pertence à fatia
+download-youtube, que está travada". O detector foi corrigido no mesmo dia.

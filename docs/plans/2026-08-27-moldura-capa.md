@@ -1,7 +1,7 @@
 ---
 slug: moldura-capa
 feature: melodia-capa-manda
-status: travado
+status: concluido
 depende-de: [like-faixas]
 decisao-humana: sim
 spec: design/Main.dc.html (tela 1 aprovada em 2026-08-27)
@@ -623,3 +623,7 @@ repositório e continua compilando — o que sumiu foi o caminho até ele.
 
 Reposto pela fatia `clique-responde` do lote `melodia-religa`. Volta a `concluido` quando
 `bash tools/check-orfaos.sh` não listar mais nada desta fatia.
+
+**Destravada em 2026-08-28.** `bash tools/check-orfaos.sh` fecha em `0 item(ns) sem porta de
+entrada` e nenhum recurso desta fatia aparece na lista de reserva declarada: a moldura voltou
+a ter caminho até ela pela fatia `clique-responde`.

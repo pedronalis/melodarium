@@ -9,8 +9,13 @@ cd "$(dirname "$0")/.." || exit 2
 
 # Exceções conscientes. Singletons não são instanciados, são chamados (Icons.get(...)).
 # Um invocável coberto por outro (pause/stop, cobertos por togglePause) também não é morto.
+# ingestDownloadedFile é chamado pelo próprio baixador em C++ quando o processo termina
+# (ytdlpdownloader.cpp): este detector só varre chamadas vindas do QML, então um caminho
+# que fecha dentro do C++ apareceria como órfão sem ser. Ficou 1 dia listado como reserva
+# por uma razão circular ("a fatia está travada"), e era a reserva que travava a fatia.
 QML_OK="Main Theme Icons"
-CPP_OK="pause stop trackAt episodeAt loadForShow isLiked recordSkip downloadDirectory"
+CPP_OK="pause stop trackAt episodeAt loadForShow isLiked recordSkip downloadDirectory \
+ingestDownloadedFile"
 
 # RESERVA DECLARADA: motor pronto e testado, gesto ainda não pedido por spec nem desenho.
 # Diferente do CPP_OK acima: estes NÃO têm outro caminho: eles esperam uma tela que ninguém
@@ -20,11 +25,9 @@ CPP_OK="pause stop trackAt episodeAt loadForShow isLiked recordSkip downloadDire
 # um item esquecido.
 #   collectionsForTrack   · marcar no menu quais coleções já têm a faixa: sem desenho
 #   continueListening     · "continuar ouvindo" não aparece em design/Podcast.dc.html
-#   ingestDownloadedFile  · pertence à fatia download-youtube, que está travada
 #   setGaplessAggressive  · o gapless agressivo não está em desenho nenhum
 #   unsubscribe           · o par de subscribe; desinscrever não tem tela nem desenho
-CPP_RESERVA="collectionsForTrack continueListening ingestDownloadedFile \
-setGaplessAggressive unsubscribe"
+CPP_RESERVA="collectionsForTrack continueListening setGaplessAggressive unsubscribe"
 
 falhas=0
 reserva=""
