@@ -146,7 +146,7 @@ git commit -m "feat(panel): stacked-frame ambient glow component (no shader)"
 
 ### Task 2: A capa repassa a própria cor
 
-- [ ] Em `src/RoundedCover.qml`, logo abaixo de `readonly property bool ready: img.ready`
+- [x] Em `src/RoundedCover.qml`, logo abaixo de `readonly property bool ready: img.ready`
       (hoje na **linha 32**), acrescentar:
 
 ```qml
@@ -156,9 +156,9 @@ git commit -m "feat(panel): stacked-frame ambient glow component (no shader)"
     readonly property alias dominantColor: img.dominantColor
 ```
 
-- [ ] verificação mecânica da task: `cmake --build build` → exit 0
-- [ ] verificação mecânica da task: `grep -c 'dominantColor' src/RoundedCover.qml` → `1`
-- [ ] commit:
+- [x] verificação mecânica da task: `cmake --build build` → exit 0
+- [x] verificação mecânica da task: `grep -c 'dominantColor' src/RoundedCover.qml` → `1`
+- [x] commit:
 
 ```bash
 git add src/RoundedCover.qml
