@@ -19,9 +19,10 @@ Rectangle {
     // cima, sob o cabeçalho.
     property bool paraCima: false
 
-    // Curto: o bastante para a linha dissolver, curto o bastante para não apagar a linha
-    // inteira — 28 px cobrem pouco mais de meia linha da lista mais apertada do app.
-    implicitHeight: Math.round(28 * Theme.uiScale)
+    // Alto o bastante para a dissolução ter tempo de acontecer: com 28 px ela cabia em meia
+    // linha e o olho ainda lia um corte, só que borrado. Uma linha inteira e meia é o que faz
+    // a última faixa PARECER estar indo embora em vez de ser apagada.
+    implicitHeight: Math.round(72 * Theme.uiScale)
     height: implicitHeight
     // Acima do conteúdo que rola, nunca abaixo.
     z: 2
@@ -31,14 +32,46 @@ Rectangle {
     readonly property color invisivel: Qt.rgba(root.corDeFundo.r, root.corDeFundo.g,
                                                root.corDeFundo.b, 0)
 
+    // Uma reta entre transparente e opaco não parece suave: o alfa cresce igual do começo ao
+    // fim e o olho enxerga a entrada do degradê como uma linha. As paradas abaixo desenham uma
+    // curva — quase nada de véu no primeiro terço, o peso todo no fim —, que é como uma sombra
+    // real cai. Escritas à mão, uma a uma: um Repeater aqui dentro não roda (o delegate dele
+    // tem de ser um Item, e GradientStop não é), e o app sequer abre.
+    //
+    // Quando a lista some para CIMA a mesma curva é lida ao contrário, e por isso cada parada
+    // carrega os dois valores: as posições precisam subir em ordem nos dois sentidos.
+    function veu(alfa) {
+        return Qt.rgba(root.corDeFundo.r, root.corDeFundo.g, root.corDeFundo.b, alfa)
+    }
+
     gradient: Gradient {
         GradientStop {
-            position: 0.0
-            color: root.paraCima ? root.corDeFundo : root.invisivel
+            position: root.paraCima ? 0.00 : 0.00
+            color: root.veu(root.paraCima ? 1.00 : 0.00)
         }
         GradientStop {
-            position: 1.0
-            color: root.paraCima ? root.invisivel : root.corDeFundo
+            position: root.paraCima ? 0.10 : 0.25
+            color: root.veu(root.paraCima ? 0.82 : 0.05)
+        }
+        GradientStop {
+            position: root.paraCima ? 0.22 : 0.45
+            color: root.veu(root.paraCima ? 0.58 : 0.16)
+        }
+        GradientStop {
+            position: root.paraCima ? 0.38 : 0.62
+            color: root.veu(root.paraCima ? 0.34 : 0.34)
+        }
+        GradientStop {
+            position: root.paraCima ? 0.55 : 0.78
+            color: root.veu(root.paraCima ? 0.16 : 0.58)
+        }
+        GradientStop {
+            position: root.paraCima ? 0.75 : 0.90
+            color: root.veu(root.paraCima ? 0.05 : 0.82)
+        }
+        GradientStop {
+            position: root.paraCima ? 1.00 : 1.00
+            color: root.veu(root.paraCima ? 0.00 : 1.00)
         }
     }
 }
