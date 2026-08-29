@@ -68,6 +68,19 @@ private slots:
                                 "VALUES (%1, '/m/%1.flac', 1, 1, 'F%1', 100)")
                      .arg(i));
         }
+        // O álbum vem antes da faixa: `tracks.album_id` é chave estrangeira de `albums`, e
+        // sem a linha do álbum o INSERT da faixa é recusado por FOREIGN KEY constraint.
+        for (int i = 4; i <= 6; ++i) {
+            exec(QStringLiteral("INSERT INTO albums (id, title) VALUES (%1, 'A%1')").arg(i));
+        }
+        for (int i = 4; i <= 6; ++i) {
+            exec(QStringLiteral("INSERT INTO tracks (id, path, mtime, size, title, added_at, "
+                                "duration_ms, album_id) "
+                                "VALUES (%1, '/m/%1.flac', 1, 1, 'F%1', 100, %2, %3)")
+                     .arg(i)
+                     .arg(i * 1000)
+                     .arg(i));
+        }
     }
 
     // "At least 3", not "exactly 3": what this slice needs is that ITS migration ran. Later
@@ -198,6 +211,49 @@ private slots:
         QCOMPARE(scalar(QStringLiteral("SELECT COUNT(*) FROM tags WHERE name = 'efêmera'")), 1);
         QVERIFY(cm.removeTagFromTrack(1, QStringLiteral("efêmera")));
         QCOMPARE(scalar(QStringLiteral("SELECT COUNT(*) FROM tags WHERE name = 'efêmera'")), 0);
+    }
+
+    void collectionsCarryTotalDurationAndCovers()
+    {
+        CollectionManager cm;
+        const int id = cm.createCollection(QStringLiteral("Com duração"));
+        QVERIFY(id > 0);
+        // 4 000 + 5 000 + 6 000 = 15 000 ms, e três capas em ordem de position.
+        QVERIFY(cm.addTrackToCollection(id, 4));
+        QVERIFY(cm.addTrackToCollection(id, 5));
+        QVERIFY(cm.addTrackToCollection(id, 6));
+
+        QVariantMap row;
+        for (const QVariant &entry : cm.collections()) {
+            if (entry.toMap().value(QStringLiteral("id")).toInt() == id)
+                row = entry.toMap();
+        }
+        QVERIFY(!row.isEmpty());
+        QCOMPARE(row.value(QStringLiteral("totalMs")).toLongLong(), 15000LL);
+
+        const QVariantList covers = row.value(QStringLiteral("covers")).toList();
+        QCOMPARE(covers.size(), 3);
+        QCOMPARE(covers.at(0).toMap().value(QStringLiteral("path")).toString(),
+                 QStringLiteral("/m/4.flac"));
+        QCOMPARE(covers.at(0).toMap().value(QStringLiteral("albumId")).toInt(), 4);
+    }
+
+    // Uma coleção sem faixa nenhuma não pode devolver chave ausente: o QML leria undefined e
+    // escreveria "undefined min" na linha.
+    void emptyCollectionHasZeroTotalAndNoCovers()
+    {
+        CollectionManager cm;
+        const int id = cm.createCollection(QStringLiteral("Vazia de propósito"));
+        QVERIFY(id > 0);
+
+        QVariantMap row;
+        for (const QVariant &entry : cm.collections()) {
+            if (entry.toMap().value(QStringLiteral("id")).toInt() == id)
+                row = entry.toMap();
+        }
+        QVERIFY(!row.isEmpty());
+        QCOMPARE(row.value(QStringLiteral("totalMs")).toLongLong(), 0LL);
+        QCOMPARE(row.value(QStringLiteral("covers")).toList().size(), 0);
     }
 };
 
