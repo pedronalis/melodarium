@@ -45,7 +45,7 @@ paralelo conflita no mesmo arquivo, não na API.
 
 ### Task 1: A alça na linha, só quando a linha pode ser arrastada
 
-- [ ] Em `src/TrackRow.qml`, declarar a propriedade junto das outras, logo depois de
+- [x] Em `src/TrackRow.qml`, declarar a propriedade junto das outras, logo depois de
       `property bool alternate: false`:
 
 ```qml
@@ -54,7 +54,7 @@ paralelo conflita no mesmo arquivo, não na API.
     property bool draggable: false
 ```
 
-- [ ] No mesmo arquivo, dentro do `RowLayout`, ANTES do `Item` que contém o número da faixa,
+- [x] No mesmo arquivo, dentro do `RowLayout`, ANTES do `Item` que contém o número da faixa,
       inserir a alça:
 
 ```qml
@@ -74,9 +74,9 @@ paralelo conflita no mesmo arquivo, não na API.
             }
 ```
 
-- [ ] verificação mecânica da task:
+- [x] verificação mecânica da task:
       `grep -c "property bool draggable" src/TrackRow.qml` → `1`
-- [ ] commit:
+- [x] commit:
 
 ```bash
 git add src/TrackRow.qml
