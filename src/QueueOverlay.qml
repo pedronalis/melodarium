@@ -25,11 +25,14 @@ Popup {
     focus: true
     closePolicy: Popup.CloseOnEscape | Popup.CloseOnPressOutside
     parent: Overlay.overlay
-    width: Math.min(660, parent ? parent.width - Theme.marginXL * 2 : 660)
-    height: Math.min(520, parent ? parent.height - 96 : 520)
-    x: parent ? Math.round((parent.width - width) / 2) : 0
-    // A mesma altura do olhar que a busca usa: o miolo continua visível por baixo.
-    y: 74
+    anchors.centerIn: Overlay.overlay
+    // Escala com a interface, como todos os outros diálogos do app: os números do desenho valem
+    // para a janela do desenho (1100x700), e presos ali eles viravam um cartão pequeno perdido
+    // no meio de uma tela grande, onde todo o resto já tinha crescido 1,7x.
+    width: Math.min(Math.round(660 * Theme.uiScale),
+                    Overlay.overlay ? Overlay.overlay.width - Theme.marginXL * 2 : 660)
+    height: Math.min(Math.round(520 * Theme.uiScale),
+                     Overlay.overlay ? Overlay.overlay.height - Theme.marginXL * 2 : 520)
     padding: 0
 
     background: Rectangle {
