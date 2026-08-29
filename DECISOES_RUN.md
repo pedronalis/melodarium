@@ -872,3 +872,89 @@ silenciar, que é o comportamento correto.
   na comparação de `totalMs`, e o teste da coleção vazia passando desde o início, como previsto.
 - `trackModel.rowCount()` não é `Q_INVOKABLE` (a contagem sai da `Q_PROPERTY count`), e a chave
   do id em `trackAt` é `id`, não `trackId`. Ajustado na bandeira da decisão 38.
+
+# Decisões do run — lote melodarium-anima (seis fatias de animação)
+
+Sessão headless autônoma, branch `exec/melodarium-anima`, 2026-08-29. As fatias 3, 4, 5 e 6
+nasceram `decisao-humana: sim`; o despacho revogou a espera e mandou decidir contra a
+referência disponível, nesta ordem: o desenho, o padrão vigente do app, o plano.
+
+## 1. O halo existia, respondia, e não pintava um pixel
+
+**Contexto.** O plano manda pôr o halo no painel com `z: -1`, dizendo que assim ele fica
+"atrás de todo o conteúdo e ainda por cima do degradê do painel". No Qt Quick isso é o
+contrário: filho com z negativo é desenhado ATRÁS do conteúdo do próprio pai — e o pai aqui é
+o painel, cujo degradê é opaco. Medido: com o halo ligado e desligado, a cor de sete pontos da
+tela era **idêntica em todos os canais**.
+
+**Decisão.** Tirei o `z` e deixei a ordem de declaração fazer o trabalho: o halo é declarado
+antes da coluna, portanto desenhado antes dela — atrás da capa, na frente do degradê. Medido
+depois: a 16 px da capa a cor sai de (20,20,20) para (30,41,51) com a capa azul do Discovery.
+
+**Alternativa descartada.** Manter `z: -1` e acreditar no texto do plano. O gate de fidelidade
+não pegaria isso nunca — ele fotografa com o halo desligado de propósito.
+
+**Custo de estar errada.** Nenhum: a prova é numérica e está no transcript.
+
+## 2. A luz é cortada na borda do painel, e isso ficou
+
+**Contexto.** A capa ocupa 340 px dos 392 da coluna: sobram 26 px de cada lado. Qualquer luz
+em volta dela chega à borda ainda forte, e ali ela é cortada — uma transição dura entre a
+coluna iluminada e o rail escuro.
+
+**Decisão.** O corte fica. Rodei a versão SEM corte e fotografei: a luz atravessa o rail e a
+lista, e as molduras que a compõem passam a se ver **como molduras** — um retângulo arredondado
+gigante desenhado por cima da tela inteira. Muito pior que a fronteira. O painel já é uma
+superfície própria, com degradê próprio; a luz terminar na borda dele lê como janela iluminada,
+não como defeito.
+
+**Alternativa descartada.** Desvanecer a luz nas laterais com uma cortina de degradê. O fundo
+do painel muda de cor de cima para baixo, então a cortina precisaria de degradê nas duas
+direções ao mesmo tempo — o que no QML só sai de shader, e shader é justamente o que some no
+adaptador de software (lição de 2026-08-28).
+
+**Custo de estar errada.** Se o Pedro achar a faixa lateral incômoda, o conserto é uma linha:
+`alcance` menor em `src/AmbientGlow.qml` aproxima a luz da arte, e `opacity` menor por camada a
+enfraquece por igual.
+
+## 3. A intensidade do halo ficou nos números do plano
+
+**Contexto.** 14 camadas a 3% de opacidade cada, alcance de 35% do lado da capa. O desenho
+(`design/Main.dc.html`) não tem halo nenhum: ele põe uma sombra PRETA sob a capa. Ou seja, a
+referência de primeira ordem não opina — ela só diz que o painel é escuro e sóbrio, e que a
+arte se destaca por sombra.
+
+**Decisão.** Fiquei nos números do plano, que são conservadores. Na foto, a luz azul da capa do
+Discovery levanta o fundo do painel em cerca de 30 níveis no canal azul junto da arte e some
+completamente antes do meio da coluna. A capa continua sendo o assunto.
+
+**Alternativa descartada.** Subir a intensidade para o halo "aparecer de verdade" numa captura.
+Halo que aparece na foto compete com a arte na tela.
+
+**Custo de estar errada.** Baixo e reversível: os dois números vivem juntos no topo de
+`src/AmbientGlow.qml`.
+
+## 4. Uma chave nova só para fotografar o halo aceso
+
+**Contexto.** O halo desliga sob `--measure` de propósito (a cor dele vem do acervo de quem
+roda, e o gate mede pontos fixos). Só que tocar uma faixa por linha de comando **também** só
+acontece sob `--measure`. Resultado: não havia como o app produzir a imagem que prova que o
+halo existe — que é justamente o que o portão deste run cobra.
+
+**Decisão.** Criei `--com-halo`: sob medição, mantém o halo aceso. A foto que MEDE continua sem
+halo; a foto que MOSTRA passa a ter. Três linhas na janela.
+
+**Alternativa descartada.** Fazer o `--play-track` funcionar fora do modo de medição. Mexeria
+no caminho de partida do app inteiro para servir a uma foto.
+
+**Custo de estar errada.** Nenhum no uso normal: sem a chave, nada muda.
+
+## 5. O campo `halo=on/off` foi para a linha de medição, não para uma `diag`
+
+**Contexto.** O plano manda acrescentar o campo a uma propriedade `diag` do painel. Não existe
+`diag` em lugar nenhum do app — nem no painel, nem em outro arquivo.
+
+**Decisão.** O campo entrou na linha `MEDIDA`, que é a porta de saída mecânica que existe de
+fato e já lê o painel. A verificação do plano passa igual.
+
+**Custo de estar errada.** Nenhum: é saída de diagnóstico.
