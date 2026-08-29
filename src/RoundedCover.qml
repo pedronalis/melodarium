@@ -36,25 +36,64 @@ Item {
     // cinza, quase preta, quase branca.
     readonly property alias dominantColor: img.dominantColor
 
-    // A sombra do desenho, empilhada em vez de borrada: um desfoque de verdade é shader, e
-    // shader é justamente o que não sobrevive ao adaptador de software. Oito molduras cada vez
-    // maiores e translúcidas dão a mesma queda de luz por baixo da arte.
-    Repeater {
-        model: root.shadow ? 8 : 0
+    // Os focos de luz desta arte: `[{ color, x, y, weight }]`, com `x`/`y` de 0 a 1 dentro do
+    // quadrado. Uma cor média só não é a luz que uma capa dá — céu azul em cima e areia
+    // laranja embaixo são duas luzes, em dois lugares, e a média das duas é um bege que não
+    // existe na arte.
+    readonly property alias colorSpots: img.colorSpots
 
-        Rectangle {
-            required property int index
+    // A sombra do desenho (design/Main.dc.html: 0 18px 40px rgba(0,0,0,0.55)).
+    //
+    // Era empilhada: oito molduras cada vez maiores, translúcidas. O problema é o mesmo que
+    // derrubou a primeira versão do halo — cada moldura tem borda dura, e oito bordas duras
+    // são uma ESCADA, não um desfoque. Sob uma capa de 340 px os degraus se veem.
+    //
+    // `Canvas` resolve porque por baixo dele é QPainter, e QPainter tem desfoque de sombra de
+    // verdade (`shadowBlur`) — sem shader, portanto sobrevive ao adaptador de software, que é
+    // onde MultiEffect some e leva a capa junto. O truque do `translate` é o de sempre com
+    // sombra em canvas: o retângulo é desenhado FORA da área visível e só a sombra dele entra
+    // no quadro, senão o preto sólido tapa a arte.
+    Canvas {
+        id: sombra
 
-            readonly property real avanco: (index + 1) / 8
-            readonly property real folga: Theme.coverShadowBlur * avanco * 0.5
+        visible: root.shadow
+        // A folga tem de caber o desfoque inteiro nos quatro lados, mais o deslocamento para
+        // baixo: cortada, a sombra ganha uma borda reta e volta a parecer moldura.
+        readonly property int folga: Theme.coverShadowBlur + Theme.coverShadowY
 
-            x: -folga
-            y: -folga + Theme.coverShadowY * avanco
-            width: root.width + folga * 2
-            height: root.height + folga * 2
-            radius: root.radius + folga
-            color: Theme.coverShadowColor
-            opacity: 0.10
+        x: -folga
+        y: -folga
+        width: root.width + folga * 2
+        height: root.height + folga * 2
+
+        onWidthChanged: requestPaint()
+        onHeightChanged: requestPaint()
+        Connections {
+            target: root
+            function onRadiusChanged() { sombra.requestPaint() }
+        }
+
+        onPaint: {
+            const ctx = getContext("2d")
+            ctx.reset()
+            if (!root.shadow)
+                return
+
+            // Longe o bastante para o corpo do retângulo ficar fora do quadro inteiro; só a
+            // sombra dele é projetada de volta para dentro.
+            const fuga = sombra.width * 2
+
+            ctx.save()
+            ctx.shadowColor = Theme.coverShadowColor
+            ctx.shadowBlur = Theme.coverShadowBlur
+            ctx.shadowOffsetX = fuga
+            ctx.shadowOffsetY = Theme.coverShadowY
+            ctx.fillStyle = Theme.coverShadowColor
+            ctx.beginPath()
+            ctx.roundedRect(sombra.folga - fuga, sombra.folga,
+                            root.width, root.height, root.radius, root.radius)
+            ctx.fill()
+            ctx.restore()
         }
     }
 

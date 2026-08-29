@@ -73,6 +73,21 @@ void RoundedImage::reload()
     if (m_dominant != antes)
         emit dominantColorChanged();
 
+    // A paleta por região: é dela que sai a luz de várias cores do painel. Recalculada junto
+    // com a imagem e não sob demanda — quem pinta o halo não pode pagar uma varredura da capa
+    // no meio de um quadro.
+    m_spots.clear();
+    const QVector<ColorSpot> focos = paletteOf(m_image, 4);
+    for (const ColorSpot &foco : focos) {
+        QVariantMap m;
+        m.insert(QStringLiteral("color"), foco.color);
+        m.insert(QStringLiteral("x"), foco.x);
+        m.insert(QStringLiteral("y"), foco.y);
+        m.insert(QStringLiteral("weight"), foco.weight);
+        m_spots.append(m);
+    }
+    emit colorSpotsChanged();
+
     if (tinha != ready())
         emit readyChanged();
     update();
