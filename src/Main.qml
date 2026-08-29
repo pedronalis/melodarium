@@ -581,6 +581,7 @@ Window {
                             + "x" + Math.round(searchOverlay.height)
                             + " fila=" + AudioEngine.queueCount
                             + " movimento=" + (Theme.reduzirMovimento ? "off" : "on")
+                            + " halo=" + (nowPlaying.mostrarHalo ? "on" : "off")
                             + " motor=" + (AudioEngine.isAvailable() ? "ok" : "MORTO"))
                 if (root.shotPath === "") {
                     Qt.quit()
