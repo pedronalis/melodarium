@@ -40,6 +40,12 @@ if ! foto vazio --pane empty --no-search; then
     echo "FALHA: o app não produziu a foto da tela vazia"
     exit 1
 fi
+# O explorador de pastas fotografado na RAIZ de propósito: "/" tem as mesmas pastas em
+# qualquer máquina, e a foto não passa a depender do acervo de quem roda o portão.
+if ! foto seletor --no-search --open-folder-picker /; then
+    echo "FALHA: o app não produziu a foto do seletor de pasta"
+    exit 1
+fi
 
 python3 - "$TMP" <<'PY'
 import sys
@@ -63,6 +69,16 @@ PONTOS = [
     ("trilho: ícone escolhido","biblioteca", ( 28,  63), "#232323"),
     ("fundo da janela (vazia)","vazio",      (900, 655), "#111111"),
     ("painel: topo (vazia)",   "vazio",      ( 70,   8), "#1a1a1a"),
+    # O seletor de pasta: superfície elevada por fora, painéis fundos por dentro, zebra na
+    # lista e a pílula no disco em que se está. Quatro papéis diferentes que, medidos só de
+    # olho, é exatamente onde a escada de cinza colapsa num tom só.
+    # A pílula do disco fica na 2ª faixa da seção DISCOS; numa máquina sem a pasta Downloads
+    # a coluna inteira sobe ~30 px e este é o ponto que acusa primeiro.
+    ("seletor: fundo do diálogo","seletor",  (170, 300), "#191919"),
+    ("seletor: campo do caminho","seletor",  (420, 135), "#111111"),
+    ("seletor: painel da lista", "seletor",  (700, 250), "#111111"),
+    ("seletor: zebra da lista",  "seletor",  (700, 280), "#151515"),
+    ("seletor: disco escolhido", "seletor",  (340, 330), "#232323"),
 ]
 
 # 3 níveis de tolerância por canal: o mesmo hex desenhado pelo Qt pode variar de 1 em arredon-

@@ -30,16 +30,6 @@ struct ConnectionGuard {
     ~ConnectionGuard() { QSqlDatabase::removeDatabase(name); }
 };
 
-const QStringList &audioSuffixes()
-{
-    static const QStringList list = {
-        QStringLiteral("flac"), QStringLiteral("mp3"),  QStringLiteral("m4a"),
-        QStringLiteral("mp4"),  QStringLiteral("opus"), QStringLiteral("ogg"),
-        QStringLiteral("oga"),  QStringLiteral("wav"),  QStringLiteral("aiff"),
-    };
-    return list;
-}
-
 struct KnownTrack {
     int id = 0;
     qint64 mtime = 0;
@@ -111,6 +101,16 @@ void bindTrack(QSqlQuery &q, const TrackRecord &r, int artistId, int albumId, in
 
 } // namespace
 
+const QStringList &LibraryScanner::audioSuffixes()
+{
+    static const QStringList list = {
+        QStringLiteral("flac"), QStringLiteral("mp3"),  QStringLiteral("m4a"),
+        QStringLiteral("mp4"),  QStringLiteral("opus"), QStringLiteral("ogg"),
+        QStringLiteral("oga"),  QStringLiteral("wav"),  QStringLiteral("aiff"),
+    };
+    return list;
+}
+
 LibraryScanner::LibraryScanner(QObject *parent)
     : QObject(parent)
 {
@@ -158,7 +158,7 @@ void LibraryScanner::run(const QString &rootPath, const QString &dbPath)
         QDirIterator it(rootPath, QDir::Files | QDir::NoDotAndDotDot, QDirIterator::Subdirectories);
         while (it.hasNext()) {
             const QString path = it.next();
-            if (audioSuffixes().contains(QFileInfo(path).suffix().toLower()))
+            if (LibraryScanner::audioSuffixes().contains(QFileInfo(path).suffix().toLower()))
                 files.append(path);
         }
 

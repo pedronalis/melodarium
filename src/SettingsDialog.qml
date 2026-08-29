@@ -3,7 +3,6 @@ pragma ComponentBehavior: Bound
 import QtCore
 import QtQuick
 import QtQuick.Controls
-import QtQuick.Dialogs
 import QtQuick.Layouts
 import Melodarium.App
 
@@ -68,7 +67,7 @@ Popup {
                     text: qsTr("Trocar")
                     outlined: true
                     enabled: !Database.scanning
-                    onClicked: pastaDialog.open()
+                    onClicked: pastaDialog.abrirEm(Database.libraryPath)
                 }
             }
 
@@ -239,14 +238,15 @@ Popup {
         property bool exclusiveOutput: false
     }
 
-    FolderDialog {
+    FolderPickerDialog {
         id: pastaDialog
         title: qsTr("Pasta de música")
-        onAccepted: {
-            const escolhida = pastaDialog.selectedFolder.toString().replace("file://", "")
-            Database.libraryPath = escolhida
+        confirmText: qsTr("Usar esta pasta")
+        startPath: Database.libraryPath
+        onFolderChosen: (path) => {
+            Database.libraryPath = path
             Database.startScan()
-            root.libraryPathPicked(escolhida)
+            root.libraryPathPicked(path)
         }
     }
 }

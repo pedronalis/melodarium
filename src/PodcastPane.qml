@@ -2,7 +2,6 @@ pragma ComponentBehavior: Bound
 
 import QtQuick
 import QtQuick.Controls
-import QtQuick.Dialogs
 import QtQuick.Layouts
 import Melodarium.App
 
@@ -148,7 +147,7 @@ Item {
                 size: Theme.fontSizeS
                 opacity: 0.55
                 tooltip: qsTr("pasta de podcast")
-                onClicked: podcastFolderDialog.open()
+                onClicked: podcastFolderDialog.abrirEm(PodcastLibrary.podcastPath)
             }
 
             IconButton {
@@ -382,11 +381,13 @@ Item {
         id: subscribeDialog
     }
 
-    FolderDialog {
+    FolderPickerDialog {
         id: podcastFolderDialog
         title: qsTr("Pasta de podcast")
-        onAccepted: {
-            PodcastLibrary.podcastPath = selectedFolder.toString().replace("file://", "")
+        confirmText: qsTr("Usar esta pasta")
+        startPath: PodcastLibrary.podcastPath
+        onFolderChosen: (path) => {
+            PodcastLibrary.podcastPath = path
             PodcastLibrary.scanPodcastFolder()
         }
     }

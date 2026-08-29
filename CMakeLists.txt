@@ -5,7 +5,7 @@ set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_AUTOMOC ON)
 
-find_package(Qt6 REQUIRED COMPONENTS Concurrent Core Network Qml Quick QuickControls2 QuickDialogs2 Sql)
+find_package(Qt6 REQUIRED COMPONENTS Concurrent Core Network Qml Quick QuickControls2 Sql)
 find_package(PkgConfig REQUIRED)
 pkg_check_modules(MPV REQUIRED IMPORTED_TARGET mpv)
 pkg_check_modules(TAGLIB REQUIRED IMPORTED_TARGET taglib)
@@ -29,6 +29,8 @@ qt_add_executable(melodarium
     src/tracklistmodel.cpp
     src/librarybrowser.h
     src/librarybrowser.cpp
+    src/folderbrowser.h
+    src/folderbrowser.cpp
     src/playstatsrecorder.h
     src/playstatsrecorder.cpp
     src/collectionmanager.h
@@ -76,6 +78,8 @@ qt_add_qml_module(melodarium
         src/NewCollectionDialog.qml
         src/ConfirmDialog.qml
         src/SettingsDialog.qml
+        src/FolderPickerDialog.qml
+        src/FolderPlaceRow.qml
         src/TagChip.qml
         src/TagEditor.qml
         src/EpisodeRow.qml
@@ -103,6 +107,8 @@ qt_add_qml_module(melodarium
         src/tracklistmodel.cpp
         src/librarybrowser.h
         src/librarybrowser.cpp
+        src/folderbrowser.h
+        src/folderbrowser.cpp
         src/playstatsrecorder.h
         src/playstatsrecorder.cpp
         src/collectionmanager.h
@@ -130,7 +136,7 @@ target_include_directories(melodarium PRIVATE src)
 
 target_link_libraries(melodarium PRIVATE
     Qt6::Concurrent Qt6::Core Qt6::Network Qt6::Qml Qt6::Quick Qt6::QuickControls2
-    Qt6::QuickDialogs2 Qt6::Sql
+    Qt6::Sql
     PkgConfig::MPV PkgConfig::TAGLIB)
 
 enable_testing()
