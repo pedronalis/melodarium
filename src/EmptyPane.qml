@@ -135,7 +135,7 @@ Item {
                 text: Icons.get("music")
                 font.family: Icons.fontFamily
                 font.pixelSize: Theme.fontSizeXXXL
-                color: Theme.cRaised
+                color: Theme.cEmptyIcon
             }
             Text {
                 Layout.fillWidth: true
@@ -188,7 +188,7 @@ Item {
                         Layout.preferredHeight: Math.round(46 * Theme.uiScale)
                         radius: Theme.radiusXS
                         fallbackIconSize: Theme.fontSizeM
-                        fallbackIconColor: Theme.cFaint
+                        fallbackIconColor: Theme.cCoverIcon
                         source: root.temRetomar
                                 ? CoverCache.coverUrlForTrack(
                                       root.resumeInfo.path,

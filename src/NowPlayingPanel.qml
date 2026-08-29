@@ -131,6 +131,8 @@ Rectangle {
             Canvas {
                 anchors.fill: parent
                 visible: !root.hasTrack
+                // Acima do bloco de capa, que é declarado depois e sem isto o cobriria.
+                z: 1
                 onPaint: {
                     const ctx = getContext("2d")
                     ctx.reset()
@@ -159,6 +161,7 @@ Rectangle {
             ColumnLayout {
                 anchors.centerIn: parent
                 visible: !root.hasTrack
+                z: 1
                 spacing: Theme.marginL
 
                 Text {
@@ -166,7 +169,7 @@ Rectangle {
                     text: Icons.get("music")
                     font.family: Icons.fontFamily
                     font.pixelSize: Theme.fontSizeXXXL
-                    color: Theme.cRaised
+                    color: Theme.cEmptyIcon
                 }
                 Text {
                     Layout.alignment: Qt.AlignHCenter
@@ -180,13 +183,24 @@ Rectangle {
             RoundedCover {
                 id: capaVazia
                 anchors.fill: parent
-                visible: root.hasTrack
+                // O bloco existe mesmo sem nada tocando: o desenho põe degradê e sombra no
+                // quadrado da capa em todas as telas, e era a ausência dele que fazia o painel
+                // vazio parecer um buraco recortado no fundo. A moldura tracejada e o "nada
+                // tocando" continuam por cima — é o que distingue vazio de capa que falta.
                 radius: Theme.radiusM
                 // A única capa do app que projeta sombra: é ela que descola a arte do painel.
                 shadow: true
                 placeholderColor: Theme.cRaised
-                fallbackIcon: root.episodeMode ? "microphone" : "music"
-                fallbackIconColor: Theme.cLine
+                placeholderTop: root.episodeMode ? Theme.cCoverTopPod : Theme.cCoverTop
+                placeholderMid: root.episodeMode ? Theme.cCoverMidPod : Theme.cCoverMid
+                // Sem faixa quem desenha o ícone é a coluna de baixo, no tamanho pequeno do
+                // desenho; aqui ele sairia grande e duplicado.
+                fallbackIcon: !root.hasTrack ? ""
+                                             : (root.episodeMode ? "microphone" : "music")
+                // 64 px num bloco de 340 no desenho — proporção, não medida fixa, porque a capa
+                // encolhe junto com a janela.
+                fallbackIconSize: Math.round(capaRect.lado * 64 / 340)
+                fallbackIconColor: root.episodeMode ? Theme.cCoverIconPod : Theme.cCoverIcon
                 source: root.episodeMode
                         ? (root.episodeInfo.coverPath !== undefined
                            && root.episodeInfo.coverPath !== ""

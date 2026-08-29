@@ -40,6 +40,22 @@ QtObject {
     readonly property color cPanelMid: "#131313"      // meio do degradê do painel
     readonly property color cRowAlt: "#151515"        // zebra da lista densa
     readonly property color cRaised: "#191919"        // campo de busca, superfície elevada
+    readonly property color cCoverTop: "#3a3a3a"      // topo do bloco de capa sem arte
+    readonly property color cCoverMid: "#262626"      // meio do bloco de capa sem arte
+    // O bloco do podcast não é cinza: o desenho o puxa para o quente, e é o que separa
+    // um episódio sem arte de uma música sem arte antes de qualquer texto ser lido.
+    readonly property color cCoverTopPod: "#35312c"   // topo do bloco de episódio sem arte
+    readonly property color cCoverMidPod: "#24211f"   // meio do bloco de episódio sem arte
+    // O ícone do bloco sem arte vive em cima do MEIO do degradê (~#2b2b2b), não do pé: em
+    // #3c3c3c ele ficava um degrau acima do próprio fundo e sumia — mais ainda nas capinhas
+    // de 46 px, onde o traço é fino. Sobe para ler como a nota que é (Pedro, 2026-08-29).
+    readonly property color cCoverIcon: "#575757"     // o ícone dentro do bloco de música
+    readonly property color cCoverIconPod: "#57534a"  // o ícone dentro do bloco de episódio
+    // O desenho manda #191919 no ícone da tela vazia (design/SemMusica.dc.html:71), mas ali
+    // ele é o MESMO tom do pé do degradê da capa: na tela real o glifo some dentro do bloco e
+    // sobra o texto sozinho. Pedro pediu o ícone visível (2026-08-29), no tom do rótulo que
+    // vem logo abaixo — ícone e legenda leem como um bloco só.
+    readonly property color cEmptyIcon: "#4a4a4a"     // o ícone grande do estado vazio
     readonly property color cRowCurrent: "#1c1c1c"    // a linha que está tocando
     readonly property color cRowWide: "#1e1e1e"       // a linha tocando na lista de álbum
     readonly property color cPill: "#232323"          // pílula de tag, ícone escolhido no trilho
