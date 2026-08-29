@@ -127,6 +127,18 @@ Window {
     // ele a tela nova da fila não teria como ser provada sem alguém clicando.
     readonly property bool measureQueueOverlay: Qt.application.arguments.indexOf("--open-queue") >= 0
 
+    // `--play-open-collection`: dispara o botão de tocar da coleção que `--open-collection`
+    // abriu. Sem ele, o gesto só poderia ser provado por alguém clicando.
+    readonly property bool measurePlayCollection:
+        Qt.application.arguments.indexOf("--play-open-collection") >= 0
+
+    // `--move-last-to-top`: manda a última faixa da coleção aberta para o começo, pelo MESMO
+    // sinal que a alça de arrastar emite. Sem isto, o caminho que GRAVA a ordem nunca roda
+    // fora da mão de alguém — e uma alça desenhada sobre um caminho que nunca gravou é o
+    // defeito que este repo já registrou uma vez.
+    readonly property bool measureMoveLastToTop:
+        Qt.application.arguments.indexOf("--move-last-to-top") >= 0
+
     // `--no-search`: não abre o overlay antes de medir.
     readonly property bool measureSearch: Qt.application.arguments.indexOf("--no-search") < 0
 
@@ -481,6 +493,13 @@ Window {
                 onTriggered: {
                     if (root.measureCollection > 0)
                         collectionsPane.openById(root.measureCollection)
+                    if (root.measurePlayCollection)
+                        collectionsPane.playRequested(false)
+                    // `count`, não `rowCount()`: o modelo expõe a contagem por Q_PROPERTY, e
+                    // a chave do id em `trackAt` é `id`, não `trackId`.
+                    if (root.measureMoveLastToTop && trackModel.count > 1)
+                        collectionsPane.trackMoved(
+                            trackModel.trackAt(trackModel.count - 1).id, 0)
                     if (root.measureAlbum > 0) {
                         // O caminho do clique: o eixo carrega os grupos, e o grupo abre a
                         // partir deles — é de lá que o artista do cabeçalho vem.
@@ -530,6 +549,7 @@ Window {
                             + " chipsvao=" + Math.round(libraryPane.chipsWidth)
                             + " busca=" + Math.round(searchOverlay.width)
                             + "x" + Math.round(searchOverlay.height)
+                            + " fila=" + AudioEngine.queueCount
                             + " motor=" + (AudioEngine.isAvailable() ? "ok" : "MORTO"))
                 if (root.shotPath === "") {
                     Qt.quit()
@@ -672,9 +692,30 @@ Window {
                     root.showSection("all", 0)
                 }
                 onTrackActivated: function (index) { root.activateTrack(index) }
+                onPlayRequested: function (shuffled) {
+                    // O modelo é o da coleção aberta: allPaths() já devolve as faixas dela na
+                    // ordem manual (clauseForCollection ordena por collection_tracks.position).
+                    const paths = trackModel.allPaths()
+                    if (paths.length === 0)
+                        return
+                    AudioEngine.loadPlaylist(paths, 0)
+                    // Depois do loadPlaylist, como em startFromEmpty: ligar o modo antes de a
+                    // fila existir deixa o botão do painel aceso sobre uma fila vazia.
+                    AudioEngine.setShuffle(shuffled)
+                    AudioEngine.play()
+                }
                 // Sem recarregar, a linha removida continua na tela até alguém trocar de
                 // painel — e o usuário clica de novo achando que o botão não funcionou.
                 onTrackRemoved: function (trackId) {
+                    const q = root.clauseFor("collection", collectionsPane.openId)
+                    trackModel.loadFromQuery(q.clause, q.bindings)
+                }
+                onTrackMoved: function (trackId, newIndex) {
+                    if (!CollectionManager.moveTrackInCollection(collectionsPane.openId,
+                                                                 trackId, newIndex))
+                        return
+                    // Recarregar do banco, nunca reordenar a lista na mão: o banco é a fonte
+                    // da ordem, e uma lista remendada mentiria até a próxima troca de painel.
                     const q = root.clauseFor("collection", collectionsPane.openId)
                     trackModel.loadFromQuery(q.clause, q.bindings)
                 }

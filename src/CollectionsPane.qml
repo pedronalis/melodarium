@@ -18,6 +18,10 @@ Item {
     signal closeRequested
     signal trackActivated(int index)
     signal trackRemoved(int trackId)
+    // A coleção é uma playlist: playlist se toca inteira. Sem isto o único jeito de ouvir
+    // "Pra codar" era abrir e clicar numa faixa, o que é navegar, não tocar.
+    signal playRequested(bool shuffled)
+    signal trackMoved(int trackId, int newIndex)
 
     property var items: []
     // url -> { received, total }. O download é por link, não por linha: guardar isso dentro
@@ -48,6 +52,20 @@ Item {
         root.openId = 0
         root.openName = ""
         root.closeRequested()
+    }
+
+    // Duplicada de LibraryPane.formatTotal de propósito: QML não tem um lugar comum para
+    // função pura (Theme é singleton de ESTILO, e pendurar lógica nele mistura os papéis).
+    // Se as duas divergirem, a lista e o cabeçalho passam a contar tempo de jeitos diferentes.
+    function formatTotal(ms) {
+        const minutes = Math.floor(ms / 60000)
+        const hours = Math.floor(minutes / 60)
+        const days = Math.floor(hours / 24)
+        if (days > 0)
+            return days + " d " + (hours % 24) + " h"
+        if (hours > 0)
+            return hours + " h " + (minutes % 60) + " min"
+        return minutes + " min"
     }
 
     Component.onCompleted: root.refresh()
@@ -116,6 +134,46 @@ Item {
                 font.family: Theme.fontFamilyFixed
                 font.pixelSize: Theme.fontSizeS
                 color: Theme.cFaint
+            }
+
+            // O único disco claro da tela significa "tocar" — é o mesmo do transporte.
+            Rectangle {
+                Layout.leftMargin: Theme.marginS
+                Layout.preferredWidth: Math.round(30 * Theme.uiScale)
+                Layout.preferredHeight: Math.round(30 * Theme.uiScale)
+                visible: root.openId > 0 && tracks.count > 0
+                radius: width / 2
+                color: tocarArea.containsMouse ? Theme.cStrong : Theme.cTitle
+
+                Behavior on color {
+                    ColorAnimation { duration: Theme.animationFast; easing.type: Theme.easingType }
+                }
+
+                Text {
+                    anchors.centerIn: parent
+                    text: Icons.get("play")
+                    font.family: Icons.fontFamily
+                    font.pixelSize: Theme.fontSizeS
+                    color: Theme.cBase
+                }
+
+                MouseArea {
+                    id: tocarArea
+                    anchors.fill: parent
+                    hoverEnabled: true
+                    cursorShape: Qt.PointingHandCursor
+                    onClicked: root.playRequested(false)
+                }
+            }
+
+            IconButton {
+                Layout.preferredWidth: Math.round(22 * Theme.uiScale)
+                Layout.preferredHeight: 22
+                visible: root.openId > 0 && tracks.count > 0
+                icon: "shuffle"
+                size: Theme.fontSizeS
+                tooltip: qsTr("tocar embaralhado")
+                onClicked: root.playRequested(true)
             }
 
             Item { Layout.fillWidth: true }
@@ -220,7 +278,7 @@ Item {
                 required property int index
 
                 width: ListView.view.width
-                height: Math.round(44 * Theme.uiScale)
+                height: Math.round(60 * Theme.uiScale)
                 radius: Theme.radiusXS
                 color: area.containsMouse
                        ? Theme.cPill
@@ -239,27 +297,135 @@ Item {
                     anchors.rightMargin: Theme.marginL
                     spacing: Theme.marginL
 
-                    Text {
-                        text: Icons.get("playlist")
-                        font.family: Icons.fontFamily
-                        font.pixelSize: Theme.fontSizeM
-                        color: area.containsMouse ? Theme.cTitle : Theme.cStrong
+                    // A arte da coleção: mosaico com quatro, capa única com uma a três,
+                    // ícone quando não há nenhuma. Sem isto a linha é texto puro e não lê
+                    // como playlist.
+                    Item {
+                        id: arte
+
+                        // `id` explícito, nunca `parent.parent`: dentro de um Repeater o pai
+                        // muda de identidade conforme o QML embrulha o delegate, e a cadeia
+                        // de parents quebra em silêncio — a arte some sem erro no console.
+                        readonly property var capas: linha.modelData.covers !== undefined
+                                                     ? linha.modelData.covers : []
+                        readonly property int lado: Math.round(44 * Theme.uiScale)
+                        readonly property int celula: Math.round((arte.lado - 2 * Theme.uiScale) / 2)
+
+                        Layout.preferredWidth: arte.lado
+                        Layout.preferredHeight: arte.lado
+
+                        Grid {
+                            anchors.fill: parent
+                            visible: arte.capas.length >= 4
+                            columns: 2
+                            spacing: Math.round(2 * Theme.uiScale)
+
+                            Repeater {
+                                model: arte.capas.length >= 4 ? arte.capas.slice(0, 4) : []
+
+                                RoundedCover {
+                                    required property var modelData
+                                    width: arte.celula
+                                    height: arte.celula
+                                    radius: Theme.radiusXXS
+                                    fallbackIconSize: Theme.fontSizeXS
+                                    source: CoverCache.coverUrlForTrack(modelData.path,
+                                                                        modelData.albumId)
+                                }
+                            }
+                        }
+
+                        RoundedCover {
+                            anchors.fill: parent
+                            visible: arte.capas.length > 0 && arte.capas.length < 4
+                            radius: Theme.radiusXS
+                            fallbackIconSize: Theme.fontSizeL
+                            source: arte.capas.length > 0
+                                    ? CoverCache.coverUrlForTrack(arte.capas[0].path,
+                                                                  arte.capas[0].albumId)
+                                    : ""
+                        }
+
+                        Rectangle {
+                            anchors.fill: parent
+                            visible: arte.capas.length === 0
+                            radius: Theme.radiusXS
+                            color: Theme.cRaised
+
+                            Text {
+                                anchors.centerIn: parent
+                                text: Icons.get("playlist")
+                                font.family: Icons.fontFamily
+                                font.pixelSize: Theme.fontSizeL
+                                color: Theme.cLine
+                            }
+                        }
                     }
 
-                    Text {
+                    ColumnLayout {
                         Layout.fillWidth: true
-                        text: linha.modelData.name
-                        elide: Text.ElideRight
-                        font.family: Theme.fontFamily
-                        font.pixelSize: Theme.fontSizeM
-                        color: area.containsMouse ? Theme.cTitle : Theme.cTitle
+                        spacing: Theme.marginXXS
+
+                        Text {
+                            Layout.fillWidth: true
+                            text: linha.modelData.name
+                            elide: Text.ElideRight
+                            font.family: Theme.fontFamily
+                            font.pixelSize: Theme.fontSizeM
+                            font.weight: Theme.fontWeightMedium
+                            color: Theme.cTitle
+                        }
+
+                        Text {
+                            Layout.fillWidth: true
+                            text: {
+                                const n = linha.modelData.count + qsTr(" faixas")
+                                const ms = linha.modelData.totalMs !== undefined
+                                           ? linha.modelData.totalMs : 0
+                                return ms > 0 ? n + " · " + root.formatTotal(ms) : n
+                            }
+                            elide: Text.ElideRight
+                            font.family: Theme.fontFamilyFixed
+                            font.pixelSize: Theme.fontSizeS
+                            color: Theme.cFaint
+                        }
                     }
 
-                    Text {
-                        text: linha.modelData.count + qsTr(" faixas")
-                        font.family: Theme.fontFamilyFixed
-                        font.pixelSize: Theme.fontSizeS
-                        color: area.containsMouse ? Theme.cTitle : Theme.cFaint
+                    // Tocar sem abrir: o gesto que separa uma playlist de uma pasta.
+                    Rectangle {
+                        Layout.preferredWidth: Math.round(30 * Theme.uiScale)
+                        Layout.preferredHeight: Math.round(30 * Theme.uiScale)
+                        // Presente em repouso, aceso no hover — o idioma que o desenho usa
+                        // para controle de linha (`.x { opacity: .35 }` em Colecoes.dc.html)
+                        // e que o TrackRow já escreveu por extenso: um controle que só
+                        // aparece no hover é um controle que o usuário nunca acha.
+                        visible: linha.modelData.count > 0
+                        opacity: area.containsMouse ? 1.0 : 0.35
+                        radius: width / 2
+                        color: Theme.cTitle
+
+                        Behavior on opacity {
+                            NumberAnimation { duration: Theme.animationFast; easing.type: Theme.easingType }
+                        }
+
+                        Text {
+                            anchors.centerIn: parent
+                            text: Icons.get("play")
+                            font.family: Icons.fontFamily
+                            font.pixelSize: Theme.fontSizeS
+                            color: Theme.cBase
+                        }
+
+                        MouseArea {
+                            anchors.fill: parent
+                            cursorShape: Qt.PointingHandCursor
+                            // Abrir ANTES de tocar: o modelo de faixas é o da coleção aberta,
+                            // e tocar sem abrir carregaria a lista que estava na tela.
+                            onClicked: {
+                                root.open(linha.modelData.id, linha.modelData.name)
+                                root.playRequested(false)
+                            }
+                        }
                     }
                 }
 
@@ -318,6 +484,45 @@ Item {
                 // tira a faixa daqui em vez de pô-la em outro lugar.
                 showCollectButton: true
                 collectGlyph: "close"
+
+                draggable: true
+
+                // A linha arrastada sobe para cima das outras e segue o dedo; o índice de
+                // destino sai da altura da própria linha, que é fixa.
+                z: dragArea.drag.active ? 2 : 0
+
+                Drag.active: dragArea.drag.active
+                Drag.hotSpot.x: width / 2
+                Drag.hotSpot.y: height / 2
+
+                MouseArea {
+                    id: dragArea
+                    // 34 e não 20: a alça desenhada começa em 17 px (a margem do Rectangle
+                    // do TrackRow mais a do RowLayout) e termina em 29. Com 20 a faixa
+                    // arrastável cobria 3 px da alça e 17 px de vão — o gesto ficava onde o
+                    // desenho não está. Para em 34, antes do número da faixa (42).
+                    width: Math.round(34 * Theme.uiScale)
+                    height: parent.height
+                    anchors.left: parent.left
+                    cursorShape: Qt.OpenHandCursor
+                    drag.target: faixa
+                    drag.axis: Drag.YAxis
+
+                    onReleased: {
+                        if (!drag.active)
+                            return
+                        // Quantas linhas o dedo andou, arredondando para a linha mais próxima.
+                        const passo = faixa.height + tracks.spacing
+                        const deslocou = Math.round(faixa.y / passo) - faixa.index
+                        const destino = Math.max(0, Math.min(tracks.count - 1,
+                                                             faixa.index + deslocou))
+                        // Devolver a linha ao lugar ANTES de recarregar: o modelo vai
+                        // repintar, e uma linha com y deslocado herdaria o deslocamento.
+                        faixa.y = faixa.index * passo
+                        if (destino !== faixa.index)
+                            root.trackMoved(faixa.model.trackId, destino)
+                    }
+                }
 
                 onActivated: root.trackActivated(faixa.index)
                 onLikeToggled: LibraryBrowser.toggleLike(faixa.model.trackId)
