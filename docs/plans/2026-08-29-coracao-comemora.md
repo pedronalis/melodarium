@@ -46,7 +46,7 @@ editam `src/IconButton.qml` e `src/NowPlayingPanel.qml`.
 
 ### Task 1: O coração da lista pula ao acender
 
-- [ ] Em `src/TrackRow.qml`, substituir o `Item` do coração inteiro (hoje das
+- [x] Em `src/TrackRow.qml`, substituir o `Item` do coração inteiro (hoje das
       **linhas 179 a 205**, o de `Layout.preferredWidth: Math.round(16 * Theme.uiScale)`)
       pelo bloco abaixo — que inclui os dois comentários de cima, hoje nas linhas 177-178:
 
@@ -113,12 +113,12 @@ editam `src/IconButton.qml` e `src/NowPlayingPanel.qml`.
             }
 ```
 
-- [ ] verificação mecânica da task: `cmake --build build` → exit 0
-- [ ] verificação mecânica da task — o disparo veio do clique, não do estado:
+- [x] verificação mecânica da task: `cmake --build build` → exit 0
+- [x] verificação mecânica da task — o disparo veio do clique, não do estado:
       `grep -c 'onLikedChanged' src/TrackRow.qml` → `0`
-- [ ] verificação mecânica da task — a assimetria existe:
+- [x] verificação mecânica da task — a assimetria existe:
       `grep -c 'if (!root.liked)' src/TrackRow.qml` → `1`
-- [ ] commit:
+- [x] commit:
 
 ```bash
 git add src/TrackRow.qml
