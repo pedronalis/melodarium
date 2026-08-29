@@ -56,7 +56,7 @@ propósito: desligar movimento é preferência de quem usa; desligar o halo é e
 
 ### Task 1: Os tokens de duração passam pelo interruptor
 
-- [ ] Substituir o bloco `// --- Motion ---` no fim de `src/Theme.qml` por:
+- [x] Substituir o bloco `// --- Motion ---` no fim de `src/Theme.qml` por:
 
 ```qml
     // --- Motion ---
@@ -95,10 +95,10 @@ propósito: desligar movimento é preferência de quem usa; desligar o halo é e
     readonly property int animationStagger: theme.reduzirMovimento ? 0 : 60
 ```
 
-- [ ] verificação mecânica da task:
+- [x] verificação mecânica da task:
       `grep -c 'reduzirMovimento' src/Theme.qml` → `9`
-- [ ] verificação mecânica da task: `cmake --build build` → exit 0
-- [ ] commit:
+- [x] verificação mecânica da task: `cmake --build build` → exit 0
+- [x] commit:
 
 ```bash
 git add src/Theme.qml
