@@ -1,5 +1,6 @@
 #pragma once
 
+#include <QColor>
 #include <QImage>
 #include <QQuickPaintedItem>
 #include <QUrl>
@@ -21,6 +22,7 @@ class RoundedImage : public QQuickPaintedItem
     Q_PROPERTY(QUrl source READ source WRITE setSource NOTIFY sourceChanged)
     Q_PROPERTY(qreal radius READ radius WRITE setRadius NOTIFY radiusChanged)
     Q_PROPERTY(bool ready READ ready NOTIFY readyChanged)
+    Q_PROPERTY(QColor dominantColor READ dominantColor NOTIFY dominantColorChanged)
 
 public:
     explicit RoundedImage(QQuickItem *parent = nullptr);
@@ -33,12 +35,17 @@ public:
 
     bool ready() const { return !m_image.isNull(); }
 
+    // A cor que esta capa "é", para o halo do painel. Transparente (alpha 0) enquanto não há
+    // arte carregada, ou quando a arte não tem cor a dar.
+    QColor dominantColor() const { return m_dominant; }
+
     void paint(QPainter *painter) override;
 
 signals:
     void sourceChanged();
     void radiusChanged();
     void readyChanged();
+    void dominantColorChanged();
 
 protected:
     void geometryChange(const QRectF &newGeometry, const QRectF &oldGeometry) override;
@@ -52,4 +59,5 @@ private:
     // A que largura a imagem em memória foi lida. Reler a cada pixel de redimensionamento
     // torraria o disco enquanto a janela é arrastada.
     int m_loadedFor = 0;
+    QColor m_dominant = QColor(0, 0, 0, 0);
 };

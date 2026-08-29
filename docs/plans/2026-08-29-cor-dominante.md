@@ -1,7 +1,7 @@
 ---
 slug: cor-dominante
 feature: melodarium-anima
-status: aprovado
+status: concluido
 depende-de: []
 decisao-humana: nao
 spec: docs/plans/research/2026-08-29-anima-varredura.md
@@ -45,7 +45,7 @@ do matiz **circularmente** (a média de 350° com 10° é 0°, não 180°).
 
 ### Task 1: A função e o teste que a prova
 
-- [ ] Escrever o teste que falha, em `tests/tst_dominantcolor.cpp`:
+- [x] Escrever o teste que falha, em `tests/tst_dominantcolor.cpp`:
 
 ```cpp
 #include <QtTest/QtTest>
@@ -151,7 +151,7 @@ QTEST_MAIN(TstDominantColor)
 #include "tst_dominantcolor.moc"
 ```
 
-- [ ] Registrar o alvo em `tests/CMakeLists.txt`, no fim do arquivo:
+- [x] Registrar o alvo em `tests/CMakeLists.txt`, no fim do arquivo:
 
 ```cmake
 qt_add_executable(tst_dominantcolor
@@ -165,10 +165,10 @@ add_test(NAME tst_dominantcolor COMMAND tst_dominantcolor)
 set_tests_properties(tst_dominantcolor PROPERTIES ENVIRONMENT "QT_QPA_PLATFORM=offscreen")
 ```
 
-- [ ] Rodar e confirmar que falha pelo motivo certo:
+- [x] Rodar e confirmar que falha pelo motivo certo:
       `cmake -B build -G Ninja && cmake --build build` → erro de compilação
       `dominantcolor.h: No such file or directory`
-- [ ] Escrever `src/dominantcolor.h`:
+- [x] Escrever `src/dominantcolor.h`:
 
 ```cpp
 #pragma once
@@ -191,7 +191,7 @@ set_tests_properties(tst_dominantcolor PROPERTIES ENVIRONMENT "QT_QPA_PLATFORM=o
 QColor dominantColorOf(const QImage &image);
 ```
 
-- [ ] Escrever `src/dominantcolor.cpp`:
+- [x] Escrever `src/dominantcolor.cpp`:
 
 ```cpp
 #include "dominantcolor.h"
@@ -263,10 +263,10 @@ QColor dominantColorOf(const QImage &image)
 }
 ```
 
-- [ ] verificação mecânica da task:
+- [x] verificação mecânica da task:
       `cmake --build build && ctest --test-dir build -R tst_dominantcolor --output-on-failure`
       → `100% tests passed, 0 tests failed out of 1`
-- [ ] commit:
+- [x] commit:
 
 ```bash
 git add src/dominantcolor.h src/dominantcolor.cpp tests/tst_dominantcolor.cpp tests/CMakeLists.txt
@@ -275,7 +275,7 @@ git commit -m "feat(cover): saturation-weighted dominant color with circular hue
 
 ### Task 2: A capa expõe a própria cor
 
-- [ ] Em `src/roundedimage.h`, acrescentar o include `#include <QColor>` no topo, a
+- [x] Em `src/roundedimage.h`, acrescentar o include `#include <QColor>` no topo, a
       propriedade abaixo do `Q_PROPERTY(bool ready ...)`, o getter, o sinal e o campo:
 
 ```cpp
@@ -296,7 +296,7 @@ git commit -m "feat(cover): saturation-weighted dominant color with circular hue
     QColor m_dominant = QColor(0, 0, 0, 0);
 ```
 
-- [ ] Em `src/roundedimage.cpp`, acrescentar `#include "dominantcolor.h"` aos includes do
+- [x] Em `src/roundedimage.cpp`, acrescentar `#include "dominantcolor.h"` aos includes do
       topo e, no fim de `reload()`, calcular a cor junto com o resto do estado. O bloco final
       da função passa a ser:
 
@@ -311,7 +311,7 @@ git commit -m "feat(cover): saturation-weighted dominant color with circular hue
     update();
 ```
 
-- [ ] Registrar `src/dominantcolor.h` e `src/dominantcolor.cpp` na lista `SOURCES` do
+- [x] Registrar `src/dominantcolor.h` e `src/dominantcolor.cpp` na lista `SOURCES` do
       `qt_add_qml_module(melodarium ...)` em `CMakeLists.txt`, logo depois das duas linhas de
       `src/roundedimage.*`:
 
@@ -320,10 +320,10 @@ git commit -m "feat(cover): saturation-weighted dominant color with circular hue
         src/dominantcolor.cpp
 ```
 
-- [ ] verificação mecânica da task: `cmake --build build` → exit 0
-- [ ] verificação mecânica da task:
+- [x] verificação mecânica da task: `cmake --build build` → exit 0
+- [x] verificação mecânica da task:
       `grep -c 'dominantColor' src/roundedimage.h` → `3`
-- [ ] commit:
+- [x] commit:
 
 ```bash
 git add src/roundedimage.h src/roundedimage.cpp CMakeLists.txt

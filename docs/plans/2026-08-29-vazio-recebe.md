@@ -1,7 +1,7 @@
 ---
 slug: vazio-recebe
 feature: melodarium-anima
-status: aprovado
+status: concluido
 depende-de: [movimento-interruptor]
 decisao-humana: sim
 spec: docs/plans/research/2026-08-29-anima-varredura.md
@@ -42,7 +42,7 @@ em **dois** lugares (o miolo e o painel sem faixa): a animação roda nos dois.
 
 ### Task 1: O Atalho sabe entrar
 
-- [ ] Em `src/EmptyPane.qml`, dentro de `component Atalho: Rectangle`, acrescentar logo
+- [x] Em `src/EmptyPane.qml`, dentro de `component Atalho: Rectangle`, acrescentar logo
       depois da propriedade `property bool vazio: false` (hoje na **linha 66**):
 
 ```qml
@@ -53,7 +53,7 @@ em **dois** lugares (o miolo e o painel sem faixa): a animação roda nos dois.
         property int ordem: 0
 ```
 
-- [ ] Ainda em `component Atalho: Rectangle`, acrescentar logo depois do bloco
+- [x] Ainda em `component Atalho: Rectangle`, acrescentar logo depois do bloco
       `Behavior on color { ... }` do próprio `Atalho` (hoje nas **linhas 79-81**, não o da
       linha 184):
 
@@ -92,9 +92,9 @@ em **dois** lugares (o miolo e o painel sem faixa): a animação roda nos dois.
         Component.onCompleted: entradaDoAtalho.start()
 ```
 
-- [ ] verificação mecânica da task: `cmake --build build` → exit 0
-- [ ] verificação mecânica da task: `grep -c 'deslocDoAtalho' src/EmptyPane.qml` → `2`
-- [ ] commit:
+- [x] verificação mecânica da task: `cmake --build build` → exit 0
+- [x] verificação mecânica da task: `grep -c 'deslocDoAtalho' src/EmptyPane.qml` → `2`
+- [x] commit:
 
 ```bash
 git add src/EmptyPane.qml
@@ -103,7 +103,7 @@ git commit -m "feat(empty): staggered entrance for the three shortcuts"
 
 ### Task 2: Os três atalhos declaram a vez
 
-- [ ] Em `src/EmptyPane.qml`, no `ColumnLayout` das outras duas saídas (hoje a partir da
+- [x] Em `src/EmptyPane.qml`, no `ColumnLayout` das outras duas saídas (hoje a partir da
       **linha 266**), acrescentar `ordem:` aos três `Atalho`. O bloco passa a ser:
 
 ```qml
@@ -143,12 +143,12 @@ git commit -m "feat(empty): staggered entrance for the three shortcuts"
         }
 ```
 
-- [ ] verificação mecânica da task: `cmake --build build` → exit 0
-- [ ] verificação mecânica da task: `grep -c 'ordem:' src/EmptyPane.qml` → `3`
-- [ ] verificação mecânica da task — a foto da tela vazia continua fiel ao desenho, o que só
+- [x] verificação mecânica da task: `cmake --build build` → exit 0
+- [x] verificação mecânica da task: `grep -c 'ordem:' src/EmptyPane.qml` → `3`
+- [x] verificação mecânica da task — a foto da tela vazia continua fiel ao desenho, o que só
       acontece se os três atalhos estiverem em `opacity: 1` quando ela é tirada:
       `bash tools/check-fidelidade.sh` → exit 0
-- [ ] commit:
+- [x] commit:
 
 ```bash
 git add src/EmptyPane.qml

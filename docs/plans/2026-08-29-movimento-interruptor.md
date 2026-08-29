@@ -1,7 +1,7 @@
 ---
 slug: movimento-interruptor
 feature: melodarium-anima
-status: aprovado
+status: concluido
 depende-de: []
 decisao-humana: nao
 spec: docs/plans/research/2026-08-29-anima-varredura.md
@@ -56,7 +56,7 @@ propósito: desligar movimento é preferência de quem usa; desligar o halo é e
 
 ### Task 1: Os tokens de duração passam pelo interruptor
 
-- [ ] Substituir o bloco `// --- Motion ---` no fim de `src/Theme.qml` por:
+- [x] Substituir o bloco `// --- Motion ---` no fim de `src/Theme.qml` por:
 
 ```qml
     // --- Motion ---
@@ -95,10 +95,10 @@ propósito: desligar movimento é preferência de quem usa; desligar o halo é e
     readonly property int animationStagger: theme.reduzirMovimento ? 0 : 60
 ```
 
-- [ ] verificação mecânica da task:
+- [x] verificação mecânica da task:
       `grep -c 'reduzirMovimento' src/Theme.qml` → `9`
-- [ ] verificação mecânica da task: `cmake --build build` → exit 0
-- [ ] commit:
+- [x] verificação mecânica da task: `cmake --build build` → exit 0
+- [x] commit:
 
 ```bash
 git add src/Theme.qml
@@ -107,7 +107,7 @@ git commit -m "feat(theme): single switch that zeroes every animation duration"
 
 ### Task 2: A janela liga o interruptor
 
-- [ ] Em `src/Main.qml`, logo abaixo da declaração `readonly property bool measuring:`
+- [x] Em `src/Main.qml`, logo abaixo da declaração `readonly property bool measuring:`
       (hoje na linha 14), acrescentar:
 
 ```qml
@@ -118,7 +118,7 @@ git commit -m "feat(theme): single switch that zeroes every animation duration"
         root.measuring || Qt.application.arguments.indexOf("--sem-animacao") >= 0
 ```
 
-- [ ] Em `src/Main.qml`, dentro de `Component.onCompleted` (hoje na linha 611), logo
+- [x] Em `src/Main.qml`, dentro de `Component.onCompleted` (hoje na linha 611), logo
       DEPOIS da linha `Theme.uiScale = root.escalaDaJanela`, acrescentar:
 
 ```qml
@@ -126,17 +126,17 @@ git commit -m "feat(theme): single switch that zeroes every animation duration"
         Theme.medindo = root.measuring
 ```
 
-- [ ] Em `src/Main.qml`, no `console.log("MEDIDA rail=" ...)`, acrescentar antes da linha
+- [x] Em `src/Main.qml`, no `console.log("MEDIDA rail=" ...)`, acrescentar antes da linha
       `+ " motor=" + ...` o campo novo:
 
 ```qml
                             + " movimento=" + (Theme.reduzirMovimento ? "off" : "on")
 ```
 
-- [ ] verificação mecânica da task: `cmake --build build` → exit 0
-- [ ] verificação mecânica da task:
+- [x] verificação mecânica da task: `cmake --build build` → exit 0
+- [x] verificação mecânica da task:
       `QT_QPA_PLATFORM=offscreen ./build/melodarium --measure 1100 --no-search --delay 900 2>&1 | grep -c 'movimento=off'` → `1`
-- [ ] commit:
+- [x] commit:
 
 ```bash
 git add src/Main.qml
@@ -145,7 +145,7 @@ git commit -m "feat(window): --sem-animacao flag and measure-mode motion kill sw
 
 ### Task 3: Confirmar que os dois gates de tela continuam verdes
 
-- [ ] Rodar os dois portões que todo redesenho de tela precisa passar:
+- [x] Rodar os dois portões que todo redesenho de tela precisa passar:
 
 ```bash
 bash tools/check-orfaos.sh
@@ -153,9 +153,9 @@ bash tools/check-fidelidade.sh
 bash tools/check-layout.sh
 ```
 
-- [ ] verificação mecânica da task: os três saem `exit 0`. Nada mudou de aparência nesta
+- [x] verificação mecânica da task: os três saem `exit 0`. Nada mudou de aparência nesta
       fatia — se algum reprovar, o interruptor mudou cor ou geometria e é bug, não ajuste.
-- [ ] commit: nada a commitar se os gates passaram (a task é portão, não mudança).
+- [x] commit: nada a commitar se os gates passaram (a task é portão, não mudança).
 
 ## Verificação da fatia (E2E)
 

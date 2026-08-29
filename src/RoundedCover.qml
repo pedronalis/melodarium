@@ -31,6 +31,11 @@ Item {
 
     readonly property bool ready: img.ready
 
+    // A cor que esta arte "é", para quem quiser pintar luz com ela. Transparente (alpha 0)
+    // enquanto não há capa carregada, ou quando a capa não tem cor a dar — capa em escala de
+    // cinza, quase preta, quase branca.
+    readonly property alias dominantColor: img.dominantColor
+
     // A sombra do desenho, empilhada em vez de borrada: um desfoque de verdade é shader, e
     // shader é justamente o que não sobrevive ao adaptador de software. Oito molduras cada vez
     // maiores e translúcidas dão a mesma queda de luz por baixo da arte.

@@ -142,10 +142,37 @@ QtObject {
     readonly property color coverShadowColor: "#8c000000"
 
     // --- Motion ---
-    readonly property int animationFaster: 75
-    readonly property int animationFast: 150
-    readonly property int animationNormal: 300
-    readonly property int animationSlow: 450
-    readonly property int animationSlowest: 750
+    // O interruptor. Ligado, toda duração abaixo vale 0: o app continua igual, só sem
+    // transição. Existe por dois motivos que apontam para o mesmo lugar — a foto do gate de
+    // fidelidade é tirada num instante fixo e pegaria qualquer animação pela metade, e
+    // "movimento reduzido" é o que quem se incomoda com tela que se mexe precisa poder pedir.
+    property bool reduzirMovimento: false
+
+    // Ligado SÓ por `--measure`, e separado do de cima de propósito: ele não desliga
+    // movimento, desliga efeito cuja cor vem do acervo de quem roda. O halo do painel tem a
+    // cor da capa que está tocando, e o gate mede 15 pontos fixos com tolerância de 3 níveis
+    // por canal — um deles a 16 px da capa. Ou o halo sai da foto, ou o gate mede sorte.
+    property bool medindo: false
+
+    readonly property int animationFaster: theme.reduzirMovimento ? 0 : 75
+    readonly property int animationFast: theme.reduzirMovimento ? 0 : 150
+    readonly property int animationNormal: theme.reduzirMovimento ? 0 : 300
+    readonly property int animationSlow: theme.reduzirMovimento ? 0 : 450
+    readonly property int animationSlowest: theme.reduzirMovimento ? 0 : 750
     readonly property int easingType: Easing.OutCubic
+
+    // O pulo do coração tem forma própria e não é transição: sobe rápido passando do alvo
+    // (OutBack devolve o excesso) e desce um pouco mais devagar. Separado dos tokens acima
+    // porque reaproveitar `animationFast` nos dois lados apagaria justamente a diferença
+    // entre confirmar um gesto e comemorar um.
+    readonly property int animationPop: theme.reduzirMovimento ? 0 : 120
+    readonly property int animationPopBack: theme.reduzirMovimento ? 0 : 140
+    readonly property real popEscala: 1.3
+    readonly property real popOvershoot: 2.5
+
+    // O passo entre um item e o próximo numa entrada escalonada. Um consumidor só, a tela
+    // vazia: ela é rara e ninguém a espera para fazer outra coisa. Numa lista de mil linhas o
+    // mesmo efeito é a definição de animação que atrapalha, e o token existir aqui não é
+    // convite para usá-lo lá.
+    readonly property int animationStagger: theme.reduzirMovimento ? 0 : 60
 }

@@ -21,6 +21,62 @@ Item {
     implicitHeight: Math.round(size * 1.8)
     opacity: enabled ? 1.0 : 0.4
 
+    // A cor de repouso do glifo, num lugar só: os dois Text abaixo a leem, e escrita duas
+    // vezes ela derraparia na primeira edição.
+    readonly property color corDoGlifo: mouse.containsMouse && root.enabled
+                                        ? Theme.cTitle
+                                        : (root.accent ? Theme.cAccent : root.baseColor)
+
+    // Trocar de desenho no lugar: dois glifos sobrepostos, o novo entrando enquanto o velho
+    // sai. Um Text só trocando `text` pisca o desenho novo sem passar por lugar nenhum — dá
+    // para ver no botão de volume (som → baixo → mudo) e no de repetir, que trocam de glifo
+    // sem mudar de posição nem de tamanho, e por isso a troca seca aparece como um susto.
+    property bool glifoAnaFrente: true
+    property string glifoA: ""
+    property string glifoB: ""
+
+    onIconChanged: {
+        if (root.glifoAnaFrente)
+            root.glifoB = root.icon
+        else
+            root.glifoA = root.icon
+        root.glifoAnaFrente = !root.glifoAnaFrente
+    }
+
+    // Os dois iguais na partida: `icon` costuma ser um binding que assenta em mais de um
+    // passo, e sem isto o botão nasceria cruzando de um glifo vazio para o certo.
+    Component.onCompleted: {
+        root.glifoA = root.icon
+        root.glifoB = root.icon
+        root.glifoAnaFrente = true
+    }
+
+    // O pulo, pedido de fora. Quem sabe que houve comemoração é quem tratou o clique, e não
+    // o botão: `accent` também muda ao ligar o aleatório e ao ligar o repetir, e nem um nem
+    // outro comemora. Um botão que pulasse sozinho a cada mudança de `accent` transformaria
+    // a fileira inteira do transporte numa festa.
+    function comemorar() { puloDoBotao.restart() }
+
+    SequentialAnimation {
+        id: puloDoBotao
+
+        NumberAnimation {
+            target: root
+            property: "scale"
+            to: Theme.popEscala
+            duration: Theme.animationPop
+            easing.type: Easing.OutBack
+            easing.overshoot: Theme.popOvershoot
+        }
+        NumberAnimation {
+            target: root
+            property: "scale"
+            to: 1.0
+            duration: Theme.animationPopBack
+            easing.type: Easing.OutCubic
+        }
+    }
+
     Rectangle {
         anchors.fill: parent
         radius: width / 2
@@ -34,15 +90,33 @@ Item {
 
         Text {
             anchors.centerIn: parent
-            text: Icons.get(root.icon)
+            text: Icons.get(root.glifoA)
             font.family: Icons.fontFamily
             font.pixelSize: root.size
-            color: mouse.containsMouse && root.enabled
-                   ? Theme.cTitle
-                   : (root.accent ? Theme.cAccent : root.baseColor)
+            color: root.corDoGlifo
+            opacity: root.glifoAnaFrente ? 1 : 0
 
             Behavior on color {
                 ColorAnimation { duration: Theme.animationFast; easing.type: Theme.easingType }
+            }
+            Behavior on opacity {
+                NumberAnimation { duration: Theme.animationFaster; easing.type: Theme.easingType }
+            }
+        }
+
+        Text {
+            anchors.centerIn: parent
+            text: Icons.get(root.glifoB)
+            font.family: Icons.fontFamily
+            font.pixelSize: root.size
+            color: root.corDoGlifo
+            opacity: root.glifoAnaFrente ? 0 : 1
+
+            Behavior on color {
+                ColorAnimation { duration: Theme.animationFast; easing.type: Theme.easingType }
+            }
+            Behavior on opacity {
+                NumberAnimation { duration: Theme.animationFaster; easing.type: Theme.easingType }
             }
         }
     }

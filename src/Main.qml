@@ -13,6 +13,19 @@ Window {
     // linha de filtros aguenta a tela estreita.
     readonly property bool measuring: Qt.application.arguments.indexOf("--measure") >= 0
 
+    // `--sem-animacao`: desliga toda transição sem precisar de tela de ajustes. `--measure`
+    // liga junto de qualquer jeito — a foto do gate é tirada num instante fixo e pegaria a
+    // animação pela metade, reprovando por movimento em vez de por cor errada.
+    readonly property bool semAnimacao:
+        root.measuring || Qt.application.arguments.indexOf("--sem-animacao") >= 0
+
+    // `--com-halo`: fotografar o halo aceso. O gate de fidelidade mede 15 pontos fixos e o
+    // halo tem a cor do acervo de quem roda, por isso `--measure` o desliga — mas então NADA
+    // no app consegue produzir a imagem que prova que ele existe, porque tocar uma faixa por
+    // linha de comando também só acontece sob `--measure`. Esta chave separa as duas coisas:
+    // a foto que MEDE continua sem halo, a foto que MOSTRA passa a ter.
+    readonly property bool comHalo: Qt.application.arguments.indexOf("--com-halo") >= 0
+
     // `--shot <arquivo.png>`: salva a tela montada, para comparar com o desenho aprovado sem
     // depender de alguém descrever o que está vendo.
     readonly property string shotPath: {
@@ -574,6 +587,8 @@ Window {
                             + " busca=" + Math.round(searchOverlay.width)
                             + "x" + Math.round(searchOverlay.height)
                             + " fila=" + AudioEngine.queueCount
+                            + " movimento=" + (Theme.reduzirMovimento ? "off" : "on")
+                            + " halo=" + (nowPlaying.mostrarHalo ? "on" : "off")
                             + " motor=" + (AudioEngine.isAvailable() ? "ok" : "MORTO"))
                 if (root.shotPath === "") {
                     Qt.quit()
@@ -605,6 +620,8 @@ Window {
 
     Component.onCompleted: {
         Theme.uiScale = root.escalaDaJanela
+        Theme.reduzirMovimento = root.semAnimacao
+        Theme.medindo = root.measuring && !root.comHalo
         // Preferência que não vale na partida não é preferência: o diálogo só aplica quando
         // é aberto, e ninguém abre ajustes toda vez que liga o app.
         AudioEngine.setReplayGainMode(prefsAudio.replayGain ? "track" : "no")
