@@ -698,6 +698,15 @@ Window {
                     const q = root.clauseFor("collection", collectionsPane.openId)
                     trackModel.loadFromQuery(q.clause, q.bindings)
                 }
+                onTrackMoved: function (trackId, newIndex) {
+                    if (!CollectionManager.moveTrackInCollection(collectionsPane.openId,
+                                                                 trackId, newIndex))
+                        return
+                    // Recarregar do banco, nunca reordenar a lista na mão: o banco é a fonte
+                    // da ordem, e uma lista remendada mentiria até a próxima troca de painel.
+                    const q = root.clauseFor("collection", collectionsPane.openId)
+                    trackModel.loadFromQuery(q.clause, q.bindings)
+                }
             }
         }
     }
