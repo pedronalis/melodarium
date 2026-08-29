@@ -984,3 +984,22 @@ apaga a tela no uso real — ela prende o item invisível.
 depois: os três atalhos estão lá, acesos e completos. A prova está no transcript.
 
 **Custo de estar errada.** Nenhum: é verificação a mais, não código a mais.
+
+## 8. O transporte ficou nos números do plano, e o que dava para conferir eu conferi
+
+**Contexto.** A fatia do transporte pede julgamento de RITMO — se a encolhida de 6% do botão
+de play em 75 ms ainda deixa o botão parecer instantâneo, e se o volume deslizando em 150 ms
+parece a mesma barra mudando. Ritmo não sai de foto parada.
+
+**Decisão.** Mantive os números. Nenhum deles briga com o padrão vigente do app: 150 ms já é a
+duração de toda transição de cor da interface, e 75 ms é metade disso. O que dava para provar
+por imagem eu provei: fotografei a fileira do transporte depois de trocar a peça de ícone
+inteira, e os seis desenhos continuam lá — aleatório, anterior, pausa, próxima, repetir e o
+alto-falante do volume. Essa era a hipótese de falha de verdade: a troca de glifo cruzado pode
+deixar o botão com os dois desenhos apagados, e nenhum gate do projeto olha para glifo.
+
+**Alternativa descartada.** Segurar a fatia esperando o Pedro medir o ritmo na mão. O despacho
+revogou a espera; e o número a mexer, se incomodar, é um só e está comentado no lugar.
+
+**Custo de estar errada.** Baixo: se o botão parecer lento, o ajuste é a escala (0,94), não a
+duração — está escrito no próprio código.
