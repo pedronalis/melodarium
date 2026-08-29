@@ -174,7 +174,7 @@ git commit -m "feat(icons): cross-fade the glyph instead of swapping it in place
 
 ### Task 2: O botão de play responde ao dedo
 
-- [ ] Em `src/NowPlayingPanel.qml`, substituir o `Rectangle` do botão de play inteiro (hoje
+- [x] Em `src/NowPlayingPanel.qml`, substituir o `Rectangle` do botão de play inteiro (hoje
       das **linhas 442 a 461**, o de `radius: Math.round(26 * Theme.uiScale)`) por:
 
 ```qml
@@ -243,10 +243,10 @@ git commit -m "feat(icons): cross-fade the glyph instead of swapping it in place
             }
 ```
 
-- [ ] verificação mecânica da task: `cmake --build build` → exit 0
-- [ ] verificação mecânica da task: `bash tools/check-layout.sh` → exit 0 (o botão continua
+- [x] verificação mecânica da task: `cmake --build build` → exit 0
+- [x] verificação mecânica da task: `bash tools/check-layout.sh` → exit 0 (o botão continua
       52x52 e a fileira do transporte continua cabendo no painel)
-- [ ] commit:
+- [x] commit:
 
 ```bash
 git add src/NowPlayingPanel.qml

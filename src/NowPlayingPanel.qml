@@ -573,20 +573,63 @@ Rectangle {
             }
 
             Rectangle {
+                id: botaoPlay
+
                 Layout.preferredWidth: Math.round(52 * Theme.uiScale)
                 Layout.preferredHeight: Math.round(52 * Theme.uiScale)
                 radius: Math.round(26 * Theme.uiScale)
                 color: Theme.cTitle
 
+                // É o botão mais apertado do app, e por isso a animação aqui é quase
+                // imperceptível de propósito: um gesto repetido dezenas de vezes por dia com
+                // transição longa deixa de parecer rápido. Encolher 6% em 75 ms confirma o
+                // toque sem cobrar tempo por ele.
+                scale: playArea.pressed ? 0.94 : 1.0
+
+                Behavior on scale {
+                    NumberAnimation {
+                        duration: Theme.animationFaster
+                        easing.type: Theme.easingType
+                    }
+                }
+
+                // Os dois glifos sobrepostos: um Text só trocando de texto põe o desenho novo
+                // no lugar do velho sem passar por lugar nenhum, e é o único lugar da tela
+                // onde isso acontece a cada pausa.
                 Text {
                     anchors.centerIn: parent
-                    text: AudioEngine.playing && root.hasTrack ? Icons.get("pause") : Icons.get("play")
+                    text: Icons.get("play")
                     font.family: Icons.fontFamily
                     font.pixelSize: Theme.fontSizeXL
                     color: Theme.cBase
+                    opacity: AudioEngine.playing && root.hasTrack ? 0 : 1
+
+                    Behavior on opacity {
+                        NumberAnimation {
+                            duration: Theme.animationFaster
+                            easing.type: Theme.easingType
+                        }
+                    }
+                }
+
+                Text {
+                    anchors.centerIn: parent
+                    text: Icons.get("pause")
+                    font.family: Icons.fontFamily
+                    font.pixelSize: Theme.fontSizeXL
+                    color: Theme.cBase
+                    opacity: AudioEngine.playing && root.hasTrack ? 1 : 0
+
+                    Behavior on opacity {
+                        NumberAnimation {
+                            duration: Theme.animationFaster
+                            easing.type: Theme.easingType
+                        }
+                    }
                 }
 
                 MouseArea {
+                    id: playArea
                     anchors.fill: parent
                     cursorShape: Qt.PointingHandCursor
                     onClicked: AudioEngine.togglePause()
