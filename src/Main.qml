@@ -150,8 +150,20 @@ Window {
         return isNaN(w) ? 0 : w
     }
 
+    // `--measure-height <px>`: a foto sai em 700 por padrão, a altura do desenho. Mas a escala
+    // da interface cresce com a MENOR razão entre janela e desenho, então uma janela alta muda
+    // tudo de tamanho — e o defeito que só aparece na janela real do usuário não aparecia em
+    // nenhuma foto de gate. Poder pedir a altura é o que torna essa janela reproduzível.
+    readonly property int measureHeight: {
+        const i = Qt.application.arguments.indexOf("--measure-height")
+        if (i < 0 || Qt.application.arguments.length <= i + 1)
+            return 0
+        const h = parseInt(Qt.application.arguments[i + 1])
+        return isNaN(h) ? 0 : h
+    }
+
     width: root.measureWidth > 0 ? root.measureWidth : 1100
-    height: 700
+    height: root.measureHeight > 0 ? root.measureHeight : 700
     minimumWidth: 720
     minimumHeight: 480
     visible: true

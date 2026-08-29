@@ -60,17 +60,22 @@ Item {
         property string glyph: ""
         property string label: ""
         property string badge: ""
+        // Um atalho sem nada para oferecer continua na tela, apagado: o desenho mostra as três
+        // saídas juntas, e esconder as vazias fazia o painel mudar de forma conforme o acervo —
+        // numa biblioteca nova, onde nada foi esquecido ainda, sobrava uma linha solta e a tela
+        // não parecia a que foi aprovada. Apagado e sem clique diz o que existe e o que não tem.
+        property bool vazio: false
 
         signal clicked
 
         implicitHeight: Math.round(40 * Theme.uiScale)
         radius: Theme.iRadiusS
-        color: atalhoArea.containsMouse
+        color: atalhoArea.containsMouse && !atalho.vazio
                ? Qt.rgba(Theme.cRaised.r, Theme.cRaised.g,
                          Theme.cRaised.b, 0.6)
                : "transparent"
         border.width: Theme.borderS
-        border.color: Theme.cLine
+        border.color: atalho.vazio ? Theme.cRowCurrent : Theme.cLine
 
         Behavior on color {
             ColorAnimation { duration: Theme.animationFast; easing.type: Theme.easingType }
@@ -86,7 +91,7 @@ Item {
                 text: atalho.glyph
                 font.family: Icons.fontFamily
                 font.pixelSize: Theme.fontSizeM
-                color: Theme.cMuted
+                color: atalho.vazio ? Theme.cGhost : Theme.cMuted
             }
             Text {
                 Layout.fillWidth: true
@@ -94,21 +99,24 @@ Item {
                 elide: Text.ElideRight
                 font.family: Theme.fontFamily
                 font.pixelSize: Theme.fontSizeS
-                color: atalhoArea.containsMouse ? Theme.cTitle : Theme.cMuted
+                color: atalho.vazio
+                       ? Theme.cGhost
+                       : (atalhoArea.containsMouse ? Theme.cTitle : Theme.cMuted)
             }
             Text {
                 visible: atalho.badge !== ""
                 text: atalho.badge
                 font.family: Theme.fontFamilyFixed
                 font.pixelSize: Theme.fontSizeXS
-                color: Theme.cFaint
+                color: atalho.vazio ? Theme.cGhost : Theme.cFaint
             }
         }
 
         MouseArea {
             id: atalhoArea
             anchors.fill: parent
-            hoverEnabled: true
+            enabled: !atalho.vazio
+            hoverEnabled: !atalho.vazio
             cursorShape: Qt.PointingHandCursor
             onClicked: atalho.clicked()
         }
@@ -270,7 +278,8 @@ Item {
             }
             Atalho {
                 Layout.fillWidth: true
-                visible: root.neverCount > 0
+                visible: root.temBiblioteca
+                vazio: root.neverCount === 0
                 glyph: Icons.get("star")
                 label: qsTr("Nunca ouvi")
                 badge: String(root.neverCount)
@@ -278,7 +287,8 @@ Item {
             }
             Atalho {
                 Layout.fillWidth: true
-                visible: root.forgottenCount > 0
+                visible: root.temBiblioteca
+                vazio: root.forgottenCount === 0
                 glyph: Icons.get("history")
                 label: qsTr("Esquecidas")
                 badge: String(root.forgottenCount)
