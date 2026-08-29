@@ -107,7 +107,7 @@ git commit -m "feat(theme): single switch that zeroes every animation duration"
 
 ### Task 2: A janela liga o interruptor
 
-- [ ] Em `src/Main.qml`, logo abaixo da declaração `readonly property bool measuring:`
+- [x] Em `src/Main.qml`, logo abaixo da declaração `readonly property bool measuring:`
       (hoje na linha 14), acrescentar:
 
 ```qml
@@ -118,7 +118,7 @@ git commit -m "feat(theme): single switch that zeroes every animation duration"
         root.measuring || Qt.application.arguments.indexOf("--sem-animacao") >= 0
 ```
 
-- [ ] Em `src/Main.qml`, dentro de `Component.onCompleted` (hoje na linha 611), logo
+- [x] Em `src/Main.qml`, dentro de `Component.onCompleted` (hoje na linha 611), logo
       DEPOIS da linha `Theme.uiScale = root.escalaDaJanela`, acrescentar:
 
 ```qml
@@ -126,17 +126,17 @@ git commit -m "feat(theme): single switch that zeroes every animation duration"
         Theme.medindo = root.measuring
 ```
 
-- [ ] Em `src/Main.qml`, no `console.log("MEDIDA rail=" ...)`, acrescentar antes da linha
+- [x] Em `src/Main.qml`, no `console.log("MEDIDA rail=" ...)`, acrescentar antes da linha
       `+ " motor=" + ...` o campo novo:
 
 ```qml
                             + " movimento=" + (Theme.reduzirMovimento ? "off" : "on")
 ```
 
-- [ ] verificação mecânica da task: `cmake --build build` → exit 0
-- [ ] verificação mecânica da task:
+- [x] verificação mecânica da task: `cmake --build build` → exit 0
+- [x] verificação mecânica da task:
       `QT_QPA_PLATFORM=offscreen ./build/melodarium --measure 1100 --no-search --delay 900 2>&1 | grep -c 'movimento=off'` → `1`
-- [ ] commit:
+- [x] commit:
 
 ```bash
 git add src/Main.qml
