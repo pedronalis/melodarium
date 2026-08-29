@@ -127,7 +127,7 @@ git commit -m "feat(list): the heart pops when it lights up, never when it goes 
 
 ### Task 2: O IconButton aprende a comemorar
 
-- [ ] Em `src/IconButton.qml`, acrescentar logo depois do bloco `Component.onCompleted`:
+- [x] Em `src/IconButton.qml`, acrescentar logo depois do bloco `Component.onCompleted`:
 
 ```qml
     // O pulo, pedido de fora. Quem sabe que houve comemoração é quem tratou o clique, e não
@@ -157,10 +157,10 @@ git commit -m "feat(list): the heart pops when it lights up, never when it goes 
     }
 ```
 
-- [ ] verificação mecânica da task: `cmake --build build` → exit 0
-- [ ] verificação mecânica da task: `bash tools/check-layout.sh` → exit 0 (`scale` é
+- [x] verificação mecânica da task: `cmake --build build` → exit 0
+- [x] verificação mecânica da task: `bash tools/check-layout.sh` → exit 0 (`scale` é
       transformação e não muda `implicitWidth`: a fileira do transporte tem que medir igual)
-- [ ] commit:
+- [x] commit:
 
 ```bash
 git add src/IconButton.qml

@@ -51,6 +51,32 @@ Item {
         root.glifoAnaFrente = true
     }
 
+    // O pulo, pedido de fora. Quem sabe que houve comemoração é quem tratou o clique, e não
+    // o botão: `accent` também muda ao ligar o aleatório e ao ligar o repetir, e nem um nem
+    // outro comemora. Um botão que pulasse sozinho a cada mudança de `accent` transformaria
+    // a fileira inteira do transporte numa festa.
+    function comemorar() { puloDoBotao.restart() }
+
+    SequentialAnimation {
+        id: puloDoBotao
+
+        NumberAnimation {
+            target: root
+            property: "scale"
+            to: Theme.popEscala
+            duration: Theme.animationPop
+            easing.type: Easing.OutBack
+            easing.overshoot: Theme.popOvershoot
+        }
+        NumberAnimation {
+            target: root
+            property: "scale"
+            to: 1.0
+            duration: Theme.animationPopBack
+            easing.type: Easing.OutCubic
+        }
+    }
+
     Rectangle {
         anchors.fill: parent
         radius: width / 2
