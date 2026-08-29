@@ -233,6 +233,28 @@ Item {
             boundsBehavior: Flickable.StopAtBounds
             model: root.visiveis
 
+            // As duas bordas dissolvem no fundo em vez de cortar a linha ao meio. Filhos diretos da
+            // lista, não do conteúdo dela: o conteúdo rola, estes ficam.
+            ListFade {
+                parent: lista
+                anchors.left: parent.left
+                anchors.right: parent.right
+                anchors.top: parent.top
+                paraCima: true
+                corDeFundo: Theme.cBase
+                opacity: lista.atYBeginning ? 0 : 1
+                Behavior on opacity { NumberAnimation { duration: Theme.animationFast } }
+            }
+            ListFade {
+                parent: lista
+                anchors.left: parent.left
+                anchors.right: parent.right
+                anchors.bottom: parent.bottom
+                corDeFundo: Theme.cBase
+                opacity: lista.atYEnd ? 0 : 1
+                Behavior on opacity { NumberAnimation { duration: Theme.animationFast } }
+            }
+
             delegate: EpisodeRow {
                 id: linha
 

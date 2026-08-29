@@ -267,6 +267,28 @@ Item {
             cacheBuffer: 400
             boundsBehavior: Flickable.StopAtBounds
 
+            // As duas bordas dissolvem no fundo em vez de cortar a linha ao meio. Filhos diretos da
+            // lista, não do conteúdo dela: o conteúdo rola, estes ficam.
+            ListFade {
+                parent: list
+                anchors.left: parent.left
+                anchors.right: parent.right
+                anchors.top: parent.top
+                paraCima: true
+                corDeFundo: Theme.cBase
+                opacity: list.atYBeginning ? 0 : 1
+                Behavior on opacity { NumberAnimation { duration: Theme.animationFast } }
+            }
+            ListFade {
+                parent: list
+                anchors.left: parent.left
+                anchors.right: parent.right
+                anchors.bottom: parent.bottom
+                corDeFundo: Theme.cBase
+                opacity: list.atYEnd ? 0 : 1
+                Behavior on opacity { NumberAnimation { duration: Theme.animationFast } }
+            }
+
             delegate: TrackRow {
                 id: trackDelegate
 
@@ -314,6 +336,28 @@ Item {
             spacing: 1
             boundsBehavior: Flickable.StopAtBounds
             model: root.groups
+
+            // As duas bordas dissolvem no fundo em vez de cortar a linha ao meio. Filhos diretos da
+            // lista, não do conteúdo dela: o conteúdo rola, estes ficam.
+            ListFade {
+                parent: groupList
+                anchors.left: parent.left
+                anchors.right: parent.right
+                anchors.top: parent.top
+                paraCima: true
+                corDeFundo: Theme.cBase
+                opacity: groupList.atYBeginning ? 0 : 1
+                Behavior on opacity { NumberAnimation { duration: Theme.animationFast } }
+            }
+            ListFade {
+                parent: groupList
+                anchors.left: parent.left
+                anchors.right: parent.right
+                anchors.bottom: parent.bottom
+                corDeFundo: Theme.cBase
+                opacity: groupList.atYEnd ? 0 : 1
+                Behavior on opacity { NumberAnimation { duration: Theme.animationFast } }
+            }
 
             delegate: Rectangle {
                 id: groupRow
