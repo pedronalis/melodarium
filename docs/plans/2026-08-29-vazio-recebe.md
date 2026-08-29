@@ -1,7 +1,7 @@
 ---
 slug: vazio-recebe
 feature: melodarium-anima
-status: aprovado
+status: concluido
 depende-de: [movimento-interruptor]
 decisao-humana: sim
 spec: docs/plans/research/2026-08-29-anima-varredura.md

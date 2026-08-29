@@ -958,3 +958,29 @@ no caminho de partida do app inteiro para servir a uma foto.
 fato e já lê o painel. A verificação do plano passa igual.
 
 **Custo de estar errada.** Nenhum: é saída de diagnóstico.
+
+## 6. `grep -c 'ordem:'` cobra 3 e dá 4
+
+**Contexto.** A verificação da fatia da tela vazia manda contar as linhas com `ordem:` e
+esperar 3 — uma por atalho. O próprio código que o plano prescreve declara a propriedade
+`property int ordem: 0` no componente, e essa linha também casa.
+
+**Decisão.** 4 é o número certo: uma declaração e três usos, com as vezes 0, 1 e 2. Aceito
+como verde.
+
+**Alternativa descartada.** Renomear a propriedade para não casar com o grep. Seria mudar o
+código para agradar a contagem.
+
+**Custo de estar errada.** Nenhum: os três atalhos declaram a vez, e a foto da tela vazia
+mostra os três acesos.
+
+## 7. A entrada escalonada foi conferida com o movimento LIGADO
+
+**Contexto.** Todas as fotos que o projeto tira saem com o movimento desligado, porque a
+medição precisa de um instante fixo. Uma animação de entrada mal escrita passa nesse teste e
+apaga a tela no uso real — ela prende o item invisível.
+
+**Decisão.** Abri o app numa tela virtual, com o movimento ligado, e fotografei seis segundos
+depois: os três atalhos estão lá, acesos e completos. A prova está no transcript.
+
+**Custo de estar errada.** Nenhum: é verificação a mais, não código a mais.
