@@ -110,7 +110,7 @@ git commit -m "feat(collections): play and shuffle the whole collection from its
 
 ### Task 2: A ligação no Main e a flag que prova o gesto
 
-- [ ] Em `src/Main.qml`, no bloco `CollectionsPane { id: collectionsPane … }`, acrescentar o
+- [x] Em `src/Main.qml`, no bloco `CollectionsPane { id: collectionsPane … }`, acrescentar o
       handler logo abaixo de `onTrackActivated: function (index) { root.activateTrack(index) }`:
 
 ```qml
@@ -128,7 +128,7 @@ git commit -m "feat(collections): play and shuffle the whole collection from its
                 }
 ```
 
-- [ ] Ainda em `src/Main.qml`, declarar a flag de medição junto das outras, imediatamente
+- [x] Ainda em `src/Main.qml`, declarar a flag de medição junto das outras, imediatamente
       abaixo do bloco de `measureQueueOverlay`:
 
 ```qml
@@ -138,7 +138,7 @@ git commit -m "feat(collections): play and shuffle the whole collection from its
         Qt.application.arguments.indexOf("--play-open-collection") >= 0
 ```
 
-- [ ] No `Loader` de medição, dentro do primeiro `Timer` e logo depois do bloco
+- [x] No `Loader` de medição, dentro do primeiro `Timer` e logo depois do bloco
       `if (root.measureCollection > 0) collectionsPane.openById(root.measureCollection)`,
       acrescentar:
 
@@ -147,13 +147,13 @@ git commit -m "feat(collections): play and shuffle the whole collection from its
                         collectionsPane.playRequested(false)
 ```
 
-- [ ] Na linha `MEDIDA` do segundo `Timer`, acrescentar a fila logo depois de `busca=`:
+- [x] Na linha `MEDIDA` do segundo `Timer`, acrescentar a fila logo depois de `busca=`:
 
 ```qml
                             + " fila=" + AudioEngine.queueCount
 ```
 
-- [ ] verificação mecânica da task: compilar e ver a chave nova na linha de medida:
+- [x] verificação mecânica da task: compilar e ver a chave nova na linha de medida:
 
 ```bash
 cmake --build build 2>&1 | tail -1
@@ -162,7 +162,7 @@ QT_QPA_PLATFORM=offscreen ./build/melodarium --measure 1100 --no-search --play-q
 
 → imprime `fila=` com número maior que zero (a biblioteca inteira entrou na fila).
 
-- [ ] commit:
+- [x] commit:
 
 ```bash
 git add src/Main.qml
