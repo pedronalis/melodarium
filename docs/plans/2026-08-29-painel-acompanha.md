@@ -354,7 +354,7 @@ git commit -m "feat(panel): ambient glow behind the cover, off while measuring"
 
 ### Task 5: Os metadados entram junto com a arte
 
-- [ ] Em `src/NowPlayingPanel.qml`, dar `id: textos` ao `ColumnLayout` que contém título,
+- [x] Em `src/NowPlayingPanel.qml`, dar `id: textos` ao `ColumnLayout` que contém título,
       artista e metadados (hoje na **linha 277**, o primeiro filho do `RowLayout` da linha
       272, aquele com `spacing: Theme.marginXXS`) e acrescentar a ele, logo abaixo de `spacing`:
 
@@ -388,7 +388,7 @@ git commit -m "feat(panel): ambient glow behind the cover, off while measuring"
                 }
 ```
 
-- [ ] Disparar a entrada na troca de faixa: no `Connections { target: AudioEngine }` do
+- [x] Disparar a entrada na troca de faixa: no `Connections { target: AudioEngine }` do
       `root` (hoje na **linha 132**), o corpo passa a ser:
 
 ```qml
@@ -398,12 +398,12 @@ git commit -m "feat(panel): ambient glow behind the cover, off while measuring"
         }
 ```
 
-- [ ] verificação mecânica da task: `cmake --build build` → exit 0
-- [ ] verificação mecânica da task: `bash tools/check-fidelidade.sh` → exit 0. A foto é
+- [x] verificação mecânica da task: `cmake --build build` → exit 0
+- [x] verificação mecânica da task: `bash tools/check-fidelidade.sh` → exit 0. A foto é
       tirada 1800 ms depois da carga e com `Theme.reduzirMovimento` ligado (duração 0): se
       este ponto reprovar, os textos ficaram presos em `opacity: 0`, que é o modo exato como
       uma animação de entrada apaga uma tela.
-- [ ] commit:
+- [x] commit:
 
 ```bash
 git add src/NowPlayingPanel.qml

@@ -179,7 +179,10 @@ Rectangle {
 
     Connections {
         target: AudioEngine
-        function onCurrentFileChanged() { root.refresh() }
+        function onCurrentFileChanged() {
+            root.refresh()
+            entradaDosTextos.restart()
+        }
     }
 
     Connections {
@@ -372,8 +375,37 @@ Rectangle {
             spacing: Theme.marginL
 
             ColumnLayout {
+                id: textos
                 Layout.fillWidth: true
                 spacing: Theme.marginXXS
+
+                // Os metadados trocam junto com a capa. Sem isto eles saltavam enquanto a
+                // arte cruzava, e o cruzamento ficava pela metade — a parte animada dizendo
+                // "está mudando" e a parte de texto já mudada.
+                transform: Translate { id: deslocDosTextos }
+
+                SequentialAnimation {
+                    id: entradaDosTextos
+
+                    ParallelAnimation {
+                        NumberAnimation {
+                            target: textos
+                            property: "opacity"
+                            from: 0.0
+                            to: 1.0
+                            duration: Theme.animationFast
+                            easing.type: Theme.easingType
+                        }
+                        NumberAnimation {
+                            target: deslocDosTextos
+                            property: "y"
+                            from: Math.round(6 * Theme.uiScale)
+                            to: 0
+                            duration: Theme.animationFast
+                            easing.type: Theme.easingType
+                        }
+                    }
+                }
 
                 Text {
                     Layout.fillWidth: true
