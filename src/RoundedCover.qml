@@ -53,47 +53,34 @@ Item {
     // onde MultiEffect some e leva a capa junto. O truque do `translate` é o de sempre com
     // sombra em canvas: o retângulo é desenhado FORA da área visível e só a sombra dele entra
     // no quadro, senão o preto sólido tapa a arte.
-    Canvas {
-        id: sombra
+    // A sombra do desenho (design/Main.dc.html: 0 18px 40px rgba(0,0,0,0.55)), empilhada.
+    //
+    // Empilhar molduras translúcidas tem um defeito conhecido: cada uma traz uma borda dura, e
+    // poucas delas leem como ESCADA em vez de degradê — foi a reclamação do Pedro em 29/08.
+    // A saída NÃO é `shadowBlur` num Canvas: ele é desfoque por software, o retângulo precisa
+    // ser desenhado fora do quadro para só a sombra entrar, e o QPainter passa a processar uma
+    // área enorme a cada repintura. Medido em 29/08: o app saltou de 2 para 100 ticks de CPU
+    // por segundo, PARADO, e a interface travava ao ser redimensionada.
+    //
+    // O que mata a escada sem custo por quadro é densidade: 28 molduras a 3% em vez de 8 a
+    // 10%. São retângulos simples, desenhados uma vez pelo scene graph e nunca repintados —
+    // o degrau entre uma e a próxima fica abaixo do que o olho separa.
+    Repeater {
+        model: root.shadow ? 28 : 0
 
-        visible: root.shadow
-        // A folga tem de caber o desfoque inteiro nos quatro lados, mais o deslocamento para
-        // baixo: cortada, a sombra ganha uma borda reta e volta a parecer moldura.
-        readonly property int folga: Theme.coverShadowBlur + Theme.coverShadowY
+        Rectangle {
+            required property int index
 
-        x: -folga
-        y: -folga
-        width: root.width + folga * 2
-        height: root.height + folga * 2
+            readonly property real avanco: (index + 1) / 28
+            readonly property real folga: Theme.coverShadowBlur * avanco * 0.5
 
-        onWidthChanged: requestPaint()
-        onHeightChanged: requestPaint()
-        Connections {
-            target: root
-            function onRadiusChanged() { sombra.requestPaint() }
-        }
-
-        onPaint: {
-            const ctx = getContext("2d")
-            ctx.reset()
-            if (!root.shadow)
-                return
-
-            // Longe o bastante para o corpo do retângulo ficar fora do quadro inteiro; só a
-            // sombra dele é projetada de volta para dentro.
-            const fuga = sombra.width * 2
-
-            ctx.save()
-            ctx.shadowColor = Theme.coverShadowColor
-            ctx.shadowBlur = Theme.coverShadowBlur
-            ctx.shadowOffsetX = fuga
-            ctx.shadowOffsetY = Theme.coverShadowY
-            ctx.fillStyle = Theme.coverShadowColor
-            ctx.beginPath()
-            ctx.roundedRect(sombra.folga - fuga, sombra.folga,
-                            root.width, root.height, root.radius, root.radius)
-            ctx.fill()
-            ctx.restore()
+            x: -folga
+            y: -folga + Theme.coverShadowY * avanco
+            width: root.width + folga * 2
+            height: root.height + folga * 2
+            radius: root.radius + folga
+            color: Theme.coverShadowColor
+            opacity: 0.030
         }
     }
 
