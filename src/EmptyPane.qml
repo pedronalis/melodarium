@@ -309,6 +309,7 @@ Item {
 
             Atalho {
                 Layout.fillWidth: true
+                ordem: 0
                 visible: root.temBiblioteca
                 glyph: Icons.get("shuffle")
                 label: qsTr("Tocar tudo em ordem aleatória")
@@ -316,6 +317,7 @@ Item {
             }
             Atalho {
                 Layout.fillWidth: true
+                ordem: 1
                 visible: root.temBiblioteca
                 vazio: root.neverCount === 0
                 glyph: Icons.get("star")
@@ -325,6 +327,7 @@ Item {
             }
             Atalho {
                 Layout.fillWidth: true
+                ordem: 2
                 visible: root.temBiblioteca
                 vazio: root.forgottenCount === 0
                 glyph: Icons.get("history")
