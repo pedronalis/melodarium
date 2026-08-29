@@ -70,7 +70,7 @@ git commit -m "feat(collections): duration formatter for the list row"
 
 ### Task 2: A linha vira cartão
 
-- [ ] Em `src/CollectionsPane.qml`, no `delegate: Rectangle { id: linha … }` da `ListView`
+- [x] Em `src/CollectionsPane.qml`, no `delegate: Rectangle { id: linha … }` da `ListView`
       `lista`, trocar a altura e o conteúdo. Substituir a linha
       `height: Math.round(44 * Theme.uiScale)` por:
 
@@ -78,7 +78,7 @@ git commit -m "feat(collections): duration formatter for the list row"
                 height: Math.round(60 * Theme.uiScale)
 ```
 
-- [ ] No mesmo delegate, substituir o `RowLayout` INTEIRO (o que hoje tem o `Text` do ícone
+- [x] No mesmo delegate, substituir o `RowLayout` INTEIRO (o que hoje tem o `Text` do ícone
       `playlist`, o `Text` do nome e o `Text` da contagem) por:
 
 ```qml
@@ -212,7 +212,7 @@ git commit -m "feat(collections): duration formatter for the list row"
                 }
 ```
 
-- [ ] verificação mecânica da task: compilar e conferir que o mosaico existe:
+- [x] verificação mecânica da task: compilar e conferir que o mosaico existe:
 
 ```bash
 cmake --build build 2>&1 | tail -1
@@ -221,7 +221,7 @@ grep -c "RoundedCover" src/CollectionsPane.qml
 
 → build `exit 0` e `2` ocorrências de `RoundedCover`
 
-- [ ] commit:
+- [x] commit:
 
 ```bash
 git add src/CollectionsPane.qml
