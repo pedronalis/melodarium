@@ -65,6 +65,12 @@ Item {
         // não parecia a que foi aprovada. Apagado e sem clique diz o que existe e o que não tem.
         property bool vazio: false
 
+        // O número da vez na entrada. Zero entra primeiro; cada passo seguinte espera mais um
+        // `animationStagger`. É a única entrada escalonada do app inteiro, e é de propósito:
+        // esta tela é rara e ninguém está esperando por ela para fazer outra coisa. Numa
+        // lista de mil linhas o mesmo efeito seria a definição de animação que atrapalha.
+        property int ordem: 0
+
         signal clicked
 
         implicitHeight: Math.round(40 * Theme.uiScale)
@@ -79,6 +85,39 @@ Item {
         Behavior on color {
             ColorAnimation { duration: Theme.animationFast; easing.type: Theme.easingType }
         }
+
+        transform: Translate { id: deslocDoAtalho }
+
+        SequentialAnimation {
+            id: entradaDoAtalho
+
+            PauseAnimation { duration: Theme.animationStagger * atalho.ordem }
+
+            ParallelAnimation {
+                NumberAnimation {
+                    target: atalho
+                    property: "opacity"
+                    from: 0.0
+                    to: 1.0
+                    duration: Theme.animationFast
+                    easing.type: Theme.easingType
+                }
+                NumberAnimation {
+                    target: deslocDoAtalho
+                    property: "y"
+                    from: Math.round(10 * Theme.uiScale)
+                    to: 0
+                    duration: Theme.animationFast
+                    easing.type: Theme.easingType
+                }
+            }
+        }
+
+        // `from`/`to` explícitos nas duas animações acima: com o interruptor de movimento
+        // ligado a duração é 0 e elas saltam direto para o estado final, em vez de deixarem
+        // o atalho preso invisível — que é exatamente como uma animação de entrada apaga uma
+        // tela quando alguém a desliga pela metade.
+        Component.onCompleted: entradaDoAtalho.start()
 
         RowLayout {
             anchors.fill: parent
