@@ -8,6 +8,7 @@
 #include <QList>
 #include <QPair>
 #include <QSqlDatabase>
+#include <QHash>
 #include <QSqlQuery>
 #include <QVariantMap>
 
@@ -36,17 +37,54 @@ QVariantList CollectionManager::collections()
 {
     QSqlQuery q(uiDb());
     QVariantList out;
+    // Faixa removida da pasta não conta: a linha mostraria um tamanho que a coleção não tem.
     if (!q.exec(QStringLiteral(
-            "SELECT c.id, c.name, COUNT(ct.track_id) "
+            "SELECT c.id, c.name, COUNT(t.id), IFNULL(SUM(t.duration_ms), 0) "
             "FROM collections c "
             "LEFT JOIN collection_tracks ct ON ct.collection_id = c.id "
+            "LEFT JOIN tracks t ON t.id = ct.track_id AND t.removed_at IS NULL "
             "GROUP BY c.id ORDER BY c.name COLLATE NOCASE")))
         return out;
+
+    QList<int> ordem;
+    QHash<int, QVariantMap> porId;
     while (q.next()) {
-        out.append(QVariantMap{{QStringLiteral("id"), q.value(0).toInt()},
-                               {QStringLiteral("name"), q.value(1).toString()},
-                               {QStringLiteral("count"), q.value(2).toInt()}});
+        const int id = q.value(0).toInt();
+        ordem.append(id);
+        porId.insert(id,
+                     QVariantMap{{QStringLiteral("id"), id},
+                                 {QStringLiteral("name"), q.value(1).toString()},
+                                 {QStringLiteral("count"), q.value(2).toInt()},
+                                 {QStringLiteral("totalMs"), q.value(3).toLongLong()},
+                                 {QStringLiteral("covers"), QVariantList{}}});
     }
+
+    // UMA consulta para as capas de TODAS as coleções. Uma por coleção seria N+1 e a lista
+    // é redesenhada a cada mudança de coleção.
+    QSqlQuery capas(uiDb());
+    if (capas.exec(QStringLiteral(
+            "SELECT collection_id, path, album_id FROM ("
+            "  SELECT ct.collection_id AS collection_id, t.path AS path, "
+            "         IFNULL(t.album_id, 0) AS album_id, "
+            "         ROW_NUMBER() OVER (PARTITION BY ct.collection_id ORDER BY ct.position) AS rn "
+            "  FROM collection_tracks ct "
+            "  JOIN tracks t ON t.id = ct.track_id "
+            "  WHERE t.removed_at IS NULL"
+            ") WHERE rn <= 4"))) {
+        while (capas.next()) {
+            const int id = capas.value(0).toInt();
+            auto it = porId.find(id);
+            if (it == porId.end())
+                continue;
+            QVariantList lista = it->value(QStringLiteral("covers")).toList();
+            lista.append(QVariantMap{{QStringLiteral("path"), capas.value(1).toString()},
+                                     {QStringLiteral("albumId"), capas.value(2).toInt()}});
+            it->insert(QStringLiteral("covers"), lista);
+        }
+    }
+
+    for (int id : ordem)
+        out.append(porId.value(id));
     return out;
 }
 
