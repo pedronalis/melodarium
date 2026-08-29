@@ -22,6 +22,9 @@ Item {
     property string groupSubtitle: ""
     property bool scanning: false
 
+    // Quem decide é a janela, que sabe se o painel da capa já mostrou o que vem a seguir.
+    property bool showQueueStrip: true
+
     // Lidas por `melodarium --measure`: a linha de filtros nunca pode pedir mais largura do
     // que tem. Ela não quebra em duas — ela espreme, e o Pedro reprovou as duas coisas.
     readonly property alias chipsImplicitWidth: chips.implicitWidth
@@ -441,9 +444,14 @@ Item {
             }
         }
 
-        // O pé da lista, como no desenho: a fila mora aqui, não no painel da capa.
+        // O pé da lista só fala da fila quando o painel da capa não está falando dela: o
+        // cartão "Próximo a tocar" e a tirinha diziam a mesma coisa na mesma tela, e a
+        // tirinha cobrava por isso três linhas de lista — que é o ponto desta coluna. Numa
+        // janela baixa demais para o cartão, ela volta e é o único lugar da fila.
         QueueStrip {
+            id: fila
             Layout.fillWidth: true
+            visible: root.showQueueStrip && fila.proximos.length > 0
             onEntryActivated: function (queueIndex) { root.queueActivated(queueIndex) }
             onExpandRequested: root.queueExpandRequested()
         }

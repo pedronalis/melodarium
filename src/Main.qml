@@ -675,6 +675,9 @@ Window {
             LibraryPane {
                 id: libraryPane
                 model: trackModel
+                // Um assunto, um lugar: o pé da lista só assume a fila quando o cartão do
+                // painel não coube.
+                showQueueStrip: !nowPlaying.mostrandoProxima
                 filter: root.libraryFilter
                 groups: root.groups
                 showingGroups: root.showingGroups
