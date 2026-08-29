@@ -14,6 +14,14 @@ Rectangle {
 
     signal likeRequested(int trackId)
     signal playRequested(string mode)
+    // Guardar numa coleção existia só na linha da lista, e é tocando que a vontade aparece:
+    // a essa altura a faixa muitas vezes nem está na tela — a lista rolou, ou o miolo está em
+    // outra seção. O painel é o único lugar que fala da música que TOCA.
+    signal collectRequested(int trackId)
+    // O que vem a seguir é da fila, não do painel: ele só repassa o gesto para quem manda
+    // nela, que é a janela.
+    signal queueJumpRequested(int queueIndex)
+    signal queueOpenRequested()
 
     // O TagEditor emite tagChosen desde sempre; o painel nunca repassou, e o clique na
     // etiqueta morria aqui dentro (regressão do commit 202b7bb).
@@ -280,6 +288,17 @@ Rectangle {
                 accent: root.info.liked === true
                 onClicked: root.likeRequested(root.trackId)
             }
+
+            // O mesmo "+" da linha da lista, e de propósito: é o glifo que já quer dizer
+            // "guardar numa coleção" neste app. Um ícone novo aqui ensinaria um segundo
+            // vocabulário para o mesmo gesto.
+            IconButton {
+                visible: root.trackId > 0 && !root.episodeMode
+                icon: "plus"
+                size: Theme.fontSizeXL
+                tooltip: qsTr("Guardar numa coleção")
+                onClicked: root.collectRequested(root.trackId)
+            }
         }
 
         ColumnLayout {
@@ -519,6 +538,24 @@ Rectangle {
             visible: root.hasTrack && root.trackId > 0 && !root.episodeMode
             trackId: root.trackId
             onTagChosen: function (name) { root.tagChosen(name) }
+        }
+
+        // O que ocupa a coluna enquanto toca. Sem isto o painel entrega capa, transporte e
+        // etiquetas e devolve o resto da altura ao vazio — numa janela alta, mais da metade.
+        UpNextList {
+            id: proximas
+
+            Layout.fillWidth: true
+            Layout.topMargin: Theme.marginM
+            // Ela vive do que SOBRA, e só disso: a conta desconta a capa inteira e o resto da
+            // coluna antes de perguntar se ela cabe. Na janela do desenho (700) não sobra nada
+            // e ela não aparece — encolher a capa para caber uma lista seria trocar o assunto
+            // do painel, que é a arte do que está tocando.
+            visible: root.hasTrack && proximas.temProximos
+                     && root.height - Math.round(330 * Theme.uiScale) - root.coverSide
+                        >= proximas.alturaCheia + Theme.marginM
+            onEntryActivated: function (queueIndex) { root.queueJumpRequested(queueIndex) }
+            onExpandRequested: root.queueOpenRequested()
         }
 
         // Sempre presente: é ele que mantém a capa no topo quando o resto da coluna encolhe.
