@@ -139,3 +139,13 @@ target_link_libraries(tst_folderbrowser PRIVATE
 
 add_test(NAME tst_folderbrowser COMMAND tst_folderbrowser)
 set_tests_properties(tst_folderbrowser PROPERTIES ENVIRONMENT "QT_QPA_PLATFORM=offscreen")
+
+qt_add_executable(tst_dominantcolor
+    tst_dominantcolor.cpp
+    ../src/dominantcolor.h ../src/dominantcolor.cpp
+)
+target_include_directories(tst_dominantcolor PRIVATE ../src)
+target_link_libraries(tst_dominantcolor PRIVATE Qt6::Core Qt6::Gui Qt6::Test)
+
+add_test(NAME tst_dominantcolor COMMAND tst_dominantcolor)
+set_tests_properties(tst_dominantcolor PROPERTIES ENVIRONMENT "QT_QPA_PLATFORM=offscreen")

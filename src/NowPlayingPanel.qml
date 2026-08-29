@@ -58,6 +58,55 @@ Rectangle {
     // is loaded. Without this guard the transport shows a pause button with nothing playing.
     readonly property bool hasTrack: AudioEngine.currentFile !== ""
 
+    // O endereço da arte do que está tocando, num lugar só: as duas camadas da capa e o halo
+    // leem daqui, e antes disso a mesma expressão de três linhas vivia dentro do RoundedCover.
+    readonly property url fonteDaCapa:
+        root.episodeMode
+        ? (root.episodeInfo.coverPath !== undefined && root.episodeInfo.coverPath !== ""
+           ? "file://" + root.episodeInfo.coverPath : "")
+        : (root.info.albumId !== undefined
+           ? CoverCache.coverUrlForTrack(AudioEngine.currentFile, root.info.albumId) : "")
+
+    // Qual das duas camadas está na frente. A troca NÃO acontece no instante em que a faixa
+    // muda: a camada de trás recebe a arte nova e as duas só trocam de lugar quando ela
+    // terminou de carregar. Sem essa espera, o cruzamento mostraria o bloco cinza do
+    // placeholder no meio do caminho — remédio pior que a doença.
+    property bool capaAnaFrente: true
+
+    readonly property var capaDaFrente: root.capaAnaFrente ? capaA : capaB
+    readonly property var capaDeTras: root.capaAnaFrente ? capaB : capaA
+
+    // A cor que o halo pinta. Guardada em vez de derivada: quando a faixa nova não tem cor a
+    // dar (capa ausente, capa em escala de cinza) o halo apaga pela opacidade e a última cor
+    // fica parada onde estava, em vez de desabar para preto no meio do caminho.
+    property color corDoHalo: Theme.cCoverMid
+
+    readonly property color corDaCapaAtual: root.capaDaFrente.dominantColor
+
+    onCorDaCapaAtualChanged: {
+        if (root.corDaCapaAtual.a > 0)
+            root.corDoHalo = root.corDaCapaAtual
+    }
+
+    // O halo sai da foto do gate: a cor dele vem do acervo de quem roda, e o gate de
+    // fidelidade mede 15 pontos fixos com 3 níveis de tolerância por canal — um deles a
+    // 16 px da capa. Ou o halo sai da foto, ou o gate passa a medir sorte.
+    readonly property bool mostrarHalo:
+        !Theme.medindo && root.hasTrack && root.corDaCapaAtual.a > 0
+
+    onFonteDaCapaChanged: {
+        root.capaDeTras.source = root.fonteDaCapa
+        // Uma faixa sem capa nenhuma nunca fica "pronta": o relógio garante que a troca
+        // acontece de qualquer jeito, e o placeholder cruza como cruzaria uma arte.
+        trocaDeCapa.restart()
+    }
+
+    Timer {
+        id: trocaDeCapa
+        interval: 350
+        onTriggered: root.capaAnaFrente = !root.capaAnaFrente
+    }
+
     // O que a coluna gasta abaixo da capa: título, progresso, transporte, volume, etiquetas e
     // os espaçamentos entre eles. MEDIDO, não estimado — o app imprime a soma real com
     // `--measure`, e ela dá 309 px na escala 1 em qualquer altura de janela. O número antigo
@@ -121,13 +170,19 @@ Rectangle {
         root.episodeInfo = path === "" ? ({}) : PodcastLibrary.episodeForPath(path)
     }
 
-    Component.onCompleted: root.refresh()
+    Component.onCompleted: {
+        root.refresh()
+        capaA.source = root.fonteDaCapa
+    }
 
 
 
     Connections {
         target: AudioEngine
-        function onCurrentFileChanged() { root.refresh() }
+        function onCurrentFileChanged() {
+            root.refresh()
+            entradaDosTextos.restart()
+        }
     }
 
     Connections {
@@ -145,6 +200,28 @@ Rectangle {
         const m = Math.floor(total / 60)
         const s = total % 60
         return m + ":" + (s < 10 ? "0" : "") + s
+    }
+
+    AmbientGlow {
+        anchors.fill: parent
+        // Sem `z`, e declarado ANTES da coluna: no Qt Quick um filho com z NEGATIVO é
+        // desenhado atrás do conteúdo do próprio pai, e o pai aqui é o painel — cujo degradê
+        // é opaco. Com `z: -1` o halo existia, respondia, e não aparecia em pixel nenhum
+        // (medido: zero diferença de cor com ele ligado e desligado). A ordem de declaração
+        // já o põe atrás da capa, que é o único lugar em que ele precisa ficar.
+        cor: root.corDoHalo
+        // A capa é o primeiro item da coluna e está centrada nela: a posição sai da conta, e
+        // não de mapToItem, porque mapeamento não é reativo e a capa muda de tamanho com a
+        // altura da janela.
+        capaX: Math.round((root.width - capaRect.lado) / 2)
+        capaY: Theme.marginXL + Theme.marginS
+        capaLado: capaRect.lado
+        raioBase: Theme.radiusM
+        opacity: root.mostrarHalo ? 1 : 0
+
+        Behavior on opacity {
+            NumberAnimation { duration: Theme.animationSlowest; easing.type: Theme.easingType }
+        }
     }
 
     ColumnLayout {
@@ -225,13 +302,17 @@ Rectangle {
                 }
             }
 
-            RoundedCover {
-                id: capaVazia
+            // Duas capas, não uma. A arte trocava no mesmo quadro em que a faixa trocava, e
+            // 340x340 px mudando de golpe é a coisa mais brusca que este painel faz. Com duas
+            // camadas a nova sobe enquanto a velha desce, e nenhum quadro fica vazio — que é
+            // o que aconteceria fazendo a mesma capa piscar.
+            //
+            // O bloco existe mesmo sem nada tocando: o desenho põe degradê e sombra no
+            // quadrado da capa em todas as telas, e era a ausência dele que fazia o painel
+            // vazio parecer um buraco recortado no fundo. A moldura tracejada e o "nada
+            // tocando" continuam por cima — é o que distingue vazio de capa que falta.
+            component Capa: RoundedCover {
                 anchors.fill: parent
-                // O bloco existe mesmo sem nada tocando: o desenho põe degradê e sombra no
-                // quadrado da capa em todas as telas, e era a ausência dele que fazia o painel
-                // vazio parecer um buraco recortado no fundo. A moldura tracejada e o "nada
-                // tocando" continuam por cima — é o que distingue vazio de capa que falta.
                 radius: Theme.radiusM
                 // A única capa do app que projeta sombra: é ela que descola a arte do painel.
                 shadow: true
@@ -242,18 +323,41 @@ Rectangle {
                 // desenho; aqui ele sairia grande e duplicado.
                 fallbackIcon: !root.hasTrack ? ""
                                              : (root.episodeMode ? "microphone" : "music")
-                // 64 px num bloco de 340 no desenho — proporção, não medida fixa, porque a capa
-                // encolhe junto com a janela.
+                // 64 px num bloco de 340 no desenho — proporção, não medida fixa, porque a
+                // capa encolhe junto com a janela.
                 fallbackIconSize: Math.round(capaRect.lado * 64 / 340)
                 fallbackIconColor: root.episodeMode ? Theme.cCoverIconPod : Theme.cCoverIcon
-                source: root.episodeMode
-                        ? (root.episodeInfo.coverPath !== undefined
-                           && root.episodeInfo.coverPath !== ""
-                           ? "file://" + root.episodeInfo.coverPath : "")
-                        : (root.info.albumId !== undefined
-                           ? CoverCache.coverUrlForTrack(AudioEngine.currentFile,
-                                                         root.info.albumId)
-                           : "")
+
+                Behavior on opacity {
+                    NumberAnimation {
+                        duration: Theme.animationNormal
+                        easing.type: Theme.easingType
+                    }
+                }
+            }
+
+            Capa {
+                id: capaA
+                opacity: root.capaAnaFrente ? 1 : 0
+                z: root.capaAnaFrente ? 1 : 0
+                onReadyChanged: {
+                    if (capaA.ready && !root.capaAnaFrente && trocaDeCapa.running) {
+                        trocaDeCapa.stop()
+                        root.capaAnaFrente = true
+                    }
+                }
+            }
+
+            Capa {
+                id: capaB
+                opacity: root.capaAnaFrente ? 0 : 1
+                z: root.capaAnaFrente ? 0 : 1
+                onReadyChanged: {
+                    if (capaB.ready && root.capaAnaFrente && trocaDeCapa.running) {
+                        trocaDeCapa.stop()
+                        root.capaAnaFrente = false
+                    }
+                }
             }
         }
 
@@ -275,8 +379,37 @@ Rectangle {
             spacing: Theme.marginL
 
             ColumnLayout {
+                id: textos
                 Layout.fillWidth: true
                 spacing: Theme.marginXXS
+
+                // Os metadados trocam junto com a capa. Sem isto eles saltavam enquanto a
+                // arte cruzava, e o cruzamento ficava pela metade — a parte animada dizendo
+                // "está mudando" e a parte de texto já mudada.
+                transform: Translate { id: deslocDosTextos }
+
+                SequentialAnimation {
+                    id: entradaDosTextos
+
+                    ParallelAnimation {
+                        NumberAnimation {
+                            target: textos
+                            property: "opacity"
+                            from: 0.0
+                            to: 1.0
+                            duration: Theme.animationFast
+                            easing.type: Theme.easingType
+                        }
+                        NumberAnimation {
+                            target: deslocDosTextos
+                            property: "y"
+                            from: Math.round(6 * Theme.uiScale)
+                            to: 0
+                            duration: Theme.animationFast
+                            easing.type: Theme.easingType
+                        }
+                    }
+                }
 
                 Text {
                     Layout.fillWidth: true
@@ -324,11 +457,19 @@ Rectangle {
             }
 
             IconButton {
+                id: botaoCurtir
+
                 visible: root.trackId > 0 && !root.episodeMode
                 icon: root.info.liked === true ? "heart-filled" : "heart"
                 size: Theme.fontSizeXL
                 accent: root.info.liked === true
-                onClicked: root.likeRequested(root.trackId)
+                onClicked: {
+                    // O estado ainda é o antigo aqui: comemorar só quando o clique vai
+                    // CURTIR. Descurtir troca o desenho e mais nada.
+                    if (root.info.liked !== true)
+                        botaoCurtir.comemorar()
+                    root.likeRequested(root.trackId)
+                }
             }
 
             // O mesmo "+" da linha da lista, e de propósito: é o glifo que já quer dizer
@@ -440,20 +581,63 @@ Rectangle {
             }
 
             Rectangle {
+                id: botaoPlay
+
                 Layout.preferredWidth: Math.round(52 * Theme.uiScale)
                 Layout.preferredHeight: Math.round(52 * Theme.uiScale)
                 radius: Math.round(26 * Theme.uiScale)
                 color: Theme.cTitle
 
+                // É o botão mais apertado do app, e por isso a animação aqui é quase
+                // imperceptível de propósito: um gesto repetido dezenas de vezes por dia com
+                // transição longa deixa de parecer rápido. Encolher 6% em 75 ms confirma o
+                // toque sem cobrar tempo por ele.
+                scale: playArea.pressed ? 0.94 : 1.0
+
+                Behavior on scale {
+                    NumberAnimation {
+                        duration: Theme.animationFaster
+                        easing.type: Theme.easingType
+                    }
+                }
+
+                // Os dois glifos sobrepostos: um Text só trocando de texto põe o desenho novo
+                // no lugar do velho sem passar por lugar nenhum, e é o único lugar da tela
+                // onde isso acontece a cada pausa.
                 Text {
                     anchors.centerIn: parent
-                    text: AudioEngine.playing && root.hasTrack ? Icons.get("pause") : Icons.get("play")
+                    text: Icons.get("play")
                     font.family: Icons.fontFamily
                     font.pixelSize: Theme.fontSizeXL
                     color: Theme.cBase
+                    opacity: AudioEngine.playing && root.hasTrack ? 0 : 1
+
+                    Behavior on opacity {
+                        NumberAnimation {
+                            duration: Theme.animationFaster
+                            easing.type: Theme.easingType
+                        }
+                    }
+                }
+
+                Text {
+                    anchors.centerIn: parent
+                    text: Icons.get("pause")
+                    font.family: Icons.fontFamily
+                    font.pixelSize: Theme.fontSizeXL
+                    color: Theme.cBase
+                    opacity: AudioEngine.playing && root.hasTrack ? 1 : 0
+
+                    Behavior on opacity {
+                        NumberAnimation {
+                            duration: Theme.animationFaster
+                            easing.type: Theme.easingType
+                        }
+                    }
                 }
 
                 MouseArea {
+                    id: playArea
                     anchors.fill: parent
                     cursorShape: Qt.PointingHandCursor
                     onClicked: AudioEngine.togglePause()
@@ -560,6 +744,19 @@ Rectangle {
                     height: parent.height
                     radius: parent.radius
                     color: Theme.cMuted
+
+                    // Clicar no trilho leva o volume de um lugar a outro sem passar pelo meio.
+                    // Deslizar diz que foi a MESMA barra que mudou, e não uma barra nova
+                    // aparecendo no lugar da anterior.
+                    //
+                    // Só o volume: a barra de progresso da faixa já se move sozinha, e um
+                    // Behavior nela faria o tempo mentir e brigar com cada arrasto de seek.
+                    Behavior on width {
+                        NumberAnimation {
+                            duration: Theme.animationFast
+                            easing.type: Theme.easingType
+                        }
+                    }
                 }
 
                 MouseArea {

@@ -1,7 +1,7 @@
 ---
 slug: transporte-responde
 feature: melodarium-anima
-status: aprovado
+status: concluido
 depende-de: [movimento-interruptor, painel-acompanha]
 decisao-humana: sim
 spec: docs/plans/research/2026-08-29-anima-varredura.md
@@ -48,7 +48,7 @@ que já se move sozinho (§ Rejeitados, artefato de research). Nenhuma duração
 
 ### Task 1: O IconButton troca de desenho cruzando, não piscando
 
-- [ ] Substituir o conteúdo inteiro de `src/IconButton.qml` por:
+- [x] Substituir o conteúdo inteiro de `src/IconButton.qml` por:
 
 ```qml
 import QtQuick
@@ -158,14 +158,14 @@ Item {
 }
 ```
 
-- [ ] verificação mecânica da task: `cmake --build build` → exit 0
-- [ ] verificação mecânica da task: `bash tools/check-fidelidade.sh` → exit 0. O ponto
+- [x] verificação mecânica da task: `cmake --build build` → exit 0
+- [x] verificação mecânica da task: `bash tools/check-fidelidade.sh` → exit 0. O ponto
       `trilho: ícone escolhido` mede o vão liso ACIMA do glifo do trilho — se ele reprovar,
       os dois `Text` deixaram de ficar sobrepostos e o botão mudou de tamanho.
-- [ ] verificação mecânica da task: `bash tools/check-layout.sh` → exit 0. `IconButton` é a
+- [x] verificação mecânica da task: `bash tools/check-layout.sh` → exit 0. `IconButton` é a
       peça de vinte lugares e a fileira do transporte já estourou o painel uma vez por causa
       da medida dela: este gate é o que prova que `implicitWidth` não mudou.
-- [ ] commit:
+- [x] commit:
 
 ```bash
 git add src/IconButton.qml
@@ -174,7 +174,7 @@ git commit -m "feat(icons): cross-fade the glyph instead of swapping it in place
 
 ### Task 2: O botão de play responde ao dedo
 
-- [ ] Em `src/NowPlayingPanel.qml`, substituir o `Rectangle` do botão de play inteiro (hoje
+- [x] Em `src/NowPlayingPanel.qml`, substituir o `Rectangle` do botão de play inteiro (hoje
       das **linhas 442 a 461**, o de `radius: Math.round(26 * Theme.uiScale)`) por:
 
 ```qml
@@ -243,10 +243,10 @@ git commit -m "feat(icons): cross-fade the glyph instead of swapping it in place
             }
 ```
 
-- [ ] verificação mecânica da task: `cmake --build build` → exit 0
-- [ ] verificação mecânica da task: `bash tools/check-layout.sh` → exit 0 (o botão continua
+- [x] verificação mecânica da task: `cmake --build build` → exit 0
+- [x] verificação mecânica da task: `bash tools/check-layout.sh` → exit 0 (o botão continua
       52x52 e a fileira do transporte continua cabendo no painel)
-- [ ] commit:
+- [x] commit:
 
 ```bash
 git add src/NowPlayingPanel.qml
@@ -255,7 +255,7 @@ git commit -m "feat(transport): press feedback and cross-faded glyph on the play
 
 ### Task 3: A barra de volume desliza
 
-- [ ] Em `src/NowPlayingPanel.qml`, no `Rectangle` interno do `trilhoVolume` (hoje na
+- [x] Em `src/NowPlayingPanel.qml`, no `Rectangle` interno do `trilhoVolume` (hoje na
       **linha 558**, o de `width: parent.width * (AudioEngine.volume / 100)`), acrescentar o `Behavior`.
       O bloco passa a ser:
 
@@ -281,10 +281,10 @@ git commit -m "feat(transport): press feedback and cross-faded glyph on the play
                 }
 ```
 
-- [ ] verificação mecânica da task: `cmake --build build` → exit 0
-- [ ] verificação mecânica da task — a barra de progresso NÃO ganhou Behavior:
+- [x] verificação mecânica da task: `cmake --build build` → exit 0
+- [x] verificação mecânica da task — a barra de progresso NÃO ganhou Behavior:
       `awk '/id: percorrido/,/^                }/' src/NowPlayingPanel.qml | grep -c 'Behavior'` → `0`
-- [ ] commit:
+- [x] commit:
 
 ```bash
 git add src/NowPlayingPanel.qml

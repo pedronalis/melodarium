@@ -1,7 +1,7 @@
 ---
 slug: painel-acompanha
 feature: melodarium-anima
-status: aprovado
+status: concluido
 depende-de: [movimento-interruptor, cor-dominante]
 decisao-humana: sim
 spec: docs/plans/research/2026-08-29-anima-varredura.md
@@ -53,7 +53,7 @@ fixo a 16 px da capa com tolerância de 3 níveis por canal (§ Restrições, ar
 
 ### Task 1: O componente do halo
 
-- [ ] Criar `src/AmbientGlow.qml`:
+- [x] Criar `src/AmbientGlow.qml`:
 
 ```qml
 import QtQuick
@@ -129,15 +129,15 @@ Item {
 }
 ```
 
-- [ ] Registrar `src/AmbientGlow.qml` na lista `QML_FILES` do
+- [x] Registrar `src/AmbientGlow.qml` na lista `QML_FILES` do
       `qt_add_qml_module(melodarium ...)` em `CMakeLists.txt`, junto das outras telas:
 
 ```cmake
         src/AmbientGlow.qml
 ```
 
-- [ ] verificação mecânica da task: `cmake --build build` → exit 0
-- [ ] commit:
+- [x] verificação mecânica da task: `cmake --build build` → exit 0
+- [x] commit:
 
 ```bash
 git add src/AmbientGlow.qml CMakeLists.txt
@@ -146,7 +146,7 @@ git commit -m "feat(panel): stacked-frame ambient glow component (no shader)"
 
 ### Task 2: A capa repassa a própria cor
 
-- [ ] Em `src/RoundedCover.qml`, logo abaixo de `readonly property bool ready: img.ready`
+- [x] Em `src/RoundedCover.qml`, logo abaixo de `readonly property bool ready: img.ready`
       (hoje na **linha 32**), acrescentar:
 
 ```qml
@@ -156,9 +156,9 @@ git commit -m "feat(panel): stacked-frame ambient glow component (no shader)"
     readonly property alias dominantColor: img.dominantColor
 ```
 
-- [ ] verificação mecânica da task: `cmake --build build` → exit 0
-- [ ] verificação mecânica da task: `grep -c 'dominantColor' src/RoundedCover.qml` → `1`
-- [ ] commit:
+- [x] verificação mecânica da task: `cmake --build build` → exit 0
+- [x] verificação mecânica da task: `grep -c 'dominantColor' src/RoundedCover.qml` → `1`
+- [x] commit:
 
 ```bash
 git add src/RoundedCover.qml
@@ -167,7 +167,7 @@ git commit -m "feat(cover): pass the artwork's dominant color through RoundedCov
 
 ### Task 3: Duas capas cruzando no lugar de uma trocando
 
-- [ ] Em `src/NowPlayingPanel.qml`, acrescentar ao bloco de propriedades do `root` (logo
+- [x] Em `src/NowPlayingPanel.qml`, acrescentar ao bloco de propriedades do `root` (logo
       depois de `readonly property bool hasTrack:`, hoje na linha 58):
 
 ```qml
@@ -203,7 +203,7 @@ git commit -m "feat(cover): pass the artwork's dominant color through RoundedCov
     }
 ```
 
-- [ ] Em `src/NowPlayingPanel.qml`, substituir o bloco `RoundedCover { id: capaVazia ... }`
+- [x] Em `src/NowPlayingPanel.qml`, substituir o bloco `RoundedCover { id: capaVazia ... }`
       inteiro (hoje das **linhas 228 a 257**, do `RoundedCover {` até o `}` que fecha o
       `source:`) por duas camadas.
       O componente `Capa` local evita repetir onze propriedades idênticas duas vezes:
@@ -263,7 +263,7 @@ git commit -m "feat(cover): pass the artwork's dominant color through RoundedCov
             }
 ```
 
-- [ ] Dar à camada da frente a arte inicial — sem isto o painel abre com as duas vazias,
+- [x] Dar à camada da frente a arte inicial — sem isto o painel abre com as duas vazias,
       porque `onFonteDaCapaChanged` não roda para o valor de partida. Acrescentar ao
       `Component.onCompleted` do `root` (hoje na **linha 128**), que passa a ser:
 
@@ -274,11 +274,11 @@ git commit -m "feat(cover): pass the artwork's dominant color through RoundedCov
     }
 ```
 
-- [ ] verificação mecânica da task: `cmake --build build` → exit 0
-- [ ] verificação mecânica da task: `bash tools/check-fidelidade.sh` → exit 0. O ponto
+- [x] verificação mecânica da task: `cmake --build build` → exit 0
+- [x] verificação mecânica da task: `bash tools/check-fidelidade.sh` → exit 0. O ponto
       `a capa está arredondada (o canto não é arte)` é o que prova que as duas camadas
       continuam recortando; se ele reprovar, o `radius` se perdeu na troca.
-- [ ] commit:
+- [x] commit:
 
 ```bash
 git add src/NowPlayingPanel.qml
@@ -287,7 +287,7 @@ git commit -m "feat(panel): cross-fade the artwork instead of swapping it in one
 
 ### Task 4: O halo atrás da capa
 
-- [ ] Em `src/NowPlayingPanel.qml`, acrescentar ao bloco de propriedades do `root`, logo
+- [x] Em `src/NowPlayingPanel.qml`, acrescentar ao bloco de propriedades do `root`, logo
       depois de `capaDeTras`:
 
 ```qml
@@ -310,7 +310,7 @@ git commit -m "feat(panel): cross-fade the artwork instead of swapping it in one
         !Theme.medindo && root.hasTrack && root.corDaCapaAtual.a > 0
 ```
 
-- [ ] Acrescentar o halo como primeiro filho do `root`, ANTES do `ColumnLayout { id: col }`
+- [x] Acrescentar o halo como primeiro filho do `root`, ANTES do `ColumnLayout { id: col }`
       (hoje na **linha 154**). `z: -1` o põe atrás de todo o conteúdo e ainda por cima do degradê
       do painel, que é pintado pelo próprio `Rectangle`:
 
@@ -334,18 +334,18 @@ git commit -m "feat(panel): cross-fade the artwork instead of swapping it in one
     }
 ```
 
-- [ ] Acrescentar o campo à linha `diag` do `root` (hoje na **linha 84**), no fim da expressão:
+- [x] Acrescentar o campo à linha `diag` do `root` (hoje na **linha 84**), no fim da expressão:
 
 ```qml
                                    + " halo=" + (root.mostrarHalo ? "on" : "off")
 ```
 
-- [ ] verificação mecânica da task: `cmake --build build` → exit 0
-- [ ] verificação mecânica da task — o halo está desligado ao medir:
+- [x] verificação mecânica da task: `cmake --build build` → exit 0
+- [x] verificação mecânica da task — o halo está desligado ao medir:
       `QT_QPA_PLATFORM=offscreen ./build/melodarium --measure 1100 --no-search --play-queue --delay 1800 2>&1 | grep -c 'halo=off'` → `1`
-- [ ] verificação mecânica da task: `bash tools/check-orfaos.sh` → exit 0 (`AmbientGlow` tem
+- [x] verificação mecânica da task: `bash tools/check-orfaos.sh` → exit 0 (`AmbientGlow` tem
       quem o instancie)
-- [ ] commit:
+- [x] commit:
 
 ```bash
 git add src/NowPlayingPanel.qml
@@ -354,7 +354,7 @@ git commit -m "feat(panel): ambient glow behind the cover, off while measuring"
 
 ### Task 5: Os metadados entram junto com a arte
 
-- [ ] Em `src/NowPlayingPanel.qml`, dar `id: textos` ao `ColumnLayout` que contém título,
+- [x] Em `src/NowPlayingPanel.qml`, dar `id: textos` ao `ColumnLayout` que contém título,
       artista e metadados (hoje na **linha 277**, o primeiro filho do `RowLayout` da linha
       272, aquele com `spacing: Theme.marginXXS`) e acrescentar a ele, logo abaixo de `spacing`:
 
@@ -388,7 +388,7 @@ git commit -m "feat(panel): ambient glow behind the cover, off while measuring"
                 }
 ```
 
-- [ ] Disparar a entrada na troca de faixa: no `Connections { target: AudioEngine }` do
+- [x] Disparar a entrada na troca de faixa: no `Connections { target: AudioEngine }` do
       `root` (hoje na **linha 132**), o corpo passa a ser:
 
 ```qml
@@ -398,12 +398,12 @@ git commit -m "feat(panel): ambient glow behind the cover, off while measuring"
         }
 ```
 
-- [ ] verificação mecânica da task: `cmake --build build` → exit 0
-- [ ] verificação mecânica da task: `bash tools/check-fidelidade.sh` → exit 0. A foto é
+- [x] verificação mecânica da task: `cmake --build build` → exit 0
+- [x] verificação mecânica da task: `bash tools/check-fidelidade.sh` → exit 0. A foto é
       tirada 1800 ms depois da carga e com `Theme.reduzirMovimento` ligado (duração 0): se
       este ponto reprovar, os textos ficaram presos em `opacity: 0`, que é o modo exato como
       uma animação de entrada apaga uma tela.
-- [ ] commit:
+- [x] commit:
 
 ```bash
 git add src/NowPlayingPanel.qml

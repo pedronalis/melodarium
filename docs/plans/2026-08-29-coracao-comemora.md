@@ -1,7 +1,7 @@
 ---
 slug: coracao-comemora
 feature: melodarium-anima
-status: aprovado
+status: concluido
 depende-de: [movimento-interruptor, transporte-responde]
 decisao-humana: sim
 spec: docs/plans/research/2026-08-29-anima-varredura.md
@@ -46,7 +46,7 @@ editam `src/IconButton.qml` e `src/NowPlayingPanel.qml`.
 
 ### Task 1: O coração da lista pula ao acender
 
-- [ ] Em `src/TrackRow.qml`, substituir o `Item` do coração inteiro (hoje das
+- [x] Em `src/TrackRow.qml`, substituir o `Item` do coração inteiro (hoje das
       **linhas 179 a 205**, o de `Layout.preferredWidth: Math.round(16 * Theme.uiScale)`)
       pelo bloco abaixo — que inclui os dois comentários de cima, hoje nas linhas 177-178:
 
@@ -113,12 +113,12 @@ editam `src/IconButton.qml` e `src/NowPlayingPanel.qml`.
             }
 ```
 
-- [ ] verificação mecânica da task: `cmake --build build` → exit 0
-- [ ] verificação mecânica da task — o disparo veio do clique, não do estado:
+- [x] verificação mecânica da task: `cmake --build build` → exit 0
+- [x] verificação mecânica da task — o disparo veio do clique, não do estado:
       `grep -c 'onLikedChanged' src/TrackRow.qml` → `0`
-- [ ] verificação mecânica da task — a assimetria existe:
+- [x] verificação mecânica da task — a assimetria existe:
       `grep -c 'if (!root.liked)' src/TrackRow.qml` → `1`
-- [ ] commit:
+- [x] commit:
 
 ```bash
 git add src/TrackRow.qml
@@ -127,7 +127,7 @@ git commit -m "feat(list): the heart pops when it lights up, never when it goes 
 
 ### Task 2: O IconButton aprende a comemorar
 
-- [ ] Em `src/IconButton.qml`, acrescentar logo depois do bloco `Component.onCompleted`:
+- [x] Em `src/IconButton.qml`, acrescentar logo depois do bloco `Component.onCompleted`:
 
 ```qml
     // O pulo, pedido de fora. Quem sabe que houve comemoração é quem tratou o clique, e não
@@ -157,10 +157,10 @@ git commit -m "feat(list): the heart pops when it lights up, never when it goes 
     }
 ```
 
-- [ ] verificação mecânica da task: `cmake --build build` → exit 0
-- [ ] verificação mecânica da task: `bash tools/check-layout.sh` → exit 0 (`scale` é
+- [x] verificação mecânica da task: `cmake --build build` → exit 0
+- [x] verificação mecânica da task: `bash tools/check-layout.sh` → exit 0 (`scale` é
       transformação e não muda `implicitWidth`: a fileira do transporte tem que medir igual)
-- [ ] commit:
+- [x] commit:
 
 ```bash
 git add src/IconButton.qml
@@ -169,7 +169,7 @@ git commit -m "feat(icons): comemorar() pops the whole button on demand"
 
 ### Task 3: O coração do painel usa a comemoração
 
-- [ ] Em `src/NowPlayingPanel.qml`, substituir o `IconButton` do coração (hoje nas
+- [x] Em `src/NowPlayingPanel.qml`, substituir o `IconButton` do coração (hoje nas
       **linhas 326 a 332**, o de `icon: root.info.liked === true ? "heart-filled" : "heart"`)
       por:
 
@@ -191,10 +191,10 @@ git commit -m "feat(icons): comemorar() pops the whole button on demand"
             }
 ```
 
-- [ ] verificação mecânica da task: `cmake --build build` → exit 0
-- [ ] verificação mecânica da task — a assimetria existe também no painel:
+- [x] verificação mecânica da task: `cmake --build build` → exit 0
+- [x] verificação mecânica da task — a assimetria existe também no painel:
       `grep -c 'if (root.info.liked !== true)' src/NowPlayingPanel.qml` → `1`
-- [ ] commit:
+- [x] commit:
 
 ```bash
 git add src/NowPlayingPanel.qml

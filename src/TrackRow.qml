@@ -174,14 +174,15 @@ Item {
                 }
             }
 
-            // Curtir mora na linha, não num menu: o coração apagado é discreto o bastante para
-            // não competir com o título, e presente o bastante para ser achado sem hover.
+            // Curtir mora na linha, não num menu: o coração apagado é discreto o bastante
+            // para não competir com o título, e presente o bastante para ser achado sem hover.
             Item {
                 Layout.preferredWidth: Math.round(16 * Theme.uiScale)
                 Layout.fillHeight: true
 
                 Text {
                     id: heart
+
                     anchors.centerIn: parent
                     text: root.liked ? Icons.get("heart-filled") : Icons.get("heart")
                     font.family: Icons.fontFamily
@@ -192,6 +193,28 @@ Item {
                     Behavior on opacity {
                         NumberAnimation { duration: Theme.animationFast; easing.type: Theme.easingType }
                     }
+
+                    // Sobe passando do alvo e volta: OutBack devolve o excesso, e é esse
+                    // excesso que separa "confirmei seu clique" de "comemorei com você".
+                    SequentialAnimation {
+                        id: puloDoCoracao
+
+                        NumberAnimation {
+                            target: heart
+                            property: "scale"
+                            to: Theme.popEscala
+                            duration: Theme.animationPop
+                            easing.type: Easing.OutBack
+                            easing.overshoot: Theme.popOvershoot
+                        }
+                        NumberAnimation {
+                            target: heart
+                            property: "scale"
+                            to: 1.0
+                            duration: Theme.animationPopBack
+                            easing.type: Easing.OutCubic
+                        }
+                    }
                 }
 
                 MouseArea {
@@ -200,7 +223,15 @@ Item {
                     anchors.margins: -Theme.marginXS
                     hoverEnabled: true
                     cursorShape: Qt.PointingHandCursor
-                    onClicked: root.likeToggled()
+                    onClicked: {
+                        // `root.liked` ainda é o valor ANTIGO aqui: se era falso, este clique
+                        // vai curtir, e é só aí que se comemora. E o disparo sai do clique,
+                        // nunca de `onLikedChanged`: a ListView recicla o delegate ao rolar, e
+                        // uma faixa já curtida entrando na tela faria a lista inteira pular.
+                        if (!root.liked)
+                            puloDoCoracao.restart()
+                        root.likeToggled()
+                    }
                 }
             }
 
