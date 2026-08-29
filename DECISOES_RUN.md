@@ -1033,3 +1033,24 @@ fatia, não deste lote.
 
 **Custo de estar errada.** Baixo: são avisos de estilo, não de comportamento, e o mesmo padrão
 já roda em produção neste app desde as primeiras telas.
+
+## 11. Duas fotos a mais, além da que o portão cobra
+
+**Contexto.** O portão pede uma imagem só: o painel com o halo aceso. Mas duas das seis fatias
+mudam a tela SEM faixa tocando (a entrada dos três atalhos), e a foto do halo não mostra nada
+disso.
+
+**Decisão.** Gravei três arquivos em `docs/telas/`: a captura da tela virtual inteira (que é o
+que o comando do portão produz), o recorte só da janela (mais fácil de olhar) e a tela sem nada
+tocando, com o movimento ligado. É o que o Pedro precisa para julgar sem abrir o app.
+
+**Custo de estar errada.** Nenhum: são dois arquivos de imagem no repositório.
+
+## 12. A lição do run ficou escrita no repositório
+
+**Contexto.** O erro que custou mais tempo neste lote — o efeito que existe, responde e não
+pinta nada — é do tipo que volta.
+
+**Decisão.** Virou `docs/solutions/ui/2026-08-29-o-efeito-existia-e-nao-pintava-um-pixel.md`,
+com a regra que fica: efeito que um gate desliga precisa nascer com a chave que o acende para a
+foto, senão não tem como ser provado nem hoje nem daqui a seis meses.
