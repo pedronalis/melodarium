@@ -457,11 +457,19 @@ Rectangle {
             }
 
             IconButton {
+                id: botaoCurtir
+
                 visible: root.trackId > 0 && !root.episodeMode
                 icon: root.info.liked === true ? "heart-filled" : "heart"
                 size: Theme.fontSizeXL
                 accent: root.info.liked === true
-                onClicked: root.likeRequested(root.trackId)
+                onClicked: {
+                    // O estado ainda é o antigo aqui: comemorar só quando o clique vai
+                    // CURTIR. Descurtir troca o desenho e mais nada.
+                    if (root.info.liked !== true)
+                        botaoCurtir.comemorar()
+                    root.likeRequested(root.trackId)
+                }
             }
 
             // O mesmo "+" da linha da lista, e de propósito: é o glifo que já quer dizer

@@ -169,7 +169,7 @@ git commit -m "feat(icons): comemorar() pops the whole button on demand"
 
 ### Task 3: O coração do painel usa a comemoração
 
-- [ ] Em `src/NowPlayingPanel.qml`, substituir o `IconButton` do coração (hoje nas
+- [x] Em `src/NowPlayingPanel.qml`, substituir o `IconButton` do coração (hoje nas
       **linhas 326 a 332**, o de `icon: root.info.liked === true ? "heart-filled" : "heart"`)
       por:
 
@@ -191,10 +191,10 @@ git commit -m "feat(icons): comemorar() pops the whole button on demand"
             }
 ```
 
-- [ ] verificação mecânica da task: `cmake --build build` → exit 0
-- [ ] verificação mecânica da task — a assimetria existe também no painel:
+- [x] verificação mecânica da task: `cmake --build build` → exit 0
+- [x] verificação mecânica da task — a assimetria existe também no painel:
       `grep -c 'if (root.info.liked !== true)' src/NowPlayingPanel.qml` → `1`
-- [ ] commit:
+- [x] commit:
 
 ```bash
 git add src/NowPlayingPanel.qml
