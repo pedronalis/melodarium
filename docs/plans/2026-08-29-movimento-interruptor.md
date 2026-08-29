@@ -161,7 +161,7 @@ bash tools/check-layout.sh
 
 - `cmake --build build` → exit 0
 - `ctest --test-dir build --output-on-failure` → exit 0
-- `ctest --test-dir build -N | grep -c 'Test #'` → `10` (piso de contagem: `ctest` sai 0 com
+- `ctest --test-dir build -N | awk '/Total Tests:/ {print $3}'` → `10` (piso de contagem: `ctest` sai 0 com
   `Total Tests: 0`, e um gate sem piso lê verde num build sem teste nenhum)
 - `QT_QPA_PLATFORM=offscreen ./build/melodarium --measure 1100 --no-search --delay 900 2>&1 | grep -c 'movimento=off'` → `1`
 - `QT_QPA_PLATFORM=offscreen ./build/melodarium --measure 1100 --sem-animacao --no-search --delay 900 2>&1 | grep -c 'movimento=off'` → `1`
