@@ -42,7 +42,7 @@ garante conflito. O sinal `playRequested(bool shuffled)` já existe quando esta 
 
 ### Task 1: O formatador de duração da linha
 
-- [ ] Em `src/CollectionsPane.qml`, acrescentar a função logo depois de `function close() { … }`:
+- [x] Em `src/CollectionsPane.qml`, acrescentar a função logo depois de `function close() { … }`:
 
 ```qml
     // Duplicada de LibraryPane.formatTotal de propósito: QML não tem um lugar comum para
@@ -60,8 +60,8 @@ garante conflito. O sinal `playRequested(bool shuffled)` já existe quando esta 
     }
 ```
 
-- [ ] verificação mecânica da task: `grep -c "function formatTotal" src/CollectionsPane.qml` → `1`
-- [ ] commit:
+- [x] verificação mecânica da task: `grep -c "function formatTotal" src/CollectionsPane.qml` → `1`
+- [x] commit:
 
 ```bash
 git add src/CollectionsPane.qml
