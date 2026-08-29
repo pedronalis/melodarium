@@ -21,6 +21,7 @@ Item {
     // A coleção é uma playlist: playlist se toca inteira. Sem isto o único jeito de ouvir
     // "Pra codar" era abrir e clicar numa faixa, o que é navegar, não tocar.
     signal playRequested(bool shuffled)
+    signal trackMoved(int trackId, int newIndex)
 
     property var items: []
     // url -> { received, total }. O download é por link, não por linha: guardar isso dentro
@@ -483,6 +484,45 @@ Item {
                 // tira a faixa daqui em vez de pô-la em outro lugar.
                 showCollectButton: true
                 collectGlyph: "close"
+
+                draggable: true
+
+                // A linha arrastada sobe para cima das outras e segue o dedo; o índice de
+                // destino sai da altura da própria linha, que é fixa.
+                z: dragArea.drag.active ? 2 : 0
+
+                Drag.active: dragArea.drag.active
+                Drag.hotSpot.x: width / 2
+                Drag.hotSpot.y: height / 2
+
+                MouseArea {
+                    id: dragArea
+                    // 34 e não 20: a alça desenhada começa em 17 px (a margem do Rectangle
+                    // do TrackRow mais a do RowLayout) e termina em 29. Com 20 a faixa
+                    // arrastável cobria 3 px da alça e 17 px de vão — o gesto ficava onde o
+                    // desenho não está. Para em 34, antes do número da faixa (42).
+                    width: Math.round(34 * Theme.uiScale)
+                    height: parent.height
+                    anchors.left: parent.left
+                    cursorShape: Qt.OpenHandCursor
+                    drag.target: faixa
+                    drag.axis: Drag.YAxis
+
+                    onReleased: {
+                        if (!drag.active)
+                            return
+                        // Quantas linhas o dedo andou, arredondando para a linha mais próxima.
+                        const passo = faixa.height + tracks.spacing
+                        const deslocou = Math.round(faixa.y / passo) - faixa.index
+                        const destino = Math.max(0, Math.min(tracks.count - 1,
+                                                             faixa.index + deslocou))
+                        // Devolver a linha ao lugar ANTES de recarregar: o modelo vai
+                        // repintar, e uma linha com y deslocado herdaria o deslocamento.
+                        faixa.y = faixa.index * passo
+                        if (destino !== faixa.index)
+                            root.trackMoved(faixa.model.trackId, destino)
+                    }
+                }
 
                 onActivated: root.trackActivated(faixa.index)
                 onLikeToggled: LibraryBrowser.toggleLike(faixa.model.trackId)

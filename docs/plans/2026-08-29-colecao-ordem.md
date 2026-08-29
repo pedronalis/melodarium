@@ -85,13 +85,13 @@ git commit -m "feat(collections): track row grows a drag handle, off by default"
 
 ### Task 2: Arrastar e soltar dentro da coleção aberta
 
-- [ ] Em `src/CollectionsPane.qml`, declarar o sinal junto dos outros:
+- [x] Em `src/CollectionsPane.qml`, declarar o sinal junto dos outros:
 
 ```qml
     signal trackMoved(int trackId, int newIndex)
 ```
 
-- [ ] No `delegate: TrackRow { id: faixa … }` da `ListView` `tracks`, acrescentar as
+- [x] No `delegate: TrackRow { id: faixa … }` da `ListView` `tracks`, acrescentar as
       propriedades e o corpo de arrasto (o `TrackRow` já é um `Item`, então ele mesmo é o alvo):
 
 ```qml
@@ -131,8 +131,8 @@ git commit -m "feat(collections): track row grows a drag handle, off by default"
                 }
 ```
 
-- [ ] verificação mecânica da task: `grep -c "drag.target: faixa" src/CollectionsPane.qml` → `1`
-- [ ] commit:
+- [x] verificação mecânica da task: `grep -c "drag.target: faixa" src/CollectionsPane.qml` → `1`
+- [x] commit:
 
 ```bash
 git add src/CollectionsPane.qml
