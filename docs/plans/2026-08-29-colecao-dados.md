@@ -1,7 +1,7 @@
 ---
 slug: colecao-dados
 feature: colecao-playlist
-status: aprovado
+status: concluido
 depende-de: []
 decisao-humana: nao
 spec: docs/specs/2026-08-27-player-musica-podcast.md
