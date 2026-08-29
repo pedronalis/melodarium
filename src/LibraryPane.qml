@@ -34,6 +34,7 @@ Item {
     signal collectRequested(int trackId)
     signal searchRequested
     signal queueActivated(int queueIndex)
+    signal queueExpandRequested
     signal collectAllRequested
 
     function reload() {
@@ -400,6 +401,7 @@ Item {
         QueueStrip {
             Layout.fillWidth: true
             onEntryActivated: function (queueIndex) { root.queueActivated(queueIndex) }
+            onExpandRequested: root.queueExpandRequested()
         }
     }
 }

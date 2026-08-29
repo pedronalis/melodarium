@@ -13,6 +13,9 @@ Item {
     property int lookahead: 4
 
     signal entryActivated(int queueIndex)
+    // A tirinha mostra quatro; a fila pode ter mil. Sem esta saída, o "+N" era um número que
+    // dizia o que faltava e não deixava ver.
+    signal expandRequested
 
     // Some inteira quando não há próximos: uma tirinha vazia rouba altura da lista, que é o
     // ponto da tela.
@@ -58,12 +61,36 @@ Item {
                 font.letterSpacing: Theme.letterSpacingLabel * Theme.fontSizeXXS
                 color: Theme.cFaint
             }
-            Text {
-                text: AudioEngine.queueCount + qsTr(" na fila")
-                font.family: Theme.fontFamilyFixed
-                font.pixelSize: Theme.fontSizeXS
-                color: Theme.cFaint
+            // A contagem é a porta da fila inteira: era o único texto da tela que dizia quantas
+            // faltavam sem dar como olhar.
+            Rectangle {
+                Layout.preferredHeight: Math.round(18 * Theme.uiScale)
+                Layout.preferredWidth: contagem.implicitWidth + Theme.marginM * 2
+                radius: Theme.iRadiusXS
+                color: contagemArea.containsMouse ? Theme.cRaised : "transparent"
+
+                Behavior on color {
+                    ColorAnimation { duration: Theme.animationFast; easing.type: Theme.easingType }
+                }
+
+                Text {
+                    id: contagem
+                    anchors.centerIn: parent
+                    text: AudioEngine.queueCount + qsTr(" na fila")
+                    font.family: Theme.fontFamilyFixed
+                    font.pixelSize: Theme.fontSizeXS
+                    color: contagemArea.containsMouse ? Theme.cBody : Theme.cFaint
+                }
+
+                MouseArea {
+                    id: contagemArea
+                    anchors.fill: parent
+                    hoverEnabled: true
+                    cursorShape: Qt.PointingHandCursor
+                    onClicked: root.expandRequested()
+                }
             }
+
             Item { Layout.fillWidth: true }
         }
 
@@ -122,16 +149,29 @@ Item {
                 Layout.preferredHeight: lado
                 visible: root.restantes > 0
                 radius: Theme.radiusS
-                color: "transparent"
+                color: restoArea.containsMouse ? Theme.cRaised : "transparent"
                 border.width: Theme.borderS
-                border.color: Theme.cLine
+                border.color: restoArea.containsMouse ? Theme.cMuted : Theme.cLine
+
+                Behavior on color {
+                    ColorAnimation { duration: Theme.animationFast; easing.type: Theme.easingType }
+                }
 
                 Text {
                     anchors.centerIn: parent
                     text: "+" + root.restantes
                     font.family: Theme.fontFamilyFixed
                     font.pixelSize: Theme.fontSizeXS
-                    color: Theme.cFaint
+                    color: restoArea.containsMouse ? Theme.cBody : Theme.cFaint
+                }
+
+                // O gesto que o número já pedia: clicar no que falta para ver o que falta.
+                MouseArea {
+                    id: restoArea
+                    anchors.fill: parent
+                    hoverEnabled: true
+                    cursorShape: Qt.PointingHandCursor
+                    onClicked: root.expandRequested()
                 }
             }
 

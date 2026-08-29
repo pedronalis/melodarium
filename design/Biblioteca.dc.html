@@ -10,239 +10,466 @@
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap">
   <style>
     body { margin: 0; font-family: Inter, system-ui, sans-serif; }
-    a { color: #cccccc; } a:hover { color: #dddddd; }
     * { box-sizing: border-box; }
+    a { color: #cccccc; } a:hover { color: #dddddd; }
+    .win { width: 1100px; height: 700px; background: #111111; color: #828282; display: flex; overflow: hidden; }
+    .rail { width: 56px; flex-shrink: 0; display: flex; flex-direction: column; align-items: center; gap: 6px; padding: 18px 0; border-right: 1px solid #1a1a1a; }
+    .rb { width: 34px; height: 34px; border-radius: 12px; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: background .15s; }
+    .rb:hover { background: #191919; }
+    .panel { width: 392px; flex-shrink: 0; display: flex; flex-direction: column; gap: 18px; padding: 26px; background: linear-gradient(170deg, #1a1a1a 0%, #131313 55%, #111111 100%); }
+    .pane { flex-grow: 1; min-width: 0; display: flex; flex-direction: column; padding: 26px 26px 16px 26px; gap: 13px; }
+    .mono { font-family: 'JetBrains Mono', monospace; }
+    .disc { width: 52px; height: 52px; border-radius: 26px; background: #dddddd; display: flex; align-items: center; justify-content: center; cursor: pointer; }
+    .tag { padding: 4px 11px; border-radius: 12px; background: #232323; color: #a4a4a4; font-size: 11px; }
+    .tagnew { padding: 4px 11px; border-radius: 12px; border: 1px dashed #3c3c3c; color: #4a4a4a; font-size: 11px; }
+    .searchbar { display: flex; align-items: center; gap: 6px; height: 30px; padding: 0 9px; border-radius: 12px; background: #191919; border: 1px solid #262626; cursor: pointer; transition: background .15s; }
+    .searchbar:hover { background: #232323; }
+    .chip { display: flex; align-items: center; gap: 6px; height: 22px; padding: 0 9px; border-radius: 12px; font-size: 12px; cursor: pointer; white-space: nowrap; }
+    .chip:hover { filter: brightness(1.4); }
+    .lin { display: flex; align-items: center; gap: 13px; height: 34px; padding: 0 13px; border-radius: 8px; cursor: pointer; transition: background .12s; }
+    .lin:hover { background: #232323 !important; }
+    .grp { display: flex; align-items: center; gap: 13px; height: 38px; padding: 0 13px; border-radius: 8px; cursor: pointer; transition: background .12s; }
+    .grp:hover { background: #232323 !important; }
+    .btn { cursor: pointer; }
+    .plus { opacity: 0.35; transition: opacity .15s; }
+    .lin:hover .plus { opacity: 1; }
+    .menu { position: absolute; right: 0; top: 26px; min-width: 158px; background: #191919; border: 1px solid #262626; border-radius: 12px; padding: 5px; z-index: 5; box-shadow: 0 10px 30px rgba(0,0,0,0.6); }
+    .mi { padding: 7px 11px; border-radius: 8px; font-size: 12px; color: #a4a4a4; cursor: pointer; }
+    .mi:hover { background: #232323; color: #dddddd; }
+    .qc { width: 62px; height: 62px; border-radius: 12px; cursor: pointer; border: 1px solid transparent; }
+    .qc:hover { border-color: #dddddd; }
+    .yt { padding: 1px 6px; border-radius: 7px; border: 1px solid #262626; font-size: 10px; color: #5d5d5d; }
   </style>
 </helmet>
 
-<div style="width: 1100px; height: 700px; background: #111111; color: #828282; display: flex; overflow: hidden;">
-  <div style="width: 56px; flex-shrink: 0; display: flex; flex-direction: column; align-items: center; gap: 7px; padding: 16px 0; border-right: 1px solid #1a1a1a;">
-      <div style="width: 34px; height: 34px; border-radius: 12px; display: flex; align-items: center; justify-content: center; background: transparent;">
-        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#4a4a4a" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="8" cy="18" r="3"/><circle cx="18" cy="16" r="3"/><path d="M11 18V5l10-2v13"/></svg>
-      </div>
-      <div style="width: 34px; height: 34px; border-radius: 12px; display: flex; align-items: center; justify-content: center; background: #232323;">
-        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#dddddd" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M4 6h16M4 12h16M4 18h16"/></svg>
-      </div>
-      <div style="width: 34px; height: 34px; border-radius: 12px; display: flex; align-items: center; justify-content: center; background: transparent;">
-        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#4a4a4a" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="2.5"/></svg>
-      </div>
-      <div style="width: 34px; height: 34px; border-radius: 12px; display: flex; align-items: center; justify-content: center; background: transparent;">
-        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#4a4a4a" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11V4h7l10 10-7 7L3 11z"/></svg>
-      </div>
-      <div style="width: 34px; height: 34px; border-radius: 12px; display: flex; align-items: center; justify-content: center; background: transparent;">
-        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#4a4a4a" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a3 3 0 0 1 3 3v6a3 3 0 0 1-6 0V5a3 3 0 0 1 3-3z"/><path d="M5 10a7 7 0 0 0 14 0M12 17v5"/></svg>
-      </div>
-      <div style="width: 34px; height: 34px; border-radius: 12px; display: flex; align-items: center; justify-content: center; background: transparent;">
-        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#4a4a4a" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
-      </div>
+<div class="win">
+  <svg width="0" height="0" style="position:absolute" aria-hidden="true">
+    <symbol id="i-music" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="8" cy="18" r="3"/><circle cx="18" cy="16" r="3"/><path d="M11 18V5l10-2v13"/></symbol>
+    <symbol id="i-list" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M4 6h16M4 12h16M4 18h16"/></symbol>
+    <symbol id="i-playlist" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M4 6h11M4 12h11M4 18h7"/><circle cx="18" cy="16" r="3"/><path d="M21 16V7"/></symbol>
+    <symbol id="i-mic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5 11a7 7 0 0 0 14 0"/><path d="M12 18v3"/></symbol>
+    <symbol id="i-search" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></symbol>
+    <symbol id="i-settings" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="m19.1 13.9.9.6a1.4 1.4 0 0 1 .4 1.8l-1 1.7a1.4 1.4 0 0 1-1.7.6l-1-.4a7 7 0 0 1-1.6.9l-.2 1.1a1.4 1.4 0 0 1-1.4 1.2h-2a1.4 1.4 0 0 1-1.4-1.2l-.2-1.1a7 7 0 0 1-1.6-.9l-1 .4a1.4 1.4 0 0 1-1.7-.6l-1-1.7a1.4 1.4 0 0 1 .4-1.8l.9-.6a7 7 0 0 1 0-1.8l-.9-.6a1.4 1.4 0 0 1-.4-1.8l1-1.7a1.4 1.4 0 0 1 1.7-.6l1 .4a7 7 0 0 1 1.6-.9l.2-1.1A1.4 1.4 0 0 1 11.1 3h2a1.4 1.4 0 0 1 1.4 1.2l.2 1.1a7 7 0 0 1 1.6.9l1-.4a1.4 1.4 0 0 1 1.7.6l1 1.7a1.4 1.4 0 0 1-.4 1.8l-.9.6a7 7 0 0 1 0 1.8z"/></symbol>
+    <symbol id="i-play" viewBox="0 0 24 24" fill="currentColor"><path d="M4 3.5v17l14-8.5z"/></symbol>
+    <symbol id="i-pause" viewBox="0 0 24 24" fill="currentColor"><path d="M7 4h4v16H7zM13 4h4v16h-4z"/></symbol>
+    <symbol id="i-prev" viewBox="0 0 24 24" fill="currentColor"><path d="M6 5v14h2V5zM20 5l-10 7 10 7z"/></symbol>
+    <symbol id="i-next" viewBox="0 0 24 24" fill="currentColor"><path d="M18 5v14h-2V5zM4 5l10 7-10 7z"/></symbol>
+    <symbol id="i-shuffle" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M16 3h5v5"/><path d="M4 20 21 3"/><path d="M21 16v5h-5"/><path d="m15 15 6 6"/><path d="M4 4l5 5"/></symbol>
+    <symbol id="i-repeat" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="m17 2 4 4-4 4"/><path d="M3 11v-1a4 4 0 0 1 4-4h14"/><path d="m7 22-4-4 4-4"/><path d="M21 13v1a4 4 0 0 1-4 4H3"/></symbol>
+    <symbol id="i-heart" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"><path d="M12 20s-7-4.5-7-9.2A3.8 3.8 0 0 1 12 8a3.8 3.8 0 0 1 7 2.8C19 15.5 12 20 12 20z"/></symbol>
+    <symbol id="i-heartfull" viewBox="0 0 24 24" fill="currentColor"><path d="M12 20s-7-4.5-7-9.2A3.8 3.8 0 0 1 12 8a3.8 3.8 0 0 1 7 2.8C19 15.5 12 20 12 20z"/></symbol>
+    <symbol id="i-plus" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></symbol>
+    <symbol id="i-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 6 6 6-6 6"/></symbol>
+    <symbol id="i-back" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 6-6 6 6 6"/></symbol>
+    <symbol id="i-hist" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><path d="M3 4v4h4"/><path d="M12 8v4l3 2"/></symbol>
+    <symbol id="i-vol" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M11 5 6 9H3v6h3l5 4z"/><path d="M15.5 8.5a5 5 0 0 1 0 7"/></symbol>
+  </svg>
+
+  <div class="rail">
+    <div class="rb"><svg viewBox="0 0 24 24" width="17" height="17" style="color: #4a4a4a;"><use href="#i-playlist"/></svg></div>
+    <div class="rb" style="background: #232323;"><svg viewBox="0 0 24 24" width="17" height="17" style="color: #dddddd;"><use href="#i-list"/></svg></div>
+    <div class="rb"><svg viewBox="0 0 24 24" width="17" height="17" style="color: #4a4a4a;"><use href="#i-mic"/></svg></div>
+    <div class="rb"><svg viewBox="0 0 24 24" width="17" height="17" style="color: #4a4a4a;"><use href="#i-search"/></svg></div>
+    <div style="flex-grow: 1;"></div>
+    <div class="rb" style="opacity: 0.7;"><svg viewBox="0 0 24 24" width="17" height="17" style="color: #4a4a4a;"><use href="#i-settings"/></svg></div>
   </div>
-  <div style="width: 392px; flex-shrink: 0; display: flex; flex-direction: column; gap: 18px; padding: 26px; background: linear-gradient(170deg, #1a1a1a 0%, #131313 55%, #111111 100%);">
+
+  <div class="panel">
     <div style="width: 340px; height: 340px; border-radius: 16px; background: linear-gradient(145deg, #3a3a3a 0%, #262626 45%, #191919 100%); flex-shrink: 0; box-shadow: 0 18px 40px rgba(0,0,0,0.55);"></div>
 
     <div style="display: flex; align-items: flex-start; gap: 13px;">
       <div style="display: flex; flex-direction: column; gap: 4px; flex-grow: 1; min-width: 0;">
-        <span style="font-size: 26px; font-weight: 700; color: #dddddd; letter-spacing: -0.02em; line-height: 1.1;">Vespers</span>
-        <span style="font-size: 14px; color: #828282;">Ólafur Arnalds</span>
-        <span style="font-size: 12px; color: #4a4a4a;">Island Songs · 2016 · FLAC 44.1 kHz</span>
+        <span style="font-size: 26px; font-weight: 700; color: #dddddd; letter-spacing: -0.02em; line-height: 1.1;">{{ nowTitle }}</span>
+        <span style="font-size: 14px; color: #828282;">{{ nowArtist }}</span>
+        <span style="font-size: 12px; color: #4a4a4a;">{{ nowMeta }}</span>
       </div>
-      <svg width="19" height="19" viewBox="0 0 24 24" fill="#cccccc" style="flex-shrink: 0;"><path d="M12 20s-7-4.5-7-9.2A3.8 3.8 0 0 1 12 8a3.8 3.8 0 0 1 7 2.8C19 15.5 12 20 12 20z"/></svg>
+      <svg viewBox="0 0 24 24" width="19" height="19" class="btn" onClick="{{ likeNow }}" style="flex-shrink: 0; color: {{ nowHeartColor }};"><use href="{{ nowHeartIcon }}"/></svg>
     </div>
 
     <div style="display: flex; flex-direction: column; gap: 7px;">
-      <div style="height: 3px; border-radius: 2px; background: #262626; position: relative;">
-        <div style="position: absolute; left: 0; top: 0; bottom: 0; width: 42%; border-radius: 2px; background: #cccccc;"></div>
-        <div style="position: absolute; left: 42%; top: -3px; width: 9px; height: 9px; border-radius: 5px; background: #dddddd;"></div>
+      <div class="btn" onClick="{{ seek }}" style="height: 3px; border-radius: 2px; background: #262626; position: relative;">
+        <div style="position: absolute; left: 0; top: 0; bottom: 0; border-radius: 2px; background: #cccccc; width: {{ progressWidth }};"></div>
+        <div style="position: absolute; top: -3px; width: 9px; height: 9px; border-radius: 5px; background: #dddddd; left: {{ progressWidth }}; margin-left: -4px;"></div>
       </div>
       <div style="display: flex; justify-content: space-between;">
-        <span style="font-size: 11px; color: #5d5d5d; font-family: 'JetBrains Mono', monospace;">1:47</span>
-        <span style="font-size: 11px; color: #5d5d5d; font-family: 'JetBrains Mono', monospace;">4:12</span>
+        <span class="mono" style="font-size: 11px; color: #5d5d5d;">{{ elapsed }}</span>
+        <span class="mono" style="font-size: 11px; color: #5d5d5d;">{{ total }}</span>
       </div>
     </div>
 
     <div style="display: flex; align-items: center; justify-content: center; gap: 26px;">
-      <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#5d5d5d" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="m17 2 4 4-4 4"/><path d="M3 11v-1a4 4 0 0 1 4-4h14"/><path d="m7 22-4-4 4-4"/><path d="M21 13v1a4 4 0 0 1-4 4H3"/></svg>
-      <svg width="20" height="20" viewBox="0 0 24 24" fill="#828282"><path d="M6 5v14h2V5zM20 5l-10 7 10 7z"/></svg>
-      <div style="width: 52px; height: 52px; border-radius: 26px; background: #dddddd; display: flex; align-items: center; justify-content: center;">
-        <svg width="19" height="19" viewBox="0 0 24 24" fill="#111111"><path d="M7 4h4v16H7zM13 4h4v16h-4z"/></svg>
+      <svg viewBox="0 0 24 24" width="17" height="17" class="btn" onClick="{{ toggleShuffle }}" style="color: {{ shuffleColor }};"><use href="#i-shuffle"/></svg>
+      <svg viewBox="0 0 24 24" width="20" height="20" class="btn" onClick="{{ prev }}" style="color: #828282;"><use href="#i-prev"/></svg>
+      <div class="disc" onClick="{{ togglePlay }}">
+        <svg viewBox="0 0 24 24" width="19" height="19" style="color: #111111;"><use href="{{ playIcon }}"/></svg>
       </div>
-      <svg width="20" height="20" viewBox="0 0 24 24" fill="#828282"><path d="M18 5v14h-2V5zM4 5l10 7-10 7z"/></svg>
-      <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#5d5d5d" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M16 3h5v5"/><path d="M4 20 21 3"/><path d="M21 16v5h-5"/><path d="m15 15 6 6"/><path d="M4 4l5 5"/></svg>
+      <svg viewBox="0 0 24 24" width="20" height="20" class="btn" onClick="{{ next }}" style="color: #828282;"><use href="#i-next"/></svg>
+      <div style="position: relative; display: flex;">
+        <svg viewBox="0 0 24 24" width="17" height="17" class="btn" onClick="{{ cycleRepeat }}" style="color: {{ repeatColor }};"><use href="#i-repeat"/></svg>
+        <span class="mono" style="position: absolute; right: -2px; bottom: -3px; font-size: 10px; font-weight: 700; color: {{ repeatOneColor }};">{{ repeatOneLabel }}</span>
+      </div>
+    </div>
+
+    <div style="display: flex; align-items: center; justify-content: flex-end; gap: 6px;">
+      <svg viewBox="0 0 24 24" width="12" height="12" style="color: #5d5d5d;"><use href="#i-vol"/></svg>
+      <div class="btn" onClick="{{ setVolume }}" style="width: 72px; height: 3px; border-radius: 2px; background: #262626;">
+        <div style="height: 3px; border-radius: 2px; background: #5d5d5d; width: {{ volumeWidth }};"></div>
+      </div>
     </div>
 
     <div style="display: flex; gap: 4px;">
-      <span style="padding: 4px 11px; border-radius: 12px; background: #232323; color: #a4a4a4; font-size: 11px;">piano</span>
-      <span style="padding: 4px 11px; border-radius: 12px; background: #232323; color: #a4a4a4; font-size: 11px;">chuva</span>
-      <span style="padding: 4px 11px; border-radius: 12px; border: 1px dashed #3c3c3c; color: #4a4a4a; font-size: 11px;">+ tag</span>
+      <span class="tag">piano</span>
+      <span class="tag">chuva</span>
+      <span class="tagnew">+ tag</span>
     </div>
   </div>
 
-  <div style="flex-grow: 1; min-width: 0; display: flex; flex-direction: column; padding: 26px 26px 16px 26px; gap: 13px;">
-    <div style="display: flex; align-items: baseline; gap: 9px;">
-      <span style="font-size: 19px; font-weight: 600; color: #dddddd; letter-spacing: -0.01em;">Biblioteca</span>
-      <span style="font-size: 12px; color: #4a4a4a; font-family: 'JetBrains Mono', monospace;">1.204 faixas · 3 d 11 h</span>
+  <div class="pane">
+    <div style="display: flex; align-items: flex-start; gap: 9px;">
+      <div style="display: flex; flex-direction: column; gap: 2px; flex-grow: 1; min-width: 0;">
+        <div style="display: flex; align-items: center; gap: 9px;">
+          <sc-if value="{{ inGroup }}" hint-placeholder-val="{{ false }}">
+            <svg viewBox="0 0 24 24" width="15" height="15" class="btn" onClick="{{ backToAll }}" style="color: #5d5d5d;"><use href="#i-back"/></svg>
+          </sc-if>
+          <span style="font-size: 19px; font-weight: 600; color: #dddddd; letter-spacing: -0.01em;">{{ listTitle }}</span>
+        </div>
+        <span class="mono" style="font-size: 12px; color: #4a4a4a;">{{ listCount }}</span>
+      </div>
+      <svg viewBox="0 0 24 24" width="14" height="14" class="btn" style="color: #5d5d5d; opacity: 0.55; margin-top: 4px;"><use href="#i-hist"/></svg>
     </div>
 
-    <div style="display: flex; align-items: center; gap: 7px; padding: 6px 11px; border-radius: 12px; background: #191919; border: 1px solid #262626;">
-      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#5d5d5d" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
-      <span style="font-size: 12px; color: #4a4a4a;">buscar por título, artista, álbum…</span>
+    <div class="searchbar">
+      <svg viewBox="0 0 24 24" width="13" height="13" style="color: #5d5d5d;"><use href="#i-search"/></svg>
+      <span style="font-size: 12px; color: #4a4a4a; flex-grow: 1;">buscar por título, artista, álbum…</span>
+      <span class="mono" style="font-size: 11px; color: #3c3c3c;">Ctrl+K</span>
     </div>
 
-    <div style="display: flex; gap: 4px; align-items: center;">
-        <span style="padding: 4px 11px; border-radius: 12px; font-size: 11px; background: #262626; color: #dddddd; font-weight: 600;">Todas</span>
-        <span style="padding: 4px 11px; border-radius: 12px; font-size: 11px; color: #5d5d5d; border: 1px solid #232323;">Artistas</span>
-        <span style="padding: 4px 11px; border-radius: 12px; font-size: 11px; color: #5d5d5d; border: 1px solid #232323;">Álbuns</span>
-        <span style="padding: 4px 11px; border-radius: 12px; font-size: 11px; color: #5d5d5d; border: 1px solid #232323;">Gêneros</span>
-        <span style="padding: 4px 11px; border-radius: 12px; font-size: 11px; color: #5d5d5d; border: 1px solid #232323;">Tags</span>
-        <span style="display: inline-flex; align-items: center; gap: 5px; padding: 4px 11px; border-radius: 12px; font-size: 11px; color: #5d5d5d; border: 1px solid #232323;">
-          <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#5d5d5d" stroke-width="2" stroke-linejoin="round"><path d="M12 20s-7-4.5-7-9.2A3.8 3.8 0 0 1 12 8a3.8 3.8 0 0 1 7 2.8C19 15.5 12 20 12 20z"/></svg>Curtidas</span>
-        <span style="display: inline-flex; align-items: center; gap: 5px; padding: 4px 11px; border-radius: 12px; font-size: 11px; color: #5d5d5d; border: 1px solid #232323; margin-left: auto;">Automáticas
-          <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#5d5d5d" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg></span>
+    <div style="display: flex; align-items: center; gap: 4px; position: relative;">
+      <sc-for list="{{ chips }}" as="c" hint-placeholder-count="5">
+        <div class="chip" style="background: {{ c.bg }}; border: {{ c.border }}; color: {{ c.color }}; font-weight: {{ c.weight }};" onClick="{{ c.pick }}">{{ c.label }}</div>
+      </sc-for>
+      <div class="chip" style="background: {{ likedBg }}; border: {{ likedBorder }}; color: {{ likedColor }};" onClick="{{ pickLiked }}">
+        <svg viewBox="0 0 24 24" width="11" height="11"><use href="#i-heart"/></svg>
+        <span>Curtidas</span>
+      </div>
+      <span class="mono" style="font-size: 11px; color: #3c3c3c;">128</span>
+      <div style="flex-grow: 1;"></div>
+      <div class="chip" style="background: {{ autoBg }}; border: {{ autoBorder }}; color: {{ autoColor }};" onClick="{{ toggleAuto }}">
+        <span>{{ autoLabel }}</span>
+        <svg viewBox="0 0 24 24" width="11" height="11" style="transform: rotate(90deg);"><use href="#i-chev"/></svg>
+      </div>
+      <sc-if value="{{ autoOpen }}" hint-placeholder-val="{{ false }}">
+        <div class="menu">
+          <sc-for list="{{ autos }}" as="a" hint-placeholder-count="4">
+            <div class="mi" onClick="{{ a.pick }}">{{ a.label }}</div>
+          </sc-for>
+        </div>
+      </sc-if>
     </div>
 
-    <div style="display: flex; flex-direction: column; gap: 1px; min-height: 0;">
-        <div style="display: grid; grid-template-columns: 22px 1fr 132px 16px 46px; gap: 13px; align-items: center; padding: 5px 13px; border-radius: 8px; background: #1c1c1c;">
-          <span style="display: flex; justify-content: flex-end;"><svg width="9" height="9" viewBox="0 0 24 24" fill="#cccccc"><path d="M4 3.5v17l14-8.5z"/></svg></span>
-          <div style="display: flex; flex-direction: column; min-width: 0;">
-            <span style="font-size: 12px; font-weight: 600; color: #dddddd; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">Vespers</span>
-            <span style="font-size: 11px; color: #828282;">Ólafur Arnalds</span>
+    <div style="flex-grow: 1; min-height: 0; display: flex; flex-direction: column; gap: 1px; overflow: hidden;">
+      <sc-for list="{{ rows }}" as="r" hint-placeholder-count="12">
+        <div class="lin" style="background: {{ r.bg }};" onClick="{{ r.play }}">
+          <sc-if value="{{ r.current }}" hint-placeholder-val="{{ true }}">
+            <svg viewBox="0 0 24 24" width="11" height="11" style="width: 22px; flex-shrink: 0; color: #cccccc;"><use href="#i-play"/></svg>
+          </sc-if>
+          <sc-if value="{{ r.idle }}" hint-placeholder-val="{{ false }}">
+            <span class="mono" style="width: 22px; text-align: right; font-size: 11px; color: #3c3c3c; flex-shrink: 0;">{{ r.num }}</span>
+          </sc-if>
+          <div style="display: flex; flex-direction: column; flex-grow: 1; min-width: 0;">
+            <span style="font-size: 13px; line-height: 1.15; color: {{ r.titleColor }}; font-weight: {{ r.titleWeight }}; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">{{ r.title }}</span>
+            <span style="font-size: 11px; line-height: 1.15; color: {{ r.artistColor }}; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">{{ r.artist }}</span>
           </div>
-          <span style="font-size: 11px; color: #4a4a4a; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">Island Songs</span>
-          <svg width="13" height="13" viewBox="0 0 24 24" fill="#cccccc" style="flex-shrink: 0;"><path d="M12 20s-7-4.5-7-9.2A3.8 3.8 0 0 1 12 8a3.8 3.8 0 0 1 7 2.8C19 15.5 12 20 12 20z"/></svg>
-          <span style="font-size: 11px; color: #5d5d5d; font-family: 'JetBrains Mono', monospace; text-align: right;">4:12</span>
+          <span style="font-size: 12px; color: #4a4a4a; text-align: right; white-space: nowrap;">{{ r.album }}</span>
+          <sc-if value="{{ r.youtube }}" hint-placeholder-val="{{ false }}">
+            <span class="yt">YouTube</span>
+          </sc-if>
+          <svg viewBox="0 0 24 24" width="13" height="13" class="btn plus" style="flex-shrink: 0; color: #828282;"><use href="#i-plus"/></svg>
+          <svg viewBox="0 0 24 24" width="13" height="13" class="btn" onClick="{{ r.like }}" style="flex-shrink: 0; color: {{ r.heartColor }};"><use href="{{ r.heartIcon }}"/></svg>
+          <span class="mono" style="width: 46px; text-align: right; font-size: 12px; color: #5d5d5d;">{{ r.time }}</span>
         </div>
-        <div style="display: grid; grid-template-columns: 22px 1fr 132px 16px 46px; gap: 13px; align-items: center; padding: 5px 13px; border-radius: 8px; background: #151515;">
-          <span style="display: flex; justify-content: flex-end;"><span style="font-size: 11px; color: #3c3c3c; font-family: 'JetBrains Mono', monospace;">2</span></span>
-          <div style="display: flex; flex-direction: column; min-width: 0;">
-            <span style="font-size: 12px; font-weight: 400; color: #a4a4a4; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">Saman</span>
-            <span style="font-size: 11px; color: #5d5d5d;">Ólafur Arnalds</span>
+      </sc-for>
+
+      <sc-for list="{{ groups }}" as="g" hint-placeholder-count="4">
+        <div class="grp" style="background: {{ g.bg }};" onClick="{{ g.open }}">
+          <div style="display: flex; flex-direction: column; flex-grow: 1; min-width: 0;">
+            <span style="font-size: 13px; line-height: 1.2; color: #dddddd;">{{ g.name }}</span>
+            <span style="font-size: 11px; line-height: 1.2; color: #3c3c3c;">{{ g.subtitle }}</span>
           </div>
-          <span style="font-size: 11px; color: #4a4a4a; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">Island Songs</span>
-          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#2f2f2f" stroke-width="1.7" stroke-linejoin="round" style="flex-shrink: 0;"><path d="M12 20s-7-4.5-7-9.2A3.8 3.8 0 0 1 12 8a3.8 3.8 0 0 1 7 2.8C19 15.5 12 20 12 20z"/></svg>
-          <span style="font-size: 11px; color: #5d5d5d; font-family: 'JetBrains Mono', monospace; text-align: right;">3:38</span>
+          <span class="mono" style="font-size: 12px; color: #3c3c3c;">{{ g.count }} faixas</span>
         </div>
-        <div style="display: grid; grid-template-columns: 22px 1fr 132px 16px 46px; gap: 13px; align-items: center; padding: 5px 13px; border-radius: 8px; background: transparent;">
-          <span style="display: flex; justify-content: flex-end;"><span style="font-size: 11px; color: #3c3c3c; font-family: 'JetBrains Mono', monospace;">3</span></span>
-          <div style="display: flex; flex-direction: column; min-width: 0;">
-            <span style="font-size: 12px; font-weight: 400; color: #a4a4a4; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">Particles</span>
-            <span style="font-size: 11px; color: #5d5d5d;">Ólafur Arnalds</span>
-          </div>
-          <span style="font-size: 11px; color: #4a4a4a; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">Island Songs</span>
-          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#2f2f2f" stroke-width="1.7" stroke-linejoin="round" style="flex-shrink: 0;"><path d="M12 20s-7-4.5-7-9.2A3.8 3.8 0 0 1 12 8a3.8 3.8 0 0 1 7 2.8C19 15.5 12 20 12 20z"/></svg>
-          <span style="font-size: 11px; color: #5d5d5d; font-family: 'JetBrains Mono', monospace; text-align: right;">4:47</span>
+      </sc-for>
+    </div>
+
+    <div style="display: flex; flex-direction: column; gap: 9px;">
+      <div style="display: flex; align-items: center; gap: 6px;">
+        <span style="font-size: 10px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: #3c3c3c;">A seguir na fila</span>
+        <span class="mono" style="font-size: 11px; color: #3c3c3c;">12 na fila</span>
+      </div>
+      <div style="display: flex; gap: 9px;">
+        <div class="qc" style="background: linear-gradient(140deg, #2e2e2e, #1a1a1a);"></div>
+        <div class="qc" style="background: linear-gradient(140deg, #282828, #181818);"></div>
+        <div class="qc" style="background: linear-gradient(140deg, #242424, #161616);"></div>
+        <div class="qc" style="background: linear-gradient(140deg, #202020, #151515);"></div>
+        <div style="width: 62px; height: 62px; border-radius: 12px; border: 1px dashed #262626; display: flex; align-items: center; justify-content: center;">
+          <span class="mono" style="font-size: 11px; color: #3c3c3c;">+4</span>
         </div>
-        <div style="display: grid; grid-template-columns: 22px 1fr 132px 16px 46px; gap: 13px; align-items: center; padding: 5px 13px; border-radius: 8px; background: #151515;">
-          <span style="display: flex; justify-content: flex-end;"><span style="font-size: 11px; color: #3c3c3c; font-family: 'JetBrains Mono', monospace;">4</span></span>
-          <div style="display: flex; flex-direction: column; min-width: 0;">
-            <span style="font-size: 12px; font-weight: 400; color: #a4a4a4; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">Nyepi</span>
-            <span style="font-size: 11px; color: #5d5d5d;">Nils Frahm</span>
-          </div>
-          <span style="font-size: 11px; color: #4a4a4a; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">All Melody</span>
-          <svg width="13" height="13" viewBox="0 0 24 24" fill="#cccccc" style="flex-shrink: 0;"><path d="M12 20s-7-4.5-7-9.2A3.8 3.8 0 0 1 12 8a3.8 3.8 0 0 1 7 2.8C19 15.5 12 20 12 20z"/></svg>
-          <span style="font-size: 11px; color: #5d5d5d; font-family: 'JetBrains Mono', monospace; text-align: right;">6:04</span>
-        </div>
-        <div style="display: grid; grid-template-columns: 22px 1fr 132px 16px 46px; gap: 13px; align-items: center; padding: 5px 13px; border-radius: 8px; background: transparent;">
-          <span style="display: flex; justify-content: flex-end;"><span style="font-size: 11px; color: #3c3c3c; font-family: 'JetBrains Mono', monospace;">5</span></span>
-          <div style="display: flex; flex-direction: column; min-width: 0;">
-            <span style="font-size: 12px; font-weight: 400; color: #a4a4a4; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">Sunson</span>
-            <span style="font-size: 11px; color: #5d5d5d;">Nils Frahm</span>
-          </div>
-          <span style="font-size: 11px; color: #4a4a4a; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">All Melody</span>
-          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#2f2f2f" stroke-width="1.7" stroke-linejoin="round" style="flex-shrink: 0;"><path d="M12 20s-7-4.5-7-9.2A3.8 3.8 0 0 1 12 8a3.8 3.8 0 0 1 7 2.8C19 15.5 12 20 12 20z"/></svg>
-          <span style="font-size: 11px; color: #5d5d5d; font-family: 'JetBrains Mono', monospace; text-align: right;">9:26</span>
-        </div>
-        <div style="display: grid; grid-template-columns: 22px 1fr 132px 16px 46px; gap: 13px; align-items: center; padding: 5px 13px; border-radius: 8px; background: #151515;">
-          <span style="display: flex; justify-content: flex-end;"><span style="font-size: 11px; color: #3c3c3c; font-family: 'JetBrains Mono', monospace;">6</span></span>
-          <div style="display: flex; flex-direction: column; min-width: 0;">
-            <span style="font-size: 12px; font-weight: 400; color: #a4a4a4; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">#2</span>
-            <span style="font-size: 11px; color: #5d5d5d;">Nils Frahm</span>
-          </div>
-          <span style="font-size: 11px; color: #4a4a4a; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">Screws</span>
-          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#2f2f2f" stroke-width="1.7" stroke-linejoin="round" style="flex-shrink: 0;"><path d="M12 20s-7-4.5-7-9.2A3.8 3.8 0 0 1 12 8a3.8 3.8 0 0 1 7 2.8C19 15.5 12 20 12 20z"/></svg>
-          <span style="font-size: 11px; color: #5d5d5d; font-family: 'JetBrains Mono', monospace; text-align: right;">2:41</span>
-        </div>
-        <div style="display: grid; grid-template-columns: 22px 1fr 132px 16px 46px; gap: 13px; align-items: center; padding: 5px 13px; border-radius: 8px; background: transparent;">
-          <span style="display: flex; justify-content: flex-end;"><span style="font-size: 11px; color: #3c3c3c; font-family: 'JetBrains Mono', monospace;">7</span></span>
-          <div style="display: flex; flex-direction: column; min-width: 0;">
-            <span style="font-size: 12px; font-weight: 400; color: #a4a4a4; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">Avril 14th</span>
-            <span style="font-size: 11px; color: #5d5d5d;">Aphex Twin</span>
-          </div>
-          <span style="font-size: 11px; color: #4a4a4a; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">Drukqs</span>
-          <svg width="13" height="13" viewBox="0 0 24 24" fill="#cccccc" style="flex-shrink: 0;"><path d="M12 20s-7-4.5-7-9.2A3.8 3.8 0 0 1 12 8a3.8 3.8 0 0 1 7 2.8C19 15.5 12 20 12 20z"/></svg>
-          <span style="font-size: 11px; color: #5d5d5d; font-family: 'JetBrains Mono', monospace; text-align: right;">1:52</span>
-        </div>
-        <div style="display: grid; grid-template-columns: 22px 1fr 132px 16px 46px; gap: 13px; align-items: center; padding: 5px 13px; border-radius: 8px; background: #151515;">
-          <span style="display: flex; justify-content: flex-end;"><span style="font-size: 11px; color: #3c3c3c; font-family: 'JetBrains Mono', monospace;">8</span></span>
-          <div style="display: flex; flex-direction: column; min-width: 0;">
-            <span style="font-size: 12px; font-weight: 400; color: #a4a4a4; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">Rhubarb</span>
-            <span style="font-size: 11px; color: #5d5d5d;">Aphex Twin</span>
-          </div>
-          <span style="font-size: 11px; color: #4a4a4a; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">SAW II</span>
-          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#2f2f2f" stroke-width="1.7" stroke-linejoin="round" style="flex-shrink: 0;"><path d="M12 20s-7-4.5-7-9.2A3.8 3.8 0 0 1 12 8a3.8 3.8 0 0 1 7 2.8C19 15.5 12 20 12 20z"/></svg>
-          <span style="font-size: 11px; color: #5d5d5d; font-family: 'JetBrains Mono', monospace; text-align: right;">7:41</span>
-        </div>
-        <div style="display: grid; grid-template-columns: 22px 1fr 132px 16px 46px; gap: 13px; align-items: center; padding: 5px 13px; border-radius: 8px; background: transparent;">
-          <span style="display: flex; justify-content: flex-end;"><span style="font-size: 11px; color: #3c3c3c; font-family: 'JetBrains Mono', monospace;">9</span></span>
-          <div style="display: flex; flex-direction: column; min-width: 0;">
-            <span style="font-size: 12px; font-weight: 400; color: #a4a4a4; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">Xtal</span>
-            <span style="font-size: 11px; color: #5d5d5d;">Aphex Twin</span>
-          </div>
-          <span style="font-size: 11px; color: #4a4a4a; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">SAW 85-92</span>
-          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#2f2f2f" stroke-width="1.7" stroke-linejoin="round" style="flex-shrink: 0;"><path d="M12 20s-7-4.5-7-9.2A3.8 3.8 0 0 1 12 8a3.8 3.8 0 0 1 7 2.8C19 15.5 12 20 12 20z"/></svg>
-          <span style="font-size: 11px; color: #5d5d5d; font-family: 'JetBrains Mono', monospace; text-align: right;">4:52</span>
-        </div>
-        <div style="display: grid; grid-template-columns: 22px 1fr 132px 16px 46px; gap: 13px; align-items: center; padding: 5px 13px; border-radius: 8px; background: #151515;">
-          <span style="display: flex; justify-content: flex-end;"><span style="font-size: 11px; color: #3c3c3c; font-family: 'JetBrains Mono', monospace;">10</span></span>
-          <div style="display: flex; flex-direction: column; min-width: 0;">
-            <span style="font-size: 12px; font-weight: 400; color: #a4a4a4; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">Kiara</span>
-            <span style="font-size: 11px; color: #5d5d5d;">Bonobo</span>
-          </div>
-          <span style="font-size: 11px; color: #4a4a4a; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">Black Sands</span>
-          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#2f2f2f" stroke-width="1.7" stroke-linejoin="round" style="flex-shrink: 0;"><path d="M12 20s-7-4.5-7-9.2A3.8 3.8 0 0 1 12 8a3.8 3.8 0 0 1 7 2.8C19 15.5 12 20 12 20z"/></svg>
-          <span style="font-size: 11px; color: #5d5d5d; font-family: 'JetBrains Mono', monospace; text-align: right;">4:01</span>
-        </div>
-        <div style="display: grid; grid-template-columns: 22px 1fr 132px 16px 46px; gap: 13px; align-items: center; padding: 5px 13px; border-radius: 8px; background: transparent;">
-          <span style="display: flex; justify-content: flex-end;"><span style="font-size: 11px; color: #3c3c3c; font-family: 'JetBrains Mono', monospace;">11</span></span>
-          <div style="display: flex; flex-direction: column; min-width: 0;">
-            <span style="font-size: 12px; font-weight: 400; color: #a4a4a4; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">Kong</span>
-            <span style="font-size: 11px; color: #5d5d5d;">Bonobo</span>
-          </div>
-          <span style="font-size: 11px; color: #4a4a4a; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">Black Sands</span>
-          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#2f2f2f" stroke-width="1.7" stroke-linejoin="round" style="flex-shrink: 0;"><path d="M12 20s-7-4.5-7-9.2A3.8 3.8 0 0 1 12 8a3.8 3.8 0 0 1 7 2.8C19 15.5 12 20 12 20z"/></svg>
-          <span style="font-size: 11px; color: #5d5d5d; font-family: 'JetBrains Mono', monospace; text-align: right;">4:47</span>
-        </div>
-        <div style="display: grid; grid-template-columns: 22px 1fr 132px 16px 46px; gap: 13px; align-items: center; padding: 5px 13px; border-radius: 8px; background: #151515;">
-          <span style="display: flex; justify-content: flex-end;"><span style="font-size: 11px; color: #3c3c3c; font-family: 'JetBrains Mono', monospace;">12</span></span>
-          <div style="display: flex; flex-direction: column; min-width: 0;">
-            <span style="font-size: 12px; font-weight: 400; color: #a4a4a4; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">Cirrus</span>
-            <span style="font-size: 11px; color: #5d5d5d;">Bonobo</span>
-          </div>
-          <span style="font-size: 11px; color: #4a4a4a; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">The North Borders</span>
-          <svg width="13" height="13" viewBox="0 0 24 24" fill="#cccccc" style="flex-shrink: 0;"><path d="M12 20s-7-4.5-7-9.2A3.8 3.8 0 0 1 12 8a3.8 3.8 0 0 1 7 2.8C19 15.5 12 20 12 20z"/></svg>
-          <span style="font-size: 11px; color: #5d5d5d; font-family: 'JetBrains Mono', monospace; text-align: right;">5:11</span>
-        </div>
-        <div style="display: grid; grid-template-columns: 22px 1fr 132px 16px 46px; gap: 13px; align-items: center; padding: 5px 13px; border-radius: 8px; background: transparent;">
-          <span style="display: flex; justify-content: flex-end;"><span style="font-size: 11px; color: #3c3c3c; font-family: 'JetBrains Mono', monospace;">13</span></span>
-          <div style="display: flex; flex-direction: column; min-width: 0;">
-            <span style="font-size: 12px; font-weight: 400; color: #a4a4a4; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">Teardrop</span>
-            <span style="font-size: 11px; color: #5d5d5d;">Massive Attack</span>
-          </div>
-          <span style="font-size: 11px; color: #4a4a4a; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">Mezzanine</span>
-          <svg width="13" height="13" viewBox="0 0 24 24" fill="#cccccc" style="flex-shrink: 0;"><path d="M12 20s-7-4.5-7-9.2A3.8 3.8 0 0 1 12 8a3.8 3.8 0 0 1 7 2.8C19 15.5 12 20 12 20z"/></svg>
-          <span style="font-size: 11px; color: #5d5d5d; font-family: 'JetBrains Mono', monospace; text-align: right;">5:29</span>
-        </div>
-        <div style="display: grid; grid-template-columns: 22px 1fr 132px 16px 46px; gap: 13px; align-items: center; padding: 5px 13px; border-radius: 8px; background: #151515;">
-          <span style="display: flex; justify-content: flex-end;"><span style="font-size: 11px; color: #3c3c3c; font-family: 'JetBrains Mono', monospace;">14</span></span>
-          <div style="display: flex; flex-direction: column; min-width: 0;">
-            <span style="font-size: 12px; font-weight: 400; color: #a4a4a4; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">Angel</span>
-            <span style="font-size: 11px; color: #5d5d5d;">Massive Attack</span>
-          </div>
-          <span style="font-size: 11px; color: #4a4a4a; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">Mezzanine</span>
-          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#2f2f2f" stroke-width="1.7" stroke-linejoin="round" style="flex-shrink: 0;"><path d="M12 20s-7-4.5-7-9.2A3.8 3.8 0 0 1 12 8a3.8 3.8 0 0 1 7 2.8C19 15.5 12 20 12 20z"/></svg>
-          <span style="font-size: 11px; color: #5d5d5d; font-family: 'JetBrains Mono', monospace; text-align: right;">6:19</span>
-        </div>
+      </div>
     </div>
   </div>
 </div>
 </x-dc>
+
+<script data-dc-script data-props='{"accent":{"editor":"color","default":"#cccccc","options":["#cccccc","#8ab4f8","#c9a227","#7fb069"]},"$preview":{"width":1100,"height":700}}'>
+class Component extends DCLogic {
+  constructor(props) {
+    super(props)
+    this.state = {
+      axis: 'all',
+      group: null,
+      current: 0,
+      playing: true,
+      position: 107,
+      shuffle: false,
+      repeat: 0,
+      volume: 68,
+      autoOpen: false,
+      liked: {}
+    }
+  }
+
+  componentDidMount() {
+    this.timer = setInterval(() => {
+      if (!this.state.playing) return
+      this.setState({ position: this.state.position + 1 >= 252 ? 0 : this.state.position + 1 })
+    }, 1000)
+  }
+
+  componentWillUnmount() { clearInterval(this.timer) }
+
+  library() {
+    return [
+      { title: 'Vespers', artist: 'Ólafur Arnalds', album: 'Island Songs', time: '4:12', liked: true, genre: 'Modern Classical' },
+      { title: 'Saman', artist: 'Ólafur Arnalds', album: 'Island Songs', time: '3:38', liked: false, genre: 'Modern Classical' },
+      { title: 'Particles', artist: 'Ólafur Arnalds', album: 'Island Songs', time: '4:47', liked: false, genre: 'Modern Classical' },
+      { title: 'Nyepi', artist: 'Nils Frahm', album: 'All Melody', time: '6:04', liked: true, genre: 'Ambient' },
+      { title: 'Sunson', artist: 'Nils Frahm', album: 'All Melody', time: '9:26', liked: false, genre: 'Ambient' },
+      { title: '#2', artist: 'Nils Frahm', album: 'Screws', time: '2:41', liked: false, genre: 'Modern Classical' },
+      { title: 'Avril 14th', artist: 'Aphex Twin', album: 'Drukqs', time: '1:52', liked: true, genre: 'IDM' },
+      { title: 'Rhubarb', artist: 'Aphex Twin', album: 'SAW II', time: '7:41', liked: false, genre: 'Ambient' },
+      { title: 'Xtal', artist: 'Aphex Twin', album: 'SAW 85-92', time: '4:52', liked: false, genre: 'IDM' },
+      { title: 'Kiara', artist: 'Bonobo', album: 'Black Sands', time: '4:01', liked: false, genre: 'Downtempo' },
+      { title: 'Kong', artist: 'Bonobo', album: 'Black Sands', time: '3:32', liked: false, genre: 'Downtempo', youtube: true },
+      { title: 'Eyesdown', artist: 'Bonobo', album: 'Black Sands', time: '5:07', liked: false, genre: 'Downtempo' }
+    ]
+  }
+
+  axes() {
+    return {
+      artists: { label: 'Artistas', items: [
+        { name: 'Ólafur Arnalds', subtitle: '4 álbuns', count: 86 },
+        { name: 'Nils Frahm', subtitle: '6 álbuns', count: 142 },
+        { name: 'Aphex Twin', subtitle: '9 álbuns', count: 218 },
+        { name: 'Bonobo', subtitle: '5 álbuns', count: 97 }
+      ] },
+      albums: { label: 'Álbuns', items: [
+        { name: 'Island Songs', subtitle: 'Ólafur Arnalds', count: 8 },
+        { name: 'All Melody', subtitle: 'Nils Frahm', count: 12 },
+        { name: 'Drukqs', subtitle: 'Aphex Twin', count: 30 },
+        { name: 'Black Sands', subtitle: 'Bonobo', count: 12 }
+      ] },
+      genres: { label: 'Gêneros', items: [
+        { name: 'Ambient', subtitle: '', count: 312 },
+        { name: 'Modern Classical', subtitle: '', count: 204 },
+        { name: 'IDM', subtitle: '', count: 188 },
+        { name: 'Downtempo', subtitle: '', count: 96 }
+      ] },
+      tags: { label: 'Tags', items: [
+        { name: 'piano', subtitle: '', count: 46 },
+        { name: 'chuva', subtitle: '', count: 18 },
+        { name: 'foco', subtitle: '', count: 63 },
+        { name: 'noite', subtitle: '', count: 27 }
+      ] }
+    }
+  }
+
+  clock(secs) {
+    const s = Math.max(0, Math.floor(secs))
+    return Math.floor(s / 60) + ':' + ('0' + (s % 60)).slice(-2)
+  }
+
+  isLiked(i, base) {
+    const over = this.state.liked[i]
+    return over === undefined ? base : over
+  }
+
+  renderVals() {
+    const accent = this.props.accent ?? '#cccccc'
+    const s = this.state
+    const all = this.library()
+    const axes = this.axes()
+    const axis = axes[s.axis]
+
+    const showGroups = axis !== undefined && s.group === null
+    let visible = all.map((t, i) => ({ t, i }))
+    let title = 'Biblioteca'
+    let count = '1.204 faixas · 3 d 11 h'
+
+    if (s.axis === 'liked') {
+      visible = visible.filter((e) => this.isLiked(e.i, e.t.liked))
+      title = 'Curtidas'
+      count = visible.length + ' faixas · 22 min'
+    } else if (s.axis === 'recent') {
+      visible = visible.slice(6).concat(visible.slice(0, 3))
+      title = 'Recentes'
+      count = '9 faixas · 42 min'
+    } else if (s.axis === 'most') {
+      title = 'Mais tocadas'
+      count = '12 faixas · 57 min'
+    } else if (s.axis === 'forgotten') {
+      visible = visible.slice(3, 9)
+      title = 'Esquecidas'
+      count = '88 faixas · 5 h 12 min'
+    } else if (s.axis === 'never') {
+      visible = visible.slice(7)
+      title = 'Nunca ouvi'
+      count = '312 faixas · 18 h 44 min'
+    } else if (s.group !== null) {
+      title = s.group
+      const field = s.axis === 'artists' ? 'artist' : (s.axis === 'albums' ? 'album' : 'genre')
+      if (s.axis === 'tags') {
+        visible = visible.slice(0, 4)
+      } else {
+        visible = visible.filter((e) => e.t[field] === s.group)
+      }
+      const artist = visible.length > 0 ? visible[0].t.artist : ''
+      count = (s.axis === 'albums' ? artist + ' · ' : '') + visible.length + ' faixas · 35 min'
+    }
+
+    const rows = showGroups ? [] : visible.map((e, pos) => ({
+      num: String(pos + 1),
+      title: e.t.title,
+      artist: e.t.artist,
+      album: e.t.album,
+      time: e.t.time,
+      youtube: e.t.youtube === true,
+      current: e.i === s.current,
+      idle: e.i !== s.current,
+      bg: e.i === s.current ? '#1c1c1c' : (pos % 2 === 1 ? '#151515' : 'transparent'),
+      titleColor: e.i === s.current ? '#dddddd' : '#a4a4a4',
+      titleWeight: e.i === s.current ? '600' : '400',
+      artistColor: e.i === s.current ? '#828282' : '#5d5d5d',
+      heartIcon: this.isLiked(e.i, e.t.liked) ? '#i-heartfull' : '#i-heart',
+      heartColor: this.isLiked(e.i, e.t.liked) ? accent : '#2f2f2f',
+      play: () => this.setState({ current: e.i, position: 0, playing: true }),
+      like: (ev) => {
+        ev.stopPropagation()
+        const liked = Object.assign({}, s.liked)
+        liked[e.i] = !this.isLiked(e.i, e.t.liked)
+        this.setState({ liked })
+      }
+    }))
+
+    const groups = showGroups ? axis.items.map((g, i) => ({
+      name: g.name,
+      subtitle: g.subtitle,
+      count: String(g.count),
+      bg: i % 2 === 1 ? '#151515' : 'transparent',
+      open: () => this.setState({ group: g.name })
+    })) : []
+
+    if (showGroups) {
+      title = axis.label
+      count = axis.items.length + ' itens'
+    }
+
+    const chipDefs = [
+      { key: 'all', label: 'Todas' },
+      { key: 'artists', label: 'Artistas' },
+      { key: 'albums', label: 'Álbuns' },
+      { key: 'genres', label: 'Gêneros' },
+      { key: 'tags', label: 'Tags' }
+    ]
+    const chips = chipDefs.map((c) => {
+      const on = s.axis === c.key
+      return {
+        label: c.label,
+        bg: on ? '#262626' : 'transparent',
+        border: on ? 'none' : '1px solid #232323',
+        color: on ? '#dddddd' : '#5d5d5d',
+        weight: on ? '600' : '400',
+        pick: () => this.setState({ axis: c.key, group: null, autoOpen: false })
+      }
+    })
+
+    const autoDefs = [
+      { key: 'recent', label: 'Recentes' },
+      { key: 'most', label: 'Mais tocadas' },
+      { key: 'forgotten', label: 'Esquecidas' },
+      { key: 'never', label: 'Nunca ouvi' }
+    ]
+    const autoOn = autoDefs.filter((a) => a.key === s.axis).length > 0
+    const chosen = autoDefs.filter((a) => a.key === s.axis)[0]
+    const now = all[s.current]
+
+    return {
+      accent,
+      listTitle: title,
+      listCount: count,
+      inGroup: s.group !== null,
+      backToAll: () => this.setState({ group: null }),
+      chips,
+      likedBg: s.axis === 'liked' ? '#262626' : 'transparent',
+      likedBorder: s.axis === 'liked' ? 'none' : '1px solid #232323',
+      likedColor: s.axis === 'liked' ? '#dddddd' : '#5d5d5d',
+      pickLiked: () => this.setState({ axis: 'liked', group: null, autoOpen: false }),
+      autoLabel: autoOn ? chosen.label : 'Automáticas',
+      autoBg: autoOn ? '#262626' : 'transparent',
+      autoBorder: autoOn ? 'none' : '1px solid #232323',
+      autoColor: autoOn ? '#dddddd' : '#5d5d5d',
+      autoOpen: s.autoOpen,
+      toggleAuto: () => this.setState({ autoOpen: !s.autoOpen }),
+      autos: autoDefs.map((a) => ({
+        label: a.label,
+        pick: () => this.setState({ axis: a.key, group: null, autoOpen: false })
+      })),
+      rows,
+      groups,
+      nowTitle: now.title,
+      nowArtist: now.artist,
+      nowMeta: now.album + ' · 2016 · FLAC 44.1 kHz',
+      nowHeartIcon: this.isLiked(s.current, now.liked) ? '#i-heartfull' : '#i-heart',
+      nowHeartColor: this.isLiked(s.current, now.liked) ? accent : '#2f2f2f',
+      likeNow: () => {
+        const liked = Object.assign({}, s.liked)
+        liked[s.current] = !this.isLiked(s.current, now.liked)
+        this.setState({ liked })
+      },
+      elapsed: this.clock(s.position),
+      total: '4:12',
+      progressWidth: Math.round((s.position / 252) * 100) + '%',
+      playIcon: s.playing ? '#i-pause' : '#i-play',
+      shuffleColor: s.shuffle ? accent : '#5d5d5d',
+      repeatColor: s.repeat > 0 ? accent : '#5d5d5d',
+      repeatOneLabel: s.repeat === 2 ? '1' : '',
+      repeatOneColor: accent,
+      volumeWidth: s.volume + '%',
+      togglePlay: () => this.setState({ playing: !s.playing }),
+      prev: () => this.setState({ current: Math.max(0, s.current - 1), position: 0 }),
+      next: () => this.setState({ current: Math.min(all.length - 1, s.current + 1), position: 0 }),
+      toggleShuffle: () => this.setState({ shuffle: !s.shuffle }),
+      cycleRepeat: () => this.setState({ repeat: (s.repeat + 1) % 3 }),
+      setVolume: (e) => {
+        const box = e.currentTarget.getBoundingClientRect()
+        this.setState({ volume: Math.round(Math.max(0, Math.min(1, (e.clientX - box.left) / box.width)) * 100) })
+      },
+      seek: (e) => {
+        const box = e.currentTarget.getBoundingClientRect()
+        this.setState({ position: Math.round(Math.max(0, Math.min(1, (e.clientX - box.left) / box.width)) * 252) })
+      }
+    }
+  }
+}
+</script>
 </body>
 </html>

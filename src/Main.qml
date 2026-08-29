@@ -123,6 +123,10 @@ Window {
     // na primeira abertura: sem alguém abri-lo, nenhuma verificação o alcança.
     readonly property bool measureSettings: Qt.application.arguments.indexOf("--open-settings") >= 0
 
+    // `--open-queue`: abre a fila inteira antes de fotografar. Mesma razão do de cima — e sem
+    // ele a tela nova da fila não teria como ser provada sem alguém clicando.
+    readonly property bool measureQueueOverlay: Qt.application.arguments.indexOf("--open-queue") >= 0
+
     // `--no-search`: não abre o overlay antes de medir.
     readonly property bool measureSearch: Qt.application.arguments.indexOf("--no-search") < 0
 
@@ -272,6 +276,14 @@ Window {
 
     function activateTrack(index) {
         AudioEngine.loadPlaylist(trackModel.allPaths(), index)
+        AudioEngine.play()
+    }
+
+    // Pular dentro da fila que já está carregada: a tirinha e o painel da fila chegam aqui pelo
+    // mesmo caminho, e recarregar a MESMA lista com outro índice é o que o motor entende por
+    // "vá para esta faixa" sem perder o resto da fila.
+    function pularNaFila(queueIndex) {
+        AudioEngine.loadPlaylist(AudioEngine.queue, queueIndex)
         AudioEngine.play()
     }
 
@@ -487,6 +499,8 @@ Window {
                         AudioEngine.cycleRepeat()
                     if (root.measureSettings)
                         settingsDialog.open()
+                    if (root.measureQueueOverlay)
+                        queueOverlay.open()
                     if (!root.measureSearch)
                         return
                     searchOverlay.open()
@@ -627,10 +641,8 @@ Window {
                 onCollectRequested: function (trackId) { root.collectTrack(trackId) }
                 onCollectAllRequested: root.collectAll()
                 onSearchRequested: searchOverlay.open()
-                onQueueActivated: function (queueIndex) {
-                    AudioEngine.loadPlaylist(AudioEngine.queue, queueIndex)
-                    AudioEngine.play()
-                }
+                onQueueActivated: function (queueIndex) { root.pularNaFila(queueIndex) }
+                onQueueExpandRequested: queueOverlay.open()
             }
 
             PodcastPane {
@@ -689,6 +701,11 @@ Window {
             root.showPane("collections")
             collectionsPane.open(collectionId, title)
         }
+    }
+
+    QueueOverlay {
+        id: queueOverlay
+        onEntryActivated: function (queueIndex) { root.pularNaFila(queueIndex) }
     }
 
     SettingsDialog {

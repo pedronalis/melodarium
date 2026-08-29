@@ -57,7 +57,10 @@ PONTOS = [
     ("campo de busca",         "biblioteca", (700,  90), "#191919"),
     ("pílula escolhida",       "biblioteca", (482, 122), "#262626"),
     ("pílula em repouso",      "biblioteca", (556, 122), "#111111"),
-    ("trilho: ícone escolhido","biblioteca", ( 16, 108), "#232323"),
+    # A marca do app saiu do topo do trilho em 28/08 (era indistinguível de um botão apagado e
+    # não clicava), e a fileira inteira subiu 38 px. Medido na foto: a pílula acesa vai de
+    # y=58 a y=91, e o glifo ocupa 71..80 — 63 é o vão liso entre o topo da pílula e o ícone.
+    ("trilho: ícone escolhido","biblioteca", ( 28,  63), "#232323"),
     ("fundo da janela (vazia)","vazio",      (900, 655), "#111111"),
     ("painel: topo (vazia)",   "vazio",      ( 70,   8), "#1a1a1a"),
 ]
