@@ -11,6 +11,7 @@
 #include <QSettings>
 #include <QSqlDatabase>
 #include <QStandardPaths>
+#include <QSurfaceFormat>
 #include <QTextStream>
 #include <QUrl>
 
@@ -83,6 +84,25 @@ void migrarDoNomeAntigo()
 
 int main(int argc, char *argv[])
 {
+    // Sem isto a janela sai em RGB565 e o app inteiro fica esverdeado — não por engano de
+    // paleta, por falta de bits. O QSurfaceFormat padrão deixa os canais em -1 ("tanto faz"),
+    // e a regra de desempate do eglChooseConfig prefere o menor buffer que atenda ao pedido:
+    // nesta máquina (NVIDIA, Wayland) isso devolve 5/6/5. O verde ganha o dobro de degraus dos
+    // outros dois, então todo cinza neutro do tema chega à tela com R=B e G acima — #151515
+    // vira #101410 — e a escada de cinzas do desenho colapsa: o degradê do painel, de 9 níveis,
+    // vira 3. Pedir 8/8/8 elimina os configs de 16 bits da seleção. Alfa fica em 0 de propósito:
+    // a janela é opaca, e pedir alfa acionaria o blur do compositor por baixo dela.
+    //
+    // Isto NÃO é pego por teste nenhum que fotografe o app por dentro: com QT_QPA_PLATFORM=
+    // offscreen o Qt usa o rasterizador de software, que sempre é 8 bits. Só medindo a janela
+    // real, pelo compositor, o defeito aparece.
+    QSurfaceFormat fmt = QSurfaceFormat::defaultFormat();
+    fmt.setRedBufferSize(8);
+    fmt.setGreenBufferSize(8);
+    fmt.setBlueBufferSize(8);
+    fmt.setAlphaBufferSize(0);
+    QSurfaceFormat::setDefaultFormat(fmt);
+
     QGuiApplication app(argc, argv);
     app.setApplicationName(QStringLiteral("melodarium"));
     app.setOrganizationName(QStringLiteral("melodarium"));
