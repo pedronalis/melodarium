@@ -736,6 +736,19 @@ Rectangle {
                     height: parent.height
                     radius: parent.radius
                     color: Theme.cMuted
+
+                    // Clicar no trilho leva o volume de um lugar a outro sem passar pelo meio.
+                    // Deslizar diz que foi a MESMA barra que mudou, e não uma barra nova
+                    // aparecendo no lugar da anterior.
+                    //
+                    // Só o volume: a barra de progresso da faixa já se move sozinha, e um
+                    // Behavior nela faria o tempo mentir e brigar com cada arrasto de seek.
+                    Behavior on width {
+                        NumberAnimation {
+                            duration: Theme.animationFast
+                            easing.type: Theme.easingType
+                        }
+                    }
                 }
 
                 MouseArea {

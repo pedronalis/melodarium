@@ -255,7 +255,7 @@ git commit -m "feat(transport): press feedback and cross-faded glyph on the play
 
 ### Task 3: A barra de volume desliza
 
-- [ ] Em `src/NowPlayingPanel.qml`, no `Rectangle` interno do `trilhoVolume` (hoje na
+- [x] Em `src/NowPlayingPanel.qml`, no `Rectangle` interno do `trilhoVolume` (hoje na
       **linha 558**, o de `width: parent.width * (AudioEngine.volume / 100)`), acrescentar o `Behavior`.
       O bloco passa a ser:
 
@@ -281,10 +281,10 @@ git commit -m "feat(transport): press feedback and cross-faded glyph on the play
                 }
 ```
 
-- [ ] verificação mecânica da task: `cmake --build build` → exit 0
-- [ ] verificação mecânica da task — a barra de progresso NÃO ganhou Behavior:
+- [x] verificação mecânica da task: `cmake --build build` → exit 0
+- [x] verificação mecânica da task — a barra de progresso NÃO ganhou Behavior:
       `awk '/id: percorrido/,/^                }/' src/NowPlayingPanel.qml | grep -c 'Behavior'` → `0`
-- [ ] commit:
+- [x] commit:
 
 ```bash
 git add src/NowPlayingPanel.qml
