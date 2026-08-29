@@ -58,6 +58,37 @@ Rectangle {
     // is loaded. Without this guard the transport shows a pause button with nothing playing.
     readonly property bool hasTrack: AudioEngine.currentFile !== ""
 
+    // O endereço da arte do que está tocando, num lugar só: as duas camadas da capa e o halo
+    // leem daqui, e antes disso a mesma expressão de três linhas vivia dentro do RoundedCover.
+    readonly property url fonteDaCapa:
+        root.episodeMode
+        ? (root.episodeInfo.coverPath !== undefined && root.episodeInfo.coverPath !== ""
+           ? "file://" + root.episodeInfo.coverPath : "")
+        : (root.info.albumId !== undefined
+           ? CoverCache.coverUrlForTrack(AudioEngine.currentFile, root.info.albumId) : "")
+
+    // Qual das duas camadas está na frente. A troca NÃO acontece no instante em que a faixa
+    // muda: a camada de trás recebe a arte nova e as duas só trocam de lugar quando ela
+    // terminou de carregar. Sem essa espera, o cruzamento mostraria o bloco cinza do
+    // placeholder no meio do caminho — remédio pior que a doença.
+    property bool capaAnaFrente: true
+
+    readonly property var capaDaFrente: root.capaAnaFrente ? capaA : capaB
+    readonly property var capaDeTras: root.capaAnaFrente ? capaB : capaA
+
+    onFonteDaCapaChanged: {
+        root.capaDeTras.source = root.fonteDaCapa
+        // Uma faixa sem capa nenhuma nunca fica "pronta": o relógio garante que a troca
+        // acontece de qualquer jeito, e o placeholder cruza como cruzaria uma arte.
+        trocaDeCapa.restart()
+    }
+
+    Timer {
+        id: trocaDeCapa
+        interval: 350
+        onTriggered: root.capaAnaFrente = !root.capaAnaFrente
+    }
+
     // O que a coluna gasta abaixo da capa: título, progresso, transporte, volume, etiquetas e
     // os espaçamentos entre eles. MEDIDO, não estimado — o app imprime a soma real com
     // `--measure`, e ela dá 309 px na escala 1 em qualquer altura de janela. O número antigo
@@ -121,7 +152,10 @@ Rectangle {
         root.episodeInfo = path === "" ? ({}) : PodcastLibrary.episodeForPath(path)
     }
 
-    Component.onCompleted: root.refresh()
+    Component.onCompleted: {
+        root.refresh()
+        capaA.source = root.fonteDaCapa
+    }
 
 
 
@@ -225,13 +259,17 @@ Rectangle {
                 }
             }
 
-            RoundedCover {
-                id: capaVazia
+            // Duas capas, não uma. A arte trocava no mesmo quadro em que a faixa trocava, e
+            // 340x340 px mudando de golpe é a coisa mais brusca que este painel faz. Com duas
+            // camadas a nova sobe enquanto a velha desce, e nenhum quadro fica vazio — que é
+            // o que aconteceria fazendo a mesma capa piscar.
+            //
+            // O bloco existe mesmo sem nada tocando: o desenho põe degradê e sombra no
+            // quadrado da capa em todas as telas, e era a ausência dele que fazia o painel
+            // vazio parecer um buraco recortado no fundo. A moldura tracejada e o "nada
+            // tocando" continuam por cima — é o que distingue vazio de capa que falta.
+            component Capa: RoundedCover {
                 anchors.fill: parent
-                // O bloco existe mesmo sem nada tocando: o desenho põe degradê e sombra no
-                // quadrado da capa em todas as telas, e era a ausência dele que fazia o painel
-                // vazio parecer um buraco recortado no fundo. A moldura tracejada e o "nada
-                // tocando" continuam por cima — é o que distingue vazio de capa que falta.
                 radius: Theme.radiusM
                 // A única capa do app que projeta sombra: é ela que descola a arte do painel.
                 shadow: true
@@ -242,18 +280,41 @@ Rectangle {
                 // desenho; aqui ele sairia grande e duplicado.
                 fallbackIcon: !root.hasTrack ? ""
                                              : (root.episodeMode ? "microphone" : "music")
-                // 64 px num bloco de 340 no desenho — proporção, não medida fixa, porque a capa
-                // encolhe junto com a janela.
+                // 64 px num bloco de 340 no desenho — proporção, não medida fixa, porque a
+                // capa encolhe junto com a janela.
                 fallbackIconSize: Math.round(capaRect.lado * 64 / 340)
                 fallbackIconColor: root.episodeMode ? Theme.cCoverIconPod : Theme.cCoverIcon
-                source: root.episodeMode
-                        ? (root.episodeInfo.coverPath !== undefined
-                           && root.episodeInfo.coverPath !== ""
-                           ? "file://" + root.episodeInfo.coverPath : "")
-                        : (root.info.albumId !== undefined
-                           ? CoverCache.coverUrlForTrack(AudioEngine.currentFile,
-                                                         root.info.albumId)
-                           : "")
+
+                Behavior on opacity {
+                    NumberAnimation {
+                        duration: Theme.animationNormal
+                        easing.type: Theme.easingType
+                    }
+                }
+            }
+
+            Capa {
+                id: capaA
+                opacity: root.capaAnaFrente ? 1 : 0
+                z: root.capaAnaFrente ? 1 : 0
+                onReadyChanged: {
+                    if (capaA.ready && !root.capaAnaFrente && trocaDeCapa.running) {
+                        trocaDeCapa.stop()
+                        root.capaAnaFrente = true
+                    }
+                }
+            }
+
+            Capa {
+                id: capaB
+                opacity: root.capaAnaFrente ? 0 : 1
+                z: root.capaAnaFrente ? 0 : 1
+                onReadyChanged: {
+                    if (capaB.ready && root.capaAnaFrente && trocaDeCapa.running) {
+                        trocaDeCapa.stop()
+                        root.capaAnaFrente = false
+                    }
+                }
             }
         }
 

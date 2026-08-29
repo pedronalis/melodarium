@@ -167,7 +167,7 @@ git commit -m "feat(cover): pass the artwork's dominant color through RoundedCov
 
 ### Task 3: Duas capas cruzando no lugar de uma trocando
 
-- [ ] Em `src/NowPlayingPanel.qml`, acrescentar ao bloco de propriedades do `root` (logo
+- [x] Em `src/NowPlayingPanel.qml`, acrescentar ao bloco de propriedades do `root` (logo
       depois de `readonly property bool hasTrack:`, hoje na linha 58):
 
 ```qml
@@ -203,7 +203,7 @@ git commit -m "feat(cover): pass the artwork's dominant color through RoundedCov
     }
 ```
 
-- [ ] Em `src/NowPlayingPanel.qml`, substituir o bloco `RoundedCover { id: capaVazia ... }`
+- [x] Em `src/NowPlayingPanel.qml`, substituir o bloco `RoundedCover { id: capaVazia ... }`
       inteiro (hoje das **linhas 228 a 257**, do `RoundedCover {` até o `}` que fecha o
       `source:`) por duas camadas.
       O componente `Capa` local evita repetir onze propriedades idênticas duas vezes:
@@ -263,7 +263,7 @@ git commit -m "feat(cover): pass the artwork's dominant color through RoundedCov
             }
 ```
 
-- [ ] Dar à camada da frente a arte inicial — sem isto o painel abre com as duas vazias,
+- [x] Dar à camada da frente a arte inicial — sem isto o painel abre com as duas vazias,
       porque `onFonteDaCapaChanged` não roda para o valor de partida. Acrescentar ao
       `Component.onCompleted` do `root` (hoje na **linha 128**), que passa a ser:
 
@@ -274,11 +274,11 @@ git commit -m "feat(cover): pass the artwork's dominant color through RoundedCov
     }
 ```
 
-- [ ] verificação mecânica da task: `cmake --build build` → exit 0
-- [ ] verificação mecânica da task: `bash tools/check-fidelidade.sh` → exit 0. O ponto
+- [x] verificação mecânica da task: `cmake --build build` → exit 0
+- [x] verificação mecânica da task: `bash tools/check-fidelidade.sh` → exit 0. O ponto
       `a capa está arredondada (o canto não é arte)` é o que prova que as duas camadas
       continuam recortando; se ele reprovar, o `radius` se perdeu na troca.
-- [ ] commit:
+- [x] commit:
 
 ```bash
 git add src/NowPlayingPanel.qml
