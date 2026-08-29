@@ -230,7 +230,7 @@ git commit -m "feat(collections): the list row reads as a playlist — art, leng
 
 ### Task 3: Fotografar a lista com coleções de verdade
 
-- [ ] Criar duas coleções-fixture de tamanhos diferentes (uma com 6 faixas, uma vazia), para
+- [x] Criar duas coleções-fixture de tamanhos diferentes (uma com 6 faixas, uma vazia), para
       a foto mostrar o mosaico E o estado sem arte:
 
 ```bash
@@ -244,7 +244,7 @@ sqlite3 "$DB" "SELECT COUNT(*) FROM collections WHERE id IN (998, 999)"
 
 → `2`
 
-- [ ] Fotografar a lista (sem abrir coleção nenhuma):
+- [x] Fotografar a lista (sem abrir coleção nenhuma):
 
 ```bash
 QT_QPA_PLATFORM=offscreen ./build/melodarium --measure 1100 --pane collections --no-search \
@@ -253,7 +253,7 @@ QT_QPA_PLATFORM=offscreen ./build/melodarium --measure 1100 --pane collections -
 
 → `motor=ok`
 
-- [ ] verificação mecânica da task: a linha alta o bastante para o cartão existe na foto:
+- [x] verificação mecânica da task: a linha alta o bastante para o cartão existe na foto:
 
 ```bash
 python3 -c "
@@ -265,7 +265,7 @@ print('tamanho', im.size)
 
 → `tamanho (1100, 700)` e `ok`
 
-- [ ] commit:
+- [x] commit:
 
 ```bash
 git add docs/telas/11-colecao-cartao.png
