@@ -649,6 +649,9 @@ Window {
             onLikeRequested: function (id) { LibraryBrowser.toggleLike(id) }
             onPlayRequested: function (mode) { root.startFromEmpty(mode) }
             onTagChosen: function (name) { root.showTag(name) }
+            onCollectRequested: function (id) { root.collectTrack(id) }
+            onQueueJumpRequested: function (queueIndex) { root.pularNaFila(queueIndex) }
+            onQueueOpenRequested: queueOverlay.open()
         }
 
         StackLayout {
