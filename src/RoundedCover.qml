@@ -123,47 +123,22 @@ Item {
     // Quem dá o ângulo é este Canvas: por baixo ele é QPainter, o mesmo caminho do
     // RoundedImage, que é o único que sobrevive ao adaptador de software neste projeto (a
     // saída por shader some, e some junto a capa inteira).
-    Canvas {
-        id: placeholder
-
+    // O bloco que faz as vezes de capa quando não há arte. O desenho não põe um retângulo
+    // cinza aí: põe um degradê DIAGONAL (`linear-gradient(145deg, …)`), que é o que faz o
+    // quadrado vazio parecer arte e não buraco.
+    //
+    // Quem pinta é C++ (`GradientBlock`), e não um `Canvas`: o degradê tem ~31 níveis de
+    // cinza espalhados por 340 px, e em 8 bits por canal isso vira listras diagonais de ~9 px
+    // — a reclamação do Pedro em 29/08. A quebra dessas faixas é ruído de ±1 nível por pixel,
+    // e o `Canvas` do QML não sabe aplicá-lo: `getImageData` devolve os pixels e
+    // `putImageData` não os grava de volta (fotos idênticas ao pixel, verificado).
+    GradientBlock {
         anchors.fill: parent
         visible: !root.ready
-
-        onWidthChanged: requestPaint()
-        onHeightChanged: requestPaint()
-        Connections {
-            target: root
-            function onPlaceholderTopChanged() { placeholder.requestPaint() }
-            function onPlaceholderMidChanged() { placeholder.requestPaint() }
-            function onPlaceholderColorChanged() { placeholder.requestPaint() }
-        }
-
-        onPaint: {
-            const ctx = getContext("2d")
-            ctx.reset()
-
-            // O ângulo do CSS conta a partir do "para cima" e cresce no sentido horário, e a
-            // linha do degradê é centrada na caixa — por isso o vetor sai do centro para os
-            // dois lados, e não de canto a canto: em 145° num quadrado ela mede 473 px numa
-            // caixa de 340, e cortar isso nos cantos deslocaria as paradas de cor.
-            const a = 145 * Math.PI / 180
-            const dx = Math.sin(a)
-            const dy = -Math.cos(a)
-            const comprimento = Math.abs(width * dx) + Math.abs(height * dy)
-            const cx = width / 2
-            const cy = height / 2
-
-            const g = ctx.createLinearGradient(cx - dx * comprimento / 2, cy - dy * comprimento / 2,
-                                               cx + dx * comprimento / 2, cy + dy * comprimento / 2)
-            g.addColorStop(0.0, root.placeholderTop)
-            g.addColorStop(0.45, root.placeholderMid)
-            g.addColorStop(1.0, root.placeholderColor)
-
-            ctx.fillStyle = g
-            ctx.beginPath()
-            ctx.roundedRect(0, 0, width, height, root.radius, root.radius)
-            ctx.fill()
-        }
+        radius: root.radius
+        topColor: root.placeholderTop
+        midColor: root.placeholderMid
+        bottomColor: root.placeholderColor
     }
 
     Text {

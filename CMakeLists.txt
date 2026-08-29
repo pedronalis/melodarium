@@ -100,6 +100,8 @@ qt_add_qml_module(melodarium
         src/colorschemeprovider.cpp
         src/roundedimage.h
         src/roundedimage.cpp
+        src/gradientblock.h
+        src/gradientblock.cpp
         src/dominantcolor.h
         src/dominantcolor.cpp
         src/audioengine.h
