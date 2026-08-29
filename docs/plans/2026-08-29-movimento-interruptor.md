@@ -1,7 +1,7 @@
 ---
 slug: movimento-interruptor
 feature: melodarium-anima
-status: aprovado
+status: concluido
 depende-de: []
 decisao-humana: nao
 spec: docs/plans/research/2026-08-29-anima-varredura.md
@@ -145,7 +145,7 @@ git commit -m "feat(window): --sem-animacao flag and measure-mode motion kill sw
 
 ### Task 3: Confirmar que os dois gates de tela continuam verdes
 
-- [ ] Rodar os dois portões que todo redesenho de tela precisa passar:
+- [x] Rodar os dois portões que todo redesenho de tela precisa passar:
 
 ```bash
 bash tools/check-orfaos.sh
@@ -153,9 +153,9 @@ bash tools/check-fidelidade.sh
 bash tools/check-layout.sh
 ```
 
-- [ ] verificação mecânica da task: os três saem `exit 0`. Nada mudou de aparência nesta
+- [x] verificação mecânica da task: os três saem `exit 0`. Nada mudou de aparência nesta
       fatia — se algum reprovar, o interruptor mudou cor ou geometria e é bug, não ajuste.
-- [ ] commit: nada a commitar se os gates passaram (a task é portão, não mudança).
+- [x] commit: nada a commitar se os gates passaram (a task é portão, não mudança).
 
 ## Verificação da fatia (E2E)
 
