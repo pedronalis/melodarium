@@ -2,6 +2,7 @@
 
 #include <QColor>
 #include <QImage>
+#include <QVariantList>
 #include <QQuickPaintedItem>
 #include <QUrl>
 #include <QtQmlIntegration/qqmlintegration.h>
@@ -23,6 +24,7 @@ class RoundedImage : public QQuickPaintedItem
     Q_PROPERTY(qreal radius READ radius WRITE setRadius NOTIFY radiusChanged)
     Q_PROPERTY(bool ready READ ready NOTIFY readyChanged)
     Q_PROPERTY(QColor dominantColor READ dominantColor NOTIFY dominantColorChanged)
+    Q_PROPERTY(QVariantList colorSpots READ colorSpots NOTIFY colorSpotsChanged)
 
 public:
     explicit RoundedImage(QQuickItem *parent = nullptr);
@@ -39,6 +41,10 @@ public:
     // arte carregada, ou quando a arte não tem cor a dar.
     QColor dominantColor() const { return m_dominant; }
 
+    // Os focos de luz desta capa, cada um `{ color, x, y, weight }`. Lista vazia quando a
+    // arte não tem cor a dar — o painel não acende halo nenhum nesse caso.
+    QVariantList colorSpots() const { return m_spots; }
+
     void paint(QPainter *painter) override;
 
 signals:
@@ -46,6 +52,7 @@ signals:
     void radiusChanged();
     void readyChanged();
     void dominantColorChanged();
+    void colorSpotsChanged();
 
 protected:
     void geometryChange(const QRectF &newGeometry, const QRectF &oldGeometry) override;
@@ -60,4 +67,5 @@ private:
     // torraria o disco enquanto a janela é arrastada.
     int m_loadedFor = 0;
     QColor m_dominant = QColor(0, 0, 0, 0);
+    QVariantList m_spots;
 };

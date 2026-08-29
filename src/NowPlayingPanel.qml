@@ -76,23 +76,27 @@ Rectangle {
     readonly property var capaDaFrente: root.capaAnaFrente ? capaA : capaB
     readonly property var capaDeTras: root.capaAnaFrente ? capaB : capaA
 
-    // A cor que o halo pinta. Guardada em vez de derivada: quando a faixa nova não tem cor a
-    // dar (capa ausente, capa em escala de cinza) o halo apaga pela opacidade e a última cor
-    // fica parada onde estava, em vez de desabar para preto no meio do caminho.
-    property color corDoHalo: Theme.cCoverMid
+    // Os focos de luz que o halo pinta. Guardados em vez de derivados: quando a faixa nova não
+    // tem cor a dar (capa ausente, capa em escala de cinza) o halo apaga pela opacidade e os
+    // últimos focos ficam parados onde estavam, em vez de sumirem no meio da travessia.
+    //
+    // E são FOCOS, no plural, desde 29/08: uma cor média só devolve um bege que não existe na
+    // arte quando a capa tem céu azul em cima e areia laranja embaixo. A luz de uma capa tem
+    // as cores dela, nos lugares delas.
+    property var focosDoHalo: []
 
-    readonly property color corDaCapaAtual: root.capaDaFrente.dominantColor
+    readonly property var focosDaCapaAtual: root.capaDaFrente.colorSpots
 
-    onCorDaCapaAtualChanged: {
-        if (root.corDaCapaAtual.a > 0)
-            root.corDoHalo = root.corDaCapaAtual
+    onFocosDaCapaAtualChanged: {
+        if (root.focosDaCapaAtual.length > 0)
+            root.focosDoHalo = root.focosDaCapaAtual
     }
 
     // O halo sai da foto do gate: a cor dele vem do acervo de quem roda, e o gate de
     // fidelidade mede 15 pontos fixos com 3 níveis de tolerância por canal — um deles a
     // 16 px da capa. Ou o halo sai da foto, ou o gate passa a medir sorte.
     readonly property bool mostrarHalo:
-        !Theme.medindo && root.hasTrack && root.corDaCapaAtual.a > 0
+        !Theme.medindo && root.hasTrack && root.focosDaCapaAtual.length > 0
 
     onFonteDaCapaChanged: {
         root.capaDeTras.source = root.fonteDaCapa
@@ -209,14 +213,13 @@ Rectangle {
         // é opaco. Com `z: -1` o halo existia, respondia, e não aparecia em pixel nenhum
         // (medido: zero diferença de cor com ele ligado e desligado). A ordem de declaração
         // já o põe atrás da capa, que é o único lugar em que ele precisa ficar.
-        cor: root.corDoHalo
+        focos: root.focosDoHalo
         // A capa é o primeiro item da coluna e está centrada nela: a posição sai da conta, e
         // não de mapToItem, porque mapeamento não é reativo e a capa muda de tamanho com a
         // altura da janela.
         capaX: Math.round((root.width - capaRect.lado) / 2)
         capaY: Theme.marginXL + Theme.marginS
         capaLado: capaRect.lado
-        raioBase: Theme.radiusM
         opacity: root.mostrarHalo ? 1 : 0
 
         Behavior on opacity {
@@ -339,7 +342,12 @@ Rectangle {
             Capa {
                 id: capaA
                 opacity: root.capaAnaFrente ? 1 : 0
-                z: root.capaAnaFrente ? 1 : 0
+                // 0 e -1, nunca 1 e 0: a moldura tracejada e o "nada tocando" que ficam por
+                // cima da capa usam `z: 1`, e com empate de z quem é declarado depois ganha.
+                // Com `z: 1` aqui, as duas camadas cobriam os dois e o painel sem faixa virava
+                // um quadrado cinza liso — a capa antiga não tinha z nenhum, e era só por isso
+                // que funcionava.
+                z: root.capaAnaFrente ? 0 : -1
                 onReadyChanged: {
                     if (capaA.ready && !root.capaAnaFrente && trocaDeCapa.running) {
                         trocaDeCapa.stop()
@@ -351,7 +359,7 @@ Rectangle {
             Capa {
                 id: capaB
                 opacity: root.capaAnaFrente ? 0 : 1
-                z: root.capaAnaFrente ? 0 : 1
+                z: root.capaAnaFrente ? -1 : 0
                 onReadyChanged: {
                     if (capaB.ready && root.capaAnaFrente && trocaDeCapa.running) {
                         trocaDeCapa.stop()
