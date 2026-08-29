@@ -118,7 +118,7 @@ git commit -m "test(collections): total duration and first covers belong to the 
 
 ### Task 2: As duas consultas em collections()
 
-- [ ] Em `src/collectionmanager.cpp`, substituir o corpo INTEIRO de
+- [x] Em `src/collectionmanager.cpp`, substituir o corpo INTEIRO de
       `QVariantList CollectionManager::collections()` por:
 
 ```cpp
@@ -178,7 +178,7 @@ QVariantList CollectionManager::collections()
 }
 ```
 
-- [ ] Garantir o include de `QHash` no topo do arquivo, se ainda não houver:
+- [x] Garantir o include de `QHash` no topo do arquivo, se ainda não houver:
 
 ```bash
 grep -q "#include <QHash>" src/collectionmanager.cpp || \
@@ -188,10 +188,10 @@ grep -c "#include <QHash>" src/collectionmanager.cpp
 
 → `1`
 
-- [ ] verificação mecânica da task:
+- [x] verificação mecânica da task:
       `cmake --build build 2>&1 | tail -1 && ctest --test-dir build -R tst_collections --output-on-failure 2>&1 | tail -3`
       → `100% tests passed`
-- [ ] commit:
+- [x] commit:
 
 ```bash
 git add src/collectionmanager.cpp
