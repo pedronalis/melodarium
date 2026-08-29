@@ -63,3 +63,32 @@ e não atropela escolha que o usuário já fez com o nome novo.
 Rebatizar o app é barato no código e caro no disco do usuário. Antes de trocar o nome:
 faça o inventário dos três caminhos da tabela acima, escreva a migração **antes** do rename, e
 verifique com dados reais — aqui, 27 faixas e 17 capas, conferidas depois da migração.
+
+## Adendo 2026-08-29 — o caminho tem DOIS níveis, e um deles é um fantasma de 0 byte
+
+`AppDataLocation` neste app resolve para `~/.local/share/<org>/<app>/`, **dois** níveis:
+`~/.local/share/melodarium/melodarium/melodarium.db` é o banco de verdade (188 KB, 16 tabelas).
+Existe também `~/.local/share/melodarium/melodarium.db`, com **0 byte** — um nível só.
+
+O fantasma é reincidente. O Estacionamento de 28/08 registrou o mesmo arquivo com o nome
+antigo, apagou, e escreveu que se um `melodarium.db` de 0 byte reaparecesse a causa estaria
+viva. Reapareceu em 29/08. A origem segue não identificada; o suspeito é código que monta o
+caminho sem a pasta da organização, abre e não escreve.
+
+**O erro que isto causa em quem escreve script ou plano:** montar o caminho com um nível só —
+`"$HOME/.local/share/melodarium/melodarium.db"` — aponta para o fantasma. Um `sqlite3` ali
+devolve `no such table: collections` com exit 1, e a leitura natural é "o app não tem coleção
+nenhuma", quando na verdade o arquivo aberto é o vazio. Aconteceu ao escrever os planos do lote
+`colecao-playlist`: os quatro nasceram apontando para o fantasma e foram corrigidos antes do
+despacho.
+
+Forma correta em qualquer script, respeitando o isolamento por `XDG_DATA_HOME`:
+
+```bash
+DB="${XDG_DATA_HOME:-$HOME/.local/share}/melodarium/melodarium/melodarium.db"
+```
+
+**Corolário para runs headless:** com `XDG_DATA_HOME` apontando para uma cópia em `/tmp`, o app
+inteiro passa a ler e escrever num banco descartável. Foi assim que o lote `colecao-playlist`
+criou seis coleções-fixture sem encostar no acervo do Pedro — o arquivo real manteve o mtime de
+antes do run, que é a prova de que nada foi tocado.
