@@ -167,7 +167,7 @@ git commit -m "feat(collections): persist the dragged order and reload from the 
 
 ### Task 4: Provar que a ordem sobrevive, pelo motor e pela foto
 
-- [ ] Acrescentar a `tests/tst_collections.cpp` o teste que fixa a semântica de `newIndex`
+- [x] Acrescentar a `tests/tst_collections.cpp` o teste que fixa a semântica de `newIndex`
       (a tela depende dela: destino contando de 0):
 
 ```cpp
@@ -195,9 +195,9 @@ git commit -m "feat(collections): persist the dragged order and reload from the 
     }
 ```
 
-- [ ] Rodar o teste: `ctest --test-dir build -R tst_collections --output-on-failure 2>&1 | tail -3`
+- [x] Rodar o teste: `ctest --test-dir build -R tst_collections --output-on-failure 2>&1 | tail -3`
       → `100% tests passed`
-- [ ] Fotografar a coleção aberta com as alças visíveis:
+- [x] Fotografar a coleção aberta com as alças visíveis:
 
 ```bash
 DB="${XDG_DATA_HOME:-$HOME/.local/share}/melodarium/melodarium/melodarium.db"
@@ -212,8 +212,8 @@ QT_QPA_PLATFORM=offscreen ./build/melodarium --measure 1100 --pane collections \
 
 → `motor=ok`
 
-- [ ] verificação mecânica da task: `test -s docs/telas/12-colecao-ordem.png && echo ok` → `ok`
-- [ ] commit:
+- [x] verificação mecânica da task: `test -s docs/telas/12-colecao-ordem.png && echo ok` → `ok`
+- [x] commit:
 
 ```bash
 git add tests/tst_collections.cpp docs/telas/12-colecao-ordem.png

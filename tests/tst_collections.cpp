@@ -255,6 +255,29 @@ private slots:
         QCOMPARE(row.value(QStringLiteral("totalMs")).toLongLong(), 0LL);
         QCOMPARE(row.value(QStringLiteral("covers")).toList().size(), 0);
     }
+
+    void movingATrackRewritesThePositionsFromZero()
+    {
+        CollectionManager cm;
+        const int id = cm.createCollection(QStringLiteral("Ordem manual"));
+        QVERIFY(id > 0);
+        QVERIFY(cm.addTrackToCollection(id, 1));
+        QVERIFY(cm.addTrackToCollection(id, 2));
+        QVERIFY(cm.addTrackToCollection(id, 3));
+
+        // A terceira vai para o começo: 3, 1, 2.
+        QVERIFY(cm.moveTrackInCollection(id, 3, 0));
+
+        QSqlDatabase db = QSqlDatabase::database(QLatin1String(Database::kUiConnection));
+        QSqlQuery q(db);
+        QVERIFY(q.exec(QStringLiteral("SELECT track_id FROM collection_tracks "
+                                      "WHERE collection_id = %1 ORDER BY position")
+                           .arg(id)));
+        QList<int> ordem;
+        while (q.next())
+            ordem.append(q.value(0).toInt());
+        QCOMPARE(ordem, (QList<int>{3, 1, 2}));
+    }
 };
 
 QTEST_MAIN(TstCollections)

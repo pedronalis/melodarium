@@ -132,6 +132,13 @@ Window {
     readonly property bool measurePlayCollection:
         Qt.application.arguments.indexOf("--play-open-collection") >= 0
 
+    // `--move-last-to-top`: manda a última faixa da coleção aberta para o começo, pelo MESMO
+    // sinal que a alça de arrastar emite. Sem isto, o caminho que GRAVA a ordem nunca roda
+    // fora da mão de alguém — e uma alça desenhada sobre um caminho que nunca gravou é o
+    // defeito que este repo já registrou uma vez.
+    readonly property bool measureMoveLastToTop:
+        Qt.application.arguments.indexOf("--move-last-to-top") >= 0
+
     // `--no-search`: não abre o overlay antes de medir.
     readonly property bool measureSearch: Qt.application.arguments.indexOf("--no-search") < 0
 
@@ -488,6 +495,11 @@ Window {
                         collectionsPane.openById(root.measureCollection)
                     if (root.measurePlayCollection)
                         collectionsPane.playRequested(false)
+                    // `count`, não `rowCount()`: o modelo expõe a contagem por Q_PROPERTY, e
+                    // a chave do id em `trackAt` é `id`, não `trackId`.
+                    if (root.measureMoveLastToTop && trackModel.count > 1)
+                        collectionsPane.trackMoved(
+                            trackModel.trackAt(trackModel.count - 1).id, 0)
                     if (root.measureAlbum > 0) {
                         // O caminho do clique: o eixo carrega os grupos, e o grupo abre a
                         // partir deles — é de lá que o artista do cabeçalho vem.
