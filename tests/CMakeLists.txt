@@ -1,5 +1,5 @@
 # Gui is required for QColor, which colorschemeprovider.h exposes.
-find_package(Qt6 REQUIRED COMPONENTS Core Gui Network Test)
+find_package(Qt6 REQUIRED COMPONENTS Concurrent Core Gui Network Test)
 
 qt_add_executable(tst_colorscheme
     tst_colorscheme.cpp
@@ -125,3 +125,17 @@ target_link_libraries(tst_ytdlp PRIVATE
 
 add_test(NAME tst_ytdlp COMMAND tst_ytdlp)
 set_tests_properties(tst_ytdlp PROPERTIES ENVIRONMENT "QT_QPA_PLATFORM=offscreen" TIMEOUT 60)
+
+qt_add_executable(tst_folderbrowser
+    tst_folderbrowser.cpp
+    ../src/folderbrowser.h ../src/folderbrowser.cpp
+    ../src/libraryscanner.h ../src/libraryscanner.cpp
+    ../src/database.h ../src/database.cpp
+    ../src/tagreader.h ../src/tagreader.cpp
+)
+target_include_directories(tst_folderbrowser PRIVATE ../src)
+target_link_libraries(tst_folderbrowser PRIVATE
+    Qt6::Concurrent Qt6::Core Qt6::Test Qt6::Qml Qt6::Sql PkgConfig::TAGLIB)
+
+add_test(NAME tst_folderbrowser COMMAND tst_folderbrowser)
+set_tests_properties(tst_folderbrowser PROPERTIES ENVIRONMENT "QT_QPA_PLATFORM=offscreen")

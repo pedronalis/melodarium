@@ -1,7 +1,6 @@
 pragma ComponentBehavior: Bound
 
 import QtQuick
-import QtQuick.Dialogs
 import QtQuick.Layouts
 import Melodarium.App
 
@@ -312,15 +311,16 @@ Item {
             Layout.alignment: Qt.AlignHCenter
             visible: !root.temBiblioteca
             text: qsTr("Escolher pasta")
-            onClicked: folderDialog.open()
+            onClicked: folderDialog.abrirEm(Database.libraryPath)
         }
     }
 
-    FolderDialog {
+    FolderPickerDialog {
         id: folderDialog
         title: qsTr("Pasta de música")
-        onAccepted: {
-            Database.libraryPath = selectedFolder.toString().replace("file://", "")
+        confirmText: qsTr("Usar esta pasta")
+        onFolderChosen: (path) => {
+            Database.libraryPath = path
             Database.startScan()
         }
     }

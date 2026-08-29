@@ -123,6 +123,16 @@ Window {
     // na primeira abertura: sem alguém abri-lo, nenhuma verificação o alcança.
     readonly property bool measureSettings: Qt.application.arguments.indexOf("--open-settings") >= 0
 
+    // `--open-folder-picker [caminho]`: o explorador de pastas não aparece em nenhuma foto de
+    // gate sem isto — ele nasce fechado atrás de um botão dentro de outro diálogo.
+    readonly property string measureFolderPicker: {
+        const i = Qt.application.arguments.indexOf("--open-folder-picker")
+        if (i < 0)
+            return ""
+        const arg = i + 1 < Qt.application.arguments.length ? Qt.application.arguments[i + 1] : ""
+        return arg.startsWith("--") || arg === "" ? "/" : arg
+    }
+
     // `--open-queue`: abre a fila inteira antes de fotografar. Mesma razão do de cima — e sem
     // ele a tela nova da fila não teria como ser provada sem alguém clicando.
     readonly property bool measureQueueOverlay: Qt.application.arguments.indexOf("--open-queue") >= 0
@@ -530,6 +540,8 @@ Window {
                         AudioEngine.cycleRepeat()
                     if (root.measureSettings)
                         settingsDialog.open()
+                    if (root.measureFolderPicker !== "")
+                        folderPickerParaFoto.abrirEm(root.measureFolderPicker)
                     if (root.measureQueueOverlay)
                         queueOverlay.open()
                     if (!root.measureSearch)
@@ -759,6 +771,13 @@ Window {
     QueueOverlay {
         id: queueOverlay
         onEntryActivated: function (queueIndex) { root.pularNaFila(queueIndex) }
+    }
+
+    // O mesmo explorador que os três botões abrem, aqui só para a foto de gate: sem uma
+    // instância alcançável por linha de comando, a tela nova não teria como ser medida.
+    FolderPickerDialog {
+        id: folderPickerParaFoto
+        title: qsTr("Pasta de música")
     }
 
     SettingsDialog {
