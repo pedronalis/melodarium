@@ -743,3 +743,132 @@ portão, com o motivo, e volta à discussão na primeira vez que alguém rodar o
   `selectedFolder` solto do plano não resolve dentro do handler.
 - Um espaçador na linha dos botões de varredura, para que "Reler a pasta" fique à direita
   quando o aviso de varredura está invisível — sem ele o botão flutuava no meio da linha.
+
+# Decisões do run — lote colecao-playlist (toca · dados · cartão · ordem)
+
+## 34. Os quatro planos não estavam neste worktree, e copiá-los foi a primeira decisão
+
+O run manda executar `docs/plans/2026-08-29-colecao-{toca,dados,cartao,ordem}.md`. Nenhum dos
+quatro existia nesta branch: os arquivos estavam **não commitados** no worktree principal
+(`/home/pedro/dev/active/melodarium/docs/plans/`), que é justamente o worktree que o run
+proíbe de tocar.
+
+**O que fiz.** Li os quatro de lá (leitura, nunca escrita) e os copiei para cá **verbatim**,
+num commit próprio (`docs(plans): the four approved slices…`) antes de qualquer código. Só
+depois passei a marcar `- [x]` e `status:`.
+
+**Alternativa descartada.** Reescrever os planos do zero a partir do enunciado do run. Seriam
+planos meus com o nome dos dele: o lote deixaria de ser "executar o que foi aprovado" e
+viraria "planejar e executar sozinho", que é exatamente o que o Fluxo Maré separa em dois
+donos.
+
+**Custo de estar errada.** Se a versão do worktree principal tiver mudado depois da cópia, o
+que rodou aqui é a foto de 29/08 12:08. Os quatro arquivos estão commitados nesta branch, então
+a diferença é um `diff` de dois caminhos, não uma arqueologia.
+
+## 35. `album_id` é chave estrangeira, e a fixture do plano `colecao-dados` não criava o álbum
+
+O plano manda inserir três faixas com `album_id` 4, 5 e 6 no `initTestCase`. Rodou e reprovou
+com `FOREIGN KEY constraint failed` — `tracks.album_id` referencia `albums(id)`, e a tabela
+`albums` está vazia no banco temporário do teste.
+
+**O que fiz.** Três `INSERT INTO albums (id, title)` antes do laço das faixas, com comentário
+dizendo por quê. O resto do plano ficou intacto, e o teste então falhou pelo motivo que o
+plano previu (`totalMs` = 0 porque a chave não existia).
+
+**Alternativa descartada.** Deixar `album_id` nulo nas três faixas. O teste do plano compara
+`covers.at(0).albumId` com `4`; sem álbum, a asserção mais interessante da fatia (a capa sabe
+de qual álbum é) viraria uma comparação de zero com zero.
+
+**Custo de estar errada.** Nenhum fora do teste: são linhas de fixture num banco temporário.
+
+## 36. O disco de tocar da LISTA fica visível em repouso, contra o que o plano escreveu
+
+O plano `colecao-cartao` põe `visible: area.containsMouse` no disco de tocar da linha — ele só
+existe sob o mouse. Duas referências acima do plano dizem o contrário, e concordam entre si:
+
+- **O desenho** (`design/Colecoes.dc.html`): o idioma dele para controle de linha é
+  `.x { opacity: 0.35 }` com `.lin:hover .x { opacity: 1 }` — presente em repouso, aceso no
+  hover. Nunca ausente.
+- **O padrão vigente do app** (`src/TrackRow.qml`, escrito por extenso no código): "Always
+  visible when enabled — a control that only appears on hover is a control the user never
+  finds."
+
+**O que fiz.** `visible: linha.modelData.count > 0` com `opacity: 0.35 → 1.0` no hover e um
+`Behavior`, exatamente como o botão de coletar do `TrackRow`. Efeito colateral bem-vindo: a
+foto `11-colecao-cartao.png` passa a PROVAR o gesto em vez de escondê-lo.
+
+**Alternativa descartada.** Seguir o plano ao pé da letra. Entregaria o botão principal da
+fatia invisível na única evidência que o run produz, e contrariando uma regra que o próprio
+repo já escreveu no código.
+
+**Custo de estar errada.** Se o disco em repouso poluir a lista, é uma linha: voltar o
+`visible` para `area.containsMouse`. A informação da linha (nome, contagem, tempo, mosaico)
+não muda.
+
+## 37. A área de arrasto do plano não ficava embaixo da alça que ele mesmo desenhou
+
+O plano `colecao-ordem` põe a alça (`⠿`) como primeiro filho do `RowLayout` do `TrackRow`, e a
+`MouseArea` de arrasto com `width: 20` ancorada à esquerda do delegate. Medindo o arquivo real:
+o `Rectangle` do `TrackRow` tem `leftMargin` 4 e o `RowLayout` dentro dele tem `leftMargin` 13,
+então a alça ocupa **17 a 29 px**. A área de 0 a 20 px cobre **3 px** dela — 17 px do gesto
+caem em vão vazio, e 9 px da alça desenhada não arrastam.
+
+**O que fiz.** `width: 34`, que cobre a alça inteira e para antes do número da faixa (que
+começa em 42).
+
+**Alternativa descartada.** Mover a alça para fora do `RowLayout`, ancorada no zero. Mexeria no
+espaçamento de TODAS as linhas da biblioteca, que usam o mesmo `TrackRow` — uma fatia de
+coleção mudando a lista principal.
+
+**Custo de estar errada.** Se 34 for largo demais, os 5 px finais roubam clique de ativação
+numa faixa da coleção. É um número num arquivo.
+
+## 38. Uma bandeira de medição a mais, porque a alça sozinha não prova gravação
+
+O plano prova a ordem por dois caminhos: o teste em C++ (`moveTrackInCollection` reescreve as
+posições) e a foto (as alças aparecem). Nenhum dos dois executa o caminho do QML — sinal
+`trackMoved` → handler no `Main.qml` → gravação → recarga da lista. Alça desenhada sobre um
+caminho que nunca rodou é o defeito que este repo já registrou em
+`docs/solutions/ui/2026-08-28-redesenho-deixa-funcionalidade-orfa.md`.
+
+**O que fiz.** `--move-last-to-top` no `Main.qml`, mesmo padrão das bandeiras da decisão 27:
+manda a última faixa da coleção aberta para o começo pelo MESMO sinal que a alça emite. Medido
+com a coleção-fixture de 6 faixas: a ordem no banco passou de `1,2,3,4,5,6` para
+`6,1,2,3,4,5`, e a foto da tela mostra "Back Home" na linha 1, renumerada — a recarga do banco
+chega ao olho.
+
+**Alternativa descartada.** Ficar só com o teste e a foto do plano. Entregaria a única fatia do
+lote cujo caminho de escrita nunca foi executado uma vez.
+
+**Custo de estar errada.** É uma bandeira de medição: não aparece em nenhum gesto do usuário e
+custa duas linhas no `Loader` que só existe sob `--measure`.
+
+## 39. `moveTrackInCollection` saiu da RESERVA DECLARADA do detector de órfãos
+
+O `tools/check-orfaos.sh` listava `moveTrackInCollection` como reserva, com o motivo por
+escrito: "o plano colecoes-tags decide: arrastar para reordenar entra só se a ordem manual se
+mostrar usada de fato". Esta fatia é essa decisão, tomada — o método agora tem tela.
+
+**O que fiz.** Tirei o item da lista e o comentário que o explicava. Provei que a remoção deu
+dentes ao detector: quebrando a chamada no `Main.qml`, ele passou a imprimir
+`NUNCA CHAMADO: moveTrackInCollection` e `1 item(ns)`; restaurada, volta a `0`.
+
+**Alternativa descartada.** Deixar na lista. O gate do run já exige que o nome suma da saída, e
+sumiria de qualquer jeito — mas o comentário continuaria dizendo que o gesto não existe, e doc
+que mente é pior que doc que falta.
+
+**Custo de estar errada.** Nenhum: se o gesto for removido um dia, o detector reprova em vez de
+silenciar, que é o comportamento correto.
+
+## 40. Detalhes em que o código do plano não batia com o arquivo real
+
+- O comando de medição dos planos (`./build/melodarium --measure … | grep fila=`) **não imprime
+  nada**: o `console.log` do Qt está mudo sem `QT_LOGGING_RULES="*.debug=true"` e
+  `QT_FORCE_STDERR_LOGGING=1`, que é o que o `tools/check-layout.sh` já faz. Rodei todas as
+  medições com as duas variáveis.
+- `grep -c FAIL` do plano `colecao-dados` cobra `1` e dá `2`: o `ctest` imprime a linha `FAIL!`
+  do caso e mais a linha `The following tests FAILED:`. A substância bateu — um teste falhando,
+  na comparação de `totalMs`, e o teste da coleção vazia passando desde o início, como previsto.
+- `trackModel.rowCount()` não é `Q_INVOKABLE` (a contagem sai da `Q_PROPERTY count`), e a chave
+  do id em `trackAt` é `id`, não `trackId`. Ajustado na bandeira da decisão 38.
