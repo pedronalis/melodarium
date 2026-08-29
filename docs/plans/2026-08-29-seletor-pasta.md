@@ -88,3 +88,8 @@ e criação de pasta nova.
 - [x] `--open-folder-picker` em `src/Main.qml`, foto em `docs/telas/`
 - [x] Pontos de cor da tela nova em `tools/check-fidelidade.sh`
 - [x] `ctest`, `check-orfaos.sh`, `check-fidelidade.sh` verdes
+
+## Decisão humana
+
+**Aprovada na tela pelo Pedro em 2026-08-29**, com o seletor aberto no app compilado — o
+frontmatter pede `decisao-humana: sim`, e a foto do gate não fecha esse item: quem clica é ele.
