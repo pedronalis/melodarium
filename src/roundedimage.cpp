@@ -1,5 +1,7 @@
 #include "roundedimage.h"
 
+#include "dominantcolor.h"
+
 #include <QImageReader>
 #include <QPainter>
 #include <QPainterPath>
@@ -65,6 +67,11 @@ void RoundedImage::reload()
         m_image = reader.read();
         m_loadedFor = lado;
     }
+
+    const QColor antes = m_dominant;
+    m_dominant = dominantColorOf(m_image);
+    if (m_dominant != antes)
+        emit dominantColorChanged();
 
     if (tinha != ready())
         emit readyChanged();

@@ -275,7 +275,7 @@ git commit -m "feat(cover): saturation-weighted dominant color with circular hue
 
 ### Task 2: A capa expõe a própria cor
 
-- [ ] Em `src/roundedimage.h`, acrescentar o include `#include <QColor>` no topo, a
+- [x] Em `src/roundedimage.h`, acrescentar o include `#include <QColor>` no topo, a
       propriedade abaixo do `Q_PROPERTY(bool ready ...)`, o getter, o sinal e o campo:
 
 ```cpp
@@ -296,7 +296,7 @@ git commit -m "feat(cover): saturation-weighted dominant color with circular hue
     QColor m_dominant = QColor(0, 0, 0, 0);
 ```
 
-- [ ] Em `src/roundedimage.cpp`, acrescentar `#include "dominantcolor.h"` aos includes do
+- [x] Em `src/roundedimage.cpp`, acrescentar `#include "dominantcolor.h"` aos includes do
       topo e, no fim de `reload()`, calcular a cor junto com o resto do estado. O bloco final
       da função passa a ser:
 
@@ -311,7 +311,7 @@ git commit -m "feat(cover): saturation-weighted dominant color with circular hue
     update();
 ```
 
-- [ ] Registrar `src/dominantcolor.h` e `src/dominantcolor.cpp` na lista `SOURCES` do
+- [x] Registrar `src/dominantcolor.h` e `src/dominantcolor.cpp` na lista `SOURCES` do
       `qt_add_qml_module(melodarium ...)` em `CMakeLists.txt`, logo depois das duas linhas de
       `src/roundedimage.*`:
 
@@ -320,10 +320,10 @@ git commit -m "feat(cover): saturation-weighted dominant color with circular hue
         src/dominantcolor.cpp
 ```
 
-- [ ] verificação mecânica da task: `cmake --build build` → exit 0
-- [ ] verificação mecânica da task:
+- [x] verificação mecânica da task: `cmake --build build` → exit 0
+- [x] verificação mecânica da task:
       `grep -c 'dominantColor' src/roundedimage.h` → `3`
-- [ ] commit:
+- [x] commit:
 
 ```bash
 git add src/roundedimage.h src/roundedimage.cpp CMakeLists.txt
