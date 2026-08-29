@@ -1,24 +1,25 @@
 # Handoff — melodarium
 
-> Atualizado: 2026-08-28 16:35 · branch: `main` · via /fecho · contexto: ~47% consumido
+> Atualizado: 2026-08-29 13:29 · branch: `main` · via /fecho · contexto: ~67% consumido
 
 ## Estado
 
-- **A tela voltou a ser o desenho aprovado.** O Pedro abriu e reprovou: cor fora, sem degradê,
-  capa de canto vivo, badge de tag errado. Causa raiz: o app consumia as 16 chaves do tema do
-  sistema, e o desenho usa **14 cinzas com papéis distintos** — quatro fundos de estado
-  colapsavam num só. `Theme` ganhou a escada por PAPEL; 10 pontos de cor batem no hex.
-- **Capa arredondada existe de verdade.** `radius` + `clip` NÃO recorta imagem no QML: a
-  moldura estava no código e a arte por cima seguia quadrada, em todas as capas. `RoundedImage`
-  (QQuickPaintedItem) resolve num caminho que sobrevive ao adaptador de software — `MultiEffect`
-  não sobrevive, e some a capa inteira.
-- **O projeto se chama `melodarium`** (escolhido pelo Pedro no /batiza). Repo, pasta, binário,
-  módulo QML, textos e documentos renomeados. `~/dev/active/melodarium`, `./build/melodarium`.
-- **A migração de dados foi a parte perigosa e está verificada:** banco, capas e preferências
-  mudam de endereço com o nome, e o app abriria limpo como se nunca tivesse sido usado.
-  27 faixas, 4 álbuns, 17 capas e a pasta de música atravessaram.
-- **O som sai — medido, não suposto.** Num canal de áudio isolado, o app entrega 13× o nível do
-  silêncio, com a forma do arquivo. Falta só o ouvido do Pedro.
+- **A coleção virou playlist.** Toca inteira (com embaralhar), a linha da lista virou cartão
+  com mosaico de capas e "N faixas · tempo", toca sem abrir, e a faixa se arrasta para outro
+  lugar com a ordem gravada em `collection_tracks.position`. Lote de 4 fatias planejado,
+  despachado headless, colhido verde e integrado em `main` (`b7a4fe7`).
+- **A fila ganhou tela.** "N na fila" e o "+N" da tirinha abrem a fila inteira por cima, no
+  mesmo formato do overlay de busca; um clique pula para qualquer faixa. Tirar da fila e
+  reordenar continuam de fora — o motor não tem esses verbos.
+- **A barra perdeu o botão morto.** A nota musical do topo tinha o tamanho e a cor dos ícones
+  apagados que SÃO botões, e não clicava. O Pedro perguntou para que servia, que é a prova do
+  defeito. Saiu; os cinco elementos restantes clicam.
+- **O canvas de telas virou o app de hoje:** 18 quadros interativos (biblioteca, coleções,
+  podcast, busca, fila, ajustes, os 4 estados vazios, as 4 caixas), em
+  <https://claude.ai/code/artifact/c1b9607c-b0ba-4055-a5f5-5bcf47f7fdf1>.
+- **Duas peças saíram da reserva do detector de órfãos:** `moveTrackInCollection` (ganhou a
+  alça de arrastar) e `ingestDownloadedFile` (era falso positivo — fecha dentro do C++).
+  Restam quatro esperando tela.
 
 ## Alvo
 
@@ -26,52 +27,64 @@
 - **Plano-fonte:** `docs/specs/2026-08-27-player-musica-podcast.md` — 9 fatias do produto +
   5 do redesenho `melodia-capa-manda`, todas `concluido` (14/14)
 - **PRONTA quando:** as fatias concluídas **e** o Pedro ouvindo o som sair ao clicar numa faixa
-- **Restante:** só o julgamento do Pedro na tela dele — o som já foi medido saindo (13× o
-  ruído) e a cor conferida contra o desenho (10/10 pontos). Nenhum código pendente.
+- **Restante:** só o julgamento do Pedro na tela dele. O app foi aberto na tela dele em
+  29/08 13:2x com as coleções já como playlist; falta ele clicar e dizer. Nenhum código
+  pendente do plano-fonte.
 - **Correção de rumo (Pedro, 2026-08-28):** "Despacha e me traz pronto, é isso que eu
   quero" — gates de conferência visual passaram a ser meus, não dele.
 - **Correção de rumo (Pedro, 2026-08-28, tarde):** "o visual ainda está feio, não está fiel as
   cores do artifact desenhado, não está com degrades, não está com as capas com bordas
   arredondadas, o badge de criar tag está diferente" — gate de geometria passa verde com a
   paleta inteira errada; desde então todo redesenho roda `tools/check-fidelidade.sh`.
+- **Correção de rumo (Pedro, 2026-08-29):** "as coleções cara, esqueceu? Isso era core do app,
+  eu poder mostrar as coleções como se fossem playlists se não não faz sentido ter a tela
+  coleções" — a tela existia e listava faixas, mas nenhum dos cinco botões do cabeçalho TOCAVA.
+  Virou o lote `colecao-playlist`, concluído no mesmo dia.
 
 ## Fila da sessão
 
-1. **[S · IMPASSE · bloqueado em ação humana]** O que falta é um minuto do Pedro, e nomeando:
-   rodar `./build/melodarium`, clicar numa faixa, e dizer se sai som e se a tela agora é o
-   desenho. Eu já medi as duas coisas por instrumento; o que falta é julgamento, que não tem
-   como ser meu. — 3ª fila desde 2026-08-27. · done: ele responde
-2. **[S · 3ª desde 2026-08-27]** Ouvir e aprovar a tela — **bloqueado pelo vagão 1** ·
+1. **[S · IMPASSE · bloqueado em ação humana]** O app está ABERTO na tela dele desde 29/08
+   13:2x. Falta o minuto dele, e nomeando: clicar numa faixa e dizer se sai som; abrir
+   Coleções, criar uma pelo `+`, jogar faixas nela pelo `+` da linha da biblioteca, e dizer se
+   a playlist é o que ele queria. — 4ª fila desde 2026-08-27. · done: ele responde
+2. **[S · 4ª desde 2026-08-27]** Ouvir e aprovar a tela — **bloqueado pelo vagão 1** ·
    done: o Pedro confirma o som e o visual
-3. **[S]** Abrir o repo ao público, como o spec pede — nada trava mais, o nome saiu do /batiza ·
+3. **[S · 2ª desde 2026-08-28]** Abrir o repo ao público, como o spec pede — nada trava mais ·
    done: `gh repo view --json visibility` diz `PUBLIC`
 
 ## Estacionamento (derivas)
 
-- [x] 2026-08-28 · Nome definitivo do projeto — RESOLVIDO: **melodarium**, escolhido pelo Pedro
-      no `/batiza`. O anterior era "melodia" (genérico, 930 repos no GitHub); "melodarium" tem
-      namespace virgem em GitHub, npm, PyPI, crates e Homebrew. Código, dados, documentos, repo
-      e pasta renomeados no mesmo dia. Era o último item entre o repo fechado e o aberto que o
-      spec pede.
 - [ ] 2026-08-27 · Bit-perfect real depende do grafo do PipeWire (`default.clock.rate`), não só
       das opções do mpv. O plano documenta o limite; medir de verdade exige um FLAC 96 kHz e uma
       sonda no ponto ALSA.
-- [x] 2026-08-28 · O `melodia.db` de 0 byte solto em `~/.local/share/melodia/` — APAGADO. A
-      renomeação isolou o arquivo (a migração levou só a pasta interna, que era a de verdade), e
-      aí ficou claro que era lixo: 0 byte, do nome que não existe mais. A origem segue não
-      identificada; se um `melodarium.db` de 0 byte reaparecer solto em
-      `~/.local/share/melodarium/`, a causa é viva e vale investigar.
+- [ ] 2026-08-29 · **REABERTO — o banco fantasma voltou, e a causa é viva.** O item de 28/08
+      previu exatamente isto: apagamos o `melodia.db` de 0 byte e escrevemos que, se um
+      `melodarium.db` de 0 byte reaparecesse solto em `~/.local/share/melodarium/`, valeria
+      investigar. Reapareceu. Medido em 29/08 durante a `/planeja`:
+      `~/.local/share/melodarium/melodarium.db` = **0 bytes**, enquanto o banco de verdade é
+      `~/.local/share/melodarium/melodarium/melodarium.db` = 188 KB (16 tabelas, com dados).
+      O de dentro é o do `QStandardPaths::AppDataLocation` (`<org>/<app>`); o de fora é criado
+      por ALGUÉM que monta o caminho sem a pasta da organização, abre e não escreve. Suspeito
+      principal: um caminho de banco montado à mão fora de `Database::caminhoDoBanco`
+      (`src/database.cpp:265`). Risco real: o dia em que esse caminho for usado para ESCREVER,
+      o app abre vazio como se nunca tivesse sido usado.
+      DERIVA da sessão de 29/08 — estacionado, não investigado.
+      Registrado também em `docs/solutions/dados/2026-08-28-renomear-o-app-muda-todo-caminho-de-dados.md`
+      (adendo 29/08), porque a forma errada do caminho já custou tempo ao escrever planos.
+- [ ] 2026-08-29 · Dois worktrees de run no disco, ambos já integrados em `main`:
+      `~/dev/active/melodia-religa-run` (`exec/melodia-religa`) e
+      `~/dev/active/melodarium-colecao-run` (`exec/colecao-playlist`). Removíveis com
+      `git worktree remove` quando o Pedro quiser — o segundo guarda `RESUMO_RUN.md` e
+      `DECISOES_RUN.md`, que ficam fora do git por exclusão do próprio repo.
 
 ## Em voo
 
-Nada em voo. O lote `melodia-religa` (7 fatias) foi **colhido e calibrado em 2026-08-28** —
-desfecho na `## Calibração de custo`. O worktree `~/dev/active/melodia-religa-run` continua no
-disco (branch `exec/melodia-religa`, já integrada em `main`); o vínculo dele com o repo foi
-reparado depois da renomeação da pasta, e ele pode ser removido quando o Pedro quiser.
+Nada em voo. O lote `colecao-playlist` (4 fatias) foi **colhido em 2026-08-29** — portão verde,
+20 commits, integrado em `main` por `b7a4fe7`; desfecho na `## Calibração de custo`.
 
-Seis peças de motor prontas seguem em **reserva declarada**, impressas pelo `check-orfaos.sh` a
-cada execução: desinscrever de podcast, "continuar ouvindo", reordenar dentro de uma coleção,
-entre outras. Esperam decisão sobre merecerem tela.
+Quatro peças de motor seguem em **reserva declarada**, impressas pelo `check-orfaos.sh` a cada
+execução: `collectionsForTrack`, `continueListening`, `setGaplessAggressive` e `unsubscribe`.
+Esperam decisão sobre merecerem tela.
 
 - 2026-08-28 · /despacha run headless · lote `melodia-religa` (7 fatias) · modelo Opus 5 ·
   estimado n/d · real **~850k tok novos (~63,90M com releitura, inflação 75×) / ~0,56 h /
@@ -81,13 +94,13 @@ entre outras. Esperam decisão sobre merecerem tela.
 
 ## Verificação
 
-- `ctest --test-dir build --output-on-failure` → `100% tests passed, 0 out of 9` · 2026-08-28 16:35
-- `bash tools/check-layout.sh` → 11 medidas ok · 2026-08-28 16:35
-- `bash tools/check-orfaos.sh` → `0 item(ns) sem porta de entrada`, mais 6 em reserva
-  declarada · 2026-08-28 16:35
-- `bash tools/check-fidelidade.sh` → 10 pontos de cor ok contra o desenho · 2026-08-28 16:35
-- erros de QML em tela virtual, nas 6 telas → 0 · 2026-08-28 16:35
-- `./build/melodarium --scan` → acha a pasta e reporta `0 novas` contra o banco migrado · 2026-08-28
+> Todos rodados DEPOIS do merge `b7a4fe7` — merge limpo não prova integração correta.
+
+- `ctest --test-dir build --output-on-failure` → `100% tests passed, 0 failed out of 9` · 2026-08-29 13:0x
+- `bash tools/check-layout.sh` → 0 falhas (janela de 1100 e de 720) · 2026-08-29 13:0x
+- `bash tools/check-orfaos.sh` → `0 item(ns) sem porta de entrada`, 4 em reserva · 2026-08-29 13:0x
+- `bash tools/check-fidelidade.sh` → 10 pontos de cor ok · 2026-08-29 13:0x
+  (a sonda do trilho mudou de (16,108) para (28,63): sem a marca, a fileira subiu 38 px)
 - áudio real na saída, em canal isolado → pico 0,173 / RMS 0,026 contra 0,009 / 0,002 de
   silêncio · 2026-08-28
 
@@ -150,6 +163,17 @@ entre outras. Esperam decisão sobre merecerem tela.
   `tools/check-layout.sh` custou pouco e transformou "ficou parecido?" em quatro comparações
   numéricas que o portão cobra sozinho.
 
+- 2026-08-29 · /despacha run headless · lote `colecao-playlist` (4 fatias, 11 tasks, QML + C++
+  sobre código existente, planos com o código pronto nos steps) · modelo Opus 5 · estimado
+  ~250k tok novos / ~25 min · real **~447k tok novos / ~0,97 h / 434 eventos** · Δ tokens
+  **+79%**, Δ tempo **+132%** · **PASSOU** — 20 commits, portão 18/18, integrado em `main`.
+  Lição, e ela inverte o viés registrado até aqui: **subestimei**. As três calibrações
+  anteriores superestimaram tempo (−40%, −60%, −77%) e a regra virada era "dividir o palpite
+  por 3" — aplicá-la a um lote com **decisões de gosto** (3 das 4 fatias `decisao-humana: sim`)
+  errou para baixo em mais de duas vezes. O que consome não é o número de tasks: é o run parar
+  para julgar contra a referência, medir o resultado e refotografar. **Fatia que decide custa o
+  dobro de fatia que só executa.**
+
 ## Perigos
 
 - [ ] 2026-08-28 · **Renomear o app move a casa inteira do usuário** — todo caminho de dados no
@@ -205,6 +229,21 @@ QT_FORCE_STDERR_LOGGING=1` — mas o log fica enorme (845 KB num único start).
 - [ ] 2026-08-28 · **`cp` do `melodarium.db` copia um banco VAZIO** — o SQLite está em modo WAL e os
       dados vivem no `-wal`. Use `sqlite3 orig ".backup copia"`. Para fotografar com dados de
       teste sem tocar no banco do Pedro: `XDG_DATA_HOME=/tmp/algo`.
+
+- [ ] 2026-08-29 · **O caminho do banco tem DOIS níveis (`<org>/<app>`)** — o real é
+      `~/.local/share/melodarium/melodarium/melodarium.db`. Montado com um nível só, aponta
+      para um arquivo de 0 byte e o `sqlite3` responde `no such table`, que se lê como "não há
+      dados". Em script: `DB="${XDG_DATA_HOME:-$HOME/.local/share}/melodarium/melodarium/melodarium.db"`.
+      Custou uma correção nos quatro planos do lote `colecao-playlist` antes do despacho.
+- [ ] 2026-08-29 · **Área de toque não tem cor, e nenhum gate de pixel a enxerga** — a alça de
+      arrastar nasceu 17 px longe da área que arrastava: o desenho na tela certa, o gesto
+      pegando 3 dos 12 px. Os cinco gates verdes. Gesto novo exige prova de EXECUÇÃO (flag de
+      medição que dispare o mesmo sinal do gesto), nunca só foto. Lição em
+      `docs/solutions/ui/2026-08-29-alca-de-arrastar-fora-da-area-que-arrasta.md`.
+- [ ] 2026-08-29 · **Coordenada de sonda de cor é solidária ao layout** — tirar a marca do topo
+      do trilho subiu a fileira 38 px, e a sonda de `check-fidelidade.sh` passou a medir o fundo
+      da janela. Mexeu em posição? remeça na foto (`--shot` + amostragem por coluna) antes de
+      trocar o número no gate.
 
 ## Legado (arquivado)
 
