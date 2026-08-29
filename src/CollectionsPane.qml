@@ -53,6 +53,20 @@ Item {
         root.closeRequested()
     }
 
+    // Duplicada de LibraryPane.formatTotal de propósito: QML não tem um lugar comum para
+    // função pura (Theme é singleton de ESTILO, e pendurar lógica nele mistura os papéis).
+    // Se as duas divergirem, a lista e o cabeçalho passam a contar tempo de jeitos diferentes.
+    function formatTotal(ms) {
+        const minutes = Math.floor(ms / 60000)
+        const hours = Math.floor(minutes / 60)
+        const days = Math.floor(hours / 24)
+        if (days > 0)
+            return days + " d " + (hours % 24) + " h"
+        if (hours > 0)
+            return hours + " h " + (minutes % 60) + " min"
+        return minutes + " min"
+    }
+
     Component.onCompleted: root.refresh()
 
     Connections {
