@@ -1,0 +1,121 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap">
+  <style>
+    body { margin: 0; font-family: Inter, system-ui, sans-serif; }
+    * { box-sizing: border-box; }
+    a { color: #cccccc; } a:hover { color: #dddddd; }
+    .stage { width: 700px; height: 560px; background: #111111; display: flex; align-items: center; justify-content: center; }
+    .overlay { width: 660px; height: 520px; background: #151515; border: 1px solid #262626; border-radius: 20px; display: flex; flex-direction: column; box-shadow: 0 24px 60px rgba(0,0,0,0.55); }
+    .mono { font-family: 'JetBrains Mono', monospace; }
+    .qfield { flex-grow: 1; background: transparent; border: none; outline: none; color: #dddddd; font-family: Inter, sans-serif; font-size: 19px; }
+    .qfield::placeholder { color: #3c3c3c; font-size: 13px; }
+    .hit { display: flex; align-items: center; gap: 13px; height: 52px; padding: 0 13px; border-radius: 12px; cursor: pointer; }
+    .hd { font-size: 11px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: #3c3c3c; padding: 6px 13px 2px; }
+  </style>
+</helmet>
+
+<div class="stage">
+  <svg width="0" height="0" style="position:absolute" aria-hidden="true">
+    <symbol id="i-search" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></symbol>
+    <symbol id="i-music" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="8" cy="18" r="3"/><circle cx="18" cy="16" r="3"/><path d="M11 18V5l10-2v13"/></symbol>
+    <symbol id="i-disc" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="2.5"/></symbol>
+    <symbol id="i-mic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5 11a7 7 0 0 0 14 0"/><path d="M12 18v3"/></symbol>
+  </svg>
+
+  <div class="overlay">
+    <div style="display: flex; align-items: center; gap: 13px; padding: 18px;">
+      <svg viewBox="0 0 24 24" width="17" height="17" style="color: #5d5d5d; flex-shrink: 0;"><use href="#i-search"/></svg>
+      <input class="qfield" placeholder="buscar faixa, álbum, artista, episódio…" value="{{ query }}" onChange="{{ type }}">
+      <span class="mono" style="font-size: 11px; color: #3c3c3c; flex-shrink: 0;">{{ hitCount }} resultados</span>
+    </div>
+
+    <div style="height: 1px; background: #191919;"></div>
+
+    <div style="flex-grow: 1; min-height: 0; overflow: hidden; padding: 9px 6px;">
+      <sc-if value="{{ nothing }}" hint-placeholder-val="{{ true }}">
+        <div style="height: 100%; display: flex; align-items: center; justify-content: center;">
+          <span style="font-size: 13px; color: #3c3c3c;">{{ emptyLabel }}</span>
+        </div>
+      </sc-if>
+      <sc-if value="{{ found }}" hint-placeholder-val="{{ false }}">
+        <div>
+          <div class="hd">Faixas</div>
+          <sc-for list="{{ rows }}" as="r" hint-placeholder-count="3">
+            <div class="hit" style="background: {{ r.bg }};" onMouseEnter="{{ r.hover }}">
+              <div style="width: 34px; height: 34px; border-radius: 8px; background: #191919; flex-shrink: 0; display: flex; align-items: center; justify-content: center;">
+                <svg viewBox="0 0 24 24" width="15" height="15" style="color: #5d5d5d;"><use href="#i-music"/></svg>
+              </div>
+              <div style="display: flex; flex-direction: column; gap: 1px; flex-grow: 1; min-width: 0;">
+                <span style="font-size: 13px; font-weight: {{ r.weight }}; color: {{ r.titleColor }};">{{ r.title }}</span>
+                <span style="font-size: 12px; color: #3c3c3c;">{{ r.subtitle }}</span>
+              </div>
+              <span style="font-size: 12px; color: {{ r.enterColor }};">↵</span>
+            </div>
+          </sc-for>
+        </div>
+      </sc-if>
+    </div>
+
+    <div style="height: 1px; background: #191919;"></div>
+
+    <div style="display: flex; align-items: center; gap: 18px; padding: 13px 18px;">
+      <div style="display: flex; align-items: center; gap: 6px;"><span style="font-size: 12px; color: #5d5d5d;">↑↓</span><span style="font-size: 12px; color: #3c3c3c;">navegar</span></div>
+      <div style="display: flex; align-items: center; gap: 6px;"><span style="font-size: 12px; color: #5d5d5d;">↵</span><span style="font-size: 12px; color: #3c3c3c;">tocar</span></div>
+      <div style="display: flex; align-items: center; gap: 6px;"><span style="font-size: 12px; color: #5d5d5d;">⇧↵</span><span style="font-size: 12px; color: #3c3c3c;">pôr na fila</span></div>
+      <div style="flex-grow: 1;"></div>
+      <div style="display: flex; align-items: center; gap: 6px;"><span style="font-size: 12px; color: #5d5d5d;">esc</span><span style="font-size: 12px; color: #3c3c3c;">fechar</span></div>
+    </div>
+  </div>
+</div>
+</x-dc>
+
+<script data-dc-script data-props='{"$preview":{"width":700,"height":560}}'>
+class Component extends DCLogic {
+  constructor(props) {
+    super(props)
+    this.state = { query: '', highlighted: 0 }
+  }
+
+  base() {
+    return [
+      { title: 'Vespers', subtitle: 'Ólafur Arnalds · Island Songs' },
+      { title: 'Saman', subtitle: 'Ólafur Arnalds · Island Songs' },
+      { title: 'Nyepi', subtitle: 'Nils Frahm · All Melody' }
+    ]
+  }
+
+  renderVals() {
+    const s = this.state
+    const q = s.query.trim().toLowerCase()
+    const hits = q === '' ? [] : this.base().filter((h) => (h.title + ' ' + h.subtitle).toLowerCase().indexOf(q) >= 0)
+
+    return {
+      query: s.query,
+      hitCount: String(hits.length),
+      nothing: hits.length === 0,
+      found: hits.length > 0,
+      emptyLabel: q === '' ? 'digite para procurar' : 'nada encontrado',
+      rows: hits.map((h, i) => ({
+        title: h.title,
+        subtitle: h.subtitle,
+        bg: i === s.highlighted ? '#232323' : 'transparent',
+        weight: i === s.highlighted ? '600' : '500',
+        titleColor: i === s.highlighted ? '#dddddd' : '#5d5d5d',
+        enterColor: i === s.highlighted ? '#5d5d5d' : 'transparent',
+        hover: () => this.setState({ highlighted: i })
+      })),
+      type: (e) => this.setState({ query: e.target.value, highlighted: 0 })
+    }
+  }
+}
+</script>
+</body>
+</html>

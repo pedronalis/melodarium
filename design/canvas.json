@@ -2,10 +2,18 @@
   "pages": [
     {
       "id": "page-1",
-      "name": "Direção escolhida"
+      "name": "As telas"
     },
     {
       "id": "page-2",
+      "name": "Quando está vazio"
+    },
+    {
+      "id": "page-3",
+      "name": "As caixas"
+    },
+    {
+      "id": "page-4",
       "name": "Não escolhidas"
     }
   ],
@@ -16,8 +24,9 @@
       "y": 0,
       "w": 1100,
       "h": 700,
-      "title": "1 · Tocando um álbum",
-      "page": "page-1"
+      "title": "1 · Álbum aberto, tocando",
+      "page": "page-1",
+      "is_interactive": true
     },
     {
       "file": "Biblioteca.dc.html",
@@ -25,35 +34,149 @@
       "y": 0,
       "w": 1100,
       "h": 700,
-      "title": "2 · Biblioteca inteira",
-      "page": "page-1"
+      "title": "2 · A biblioteca inteira",
+      "page": "page-1",
+      "is_interactive": true
     },
     {
-      "file": "Podcast.dc.html",
-      "x": 0,
-      "y": 1040,
-      "w": 1100,
-      "h": 700,
-      "title": "4 · Podcast",
-      "page": "page-1"
-    },
-    {
-      "file": "Busca.dc.html",
+      "file": "Colecoes.dc.html",
       "x": 2440,
       "y": 0,
       "w": 1100,
       "h": 700,
-      "title": "3 · Busca",
-      "page": "page-1"
+      "title": "3 · Coleções",
+      "page": "page-1",
+      "is_interactive": true
+    },
+    {
+      "file": "Podcast.dc.html",
+      "x": 0,
+      "y": 1180,
+      "w": 1100,
+      "h": 700,
+      "title": "4 · Podcast",
+      "page": "page-1",
+      "is_interactive": true
+    },
+    {
+      "file": "Busca.dc.html",
+      "x": 1220,
+      "y": 1180,
+      "w": 1100,
+      "h": 700,
+      "title": "5 · Busca",
+      "page": "page-1",
+      "is_interactive": true
     },
     {
       "file": "SemMusica.dc.html",
-      "x": 1220,
-      "y": 1040,
+      "x": 2440,
+      "y": 1180,
       "w": 1100,
       "h": 700,
-      "title": "5 · Nada tocando",
-      "page": "page-1"
+      "title": "6 · Nada tocando",
+      "page": "page-1",
+      "is_interactive": true
+    },
+    {
+      "file": "Ajustes.dc.html",
+      "x": 0,
+      "y": 2360,
+      "w": 1100,
+      "h": 700,
+      "title": "7 · Ajustes",
+      "page": "page-1",
+      "is_interactive": true
+    },
+    {
+      "file": "Fila.dc.html",
+      "x": 1220,
+      "y": 2360,
+      "w": 1100,
+      "h": 700,
+      "title": "8 · A fila inteira",
+      "page": "page-1",
+      "is_interactive": true
+    },
+    {
+      "file": "BibliotecaVazia.dc.html",
+      "x": 0,
+      "y": 0,
+      "w": 1100,
+      "h": 700,
+      "title": "Biblioteca sem pasta escolhida",
+      "page": "page-2",
+      "is_interactive": true
+    },
+    {
+      "file": "ColecoesVazio.dc.html",
+      "x": 1220,
+      "y": 0,
+      "w": 1100,
+      "h": 700,
+      "title": "Nenhuma coleção ainda",
+      "page": "page-2",
+      "is_interactive": true
+    },
+    {
+      "file": "PodcastVazio.dc.html",
+      "x": 2440,
+      "y": 0,
+      "w": 1100,
+      "h": 700,
+      "title": "Nenhum programa ainda",
+      "page": "page-2",
+      "is_interactive": true
+    },
+    {
+      "file": "BuscaVazia.dc.html",
+      "x": 0,
+      "y": 820,
+      "w": 700,
+      "h": 560,
+      "title": "Busca sem resultado",
+      "page": "page-2",
+      "is_interactive": true
+    },
+    {
+      "file": "NovaColecao.dc.html",
+      "x": 0,
+      "y": 0,
+      "w": 460,
+      "h": 260,
+      "title": "Nova coleção · renomear",
+      "page": "page-3",
+      "is_interactive": true
+    },
+    {
+      "file": "ApagarColecao.dc.html",
+      "x": 580,
+      "y": 0,
+      "w": 460,
+      "h": 240,
+      "title": "Apagar coleção",
+      "page": "page-3",
+      "is_interactive": true
+    },
+    {
+      "file": "AssinarFeed.dc.html",
+      "x": 1160,
+      "y": 0,
+      "w": 560,
+      "h": 340,
+      "title": "Assinar podcast",
+      "page": "page-3",
+      "is_interactive": true
+    },
+    {
+      "file": "ColarLink.dc.html",
+      "x": 1840,
+      "y": 0,
+      "w": 620,
+      "h": 420,
+      "title": "Adicionar link do YouTube",
+      "page": "page-3",
+      "is_interactive": true
     },
     {
       "file": "HierarquiaContraste.dc.html",
@@ -62,7 +185,7 @@
       "w": 1100,
       "h": 700,
       "title": "A · Hierarquia por contraste",
-      "page": "page-2"
+      "page": "page-4"
     },
     {
       "file": "DensaTabular.dc.html",
@@ -71,63 +194,113 @@
       "w": 1100,
       "h": 700,
       "title": "B · Densa e tabular",
-      "page": "page-2"
+      "page": "page-4"
     }
   ],
   "annotations": [
     {
-      "id": "escolhida",
+      "id": "como-usar",
       "x": 0,
-      "y": -240,
+      "y": -340,
+      "w": 640,
+      "page": "page-1",
+      "text": "AS TELAS DO MELODARIUM — 28/08\n\nCada quadro FUNCIONA: os chips filtram, as abas trocam de lista, o coração acende, o botão toca e pausa, o tempo anda, as caixas abrem. Cada tela tem o seu próprio funcionamento — mexer numa não move as outras.\n\nA moldura é sempre a mesma: barra de ícones, painel do que está tocando à esquerda, conteúdo à direita.\n\nMUDOU HOJE: a nota musical saiu do topo da barra. Ela tinha o tamanho e a cor dos ícones apagados que são botões, e não clicava — parecia um botão morto. Agora os cinco elementos da barra clicam, e o primeiro começa no topo."
+    },
+    {
+      "id": "nota-album",
+      "x": 0,
+      "y": 760,
       "w": 460,
-      "text": "DIREÇÃO C — escolhida em 27/08.\n\nAs quatro telas são a MESMA moldura: barra de ícones, painel do que está tocando à esquerda, conteúdo à direita. Só o miolo troca. Isso é o que torna a direção implementável sem virar quatro telas separadas no código."
+      "page": "page-1",
+      "text": "1 · ÁLBUM ABERTO\n\nClique numa faixa e ela passa a tocar: o painel troca de título, o tempo reinicia e a lista marca o triângulo.\n\nO + Coleção abre o menu das coleções. O \"+ tag\" vira campo de texto no lugar dele — Enter cria a etiqueta."
     },
     {
       "id": "nota-biblioteca",
       "x": 1220,
-      "y": -240,
-      "w": 460,
-      "text": "A tela que faltava. O painel do que toca fica; o miolo vira lista densa com busca e filtros em chips — a densidade da direção B, dentro da moldura da C.\n\nDecisão embutida: a busca fica no miolo, não no topo, porque o topo não existe mais nesta direção."
-    },
-    {
-      "id": "nota-busca",
-      "x": 2440,
-      "y": -240,
+      "y": 760,
       "w": 460,
       "page": "page-1",
-      "text": "BUSCA. Sem barra no topo, ela vira um painel que abre por cima (lupa na barra de ícones, ou um atalho de teclado).\n\nBusca tudo de uma vez — faixa, álbum, artista e episódio de podcast na mesma lista — e toca com Enter, sem tirar a mão do teclado."
+      "text": "2 · A BIBLIOTECA INTEIRA\n\nOs chips são o eixo: Artistas, Álbuns, Gêneros e Tags trocam a lista de faixas pela lista de GRUPOS; clicar num grupo abre as faixas dele, e a seta volta.\n\n\"Automáticas\" recolhe Recentes, Mais tocadas, Esquecidas e Nunca ouvi num menu — nove chips não cabem numa linha, e uma linha é o que o desenho manda."
+    },
+    {
+      "id": "nota-colecoes",
+      "x": 2440,
+      "y": 760,
+      "w": 460,
+      "page": "page-1",
+      "text": "3 · COLEÇÕES\n\nDois estados no mesmo painel: a lista das coleções e as faixas de uma coleção aberta. A seta volta.\n\nCom uma coleção aberta aparecem baixar, renomear e apagar. O × de cada linha tira a faixa dali — não da biblioteca. A seta de baixar mostra o progresso do yt-dlp no topo da lista."
     },
     {
       "id": "nota-podcast",
       "x": 0,
-      "y": 790,
+      "y": 1940,
       "w": 460,
       "page": "page-1",
-      "text": "PODCAST. Mesma moldura, com o que muda de verdade num player de fala: velocidade (1.5x), pular 30s para frente e para trás, e cada episódio mostrando se foi ouvido, quanto falta ou se está baixado.\n\nO download em curso vive no rodapé do miolo."
+      "text": "4 · PODCAST\n\nO painel troca de transporte: no lugar de aleatório e repetir vêm a velocidade e os pulos de 30 s.\n\nOs filtros funcionam. A seta de baixar puxa o episódio de verdade (barra no rodapé, e a seta some quando termina). O tique marca ouvido e desmarca."
+    },
+    {
+      "id": "nota-busca",
+      "x": 1220,
+      "y": 1940,
+      "w": 460,
+      "page": "page-1",
+      "text": "5 · BUSCA\n\nDigite no campo: a lista filtra de verdade, agrupada por tipo. ↑↓ andam, Enter toca, Shift+Enter põe na fila.\n\nSem barra no topo, a busca é um painel que abre por cima — a lupa da barra de ícones, ou Ctrl+K."
     },
     {
       "id": "nota-vazio",
-      "x": 1220,
-      "y": 790,
+      "x": 2440,
+      "y": 1940,
       "w": 460,
       "page": "page-1",
-      "text": "NADA TOCANDO — o furo que a direção C tinha: uma capa gigante vazia.\n\nEm vez de retângulo cinza, o painel vira o convite: continuar de onde parou (com o minuto exato), tocar tudo embaralhado, ou atacar as 312 que você nunca ouviu."
+      "text": "6 · NADA TOCANDO\n\nEm vez de uma capa cinza e um transporte que não controla nada, o painel vira o convite: continuar de onde parou (com o minuto exato), tocar tudo embaralhado, atacar as 312 nunca ouvidas.\n\nClique num convite e o painel passa a tocar. Clicar na capa volta ao estado vazio."
+    },
+    {
+      "id": "nota-ajustes",
+      "x": 0,
+      "y": 3120,
+      "w": 460,
+      "page": "page-1",
+      "text": "7 · AJUSTES\n\nA gaveta que faltava: depois de escolher a pasta uma vez, não havia como trocá-la nunca mais.\n\nOs dois interruptores de áudio ligam e desligam de verdade — preenchido é ligado, contornado é desligado. \"Reler a pasta\" mostra a varredura acontecendo. A engrenagem no pé da barra abre e o Fechar fecha."
+    },
+    {
+      "id": "nota-vazios",
+      "x": 0,
+      "y": -300,
+      "w": 640,
+      "page": "page-2",
+      "text": "QUANDO ESTÁ VAZIO\n\nO que o app mostra antes de ter qualquer coisa dentro. São telas de verdade, não erro: cada uma diz o que aconteceu e oferece a saída.\n\nTambém funcionam: escolher a pasta dispara a varredura e a biblioteca aparece; criar a primeira coleção põe a linha na lista; assinar um feed traz os episódios."
+    },
+    {
+      "id": "nota-caixas",
+      "x": 0,
+      "y": -320,
+      "w": 640,
+      "page": "page-3",
+      "text": "AS CAIXAS\n\nAs quatro janelinhas do app, no tamanho real (360, 460 e 520 de largura). Todas com campo que aceita digitação e botões que respondem.\n\nNome repetido é recusado com a mensagem. Endereço de feed sem http:// é recusado. O link do YouTube busca a prévia antes de baixar, e o áudio entra marcado como comprimido — o app não finge que é a mesma coisa que os seus arquivos."
     },
     {
       "id": "nota-a",
       "x": 0,
       "y": -240,
       "w": 420,
-      "page": "page-2",
-      "text": "A · HIERARQUIA POR CONTRASTE\n\nNão escolhida — mexia em cor e peso, não no que a tela faz."
+      "page": "page-4",
+      "text": "A · HIERARQUIA POR CONTRASTE\n\nNão escolhida em 27/08 — mexia em cor e peso, não no que a tela faz."
     },
     {
       "id": "nota-b",
       "x": 1220,
       "y": -240,
       "w": 420,
-      "page": "page-2",
-      "text": "B · DENSA E TABULAR\n\nNão escolhida, mas não descartada: a densidade dela virou a tela de biblioteca da direção C."
+      "page": "page-4",
+      "text": "B · DENSA E TABULAR\n\nNão escolhida, mas não descartada: a densidade dela virou a tela de biblioteca da direção C, que é a que o app usa hoje."
+    },
+    {
+      "id": "nota-fila",
+      "x": 1220,
+      "y": 3120,
+      "w": 460,
+      "page": "page-1",
+      "text": "8 · A FILA INTEIRA\n\nO buraco que a barra escondia. A tirinha do pé mostra quatro capas e um \"+8\": doze faixas enfileiradas, quatro visíveis, e nenhum jeito de ver o resto.\n\nAgora \"12 na fila\" e o \"+8\" abrem a fila inteira por cima, no mesmo painel da busca. Um clique pula para qualquer faixa; as que já passaram ficam apagadas. Tirar da fila e reordenar não estão aqui: o motor não tem esses dois verbos ainda."
     }
   ],
   "launch": {

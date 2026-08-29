@@ -40,20 +40,10 @@ Rectangle {
         anchors.bottomMargin: Theme.marginXL
         spacing: Theme.marginS
 
-        // A marca, no topo da barra: não é botão, é de onde o olho parte (design/Main.dc.html).
-        Item {
-            Layout.preferredWidth: Math.round(34 * Theme.uiScale)
-            Layout.preferredHeight: Math.round(34 * Theme.uiScale)
-            Layout.bottomMargin: Theme.marginXS
-
-            Text {
-                anchors.centerIn: parent
-                text: Icons.get("music")
-                font.family: Icons.fontFamily
-                font.pixelSize: Theme.fontSizeL
-                color: Theme.cDim
-            }
-        }
+        // Aqui havia a marca do app: uma nota musical do mesmo tamanho e da mesma cor dos ícones
+        // apagados que SÃO botões — indistinguível de um botão desligado, e sem clique nenhum.
+        // O Pedro perguntou "para que serve esse botão" em 2026-08-28, que é a prova do defeito.
+        // Saiu: todo item deste trilho clica. Identidade de marca é assunto do ícone da janela.
 
         Repeater {
             model: root.items

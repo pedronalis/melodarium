@@ -1,0 +1,61 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap">
+  <style>
+    body { margin: 0; font-family: Inter, system-ui, sans-serif; }
+    * { box-sizing: border-box; }
+    a { color: #cccccc; } a:hover { color: #dddddd; }
+    .stage { width: 460px; height: 240px; background: #111111; display: flex; align-items: center; justify-content: center; }
+    .box { width: 360px; background: #191919; border: 1px solid #262626; border-radius: 16px; padding: 13px; display: flex; flex-direction: column; gap: 9px; box-shadow: 0 24px 60px rgba(0,0,0,0.55); }
+    .bt { padding: 9px 18px; border-radius: 12px; font-size: 13px; font-weight: 500; cursor: pointer; }
+    .bt.fill { background: #262626; color: #dddddd; }
+    .bt.fill:hover { background: #232323; }
+    .bt.out { border: 1px solid #262626; color: #5d5d5d; }
+    .bt.out:hover { background: #232323; color: #dddddd; }
+  </style>
+</helmet>
+
+<div class="stage">
+  <div class="box">
+    <span style="font-size: 14px; font-weight: 600; color: #dddddd;">Apagar coleção</span>
+    <span style="font-size: 13px; color: #828282; line-height: 1.6;">{{ message }}</span>
+    <div style="display: flex; justify-content: flex-end; gap: 6px;">
+      <div class="bt out" onClick="{{ cancel }}">{{ cancelLabel }}</div>
+      <sc-if value="{{ pending }}" hint-placeholder-val="{{ true }}">
+        <div class="bt fill" onClick="{{ confirm }}">Apagar</div>
+      </sc-if>
+    </div>
+  </div>
+</div>
+</x-dc>
+
+<script data-dc-script data-props='{"$preview":{"width":460,"height":240}}'>
+class Component extends DCLogic {
+  constructor(props) {
+    super(props)
+    this.state = { done: false }
+  }
+
+  renderVals() {
+    const s = this.state
+    return {
+      message: s.done
+        ? '"Para dormir" foi apagada. As 14 faixas continuam na biblioteca.'
+        : 'Apagar "Para dormir"? As faixas continuam na biblioteca.',
+      pending: !s.done,
+      cancelLabel: s.done ? 'Fechar' : 'Cancelar',
+      confirm: () => this.setState({ done: true }),
+      cancel: () => this.setState({ done: false })
+    }
+  }
+}
+</script>
+</body>
+</html>
