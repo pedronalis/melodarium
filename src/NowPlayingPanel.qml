@@ -85,7 +85,22 @@ Rectangle {
     // as cores dela, nos lugares delas.
     property var focosDoHalo: []
 
-    readonly property var focosDaCapaAtual: root.capaDaFrente.colorSpots
+    // `--halo-teste`: acende o halo com focos sintéticos, sem precisar de música. Existe para
+    // que o halo possa ser posto sob esforço (redimensionamento em rajada) por um script, em
+    // vez de depender de alguém clicar numa faixa — foi assim que o crash de 29/08 pôde ser
+    // reproduzido fora da tela do Pedro.
+    readonly property bool haloDeTeste:
+        Qt.application.arguments.indexOf("--halo-teste") >= 0
+
+    readonly property var focosSinteticos: [
+        { color: Qt.rgba(0.20, 0.42, 0.90, 1), x: 0.16, y: 0.16, weight: 1.00 },
+        { color: Qt.rgba(0.90, 0.52, 0.10, 1), x: 0.83, y: 0.83, weight: 0.80 },
+        { color: Qt.rgba(0.10, 0.80, 0.40, 1), x: 0.83, y: 0.16, weight: 0.60 },
+        { color: Qt.rgba(0.80, 0.10, 0.50, 1), x: 0.16, y: 0.83, weight: 0.40 }
+    ]
+
+    readonly property var focosDaCapaAtual:
+        root.haloDeTeste ? root.focosSinteticos : root.capaDaFrente.colorSpots
 
     onFocosDaCapaAtualChanged: {
         if (root.focosDaCapaAtual.length > 0)
@@ -96,7 +111,8 @@ Rectangle {
     // fidelidade mede 15 pontos fixos com 3 níveis de tolerância por canal — um deles a
     // 16 px da capa. Ou o halo sai da foto, ou o gate passa a medir sorte.
     readonly property bool mostrarHalo:
-        !Theme.medindo && root.hasTrack && root.focosDaCapaAtual.length > 0
+        !Theme.medindo && (root.hasTrack || root.haloDeTeste)
+        && root.focosDaCapaAtual.length > 0
 
     onFonteDaCapaChanged: {
         root.capaDeTras.source = root.fonteDaCapa

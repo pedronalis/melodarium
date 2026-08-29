@@ -60,6 +60,20 @@ Item {
             required property int index
 
             readonly property real raio: Math.max(1, root.capaLado * root.alcance)
+
+            // O Canvas é pintado SEMPRE neste tamanho, e a escala faz o resto. Não é
+            // micro-otimização: é a diferença entre a interface responder e travar.
+            //
+            // Pintado no tamanho final, cada foco virava uma textura de ~982x982 numa janela
+            // larga. Quatro delas são ~15 MB, e como a deriva move os itens a cada quadro, o
+            // Qt recompõe as quatro sessenta vezes por segundo — um núcleo inteiro a 100%,
+            // para sempre. Ao ESTREITAR a janela cabia no orçamento de quadro; ao EXPANDIR
+            // estourava, a interface parava de responder e o compositor oferecia encerrar o
+            // app. Medido em 29/08: 100 ticks/s com deriva, 0 sem ela.
+            //
+            // 256 px chega porque um degradê radial é liso: ampliar 4x um borrão não deixa
+            // degrau nenhum visível, e a textura cai de 3,8 MB para 262 KB.
+            readonly property int resolucao: 256
             // NÃO é `readonly`, e a diferença não é estilo: um `Behavior` numa propriedade
             // só de leitura faz o tipo inteiro deixar de carregar, EM SILÊNCIO — sem erro no
             // stderr, o app apenas sai com código 255. Mesma família da armadilha do `opened`
@@ -73,12 +87,18 @@ Item {
             // de fase, o que se vê é a cor mudando de lugar devagar.
             property real fase: index * 1.7
 
-            width: foco.raio * 2
-            height: foco.raio * 2
+            width: foco.resolucao
+            height: foco.resolucao
 
-            x: root.capaX + foco.modelData.x * root.capaLado - foco.raio
+            // A escala é transformação de cena: cresce a textura já pintada, sem repintar e
+            // sem realocar. `transformOrigin` no centro para que a conta de posição abaixo
+            // fale do CENTRO do foco, que é onde a luz nasce.
+            scale: (foco.raio * 2) / foco.resolucao
+            transformOrigin: Item.Center
+
+            x: root.capaX + foco.modelData.x * root.capaLado - foco.resolucao / 2
                + Math.cos(foco.fase) * root.amplitude
-            y: root.capaY + foco.modelData.y * root.capaLado - foco.raio
+            y: root.capaY + foco.modelData.y * root.capaLado - foco.resolucao / 2
                + Math.sin(foco.fase * 0.7) * root.amplitude
 
             // Um período por foco, todos longos e nenhum múltiplo do outro: períodos que se
@@ -91,16 +111,17 @@ Item {
                 duration: 23000 + foco.index * 4700
             }
 
+            // Só cor e força repintam. O tamanho da janela NÃO: é a escala que responde por
+            // ele, e é isso que tira a repintura do caminho do redimensionamento.
             onCorChanged: foco.requestPaint()
             onForcaChanged: foco.requestPaint()
-            onRaioChanged: foco.requestPaint()
 
             onPaint: {
                 const ctx = getContext("2d")
                 ctx.reset()
 
-                const g = ctx.createRadialGradient(foco.raio, foco.raio, 0,
-                                                   foco.raio, foco.raio, foco.raio)
+                const meio = foco.resolucao / 2
+                const g = ctx.createRadialGradient(meio, meio, 0, meio, meio, meio)
                 // Quatro paradas, e não duas: uma reta de opaco a transparente deixa o miolo
                 // chapado e a borda visível. A curva concentra a luz no centro e faz a cauda
                 // morrer devagar, que é como luz cai.
