@@ -18,6 +18,9 @@ Item {
     signal closeRequested
     signal trackActivated(int index)
     signal trackRemoved(int trackId)
+    // A coleção é uma playlist: playlist se toca inteira. Sem isto o único jeito de ouvir
+    // "Pra codar" era abrir e clicar numa faixa, o que é navegar, não tocar.
+    signal playRequested(bool shuffled)
 
     property var items: []
     // url -> { received, total }. O download é por link, não por linha: guardar isso dentro
@@ -116,6 +119,46 @@ Item {
                 font.family: Theme.fontFamilyFixed
                 font.pixelSize: Theme.fontSizeS
                 color: Theme.cFaint
+            }
+
+            // O único disco claro da tela significa "tocar" — é o mesmo do transporte.
+            Rectangle {
+                Layout.leftMargin: Theme.marginS
+                Layout.preferredWidth: Math.round(30 * Theme.uiScale)
+                Layout.preferredHeight: Math.round(30 * Theme.uiScale)
+                visible: root.openId > 0 && tracks.count > 0
+                radius: width / 2
+                color: tocarArea.containsMouse ? Theme.cStrong : Theme.cTitle
+
+                Behavior on color {
+                    ColorAnimation { duration: Theme.animationFast; easing.type: Theme.easingType }
+                }
+
+                Text {
+                    anchors.centerIn: parent
+                    text: Icons.get("play")
+                    font.family: Icons.fontFamily
+                    font.pixelSize: Theme.fontSizeS
+                    color: Theme.cBase
+                }
+
+                MouseArea {
+                    id: tocarArea
+                    anchors.fill: parent
+                    hoverEnabled: true
+                    cursorShape: Qt.PointingHandCursor
+                    onClicked: root.playRequested(false)
+                }
+            }
+
+            IconButton {
+                Layout.preferredWidth: Math.round(22 * Theme.uiScale)
+                Layout.preferredHeight: 22
+                visible: root.openId > 0 && tracks.count > 0
+                icon: "shuffle"
+                size: Theme.fontSizeS
+                tooltip: qsTr("tocar embaralhado")
+                onClicked: root.playRequested(true)
             }
 
             Item { Layout.fillWidth: true }
