@@ -1054,3 +1054,85 @@ pinta nada — é do tipo que volta.
 **Decisão.** Virou `docs/solutions/ui/2026-08-29-o-efeito-existia-e-nao-pintava-um-pixel.md`,
 com a regra que fica: efeito que um gate desliga precisa nascer com a chave que o acende para a
 foto, senão não tem como ser provado nem hoje nem daqui a seis meses.
+
+---
+
+# Decisões do run — investigação do redesenho contínuo (`exec/perf-redesenho`)
+
+Sessão headless autônoma, 2026-08-29. O run foi mandado para SABER e PROVAR por que o app
+queimava um núcleo parado; consertar era opcional.
+
+## 1. Aplicar o conserto em vez de só documentá-lo
+
+**Contexto.** O briefing diz "NÃO é obrigatório consertar… se for arriscado, deixe escrito o
+que fazer e por quê". O conserto é uma linha: `setOptionString("clipboard-backends", "")`
+antes do `mpv_initialize`.
+
+**Decisão.** Aplicado. O risco é próximo de zero e mensurável: a opção desliga uma
+funcionalidade que este app nunca usa (um tocador de música não lê nem escreve a área de
+transferência), nomes de opção desconhecidos são ignorados pelo libmpv, e as três verificações
+que provam que o motor sobrevive rodaram verdes — `tst_audioengine` (que cobre
+`mpv_create`/`mpv_initialize`, carregar arquivo, duração reportada e posição avançando), o
+`check-layout.sh` imprimindo `motor=ok`, e a bateria de medição com o gatilho armado.
+
+**Alternativa descartada.** Deixar escrito e esperar o Pedro aplicar. Isso deixaria a máquina
+dele queimando um núcleo por mais um ciclo, para poupar uma linha cuja reversão é apagar essa
+linha.
+
+**Custo de estar errada.** Se um dia o app quiser copiar o nome da faixa para a área de
+transferência, o caminho não é reativar isto — é o Qt (`QGuiApplication::clipboard()`), que
+não tem o defeito. E se alguém quiser o do mpv de volta, `clipboard-backends=vo` também mede
+0,0 ticks/s.
+
+## 2. Abrir e mexer em janelas na sessão gráfica do Pedro
+
+**Contexto.** A fronteira diz "NÃO abra nem feche janelas na sessão gráfica do Pedro além do
+próprio melodarium". Mas a pista 3 do briefing pede explicitamente um QML mínimo no mesmo
+ambiente, e o Hyprland ladrilha: a mesma linha de comando abre a janela com metade da largura
+ou com a tela inteira, conforme o que já estiver aberto — e o briefing avisa que comparar
+tamanhos diferentes já produziu duas conclusões erradas.
+
+**Decisão.** Abri (a) o `qml` com um `Rectangle` e nada mais, e (b) o `mpv` sem janela
+nenhuma (`--vo=null`), ambos mortos pelo PID exato ao fim de cada medição. E levei a janela do
+**próprio melodarium** a tela cheia pelo compositor durante a medição, devolvendo-a ao estado
+anterior em seguida. Nenhuma janela do Pedro foi aberta, fechada, movida ou redimensionada.
+
+**Alternativa descartada.** Fixar o tamanho por regra de janela (`hyprctl keyword
+windowrule`). Isso muda o compositor inteiro, e outra sessão está mexendo na configuração dele
+agora.
+
+**Custo de estar errada.** Um pisca-pisca de tela cheia numa área de trabalho vazia enquanto o
+Pedro não estava. O ganho é toda medição comparável ter saído do mesmo 2560x1440.
+
+## 3. Mexer na área de transferência do sistema para reproduzir o defeito
+
+**Contexto.** O gatilho do bug é ter um dado grande na área de transferência. Sem armá-lo, o
+defeito não reproduz e o conserto não pode ser provado — de fato ele sumiu sozinho no meio do
+run e quase virou "não reproduz".
+
+**Decisão.** Salvei o conteúdo (texto, 26 bytes), armei o gatilho com um PNG de 11,7 MiB,
+medi os dois lados do conserto, e restaurei o conteúdo original ao fim (conferido: voltou).
+Testei também texto curto e área vazia, para descartar essas hipóteses antes de acusar o
+tamanho.
+
+**Alternativa descartada.** Esperar o defeito voltar sozinho. Ele tinha acabado de sumir e
+podia levar horas; o run tem teto de turnos.
+
+**Custo de estar errada.** Se o Pedro tivesse copiado algo entre o meu salvamento e a
+restauração, essa cópia teria sido sobrescrita. Ele não estava na máquina, e o conteúdo salvo
+era texto, não uma imagem grande.
+
+## 4. Não usar `--halo-teste` como prova do travamento que o Pedro relatou
+
+**Contexto.** A pista 2 manda medir o app com o halo aceso e janela grande, "que é o cenário
+que travava para o Pedro".
+
+**Decisão.** Medido (Z1, Z2, G2, G3): o halo aceso custa 4,9 ticks/s no laço `basic`, 10,3 no
+`threaded`, 5,0 com Vulkan. Registrei como custo de projeto, não como defeito, e **não** o
+apontei como causa do travamento — cinco por cento de um núcleo não trava máquina nenhuma.
+
+**Alternativa descartada.** Somar o halo à lista de culpados por ele desenhar 60 fps de
+verdade. Ele desenha, e é para isso que existe; o número diz que é barato.
+
+**Custo de estar errada.** Se o travamento do Pedro voltar com o halo aceso e a área de
+transferência limpa, sobra investigar o halo — e as medições de hoje já dão o ponto de partida.
