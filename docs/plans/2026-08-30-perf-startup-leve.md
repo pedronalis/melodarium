@@ -1,7 +1,7 @@
 ---
 slug: perf-startup-leve
 feature: melodarium
-status: em-execucao
+status: concluido
 depende-de: []
 decisao-humana: nao
 spec: docs/plans/research/2026-08-29-perf-medicoes.md
@@ -131,18 +131,18 @@ primeira visita e preservados até o fim da sessão.
 - Produces: loaders persistentes para `PodcastPane`, `EmptyPane` e `CollectionsPane`; as funções
   de navegação garantem a criação antes de chamar métodos no item carregado.
 
-- [ ] **Step 1: registrar a validação vermelha**
+- [x] **Step 1: registrar a validação vermelha**
   Confirmar que as três páginas aparecem como filhos diretos do `StackLayout` atual.
-- [ ] **Step 2: implementar loaders persistentes**
+- [x] **Step 2: implementar loaders persistentes**
   A biblioteca continua direta; cada página secundária é ativada antes de mudar `section` ou
   pela flag de medição correspondente. Ajustar acessos a `CollectionsPane` para `loader.item`.
-- [ ] **Step 3: provar navegação e harness**
+- [x] **Step 3: provar navegação e harness**
   Rodar `--measure --pane library|podcast|empty|collections --no-search`; cada execução deve
   produzir `MEDIDA` sem `ReferenceError`, `TypeError`, `unavailable` ou `Cannot assign`.
-- [ ] **Step 4: gates completos da fatia**
+- [x] **Step 4: gates completos da fatia**
   Configurar, construir, confirmar `ctest -N` com pelo menos 11 testes, rodar `ctest`, órfãos,
   layout e fidelidade.
-- [ ] **Step 5: checkpoint e status**
+- [x] **Step 5: checkpoint e status**
   Marcar a task, mudar o frontmatter para `concluido` pelo `planos-lote.py` e commitar com
   `perf(startup): lazy-load secondary panes`.
 
