@@ -34,6 +34,14 @@ AudioEngine::AudioEngine(QObject *parent, bool headlessAo)
     setOptionString("video", "no");
     setOptionString("vo", "null");
     setOptionString("audio-display", "no");
+    // libmpv 0.40 starts a clipboard thread even for a player with no video and no window,
+    // and its Wayland backend spins on ppoll instead of blocking: `mpv --idle --vo=null
+    // --ao=null` burns 99.7 CPU ticks/s on this machine, and 0.0 with the backend list empty.
+    // That was the whole "the app redraws 60 times a second while idle" bill — the renderer
+    // was never the payer. A music player neither reads nor writes the clipboard, so the
+    // right list is the empty one. Unknown option names are ignored by libmpv, so an older
+    // libmpv without this option keeps working.
+    setOptionString("clipboard-backends", "");
     // MELODIA_NULL_AO existe para rodar o app inteiro onde não há placa de som (o gate roda
     // em offscreen): sem isto o mpv falha ao abrir o device e nada chega a tocar.
     if (headlessAo || qEnvironmentVariableIsSet("MELODIA_NULL_AO"))
