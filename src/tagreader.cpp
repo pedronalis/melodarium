@@ -3,6 +3,7 @@
 #include <QCryptographicHash>
 #include <QFile>
 #include <QFileInfo>
+#include <QRegularExpression>
 
 #include <attachedpictureframe.h>
 #include <fileref.h>
@@ -79,6 +80,33 @@ QString TagReader::computeContentHash(const QString &absolutePath)
     return QString::fromLatin1(hash.result().toHex());
 }
 
+QString TagReader::primaryName(const QString &raw)
+{
+    const QString name = raw.trimmed();
+    if (name.isEmpty())
+        return name;
+
+    // Only separators that cannot mean anything else. "&" and "," are deliberately absent:
+    // cutting there turns "Earth, Wind & Fire" into "Earth" and "Simon & Garfunkel" into
+    // "Simon" — an ambiguous separator destroys more real names than it repairs. "/" is out
+    // for the same reason, even though old ID3 used it to list artists: it would cut "AC/DC"
+    // down to "AC".
+    static const QRegularExpression guest(
+        QStringLiteral(R"(\s+(?:feat|ft|featuring|vs)\.?(?:\s|$))"),
+        QRegularExpression::CaseInsensitiveOption);
+
+    int cut = name.size();
+    const int semicolon = name.indexOf(QLatin1Char(';'));
+    if (semicolon >= 0)
+        cut = semicolon;
+    const QRegularExpressionMatch m = guest.match(name);
+    if (m.hasMatch() && m.capturedStart() < cut)
+        cut = m.capturedStart();
+
+    const QString primary = name.left(cut).trimmed();
+    return primary.isEmpty() ? name : primary; // a cut must never leave the field empty
+}
+
 TrackRecord TagReader::read(const QString &absolutePath)
 {
     TrackRecord r;
@@ -129,6 +157,23 @@ TrackRecord TagReader::read(const QString &absolutePath)
 
     if (TagLib::File *file = ref.file()) {
         const TagLib::PropertyMap pm = file->properties();
+
+        // A file with two ARTIST fields ("Daft Punk", "Julian Casablancas") is correctly
+        // tagged, but tag->artist() glues the list into one string with no separator and
+        // invents a band that never existed. The PropertyMap keeps the values apart, so the
+        // first one — the main artist, the primary genre — is what the library gets. Formats
+        // with no usable PropertyMap keep whatever tag-> returned: fallback, not regression.
+        {
+            const QString first = firstValue(pm, "ARTIST");
+            if (!first.isEmpty())
+                r.artist = first;
+        }
+        {
+            const QString first = firstValue(pm, "GENRE");
+            if (!first.isEmpty())
+                r.genre = first;
+        }
+
         r.albumArtist = firstValue(pm, "ALBUMARTIST");
         r.composer = firstValue(pm, "COMPOSER");
         r.musicBrainzTrackId = firstValue(pm, "MUSICBRAINZ_TRACKID");
@@ -152,6 +197,10 @@ TrackRecord TagReader::read(const QString &absolutePath)
             r.replayGainAlbumDb = gain;
     }
 
+    // Badly tagged files keep the guests inside a single field; the genre never does, and
+    // firstValue already handled the multi-value case there.
+    r.artist = primaryName(r.artist);
+    r.albumArtist = primaryName(r.albumArtist);
     if (r.albumArtist.isEmpty())
         r.albumArtist = r.artist;
     r.codec = codecFromSuffix(absolutePath);

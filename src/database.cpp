@@ -181,6 +181,15 @@ CREATE INDEX idx_tracks_liked ON tracks(liked_at) WHERE liked_at IS NOT NULL;
         QStringLiteral(R"SQL(
 ALTER TABLE track_stats ADD COLUMN last_position_ms INTEGER NOT NULL DEFAULT 0;
 )SQL"),
+        // Tag reading was fixed: a multi-value ARTIST used to be glued into one fake band
+        // name. The scanner never opens a file whose mtime and size still match, so without
+        // this every track already imported would keep the wrong name forever. Zeroing mtime
+        // costs one full re-read, once. content_hash is left alone: it is what pairs a moved
+        // file with its row, and each track comes back through the UPDATE branch with its
+        // id, likes and play counts intact.
+        QStringLiteral(R"SQL(
+UPDATE tracks SET mtime = 0;
+)SQL"),
     };
     return list;
 }
