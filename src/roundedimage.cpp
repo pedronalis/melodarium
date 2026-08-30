@@ -33,6 +33,15 @@ void RoundedImage::setRadius(qreal r)
     update();
 }
 
+void RoundedImage::setAnalyzeColors(bool analyze)
+{
+    if (m_analyzeColors == analyze)
+        return;
+    m_analyzeColors = analyze;
+    emit analyzeColorsChanged();
+    updateColorAnalysis();
+}
+
 void RoundedImage::geometryChange(const QRectF &newGeometry, const QRectF &oldGeometry)
 {
     QQuickPaintedItem::geometryChange(newGeometry, oldGeometry);
@@ -68,29 +77,37 @@ void RoundedImage::reload()
         m_loadedFor = lado;
     }
 
+    updateColorAnalysis();
+
+    if (tinha != ready())
+        emit readyChanged();
+    update();
+}
+
+void RoundedImage::updateColorAnalysis()
+{
+    const ColorAnalysis analysis = m_analyzeColors
+                                       ? analyzeImageColors(m_image, 4)
+                                       : ColorAnalysis();
+
     const QColor antes = m_dominant;
-    m_dominant = dominantColorOf(m_image);
+    m_dominant = analysis.dominant;
     if (m_dominant != antes)
         emit dominantColorChanged();
 
-    // A paleta por região: é dela que sai a luz de várias cores do painel. Recalculada junto
-    // com a imagem e não sob demanda — quem pinta o halo não pode pagar uma varredura da capa
-    // no meio de um quadro.
-    m_spots.clear();
-    const QVector<ColorSpot> focos = paletteOf(m_image, 4);
-    for (const ColorSpot &foco : focos) {
+    QVariantList spots;
+    for (const ColorSpot &foco : analysis.spots) {
         QVariantMap m;
         m.insert(QStringLiteral("color"), foco.color);
         m.insert(QStringLiteral("x"), foco.x);
         m.insert(QStringLiteral("y"), foco.y);
         m.insert(QStringLiteral("weight"), foco.weight);
-        m_spots.append(m);
+        spots.append(m);
     }
-    emit colorSpotsChanged();
-
-    if (tinha != ready())
-        emit readyChanged();
-    update();
+    if (m_spots != spots) {
+        m_spots = spots;
+        emit colorSpotsChanged();
+    }
 }
 
 void RoundedImage::paint(QPainter *painter)

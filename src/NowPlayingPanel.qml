@@ -333,6 +333,7 @@ Rectangle {
             component Capa: RoundedCover {
                 anchors.fill: parent
                 radius: Theme.radiusM
+                analyzeColors: true
                 // A única capa do app que projeta sombra: é ela que descola a arte do painel.
                 shadow: true
                 placeholderColor: Theme.cRaised

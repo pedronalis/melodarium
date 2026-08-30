@@ -149,3 +149,14 @@ target_link_libraries(tst_dominantcolor PRIVATE Qt6::Core Qt6::Gui Qt6::Test)
 
 add_test(NAME tst_dominantcolor COMMAND tst_dominantcolor)
 set_tests_properties(tst_dominantcolor PROPERTIES ENVIRONMENT "QT_QPA_PLATFORM=offscreen")
+
+qt_add_executable(tst_roundedimage
+    tst_roundedimage.cpp
+    ../src/roundedimage.h ../src/roundedimage.cpp
+    ../src/dominantcolor.h ../src/dominantcolor.cpp
+)
+target_include_directories(tst_roundedimage PRIVATE ../src)
+target_link_libraries(tst_roundedimage PRIVATE Qt6::Core Qt6::Gui Qt6::Quick Qt6::Test)
+
+add_test(NAME tst_roundedimage COMMAND tst_roundedimage)
+set_tests_properties(tst_roundedimage PROPERTIES ENVIRONMENT "QT_QPA_PLATFORM=offscreen")

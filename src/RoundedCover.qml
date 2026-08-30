@@ -28,6 +28,7 @@ Item {
     property color fallbackIconColor: Theme.cCoverIcon
     // A capa grande do painel é a única que projeta sombra (design/Main.dc.html).
     property bool shadow: false
+    property bool analyzeColors: false
 
     readonly property bool ready: img.ready
 
@@ -155,5 +156,6 @@ Item {
         anchors.fill: parent
         source: root.source
         radius: root.radius
+        analyzeColors: root.analyzeColors
     }
 }

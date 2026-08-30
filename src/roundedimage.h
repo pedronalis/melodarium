@@ -23,6 +23,7 @@ class RoundedImage : public QQuickPaintedItem
     Q_PROPERTY(QUrl source READ source WRITE setSource NOTIFY sourceChanged)
     Q_PROPERTY(qreal radius READ radius WRITE setRadius NOTIFY radiusChanged)
     Q_PROPERTY(bool ready READ ready NOTIFY readyChanged)
+    Q_PROPERTY(bool analyzeColors READ analyzeColors WRITE setAnalyzeColors NOTIFY analyzeColorsChanged)
     Q_PROPERTY(QColor dominantColor READ dominantColor NOTIFY dominantColorChanged)
     Q_PROPERTY(QVariantList colorSpots READ colorSpots NOTIFY colorSpotsChanged)
 
@@ -36,6 +37,8 @@ public:
     void setRadius(qreal r);
 
     bool ready() const { return !m_image.isNull(); }
+    bool analyzeColors() const { return m_analyzeColors; }
+    void setAnalyzeColors(bool analyze);
 
     // A cor que esta capa "é", para o halo do painel. Transparente (alpha 0) enquanto não há
     // arte carregada, ou quando a arte não tem cor a dar.
@@ -51,6 +54,7 @@ signals:
     void sourceChanged();
     void radiusChanged();
     void readyChanged();
+    void analyzeColorsChanged();
     void dominantColorChanged();
     void colorSpotsChanged();
 
@@ -59,6 +63,7 @@ protected:
 
 private:
     void reload();
+    void updateColorAnalysis();
 
     QUrl m_source;
     qreal m_radius = 0.0;
@@ -66,6 +71,7 @@ private:
     // A que largura a imagem em memória foi lida. Reler a cada pixel de redimensionamento
     // torraria o disco enquanto a janela é arrastada.
     int m_loadedFor = 0;
+    bool m_analyzeColors = false;
     QColor m_dominant = QColor(0, 0, 0, 0);
     QVariantList m_spots;
 };

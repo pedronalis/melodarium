@@ -61,13 +61,13 @@ publica revisão quando um arquivo fica pronto.
 
 ### Task 3: Paleta única e opt-in
 
-- [ ] Acrescentar teste em `tst_dominantcolor` provando que `analyzeImage()` devolve a mesma cor
+- [x] Acrescentar `tests/tst_roundedimage.cpp` provando que o opt-in devolve a mesma cor
   dominante e os mesmos spots das APIs atuais.
-- [ ] Implementar uma única redução 48×48 compartilhada; `RoundedImage.analyzeColors` fica
+- [x] Implementar uma única redução 48×48 compartilhada; `RoundedImage.analyzeColors` fica
   `false` por padrão e impede qualquer análise quando desligada.
-- [ ] Propagar `analyzeColors` por `RoundedCover` e ligá-lo somente nas duas capas do painel
+- [x] Propagar `analyzeColors` por `RoundedCover` e ligá-lo somente nas duas capas do painel
   principal que participam do crossfade.
-- [ ] Rodar testes, screenshot com halo e fidelidade; marcar e commitar com
+- [x] Rodar testes, screenshot com halo e fidelidade; marcar e commitar com
   `perf(covers): analyze colors only for the main artwork`.
 
 ### Task 4: Cache assíncrono sem duplicação destrutiva
