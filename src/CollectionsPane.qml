@@ -519,7 +519,6 @@ Item {
                 artist: faixa.model.artist
                 album: faixa.model.album
                 durationMs: faixa.model.durationMs
-                coverUrl: faixa.model.coverUrl
                 isCurrent: faixa.model.isCurrent
                 trackId: faixa.model.trackId
                 liked: faixa.model.liked

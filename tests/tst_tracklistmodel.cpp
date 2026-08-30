@@ -39,6 +39,8 @@ private slots:
         QVERIFY(roles.contains(TrackListModel::TitleRole));
         QCOMPARE(roles.value(TrackListModel::TitleRole), QByteArrayLiteral("title"));
         QCOMPARE(roles.value(TrackListModel::IsCurrentRole), QByteArrayLiteral("isCurrent"));
+        QVERIFY2(!roles.values().contains(QByteArrayLiteral("coverUrl")),
+                 "track delegates must not trigger cover extraction for an image they do not draw");
     }
 
     // O cabeçalho da biblioteca anuncia "N faixas · 3 d 11 h": a soma vem do modelo, e uma
@@ -96,16 +98,36 @@ private slots:
                  QStringLiteral("b"));
     }
 
-    void currentPathMarksExactlyOneRow()
+    void currentPathInvalidatesOnlyThePreviousAndCurrentRows()
     {
         TrackListModel model;
-        model.setRowsForTesting(sampleRows());
+        QList<TrackRow> rows = sampleRows();
+        TrackRow c;
+        c.id = 3;
+        c.path = QStringLiteral("/music/c.flac");
+        c.title = QStringLiteral("Terceira");
+        rows.append(c);
+        model.setRowsForTesting(rows);
         QSignalSpy changed(&model, &TrackListModel::dataChanged);
 
         model.setCurrentPath(QStringLiteral("/music/b.flac"));
         QCOMPARE(model.data(model.index(0), TrackListModel::IsCurrentRole).toBool(), false);
         QCOMPARE(model.data(model.index(1), TrackListModel::IsCurrentRole).toBool(), true);
-        QCOMPARE(changed.count(), 1); // one ranged signal, not one per row
+        QCOMPARE(changed.count(), 1);
+        QCOMPARE(changed.at(0).at(0).toModelIndex().row(), 1);
+        QCOMPARE(changed.at(0).at(1).toModelIndex().row(), 1);
+
+        changed.clear();
+        model.setCurrentPath(QStringLiteral("/music/c.flac"));
+        QCOMPARE(changed.count(), 2);
+        QSet<int> touchedRows;
+        for (const QList<QVariant> &args : changed) {
+            QCOMPARE(args.at(0).toModelIndex().row(), args.at(1).toModelIndex().row());
+            const QList<int> roles = args.at(2).value<QList<int>>();
+            QCOMPARE(roles, QList<int>({TrackListModel::IsCurrentRole}));
+            touchedRows.insert(args.at(0).toModelIndex().row());
+        }
+        QCOMPARE(touchedRows, QSet<int>({1, 2}));
     }
 
     void allPathsFeedsThePlaylistInOrder()
