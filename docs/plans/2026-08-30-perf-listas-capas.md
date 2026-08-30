@@ -52,11 +52,11 @@ publica revisão quando um arquivo fica pronto.
 
 ### Task 2: Reciclar todos os delegates extensos
 
-- [ ] Criar `tools/check-list-reuse.sh` exigindo `reuseItems: true` nas oito `ListView` atuais;
+- [x] Criar `tools/check-list-reuse.sh` exigindo `reuseItems: true` nas oito `ListView` atuais;
   confirmar vermelho antes da mudança.
-- [ ] Ativar reciclagem e implementar `ListView.onPooled`/`onReused` apenas onde o delegate tem
+- [x] Ativar reciclagem e implementar `ListView.onPooled`/`onReused` apenas onde o delegate tem
   animação ou estado que não deriva integralmente do modelo.
-- [ ] Exercitar scroll e abertura de fila em banco temporário, depois rodar layout, órfãos e
+- [x] Exercitar scroll e abertura de fila em banco temporário, depois rodar layout, órfãos e
   fidelidade; marcar e commitar com `perf(qml): recycle long-list delegates`.
 
 ### Task 3: Paleta única e opt-in

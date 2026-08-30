@@ -263,6 +263,7 @@ Item {
         // --- A lista das coleções ---
         ListView {
             id: lista
+            reuseItems: true
             Layout.fillWidth: true
             Layout.fillHeight: true
             visible: root.openId === 0
@@ -476,6 +477,7 @@ Item {
         // --- As faixas da coleção aberta ---
         ListView {
             id: tracks
+            reuseItems: true
             Layout.fillWidth: true
             Layout.fillHeight: true
             visible: root.openId > 0

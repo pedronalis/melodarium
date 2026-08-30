@@ -47,6 +47,14 @@ Item {
         return minutes + ":" + (seconds < 10 ? "0" : "") + seconds
     }
 
+    function resetTransientState() {
+        puloDoCoracao.stop()
+        heart.scale = 1.0
+    }
+
+    ListView.onPooled: root.resetTransientState()
+    ListView.onReused: root.resetTransientState()
+
     Rectangle {
         anchors.fill: parent
         anchors.leftMargin: Theme.marginXS

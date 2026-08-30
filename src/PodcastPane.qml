@@ -225,6 +225,7 @@ Item {
 
         ListView {
             id: lista
+            reuseItems: true
             Layout.fillWidth: true
             Layout.fillHeight: true
             clip: true
