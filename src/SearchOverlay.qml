@@ -254,6 +254,7 @@ Popup {
         // --- Os resultados, agrupados por tipo ---
         ListView {
             id: results
+            reuseItems: true
             Layout.fillWidth: true
             Layout.fillHeight: true
             Layout.margins: Theme.marginL

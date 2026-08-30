@@ -95,6 +95,7 @@ Popup {
 
         ListView {
             id: lista
+            reuseItems: true
             Layout.fillWidth: true
             Layout.fillHeight: true
             Layout.margins: Theme.marginL

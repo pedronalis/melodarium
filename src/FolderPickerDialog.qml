@@ -436,6 +436,7 @@ Popup {
 
                 ListView {
                     id: lista
+                    reuseItems: true
                     anchors.fill: parent
                     anchors.margins: Theme.borderS
                     model: browser

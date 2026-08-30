@@ -262,6 +262,7 @@ Item {
         // --- A lista: grupos ou faixas, nunca as duas ---
         ListView {
             id: list
+            reuseItems: true
             Layout.fillWidth: true
             Layout.fillHeight: true
             visible: !root.showingGroups
@@ -331,6 +332,7 @@ Item {
 
         ListView {
             id: groupList
+            reuseItems: true
             Layout.fillWidth: true
             Layout.fillHeight: true
             visible: root.showingGroups
