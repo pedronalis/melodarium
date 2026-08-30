@@ -19,6 +19,7 @@ Popup {
     property var hits: []
     property var linhas: []
     property int highlighted: 0
+    readonly property double coverRevision: CoverCache.revision
 
     signal trackChosen(string path)
     signal episodeChosen(int episodeId)
@@ -327,18 +328,46 @@ Popup {
                         anchors.rightMargin: Theme.marginL
                         spacing: Theme.marginL
 
-                        // Artista é redondo, o resto é quadrado: o formato já diz o tipo antes
-                        // de o olho chegar ao rótulo do grupo.
-                        Rectangle {
+                        // Keep the existing 34 px type slot: artwork replaces the generic
+                        // glyph without increasing row height or changing text alignment.
+                        Item {
+                            id: artworkSlot
+
                             Layout.preferredWidth: 34
                             Layout.preferredHeight: 34
-                            radius: linha.modelData.header
-                                    ? 0
-                                    : (linha.modelData.hit.kind === "artist" ? 17 : Theme.radiusXS)
-                            color: Theme.cRaised
+
+                            RoundedCover {
+                                id: artwork
+
+                                anchors.fill: parent
+                                radius: linha.modelData.header
+                                        ? 0
+                                        : (linha.modelData.hit.kind === "artist"
+                                           ? artworkSlot.width / 2 : Theme.radiusXS)
+                                fallbackIcon: ""
+                                placeholderColor: Theme.cRaised
+                                placeholderTop: Theme.cRaised
+                                placeholderMid: Theme.cRaised
+                                source: {
+                                    if (linha.modelData.header)
+                                        return ""
+                                    const hit = linha.modelData.hit
+                                    if (hit.coverPath !== undefined && hit.coverPath !== "")
+                                        return "file://" + hit.coverPath
+                                    if (hit.coverTrackPath !== undefined
+                                            && hit.coverTrackPath !== ""
+                                            && root.coverRevision >= 0) {
+                                        return CoverCache.coverUrlForTrack(
+                                                    hit.coverTrackPath,
+                                                    hit.albumId !== undefined ? hit.albumId : 0)
+                                    }
+                                    return ""
+                                }
+                            }
 
                             Text {
                                 anchors.centerIn: parent
+                                visible: !artwork.ready
                                 text: linha.modelData.header
                                       ? "" : root.glyphFor(linha.modelData.hit.kind)
                                 font.family: Icons.fontFamily

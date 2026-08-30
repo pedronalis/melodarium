@@ -132,6 +132,51 @@ private slots:
         QVERIFY(sawTrack);
     }
 
+    void searchGroupedCarriesArtworkSourcesForMusicAndPodcasts()
+    {
+        exec(QStringLiteral(
+            "INSERT INTO podcast_shows (id, title, cover_path) "
+            "VALUES (9, 'Programa Capa', '/podcasts/programa.jpg')"));
+        exec(QStringLiteral(
+            "INSERT INTO podcast_episodes (id, show_id, guid, title, local_path) "
+            "VALUES (10, 9, 'episode-cover', 'Episódio Capa', '/podcasts/episodio.mp3')"));
+
+        LibraryBrowser browser;
+        const QVariantList musicHits = browser.searchGrouped(QStringLiteral("Coração"), 4);
+        bool sawTrack = false;
+        bool sawAlbum = false;
+        for (const QVariant &raw : musicHits) {
+            const QVariantMap row = raw.toMap();
+            const QString kind = row.value(QStringLiteral("kind")).toString();
+            if (kind == QLatin1String("track")) {
+                sawTrack = true;
+                QCOMPARE(row.value(QStringLiteral("coverTrackPath")).toString(),
+                         row.value(QStringLiteral("path")).toString());
+                QCOMPARE(row.value(QStringLiteral("albumId")).toInt(), 1);
+            } else if (kind == QLatin1String("album")) {
+                sawAlbum = true;
+                QCOMPARE(row.value(QStringLiteral("coverTrackPath")).toString(), firstTrackPath());
+                QCOMPARE(row.value(QStringLiteral("albumId")).toInt(), 1);
+            }
+        }
+        QVERIFY(sawTrack);
+        QVERIFY(sawAlbum);
+
+        const QVariantList podcastHits = browser.searchGrouped(QStringLiteral("Episódio Capa"), 4);
+        bool sawEpisode = false;
+        for (const QVariant &raw : podcastHits) {
+            const QVariantMap row = raw.toMap();
+            if (row.value(QStringLiteral("kind")).toString() != QLatin1String("episode"))
+                continue;
+            sawEpisode = true;
+            QCOMPARE(row.value(QStringLiteral("coverPath")).toString(),
+                     QStringLiteral("/podcasts/programa.jpg"));
+            QCOMPARE(row.value(QStringLiteral("coverTrackPath")).toString(),
+                     QStringLiteral("/podcasts/episodio.mp3"));
+        }
+        QVERIFY(sawEpisode);
+    }
+
     // A collection nobody can search for is a collection that only exists for whoever
     // remembers where it is.
     void searchAlsoFindsCollections()
