@@ -1,7 +1,9 @@
 #pragma once
 
 #include <QColor>
+#include <QImage>
 #include <QQuickPaintedItem>
+#include <QSize>
 #include <QtQmlIntegration/qqmlintegration.h>
 
 // O bloco de degradê diagonal que faz as vezes de capa quando não há arte.
@@ -52,6 +54,18 @@ signals:
     void radiusChanged();
 
 private:
+    // O desenho pronto, guardado. `paint()` é chamado a cada quadro em que a cena redesenha, e
+    // recalcular 115 mil pixels ali dentro saturava um núcleo inteiro — medido em 2026-08-29:
+    // 103 ticks de CPU por segundo com o app parado. O degradê só muda quando o bloco muda de
+    // tamanho ou de cor, que é o que estas duas chaves guardam.
+    void rebuild();
+    QImage m_cache;
+    QSize m_cacheSize;
+    QColor m_cacheTop;
+    QColor m_cacheMid;
+    QColor m_cacheBottom;
+    qreal m_cacheRadius = -1.0;
+
     QColor m_top;
     QColor m_mid;
     QColor m_bottom;
