@@ -3,6 +3,7 @@
 #include <QtMath>
 
 #include <algorithm>
+#include <array>
 
 namespace {
 
@@ -82,13 +83,16 @@ int distanciaDeMatiz(int a, int b)
 
 } // namespace
 
-QColor dominantColorOf(const QImage &image)
+ColorAnalysis analyzeImageColors(const QImage &image, int maxSpots)
 {
+    ColorAnalysis result;
     if (image.isNull())
-        return QColor(0, 0, 0, 0);
+        return result;
 
     const QImage amostra = amostraDe(image);
-    Acumulador acc;
+    const int lado = amostra.width() / kGrade;
+    Acumulador global;
+    std::array<Acumulador, kGrade * kGrade> celulas;
 
     for (int y = 0; y < amostra.height(); ++y) {
         for (int x = 0; x < amostra.width(); ++x) {
@@ -99,26 +103,21 @@ QColor dominantColorOf(const QImage &image)
             // h == -1 é o acromático do Qt: cinza puro, sem matiz nenhum para votar.
             if (h < 0 || v < kValorMin || v > kValorMax)
                 continue;
-            acc.votar(h, s);
+            global.votar(h, s);
+            if (maxSpots > 0 && lado > 0) {
+                const int cx = qMin(kGrade - 1, x / lado);
+                const int cy = qMin(kGrade - 1, y / lado);
+                celulas[cy * kGrade + cx].votar(h, s);
+            }
         }
     }
 
     // Peso desprezível = capa sem cor (escala de cinza, quase preta ou quase branca).
-    if (acc.peso < 1.0)
-        return QColor(0, 0, 0, 0);
+    if (global.peso >= 1.0)
+        result.dominant = global.cor();
 
-    return acc.cor();
-}
-
-QVector<ColorSpot> paletteOf(const QImage &image, int maxSpots)
-{
-    if (image.isNull() || maxSpots <= 0)
-        return {};
-
-    const QImage amostra = amostraDe(image);
-    const int lado = amostra.width() / kGrade;
-    if (lado <= 0)
-        return {};
+    if (maxSpots <= 0 || lado <= 0)
+        return result;
 
     struct Candidato
     {
@@ -135,24 +134,14 @@ QVector<ColorSpot> paletteOf(const QImage &image, int maxSpots)
             Candidato c;
             c.celulaX = cx;
             c.celulaY = cy;
-            for (int y = cy * lado; y < (cy + 1) * lado; ++y) {
-                for (int x = cx * lado; x < (cx + 1) * lado; ++x) {
-                    int h = 0;
-                    int s = 0;
-                    int v = 0;
-                    amostra.pixelColor(x, y).getHsv(&h, &s, &v);
-                    if (h < 0 || v < kValorMin || v > kValorMax)
-                        continue;
-                    c.acc.votar(h, s);
-                }
-            }
+            c.acc = celulas[cy * kGrade + cx];
             if (c.acc.peso >= kPesoMinimo)
                 candidatos.append(c);
         }
     }
 
     if (candidatos.isEmpty())
-        return {};
+        return result;
 
     // Do pedaço mais colorido para o menos: quem tem mais cor acende primeiro, e é dele que
     // sai o foco mais forte.
@@ -161,14 +150,13 @@ QVector<ColorSpot> paletteOf(const QImage &image, int maxSpots)
 
     const qreal pesoMaior = candidatos.first().acc.peso;
 
-    QVector<ColorSpot> escolhidos;
     for (const Candidato &c : std::as_const(candidatos)) {
-        if (escolhidos.size() >= maxSpots)
+        if (result.spots.size() >= maxSpots)
             break;
 
         const int matiz = c.acc.matiz();
         const bool repetido =
-            std::any_of(escolhidos.cbegin(), escolhidos.cend(), [matiz](const ColorSpot &e) {
+            std::any_of(result.spots.cbegin(), result.spots.cend(), [matiz](const ColorSpot &e) {
                 return distanciaDeMatiz(e.color.hsvHue(), matiz) < kDistanciaMinimaDeMatiz;
             });
         if (repetido)
@@ -180,8 +168,18 @@ QVector<ColorSpot> paletteOf(const QImage &image, int maxSpots)
         spot.x = (c.celulaX + 0.5) / kGrade;
         spot.y = (c.celulaY + 0.5) / kGrade;
         spot.weight = qBound(0.0, c.acc.peso / pesoMaior, 1.0);
-        escolhidos.append(spot);
+        result.spots.append(spot);
     }
 
-    return escolhidos;
+    return result;
+}
+
+QColor dominantColorOf(const QImage &image)
+{
+    return analyzeImageColors(image, 0).dominant;
+}
+
+QVector<ColorSpot> paletteOf(const QImage &image, int maxSpots)
+{
+    return analyzeImageColors(image, maxSpots).spots;
 }

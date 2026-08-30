@@ -33,6 +33,15 @@ struct ColorSpot
     qreal weight = 1.0;
 };
 
+struct ColorAnalysis
+{
+    QColor dominant = QColor(0, 0, 0, 0);
+    QVector<ColorSpot> spots;
+};
+
+// Computes the global color and regional spots from one shared 48x48 sample.
+ColorAnalysis analyzeImageColors(const QImage &image, int maxSpots = 4);
+
 // Até `maxSpots` focos de luz, tirados de uma grade 3x3 sobre a capa e ordenados do mais
 // colorido para o menos. Dois focos de matiz vizinho não entram os dois: repetir a mesma cor
 // em dois lugares não enriquece a luz, só a deixa mais forte de um lado. Capa sem cor nenhuma
