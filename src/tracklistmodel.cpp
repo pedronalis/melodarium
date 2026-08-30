@@ -1,6 +1,5 @@
 #include "tracklistmodel.h"
 
-#include "covercache.h"
 #include "database.h"
 
 #include <QFileInfo>
@@ -61,11 +60,6 @@ QVariant TrackListModel::data(const QModelIndex &index, int role) const
         return r.sampleRate;
     case BitsPerSampleRole:
         return r.bitsPerSample;
-    case CoverUrlRole: {
-        // One shared instance: a temporary here would run mkpath() on every rendered row.
-        static CoverCache cache;
-        return cache.coverUrlForTrack(r.path, r.albumId);
-    }
     case IsCurrentRole:
         return !m_currentPath.isEmpty() && m_currentPath == r.path;
     case SourceKindRole:
@@ -87,7 +81,7 @@ QHash<int, QByteArray> TrackListModel::roleNames() const
         {AlbumRole, "album"},          {DurationMsRole, "durationMs"},
         {TrackNoRole, "trackNo"},      {YearRole, "year"},
         {CodecRole, "codec"},          {SampleRateRole, "sampleRate"},
-        {BitsPerSampleRole, "bitsPerSample"}, {CoverUrlRole, "coverUrl"},
+        {BitsPerSampleRole, "bitsPerSample"},
         {IsCurrentRole, "isCurrent"}, {SourceKindRole, "sourceKind"},
         {SourceNoteRole, "sourceNote"}, {LikedRole, "liked"},
     };
@@ -97,12 +91,14 @@ void TrackListModel::setCurrentPath(const QString &path)
 {
     if (m_currentPath == path)
         return;
+    const int previousRow = m_rowForPath.value(m_currentPath, -1);
+    const int currentRow = m_rowForPath.value(path, -1);
     m_currentPath = path;
     emit currentPathChanged();
-    // Only IsCurrentRole changed, on every row — cheaper than resetting the model.
-    if (!m_rows.isEmpty()) {
-        emit dataChanged(index(0), index(m_rows.size() - 1), {IsCurrentRole});
-    }
+    if (previousRow >= 0)
+        emit dataChanged(index(previousRow), index(previousRow), {IsCurrentRole});
+    if (currentRow >= 0 && currentRow != previousRow)
+        emit dataChanged(index(currentRow), index(currentRow), {IsCurrentRole});
 }
 
 void TrackListModel::loadAllTracks()
@@ -149,6 +145,7 @@ void TrackListModel::loadFromQuery(const QString &whereClause, const QVariantLis
 
     beginResetModel();
     m_rows = std::move(rows);
+    rebuildPathIndex();
     recomputeTotalDuration();
     endResetModel();
     emit countChanged();
@@ -202,6 +199,7 @@ void TrackListModel::setRowsForTesting(const QList<TrackRow> &rows)
 {
     beginResetModel();
     m_rows = rows;
+    rebuildPathIndex();
     recomputeTotalDuration();
     endResetModel();
     emit countChanged();
@@ -213,4 +211,12 @@ void TrackListModel::recomputeTotalDuration()
     for (const TrackRow &row : std::as_const(m_rows))
         total += row.durationMs;
     m_totalDurationMs = total;
+}
+
+void TrackListModel::rebuildPathIndex()
+{
+    m_rowForPath.clear();
+    m_rowForPath.reserve(m_rows.size());
+    for (int row = 0; row < m_rows.size(); ++row)
+        m_rowForPath.insert(m_rows.at(row).path, row);
 }

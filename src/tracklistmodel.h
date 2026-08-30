@@ -1,6 +1,7 @@
 #pragma once
 
 #include <QAbstractListModel>
+#include <QHash>
 #include <QList>
 #include <QString>
 #include <QVariantList>
@@ -51,7 +52,6 @@ public:
         CodecRole,
         SampleRateRole,
         BitsPerSampleRole,
-        CoverUrlRole,
         IsCurrentRole,
         SourceKindRole,
         SourceNoteRole,
@@ -90,8 +90,10 @@ signals:
 
 private:
     void recomputeTotalDuration();
+    void rebuildPathIndex();
 
     QList<TrackRow> m_rows;
+    QHash<QString, int> m_rowForPath;
     qint64 m_totalDurationMs = 0;
     QString m_currentPath;
 };

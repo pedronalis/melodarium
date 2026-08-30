@@ -305,7 +305,6 @@ Item {
                 artist: trackDelegate.model.artist
                 album: trackDelegate.model.album
                 durationMs: trackDelegate.model.durationMs
-                coverUrl: trackDelegate.model.coverUrl
                 isCurrent: trackDelegate.model.isCurrent
                 trackId: trackDelegate.model.trackId
                 liked: trackDelegate.model.liked

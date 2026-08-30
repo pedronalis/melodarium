@@ -13,7 +13,6 @@ Item {
     property string artist: ""
     property string album: ""
     property int durationMs: 0
-    property string coverUrl: ""
     property bool isCurrent: false
     property int trackId: 0
     property bool showCollectButton: false
