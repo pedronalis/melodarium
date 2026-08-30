@@ -4,6 +4,7 @@
 #include <QImage>
 #include <QQuickPaintedItem>
 #include <QSize>
+#include <QTimer>
 #include <QtQmlIntegration/qqmlintegration.h>
 
 // O bloco de degradê diagonal que faz as vezes de capa quando não há arte.
@@ -47,6 +48,9 @@ public:
 
     void paint(QPainter *painter) override;
 
+protected:
+    void geometryChange(const QRectF &newGeometry, const QRectF &oldGeometry) override;
+
 signals:
     void topColorChanged();
     void midColorChanged();
@@ -70,4 +74,6 @@ private:
     QColor m_mid;
     QColor m_bottom;
     qreal m_radius = 0.0;
+    QTimer m_resizeTimer;
+    bool m_resizeSettled = true;
 };

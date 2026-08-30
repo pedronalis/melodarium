@@ -26,8 +26,6 @@ Item {
     property color placeholderMid: Theme.cCoverMid
     property real fallbackIconSize: Theme.fontSizeXXXL
     property color fallbackIconColor: Theme.cCoverIcon
-    // A capa grande do painel é a única que projeta sombra (design/Main.dc.html).
-    property bool shadow: false
     property bool analyzeColors: false
 
     readonly property bool ready: img.ready
@@ -42,78 +40,6 @@ Item {
     // laranja embaixo são duas luzes, em dois lugares, e a média das duas é um bege que não
     // existe na arte.
     readonly property alias colorSpots: img.colorSpots
-
-    // A sombra do desenho (design/Main.dc.html: 0 18px 40px rgba(0,0,0,0.55)).
-    //
-    // Duas tentativas falharam antes desta, e as duas estão registradas porque cada uma erra
-    // de um jeito diferente:
-    //
-    // 1. EMPILHAR molduras translúcidas (8 a 10%, e depois 28 a 3%). Cada moldura tem borda
-    //    dura: o resultado é uma ESCADA, não um desfoque. Aumentar a densidade não resolve —
-    //    medido em 29/08, o degrau máximo continuou em 2 níveis nas duas versões, porque o
-    //    acúmulo das 28 é matematicamente o mesmo das 8.
-    // 2. `shadowBlur` num Canvas DO TAMANHO DA CAPA. Suave de verdade, mas o desfoque do
-    //    QPainter é por software: o app foi de 2 para 100 ticks de CPU por segundo PARADO, e
-    //    travava quando o gerenciador de janelas alargava a janela.
-    //
-    // O que funciona é o desfoque de verdade pago UMA vez: o Canvas é sempre desenhado em
-    // 220 px e a escala leva ao tamanho real. A capa é sempre quadrada, então escalar não
-    // deforma canto nenhum, e ampliar um borrão não cria degrau. Redimensionar a janela passa
-    // a ser transformação de cena, que não repinta nada.
-    Canvas {
-        id: sombra
-
-        visible: root.shadow
-
-        // O lado em que a sombra é pintada, e a folga que ela ocupa em volta da capa — em
-        // fração do lado, para que a conta não dependa do tamanho real.
-        readonly property int base: 220
-        readonly property real fracao: (Theme.coverShadowBlur + Theme.coverShadowY) / 340.0
-        readonly property int lado: Math.round(sombra.base * (1 + sombra.fracao * 2))
-
-        width: sombra.lado
-        height: sombra.lado
-        anchors.centerIn: parent
-        transformOrigin: Item.Center
-        scale: root.width > 0 ? (root.width * (1 + sombra.fracao * 2)) / sombra.lado : 1
-        // Atrás da arte e do placeholder, que são declarados depois.
-        z: -1
-
-        // Só o raio relativo muda o desenho. O TAMANHO não: quem responde por ele é a escala,
-        // e é isso que tira a repintura do caminho do redimensionamento.
-        readonly property real raioRelativo: root.width > 0
-                                             ? root.radius * sombra.base / root.width : 0
-        onRaioRelativoChanged: sombra.requestPaint()
-        Component.onCompleted: sombra.requestPaint()
-
-        onPaint: {
-            const ctx = getContext("2d")
-            ctx.reset()
-            if (!root.shadow)
-                return
-
-            const f = sombra.base * sombra.fracao
-            // Longe o bastante para o corpo do retângulo ficar fora do quadro: só a sombra
-            // dele é projetada de volta para dentro, senão o preto sólido tapa a arte.
-            const fuga = sombra.lado * 3
-            const escala = sombra.base / 340.0
-
-            ctx.save()
-            ctx.shadowColor = Theme.coverShadowColor
-            ctx.shadowBlur = Theme.coverShadowBlur * escala
-            ctx.shadowOffsetX = fuga
-            ctx.shadowOffsetY = Theme.coverShadowY * escala
-            // Preto opaco no CORPO: quem dá a cor e a translucidez da sombra é `shadowColor`.
-            // Pintando o corpo com a própria cor translúcida, a projeção nasce com metade da
-            // força — medido em 29/08: amplitude de 2 níveis em vez de 8.
-            ctx.fillStyle = "#000000"
-            ctx.beginPath()
-            ctx.roundedRect(f - fuga, f, sombra.base, sombra.base,
-                            sombra.raioRelativo, sombra.raioRelativo)
-            ctx.fill()
-            ctx.restore()
-        }
-    }
 
     // O desenho não põe retângulo cinza no lugar da capa que falta: põe um degradê, que é o
     // que faz o quadrado vazio parecer arte e não buraco. E o degradê dele é DIAGONAL

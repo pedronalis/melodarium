@@ -92,6 +92,7 @@ qt_add_qml_module(melodarium
         src/DownloadProgressRow.qml
         src/SourceBadge.qml
         src/RoundedCover.qml
+        src/CoverShadow.qml
         src/AmbientGlow.qml
     RESOURCES
         assets/fonts/noctalia-tabler-icons.ttf

@@ -1,7 +1,7 @@
 ---
 slug: perf-render-fila
 feature: melodarium
-status: aprovado
+status: em-execucao
 depende-de: [perf-listas-capas]
 decisao-humana: sim
 spec: docs/plans/research/2026-08-29-perf-medicoes.md
@@ -31,6 +31,10 @@ playlist interna do mpv como autoridade sonora.
 ## Mapa de arquivos
 
 - `src/AmbientGlow.qml`, `src/NowPlayingPanel.qml`, `src/Main.qml`: atividade do halo.
+- `src/CoverShadow.qml`, `src/RoundedCover.qml`, `src/NowPlayingPanel.qml`: uma sombra exata,
+  compartilhada e estabilizada fora do crossfade.
+- `src/gradientblock.*`, `tests/tst_gradientblock.cpp`: manter o raster pronto durante resize e
+  reconstruir tamanho/raio exatos no fim.
 - `src/roundedimage.*`, `tests/tst_roundedimage.cpp`: debounce de decode no resize.
 - `src/audioengine.*`, `tests/tst_audioengine.cpp`: carga e reorder escaláveis.
 - `docs/solutions/perf/`: medição final e decisões que sobreviverão à sessão.
@@ -47,13 +51,17 @@ playlist interna do mpv como autoridade sonora.
 - [ ] Comparar screenshot tocando, marcar e commitar com
   `perf(render): suspend the halo when it cannot animate`.
 
-### Task 2: Decode estável durante resize
+### Task 2: Raster e decode estáveis durante resize
 
-- [ ] Criar teste de `RoundedImage` que conte uma única atualização após uma rajada de mudanças
-  de geometria e nenhuma perda do pixmap enquanto o timer está pendente.
-- [ ] Implementar debounce curto para upgrades de resolução, mantendo escala da imagem atual e
-  fazendo decode final na dimensão exata.
-- [ ] Exercitar resize real em Wayland e comparar screenshots antes/depois; marcar e commitar
+- [x] Perfilar a rajada horizontal e identificar `qt_image_boxblur` em 4/4 amostras do thread
+  da interface; congelar screenshots de referência em 1100×700 e 1800×1300.
+- [x] Criar `tools/check-resize-shadow.sh`, ver o gate falhar e compartilhar uma única sombra
+  exata fora das duas capas do crossfade, com debounce dos parâmetros rasterizados.
+- [x] Criar `tst_gradientblock`, ver a rajada de geometria+raio falhar e manter o degradê pronto
+  escalado até reconstruir o raster exato no fim.
+- [x] Ampliar `tst_roundedimage`, ver o teste falhar e manter a arte carregada até fazer um
+  único decode exato depois da rajada.
+- [x] Exercitar resize real em Wayland e comparar screenshots antes/depois; marcar e commitar
   com `perf(covers): debounce artwork decoding during resize`.
 
 ### Task 3: Carga e shuffle escaláveis
@@ -74,4 +82,3 @@ playlist interna do mpv como autoridade sonora.
   mesmo banco e geometria das medições de 29/08.
 - [ ] Registrar números, comandos, decisões e limites em `docs/solutions/perf/`, concluir a
   fatia pelo `planos-lote.py` e commitar apenas os arquivos da task.
-
