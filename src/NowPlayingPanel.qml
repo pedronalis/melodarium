@@ -270,6 +270,15 @@ Rectangle {
             // Sem faixa, a capa não é um retângulo cinza: é uma moldura tracejada que diz o
             // que está acontecendo (design/SemMusica.dc.html).
 
+            // The artwork crossfades through two RoundedCover layers, but the shadow never
+            // changes with the artwork. One shared texture avoids calculating the same
+            // software blur twice and keeps the finished shadow while the window is resized.
+            CoverShadow {
+                anchors.fill: parent
+                radius: Theme.radiusM
+                z: -1
+            }
+
             Canvas {
                 anchors.fill: parent
                 visible: !root.hasTrack
@@ -335,8 +344,6 @@ Rectangle {
                 anchors.fill: parent
                 radius: Theme.radiusM
                 analyzeColors: true
-                // A única capa do app que projeta sombra: é ela que descola a arte do painel.
-                shadow: true
                 placeholderColor: Theme.cRaised
                 placeholderTop: root.episodeMode ? Theme.cCoverTopPod : Theme.cCoverTop
                 placeholderMid: root.episodeMode ? Theme.cCoverMidPod : Theme.cCoverMid

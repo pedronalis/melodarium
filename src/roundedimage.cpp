@@ -13,12 +13,21 @@ RoundedImage::RoundedImage(QQuickItem *parent)
     // Sem isto o canto arredondado sai serrilhado: o item é desenhado direto na cena, e a
     // borda curva não ganha as amostras extras que a moldura precisa.
     setRenderTarget(QQuickPaintedItem::FramebufferObject);
+
+    m_resizeTimer.setSingleShot(true);
+    m_resizeTimer.setInterval(120);
+    connect(&m_resizeTimer, &QTimer::timeout, this, [this] {
+        const int side = qCeil(qMax(width(), height()));
+        if (side > m_loadedFor)
+            reload();
+    });
 }
 
 void RoundedImage::setSource(const QUrl &url)
 {
     if (m_source == url)
         return;
+    m_resizeTimer.stop();
     m_source = url;
     emit sourceChanged();
     reload();
@@ -45,12 +54,19 @@ void RoundedImage::setAnalyzeColors(bool analyze)
 void RoundedImage::geometryChange(const QRectF &newGeometry, const QRectF &oldGeometry)
 {
     QQuickPaintedItem::geometryChange(newGeometry, oldGeometry);
-    // Só relê quando a imagem em memória ficou pequena demais para a caixa: crescer uma capa
-    // lida a 62 px até 340 borra, encolher não.
-    if (newGeometry.width() > m_loadedFor)
+    // Keep the finished texture visible through a configure burst. Decoding every intermediate
+    // size blocks the GUI thread and briefly clears the artwork; the final exact decode happens
+    // once after geometry settles.
+    const int side = qCeil(qMax(newGeometry.width(), newGeometry.height()));
+    if (side > m_loadedFor && m_image.isNull())
         reload();
-    else
+    else if (side > m_loadedFor) {
+        m_resizeTimer.start();
         update();
+    } else {
+        m_resizeTimer.stop();
+        update();
+    }
 }
 
 void RoundedImage::reload()

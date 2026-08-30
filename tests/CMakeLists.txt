@@ -161,6 +161,20 @@ target_link_libraries(tst_roundedimage PRIVATE Qt6::Core Qt6::Gui Qt6::Quick Qt6
 add_test(NAME tst_roundedimage COMMAND tst_roundedimage)
 set_tests_properties(tst_roundedimage PROPERTIES ENVIRONMENT "QT_QPA_PLATFORM=offscreen")
 
+qt_add_executable(tst_gradientblock
+    tst_gradientblock.cpp
+    ../src/gradientblock.h ../src/gradientblock.cpp
+)
+target_include_directories(tst_gradientblock PRIVATE ../src)
+target_link_libraries(tst_gradientblock PRIVATE Qt6::Core Qt6::Gui Qt6::Quick Qt6::Test)
+
+add_test(NAME tst_gradientblock COMMAND tst_gradientblock)
+set_tests_properties(tst_gradientblock PROPERTIES ENVIRONMENT "QT_QPA_PLATFORM=offscreen")
+
+add_test(NAME tst_resize_shadow
+    COMMAND bash "${CMAKE_SOURCE_DIR}/tools/check-resize-shadow.sh")
+set_tests_properties(tst_resize_shadow PROPERTIES WORKING_DIRECTORY "${CMAKE_SOURCE_DIR}")
+
 qt_add_executable(tst_covercache
     tst_covercache.cpp
     ../src/covercache.h ../src/covercache.cpp

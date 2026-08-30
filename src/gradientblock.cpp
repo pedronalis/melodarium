@@ -17,6 +17,13 @@ GradientBlock::GradientBlock(QQuickItem *parent)
     // faz a cena redesenhar a cada quadro — 99 ticks de CPU por segundo com o app parado,
     // medido em 2026-08-29. Em imagem, o item é desenhado uma vez e fica.
     setRenderTarget(QQuickPaintedItem::Image);
+
+    m_resizeTimer.setSingleShot(true);
+    m_resizeTimer.setInterval(120);
+    connect(&m_resizeTimer, &QTimer::timeout, this, [this] {
+        m_resizeSettled = true;
+        update();
+    });
 }
 
 void GradientBlock::setTopColor(const QColor &c)
@@ -52,6 +59,11 @@ void GradientBlock::setRadius(qreal r)
         return;
     m_radius = r;
     emit radiusChanged();
+
+    if (!m_cache.isNull()) {
+        m_resizeSettled = false;
+        m_resizeTimer.start();
+    }
     update();
 }
 
@@ -100,9 +112,35 @@ const float *tabelaDeRuido()
 
 void GradientBlock::paint(QPainter *painter)
 {
-    rebuild();
-    if (!m_cache.isNull())
-        painter->drawImage(0, 0, m_cache);
+    const QSize currentSize(qCeil(width()), qCeil(height()));
+    const bool colorsChanged = m_cache.isNull() || m_cacheTop != m_top || m_cacheMid != m_mid
+                               || m_cacheBottom != m_bottom;
+    const bool settledRasterChanged = m_cacheSize != currentSize
+                                      || !qFuzzyCompare(m_cacheRadius, m_radius);
+    if (colorsChanged || (m_resizeSettled && settledRasterChanged))
+        rebuild();
+
+    if (!m_cache.isNull()) {
+        painter->setRenderHint(QPainter::SmoothPixmapTransform, true);
+        painter->drawImage(QRectF(0, 0, width(), height()), m_cache);
+    }
+}
+
+void GradientBlock::geometryChange(const QRectF &newGeometry, const QRectF &oldGeometry)
+{
+    QQuickPaintedItem::geometryChange(newGeometry, oldGeometry);
+
+    const QSize nextSize(qCeil(newGeometry.width()), qCeil(newGeometry.height()));
+    if (m_cache.isNull() || nextSize == m_cacheSize) {
+        m_resizeTimer.stop();
+        m_resizeSettled = true;
+        return;
+    }
+
+    // Keep stretching the finished dithered raster while configure events arrive. Rebuilding
+    // it for every intermediate pixel runs the per-pixel gradient and mask on the GUI thread.
+    m_resizeSettled = false;
+    m_resizeTimer.start();
 }
 
 // Refaz o degradê só quando alguma coisa que o define mudou. Sem esta guarda, `paint()` é o

@@ -4,6 +4,7 @@
 #include <QImage>
 #include <QVariantList>
 #include <QQuickPaintedItem>
+#include <QTimer>
 #include <QUrl>
 #include <QtQmlIntegration/qqmlintegration.h>
 
@@ -74,4 +75,5 @@ private:
     bool m_analyzeColors = false;
     QColor m_dominant = QColor(0, 0, 0, 0);
     QVariantList m_spots;
+    QTimer m_resizeTimer;
 };
