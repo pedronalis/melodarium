@@ -404,6 +404,16 @@ Window {
         root.section = name
     }
 
+    function openSettings() {
+        settingsLoader.active = true
+        settingsLoader.item.open()
+    }
+
+    function openMeasureFolderPicker(path) {
+        measureFolderPickerLoader.active = true
+        measureFolderPickerLoader.item.abrirEm(path)
+    }
+
     function reloadCurrent() {
         showSection(root.currentSection, root.currentId)
     }
@@ -552,9 +562,9 @@ Window {
                     for (let r = 0; r < root.measureRepeat; ++r)
                         AudioEngine.cycleRepeat()
                     if (root.measureSettings)
-                        settingsDialog.open()
+                        root.openSettings()
                     if (root.measureFolderPicker !== "")
-                        folderPickerParaFoto.abrirEm(root.measureFolderPicker)
+                        root.openMeasureFolderPicker(root.measureFolderPicker)
                     if (root.measureQueueOverlay)
                         queueOverlay.open()
                     if (!root.measureSearch)
@@ -650,7 +660,7 @@ Window {
             Layout.fillHeight: true
             current: root.section
             onChosen: function (name) { root.showPane(name) }
-            onSettingsRequested: settingsDialog.open()
+            onSettingsRequested: root.openSettings()
         }
 
         NowPlayingPanel {
@@ -796,18 +806,24 @@ Window {
         onEntryActivated: function (queueIndex) { root.pularNaFila(queueIndex) }
     }
 
-    // O mesmo explorador que os três botões abrem, aqui só para a foto de gate: sem uma
-    // instância alcançável por linha de comando, a tela nova não teria como ser medida.
-    FolderPickerDialog {
-        id: folderPickerParaFoto
-        title: qsTr("Pasta de música")
+    // Ferramentas fechadas não devem montar centenas de objetos nem tocar o filesystem. Os
+    // loaders são síncronos na primeira abertura, então o gesto continua abrindo no mesmo frame.
+    Loader {
+        id: measureFolderPickerLoader
+        active: false
+        sourceComponent: FolderPickerDialog {
+            title: qsTr("Pasta de música")
+        }
     }
 
-    SettingsDialog {
-        id: settingsDialog
-        onLibraryPathPicked: function (path) {
-            // A pasta mudou: a lista aberta é da pasta antiga.
-            root.showSection("all", 0)
+    Loader {
+        id: settingsLoader
+        active: false
+        sourceComponent: SettingsDialog {
+            onLibraryPathPicked: function (path) {
+                // A pasta mudou: a lista aberta é da pasta antiga.
+                root.showSection("all", 0)
+            }
         }
     }
 

@@ -107,19 +107,19 @@ primeira visita e preservados até o fim da sessão.
 - Produces: `openSettings()` e `openMeasureFolderPicker(path)` criam loaders síncronos na
   primeira chamada e abrem o mesmo componente no mesmo evento.
 
-- [ ] **Step 1: criar uma validação vermelha estrutural**
+- [x] **Step 1: criar uma validação vermelha estrutural**
   Rodar um `rg` que exige `SettingsDialog` e o seletor de gate dentro de `Loader` e confirmar que
   a árvore atual reprova; registrar o comando no fim desta task.
-- [ ] **Step 2: implementar os loaders**
+- [x] **Step 2: implementar os loaders**
   Trocar as instâncias de topo por loaders inativos; manter `onLibraryPathPicked`; adaptar o rail
   e as flags `--open-settings`/`--open-folder-picker` às funções de abertura.
-- [ ] **Step 3: provar os dois caminhos reais**
+- [x] **Step 3: provar os dois caminhos reais**
   Rodar `--measure --open-settings --no-search` e
   `--measure --open-folder-picker / --no-search`, exigindo zero erros QML e uma linha `MEDIDA`.
-- [ ] **Step 4: rodar os gates visuais do repo**
+- [x] **Step 4: rodar os gates visuais do repo**
   `quiet-run bash tools/check-orfaos.sh`, `quiet-run bash tools/check-layout.sh` e
   `quiet-run bash tools/check-fidelidade.sh` devem sair 0.
-- [ ] **Step 5: checkpoint**
+- [x] **Step 5: checkpoint**
   Marcar esta task e commitar com `perf(startup): instantiate top-level dialogs on demand`.
 
 ### Task 4: Páginas secundárias sob demanda
