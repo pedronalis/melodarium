@@ -9,6 +9,7 @@
 #include <QJsonObject>
 #include <QProcess>
 #include <QStandardPaths>
+#include <QTimer>
 #include <QUrl>
 
 QString YtDlpDownloader::findFfmpeg()
@@ -101,18 +102,41 @@ void YtDlpDownloader::probe()
     // the user installed, which is the whole point of not shipping the downloader. This
     // machine happens to have two (Homebrew on PATH, Fedora's in /usr/bin), which is exactly
     // why the version found is shown in the UI instead of assumed.
-    QProcess probe;
-    probe.start(QStringLiteral("yt-dlp"), {QStringLiteral("--version")});
-    if (!probe.waitForStarted(2000)) {
-        m_available = false; // QProcess::FailedToStart: not on PATH
-        m_toolVersion.clear();
-        emit availabilityChanged();
+    if (m_probe)
         return;
-    }
-    probe.waitForFinished(5000);
-    m_available = probe.exitStatus() == QProcess::NormalExit && probe.exitCode() == 0;
-    m_toolVersion = QString::fromUtf8(probe.readAllStandardOutput()).trimmed();
+
+    auto *probeProcess = new QProcess(this);
+    m_probe = probeProcess;
+    connect(probeProcess, &QProcess::finished, this,
+            [this, probeProcess](int, QProcess::ExitStatus) {
+                finishProbe(probeProcess, true);
+            });
+    connect(probeProcess, &QProcess::errorOccurred, this,
+            [this, probeProcess](QProcess::ProcessError error) {
+                if (error == QProcess::FailedToStart)
+                    finishProbe(probeProcess, false);
+            });
+    QTimer::singleShot(5000, probeProcess, [this, probeProcess]() {
+        if (m_probe != probeProcess)
+            return;
+        probeProcess->kill();
+        finishProbe(probeProcess, false);
+    });
+    probeProcess->start(QStringLiteral("yt-dlp"), {QStringLiteral("--version")});
+}
+
+void YtDlpDownloader::finishProbe(QProcess *probe, bool completed)
+{
+    if (m_probe != probe)
+        return;
+    m_probe = nullptr;
+    m_available = completed && probe->exitStatus() == QProcess::NormalExit
+                  && probe->exitCode() == 0;
+    m_toolVersion = m_available
+                        ? QString::fromUtf8(probe->readAllStandardOutput()).trimmed()
+                        : QString();
     emit availabilityChanged();
+    probe->deleteLater();
 }
 
 QString YtDlpDownloader::downloadDirectory() const
