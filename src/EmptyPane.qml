@@ -9,6 +9,7 @@ import Melodarium.App
 // a biblioteca no aleatório, ou atacar o que nunca foi ouvido.
 Item {
     id: root
+    readonly property double coverRevision: CoverCache.revision
 
     property var resumeInfo: ({})
     property int neverCount: 0
@@ -235,7 +236,7 @@ Item {
                         radius: Theme.radiusXS
                         fallbackIconSize: Theme.fontSizeM
                         fallbackIconColor: Theme.cCoverIcon
-                        source: root.temRetomar
+                        source: root.temRetomar && root.coverRevision >= 0
                                 ? CoverCache.coverUrlForTrack(
                                       root.resumeInfo.path,
                                       root.resumeInfo.albumId !== undefined

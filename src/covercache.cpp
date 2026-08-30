@@ -5,13 +5,37 @@
 #include <QDir>
 #include <QFile>
 #include <QFileInfo>
+#include <QFutureWatcher>
+#include <QSaveFile>
 #include <QStandardPaths>
 #include <QUrl>
+#include <QtConcurrent/QtConcurrentRun>
+
+namespace {
+
+bool writeAtomically(const QString &path, const QByteArray &data)
+{
+    QSaveFile file(path);
+    if (!file.open(QIODevice::WriteOnly))
+        return false;
+    if (!data.isEmpty() && file.write(data) != data.size())
+        return false;
+    return file.commit();
+}
+
+QString trackKey(const QString &trackPath)
+{
+    return QString::fromLatin1(
+        QCryptographicHash::hash(trackPath.toUtf8(), QCryptographicHash::Sha1).toHex());
+}
+
+} // namespace
 
 CoverCache::CoverCache(QObject *parent)
     : QObject(parent)
 {
-    QDir().mkpath(cacheDirectory());
+    QDir().mkpath(cacheDirectory() + QStringLiteral("/blobs"));
+    QDir().mkpath(cacheDirectory() + QStringLiteral("/refs"));
 }
 
 QString CoverCache::cacheDirectory()
@@ -41,38 +65,121 @@ QString CoverCache::coverUrlForTrack(const QString &trackPath, int albumId)
     Q_UNUSED(albumId)
     if (trackPath.isEmpty())
         return {};
+    if (m_resolved.contains(trackPath))
+        return m_resolved.value(trackPath);
 
-    const QString key = QString::fromLatin1(
-        QCryptographicHash::hash(trackPath.toUtf8(), QCryptographicHash::Sha1).toHex());
+    const QString key = trackKey(trackPath);
+    const QString ref = cacheDirectory() + QStringLiteral("/refs/") + key
+                        + QStringLiteral(".ref");
+    const QString none = cacheDirectory() + QStringLiteral("/refs/") + key
+                         + QStringLiteral(".none");
+    if (QFile::exists(ref)) {
+        QFile file(ref);
+        if (file.open(QIODevice::ReadOnly)) {
+            const QString url = QString::fromUtf8(file.readAll()).trimmed();
+            const QString local = QUrl(url).toLocalFile();
+            if (!url.isEmpty() && !local.isEmpty() && QFile::exists(local)) {
+                m_resolved.insert(trackPath, url);
+                return url;
+            }
+        }
+    }
+    if (QFile::exists(none)) {
+        m_resolved.insert(trackPath, QString());
+        return {};
+    }
+
+    // Keep the old cache visible while it is migrated to content-addressed storage. The
+    // worker reads and hashes it without making the first frame wait or deleting recoverable data.
     const QString jpg = cacheDirectory() + QLatin1Char('/') + key + QStringLiteral(".jpg");
     const QString png = cacheDirectory() + QLatin1Char('/') + key + QStringLiteral(".png");
-    const QString miss = cacheDirectory() + QLatin1Char('/') + key + QStringLiteral(".none");
+    const QString legacyNone = cacheDirectory() + QLatin1Char('/') + key + QStringLiteral(".none");
 
-    if (QFile::exists(jpg))
+    if (QFile::exists(jpg)) {
+        scheduleResolution(trackPath, key, jpg);
         return QUrl::fromLocalFile(jpg).toString();
-    if (QFile::exists(png))
+    }
+    if (QFile::exists(png)) {
+        scheduleResolution(trackPath, key, png);
         return QUrl::fromLocalFile(png).toString();
-    if (QFile::exists(miss))
+    }
+    if (QFile::exists(legacyNone)) {
+        m_resolved.insert(trackPath, QString());
         return {}; // negative cache: do not re-open the file on every scroll
+    }
 
+    scheduleResolution(trackPath, key);
+    return {};
+}
+
+void CoverCache::scheduleResolution(const QString &trackPath, const QString &key,
+                                    const QString &legacyPath)
+{
+    if (m_pending.contains(trackPath))
+        return;
+    m_pending.insert(trackPath);
+
+    auto *watcher = new QFutureWatcher<QString>(this);
+    connect(watcher, &QFutureWatcher<QString>::finished, this,
+            [this, watcher, trackPath]() {
+                const QString result = watcher->result();
+                watcher->deleteLater();
+                m_pending.remove(trackPath);
+                m_resolved.insert(trackPath, result);
+                ++m_revision;
+                emit revisionChanged();
+            });
+    watcher->setFuture(QtConcurrent::run(&CoverCache::resolveCover, trackPath, key, legacyPath));
+}
+
+QString CoverCache::resolveCover(const QString &trackPath, const QString &key,
+                                 const QString &legacyPath)
+{
+    QByteArray data;
     QString mime;
-    const QByteArray data = TagReader::readCover(trackPath, &mime);
-    if (!data.isEmpty()) {
-        const QString out = mime.contains(QStringLiteral("png")) ? png : jpg;
-        QFile f(out);
-        if (f.open(QIODevice::WriteOnly)) {
-            f.write(data);
-            f.close();
-            return QUrl::fromLocalFile(out).toString();
+    QString sourcePath = legacyPath;
+
+    if (!legacyPath.isEmpty()) {
+        QFile legacy(legacyPath);
+        if (legacy.open(QIODevice::ReadOnly))
+            data = legacy.readAll();
+    } else {
+        data = TagReader::readCover(trackPath, &mime);
+    }
+
+    if (data.isEmpty()) {
+        sourcePath = siblingCoverFile(trackPath);
+        if (!sourcePath.isEmpty()) {
+            QFile sibling(sourcePath);
+            if (sibling.open(QIODevice::ReadOnly))
+                data = sibling.readAll();
         }
     }
 
-    const QString sibling = siblingCoverFile(trackPath);
-    if (!sibling.isEmpty())
-        return QUrl::fromLocalFile(sibling).toString();
+    const QString refs = cacheDirectory() + QStringLiteral("/refs/");
+    const QString ref = refs + key + QStringLiteral(".ref");
+    const QString none = refs + key + QStringLiteral(".none");
+    if (data.isEmpty()) {
+        writeAtomically(none, {});
+        QFile::remove(ref);
+        return {};
+    }
 
-    QFile marker(miss);
-    if (marker.open(QIODevice::WriteOnly))
-        marker.close();
-    return {};
+    const bool png = mime.contains(QStringLiteral("png"), Qt::CaseInsensitive)
+                     || QFileInfo(sourcePath).suffix().compare(QStringLiteral("png"),
+                                                               Qt::CaseInsensitive) == 0;
+    const QString hash = QString::fromLatin1(
+        QCryptographicHash::hash(data, QCryptographicHash::Sha256).toHex());
+    const QString blob = cacheDirectory() + QStringLiteral("/blobs/") + hash
+                         + (png ? QStringLiteral(".png") : QStringLiteral(".jpg"));
+    if (!QFile::exists(blob) && !writeAtomically(blob, data)) {
+        writeAtomically(none, {});
+        return {};
+    }
+
+    const QString url = QUrl::fromLocalFile(blob).toString();
+    if (!writeAtomically(ref, url.toUtf8()))
+        return {};
+    QFile::remove(none);
+    return url;
 }

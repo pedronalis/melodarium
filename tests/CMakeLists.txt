@@ -160,3 +160,15 @@ target_link_libraries(tst_roundedimage PRIVATE Qt6::Core Qt6::Gui Qt6::Quick Qt6
 
 add_test(NAME tst_roundedimage COMMAND tst_roundedimage)
 set_tests_properties(tst_roundedimage PROPERTIES ENVIRONMENT "QT_QPA_PLATFORM=offscreen")
+
+qt_add_executable(tst_covercache
+    tst_covercache.cpp
+    ../src/covercache.h ../src/covercache.cpp
+    ../src/tagreader.h ../src/tagreader.cpp
+)
+target_include_directories(tst_covercache PRIVATE ../src)
+target_link_libraries(tst_covercache PRIVATE
+    Qt6::Concurrent Qt6::Core Qt6::Gui Qt6::Test PkgConfig::TAGLIB)
+
+add_test(NAME tst_covercache COMMAND tst_covercache)
+set_tests_properties(tst_covercache PROPERTIES ENVIRONMENT "QT_QPA_PLATFORM=offscreen")

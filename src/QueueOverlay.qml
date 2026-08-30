@@ -18,6 +18,7 @@ import Melodarium.App
 // não abre.
 Popup {
     id: root
+    readonly property double coverRevision: CoverCache.revision
 
     signal entryActivated(int queueIndex)
 
@@ -182,9 +183,11 @@ Popup {
                         Layout.preferredHeight: Math.round(34 * Theme.uiScale)
                         radius: Theme.radiusXS
                         fallbackIconSize: Theme.fontSizeM
-                        source: CoverCache.coverUrlForTrack(
-                                    linha.modelData,
-                                    linha.info.albumId !== undefined ? linha.info.albumId : 0)
+                        source: root.coverRevision >= 0
+                                ? CoverCache.coverUrlForTrack(
+                                      linha.modelData,
+                                      linha.info.albumId !== undefined ? linha.info.albumId : 0)
+                                : ""
                     }
 
                     ColumnLayout {

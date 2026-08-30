@@ -72,11 +72,13 @@ publica revisão quando um arquivo fica pronto.
 
 ### Task 4: Cache assíncrono sem duplicação destrutiva
 
-- [ ] Criar teste com duas faixas do mesmo álbum e mesma arte, uma faixa com arte exclusiva e
+- [x] Criar teste com duas faixas do mesmo álbum e mesma arte, uma faixa com arte exclusiva e
   uma faixa sem arte; provar deduplicação, preservação da exceção e negative cache.
-- [ ] Mover extração para worker, publicar `revision` no singleton e fazer bindings QML usarem
+- [x] Mover extração para worker, publicar `revision` no singleton e fazer bindings QML usarem
   essa revisão para atualizar quando o arquivo ficar pronto.
-- [ ] Armazenar blobs por hash de conteúdo e manter chave de resolução por faixa/álbum; migrar
+- [x] Armazenar blobs por hash de conteúdo e manter chave de resolução por faixa; migrar
   de forma preguiçosa sem apagar o cache antigo antes de confirmar o novo arquivo.
-- [ ] Rodar testes e comparar visualmente biblioteca, fila, coleção e painel; marcar a task,
-  concluir a fatia e commitar com `perf(covers): resolve artwork off the UI thread`.
+- [x] Rodar testes, cache frio e gates automatizados; commitar com
+  `perf(covers): resolve artwork off the UI thread`.
+- [ ] Pedro confirma na tela biblioteca, fila, coleção e painel; então marcar a task e concluir
+  a fatia pelo `planos-lote.py`.
