@@ -288,13 +288,18 @@ QVariantList LibraryBrowser::searchGrouped(const QString &text, int limitPerKind
     const QString like = QStringLiteral("%") + trimmed + QStringLiteral("%");
 
     auto append = [&out](const QString &kind, int id, const QString &title,
-                         const QString &subtitle, const QString &path) {
+                         const QString &subtitle, const QString &path,
+                         const QString &coverTrackPath = QString(), int albumId = 0,
+                         const QString &coverPath = QString()) {
         QVariantMap row;
         row.insert(QStringLiteral("kind"), kind);
         row.insert(QStringLiteral("id"), id);
         row.insert(QStringLiteral("title"), title);
         row.insert(QStringLiteral("subtitle"), subtitle);
         row.insert(QStringLiteral("path"), path);
+        row.insert(QStringLiteral("coverTrackPath"), coverTrackPath);
+        row.insert(QStringLiteral("albumId"), albumId);
+        row.insert(QStringLiteral("coverPath"), coverPath);
         out.append(row);
     };
 
@@ -302,7 +307,7 @@ QVariantList LibraryBrowser::searchGrouped(const QString &text, int limitPerKind
     QSqlQuery tq(db);
     tq.prepare(QStringLiteral(
         "SELECT t.id, IFNULL(t.title,''), IFNULL(ar.name,''), IFNULL(al.title,''), t.path, "
-        "IFNULL(t.duration_ms,0) "
+        "IFNULL(t.duration_ms,0), IFNULL(t.album_id,0) "
         "FROM tracks t "
         "LEFT JOIN artists ar ON ar.id = t.artist_id "
         "LEFT JOIN albums al ON al.id = t.album_id "
@@ -315,13 +320,14 @@ QVariantList LibraryBrowser::searchGrouped(const QString &text, int limitPerKind
             append(QStringLiteral("track"), tq.value(0).toInt(), tq.value(1).toString(),
                    joinParts({tq.value(2).toString(), tq.value(3).toString(),
                               formatClock(tq.value(5).toInt())}),
-                   tq.value(4).toString());
+                   tq.value(4).toString(), tq.value(4).toString(), tq.value(6).toInt());
         }
     }
 
     QSqlQuery alq(db);
     alq.prepare(QStringLiteral(
-        "SELECT al.id, al.title, IFNULL(ar.name,''), COUNT(t.id), IFNULL(al.year,0) "
+        "SELECT al.id, al.title, IFNULL(ar.name,''), COUNT(t.id), IFNULL(al.year,0), "
+        "MIN(t.path) "
         "FROM albums al "
         "LEFT JOIN artists ar ON ar.id = al.album_artist_id "
         "JOIN tracks t ON t.album_id = al.id AND t.removed_at IS NULL "
@@ -336,7 +342,7 @@ QVariantList LibraryBrowser::searchGrouped(const QString &text, int limitPerKind
                               year > 0 ? QString::number(year) : QString(),
                               plural(alq.value(3).toInt(), QStringLiteral("faixa"),
                                      QStringLiteral("faixas"))}),
-                   QString());
+                   QString(), alq.value(5).toString(), alq.value(0).toInt());
         }
     }
 
@@ -381,7 +387,7 @@ QVariantList LibraryBrowser::searchGrouped(const QString &text, int limitPerKind
     QSqlQuery eq(db);
     eq.prepare(QStringLiteral(
         "SELECT e.id, e.title, IFNULL(s.title,''), IFNULL(e.local_path,''), "
-        "IFNULL(e.published_at,0), IFNULL(e.duration_ms,0) "
+        "IFNULL(e.published_at,0), IFNULL(e.duration_ms,0), IFNULL(s.cover_path,'') "
         "FROM podcast_episodes e "
         "LEFT JOIN podcast_shows s ON s.id = e.show_id "
         "WHERE e.title LIKE ? ORDER BY e.published_at DESC LIMIT ?"));
@@ -393,7 +399,8 @@ QVariantList LibraryBrowser::searchGrouped(const QString &text, int limitPerKind
                    joinParts({eq.value(2).toString(),
                               formatShortDate(eq.value(4).toLongLong()),
                               formatMinutes(eq.value(5).toInt())}),
-                   eq.value(3).toString());
+                   eq.value(3).toString(), eq.value(3).toString(), 0,
+                   eq.value(6).toString());
         }
     }
 

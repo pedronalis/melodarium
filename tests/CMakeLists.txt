@@ -179,6 +179,10 @@ add_test(NAME tst_halo_intensity
     COMMAND bash "${CMAKE_SOURCE_DIR}/tools/check-halo-intensity.sh" "$<TARGET_FILE:melodarium>")
 set_tests_properties(tst_halo_intensity PROPERTIES WORKING_DIRECTORY "${CMAKE_SOURCE_DIR}")
 
+add_test(NAME tst_search_covers
+    COMMAND bash "${CMAKE_SOURCE_DIR}/tools/check-search-covers.sh" "$<TARGET_FILE:melodarium>")
+set_tests_properties(tst_search_covers PROPERTIES WORKING_DIRECTORY "${CMAKE_SOURCE_DIR}")
+
 qt_add_executable(tst_covercache
     tst_covercache.cpp
     ../src/covercache.h ../src/covercache.cpp
