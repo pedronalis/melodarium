@@ -119,7 +119,6 @@ FolderBrowser::FolderBrowser(QObject *parent)
 {
     connect(m_counter, &QFutureWatcher<QVector<int>>::finished, this, &FolderBrowser::applyCounts);
     m_path = QDir::homePath();
-    refresh();
 }
 
 FolderBrowser::~FolderBrowser()
@@ -171,8 +170,10 @@ void FolderBrowser::setPath(const QString &path)
     if (wanted.isEmpty())
         wanted = QDir::homePath();
     const QString clean = QDir::cleanPath(wanted);
-    if (clean == m_path)
+    if (clean == m_path) {
+        ensureLoaded();
         return;
+    }
     m_path = clean;
     refresh();
     emit pathChanged();
@@ -197,6 +198,7 @@ void FolderBrowser::setShowHidden(bool on)
 
 void FolderBrowser::refresh()
 {
+    m_loaded = true;
     QDir dir(m_path);
     QDir::Filters filters = QDir::Dirs | QDir::NoDotAndDotDot | QDir::NoSymLinks;
     if (m_showHidden)
@@ -241,6 +243,12 @@ void FolderBrowser::refresh()
             counts.append(p.isEmpty() ? -1 : countAudioIn(p));
         return counts;
     }));
+}
+
+void FolderBrowser::ensureLoaded()
+{
+    if (!m_loaded)
+        refresh();
 }
 
 void FolderBrowser::applyCounts()

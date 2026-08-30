@@ -50,12 +50,14 @@ public:
     bool showHidden() const { return m_showHidden; }
     void setShowHidden(bool on);
     int count() const { return int(m_entries.size()); }
+    bool loaded() const { return m_loaded; }
 
     QVariantList crumbs() const;
     QVariantList places() const;
     QVariantList volumes() const;
 
     Q_INVOKABLE void refresh();
+    Q_INVOKABLE void ensureLoaded();
     Q_INVOKABLE void refreshVolumes();
     Q_INVOKABLE void enter(int row);
     Q_INVOKABLE QString pathAt(int row) const;
@@ -88,6 +90,7 @@ private:
     QString m_path;
     bool m_readable = true;
     bool m_showHidden = false;
+    bool m_loaded = false;
     QVector<Entry> m_entries;
 
     // The folder that motivated this feature lives on an external drive: counting the audio
