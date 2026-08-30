@@ -54,6 +54,9 @@
 
 ## Estacionamento (derivas)
 
+- [ ] 2026-08-30 · DERIVA: portão de cor instável — `check-fidelidade.sh` reprova 1 em 5 com
+  "a capa está quadrada" sem nada mudar; a foto sai antes de a capa terminar de arredondar.
+
 - [ ] 2026-08-27 · Bit-perfect real depende do grafo do PipeWire (`default.clock.rate`), não só
       das opções do mpv. O plano documenta o limite; medir de verdade exige um FLAC 96 kHz e uma
       sonda no ponto ALSA.
@@ -79,18 +82,17 @@
 
 ## Em voo
 
-Nada em voo. O lote `colecao-playlist` (4 fatias) foi **colhido em 2026-08-29** — portão verde,
-20 commits, integrado em `main` por `b7a4fe7`; desfecho na `## Calibração de custo`.
+Nada em voo. Os dois runs de 2026-08-29 foram colhidos:
+
+- **`melodarium-anima`** (6 fatias de animação) — portão verde, integrado em `main`.
+- **`perf-redesenho`** (o núcleo queimado com o app parado) — portão verde, integrado em
+  `main`. A causa não era a tela: era a vigia de área de transferência do libmpv, que entra
+  em laço quando há algo grande copiado. Lição em
+  `docs/solutions/perf/2026-08-29-redesenho-continuo.md`.
 
 Quatro peças de motor seguem em **reserva declarada**, impressas pelo `check-orfaos.sh` a cada
 execução: `collectionsForTrack`, `continueListening`, `setGaplessAggressive` e `unsubscribe`.
 Esperam decisão sobre merecerem tela.
-
-- 2026-08-28 · /despacha run headless · lote `melodia-religa` (7 fatias) · modelo Opus 5 ·
-  estimado n/d · real **~850k tok novos (~63,90M com releitura, inflação 75×) / ~0,56 h /
-  336 turnos** · **PASSOU** — 7 fatias `concluido`, integradas em `main`. Lição: o run de lote
-  custou **6,2× os tokens novos** do run de fatias 1-3 (138k) para 2,3× o número de turnos —
-  fatia que RELIGA código existente lê muito mais do que fatia que escreve do zero.
 
 ## Verificação
 
