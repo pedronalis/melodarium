@@ -42,9 +42,10 @@ Item {
     // perto da arte vira contorno, e contorno é justamente o que a versão de camadas parecia.
     property real alcance: 0.85
 
-    // O pico de opacidade no centro de um foco de peso 1. Em 0,35 (a primeira versão) a luz
-    // competia com a própria capa; aqui ela levanta o fundo do painel sem disputar com a arte.
-    property real intensidade: 0.18
+    // The peak opacity at the center of a full-weight focus. The first version used 0.35 and
+    // competed with the artwork; 0.20 gives the approved subtle glow a small lift without
+    // changing its reach, color curve, or softness.
+    property real intensidade: 0.20
 
     // Quanto cada foco passeia, em pixels. Um oitavo de segundo de olhar não pega o movimento;
     // meio minuto de música, sim.
