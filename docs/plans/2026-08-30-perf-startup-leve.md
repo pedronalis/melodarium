@@ -86,16 +86,16 @@ primeira visita e preservados até o fim da sessão.
 - Produces: `bool loaded() const` e `Q_INVOKABLE void ensureLoaded()`; `setPath()` e `refresh()`
   continuam carregando imediatamente quando chamados explicitamente.
 
-- [ ] **Step 1: escrever o teste vermelho `constructionDefersDirectoryEnumeration`**
+- [x] **Step 1: escrever o teste vermelho `constructionDefersDirectoryEnumeration`**
   Exigir `!loaded()` e modelo vazio logo após construir; após `ensureLoaded()`, exigir `loaded()`.
-- [ ] **Step 2: comprovar o vermelho**
+- [x] **Step 2: comprovar o vermelho**
   Construir e rodar a função por nome; esperado: falha porque o construtor enumera `$HOME`.
-- [ ] **Step 3: implementar o carregamento explícito**
+- [x] **Step 3: implementar o carregamento explícito**
   Preservar o caminho inicial como home, retirar `refresh()` do construtor, marcar o modelo como
   carregado em `refresh()` e chamar `ensureLoaded()` em `FolderPickerDialog.onOpened`.
-- [ ] **Step 4: comprovar o verde e a navegação existente**
+- [x] **Step 4: comprovar o verde e a navegação existente**
   Rodar todo `tst_folderbrowser`; esperado: todos passam sem skips.
-- [ ] **Step 5: checkpoint**
+- [x] **Step 5: checkpoint**
   Marcar esta task e commitar com `perf(startup): defer folder enumeration until picker opens`.
 
 ### Task 3: Diálogos de topo sob demanda

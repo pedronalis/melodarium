@@ -56,6 +56,7 @@ Popup {
             if (alvo !== "")
                 browser.path = alvo
         }
+        browser.ensureLoaded()
         browser.refreshVolumes()
         lista.currentIndex = -1
         caminhoDigitado.text = ""

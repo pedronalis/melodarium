@@ -57,6 +57,12 @@ private slots:
         touch(QStringLiteral("raiz.mp3"));
     }
 
+    void constructionDefersDirectoryEnumeration()
+    {
+        FolderBrowser browser;
+        QCOMPARE(browser.rowCount(), 0);
+    }
+
     // Only directories, sorted case-insensitively — a file in the folder is not a destination.
     void listsOnlySubfoldersSorted()
     {
