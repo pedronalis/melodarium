@@ -9,6 +9,7 @@ import Melodarium.App
 // capa — no desenho ele é o pé da LISTA.
 Item {
     id: root
+    readonly property double coverRevision: CoverCache.revision
 
     property int lookahead: 4
 
@@ -118,7 +119,8 @@ Item {
                         fallbackIconSize: Theme.fontSizeL
                         // O segundo argumento é ignorado pela implementação (a capa sai do
                         // caminho do arquivo). Passar 0 evita uma consulta por quadradinho.
-                        source: CoverCache.coverUrlForTrack(quadro.modelData, 0)
+                        source: root.coverRevision >= 0
+                                ? CoverCache.coverUrlForTrack(quadro.modelData, 0) : ""
                     }
 
                     Rectangle {

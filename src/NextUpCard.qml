@@ -14,6 +14,7 @@ import Melodarium.App
 // da coluna, fecha a coluna de ponta a ponta; quem quer a fila inteira clica em "N na fila".
 Item {
     id: root
+    readonly property double coverRevision: CoverCache.revision
 
     signal entryActivated(int queueIndex)
     // O contador é a porta da fila inteira: dizer quantas faltam sem dar como olhar seria um
@@ -148,7 +149,7 @@ Item {
                     fallbackIconColor: Theme.cCoverIcon
                     // O segundo argumento é ignorado pela implementação (a capa sai do
                     // caminho do arquivo). Passar 0 evita uma consulta a mais.
-                    source: root.temProximo
+                    source: root.temProximo && root.coverRevision >= 0
                             ? CoverCache.coverUrlForTrack(root.proximoCaminho, 0) : ""
                 }
 

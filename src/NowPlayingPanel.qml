@@ -57,6 +57,7 @@ Rectangle {
     // mpv reports pause=false while it is idle, so AudioEngine.playing is true before any file
     // is loaded. Without this guard the transport shows a pause button with nothing playing.
     readonly property bool hasTrack: AudioEngine.currentFile !== ""
+    readonly property double coverRevision: CoverCache.revision
 
     // O endereço da arte do que está tocando, num lugar só: as duas camadas da capa e o halo
     // leem daqui, e antes disso a mesma expressão de três linhas vivia dentro do RoundedCover.
@@ -64,7 +65,7 @@ Rectangle {
         root.episodeMode
         ? (root.episodeInfo.coverPath !== undefined && root.episodeInfo.coverPath !== ""
            ? "file://" + root.episodeInfo.coverPath : "")
-        : (root.info.albumId !== undefined
+        : (root.coverRevision >= 0 && root.info.albumId !== undefined
            ? CoverCache.coverUrlForTrack(AudioEngine.currentFile, root.info.albumId) : "")
 
     // Qual das duas camadas está na frente. A troca NÃO acontece no instante em que a faixa

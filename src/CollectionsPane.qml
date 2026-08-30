@@ -9,6 +9,7 @@ import Melodarium.App
 // biblioteca de propósito — uma faixa não pode ter duas aparências no mesmo app.
 Item {
     id: root
+    readonly property double coverRevision: CoverCache.revision
 
     property alias model: tracks.model
     property int openId: 0
@@ -352,8 +353,10 @@ Item {
                                     height: arte.celula
                                     radius: Theme.radiusXXS
                                     fallbackIconSize: Theme.fontSizeXS
-                                    source: CoverCache.coverUrlForTrack(modelData.path,
-                                                                        modelData.albumId)
+                                    source: root.coverRevision >= 0
+                                            ? CoverCache.coverUrlForTrack(modelData.path,
+                                                                          modelData.albumId)
+                                            : ""
                                 }
                             }
                         }
@@ -363,7 +366,7 @@ Item {
                             visible: arte.capas.length > 0 && arte.capas.length < 4
                             radius: Theme.radiusXS
                             fallbackIconSize: Theme.fontSizeL
-                            source: arte.capas.length > 0
+                            source: arte.capas.length > 0 && root.coverRevision >= 0
                                     ? CoverCache.coverUrlForTrack(arte.capas[0].path,
                                                                   arte.capas[0].albumId)
                                     : ""
