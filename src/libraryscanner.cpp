@@ -287,6 +287,23 @@ void LibraryScanner::run(const QString &rootPath, const QString &dbPath)
                 ++removed;
         }
 
+        // 4. Drop the lookup rows nothing points at any more. Re-reading tags renames
+        //    artists and genres, and the old glued name ("Daft Punk Julian Casablancas")
+        //    would otherwise sit in the table forever. A soft-deleted track still counts as
+        //    a reference: an unmounted drive must not erase the artist of a track that is
+        //    going to come back.
+        {
+            QSqlQuery q(db);
+            q.exec(QStringLiteral(
+                "DELETE FROM artists WHERE id NOT IN "
+                "(SELECT artist_id FROM tracks WHERE artist_id IS NOT NULL) AND id NOT IN "
+                "(SELECT album_artist_id FROM albums WHERE album_artist_id IS NOT NULL)"));
+            QSqlQuery g(db);
+            g.exec(QStringLiteral(
+                "DELETE FROM genres WHERE id NOT IN "
+                "(SELECT genre_id FROM tracks WHERE genre_id IS NOT NULL)"));
+        }
+
         db.commit();
         emit progress(files.size(), files.size());
         db.close();

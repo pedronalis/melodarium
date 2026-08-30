@@ -34,4 +34,8 @@ namespace TagReader {
 QString computeContentHash(const QString &absolutePath);
 TrackRecord read(const QString &absolutePath);
 QByteArray readCover(const QString &absolutePath, QString *mimeTypeOut);
+
+// Keeps only the main artist of a single-field credit ("Daft Punk feat. Julian" -> "Daft
+// Punk"). Public so the rule can be tested straight, with no audio fixture behind it.
+QString primaryName(const QString &raw);
 } // namespace TagReader
