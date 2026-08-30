@@ -1,9 +1,19 @@
 # Handoff — melodarium
 
-> Atualizado: 2026-08-29 13:29 · branch: `main` · via /fecho · contexto: ~67% consumido
+> Atualizado: 2026-08-30 09:46 · branch: `main` · implementação de performance aguardando gate humano
 
 ## Estado
 
+- **O primeiro lote de performance está implementado.** `perf-startup-leve` concluiu:
+  probe do `yt-dlp` assíncrono, `FolderBrowser` sem I/O no construtor, diálogos e páginas
+  secundárias sob demanda. Em `perf-listas-capas`, saíram o papel morto `coverUrl`, a
+  invalidação da lista inteira, delegates sem reciclagem e análise cromática em miniaturas;
+  capas agora resolvem em worker e deduplicam blobs pelo conteúdo. O código está em 8 commits
+  (`c0e7bd4..538114a`), ainda sem push.
+- **Medição A/B lado a lado contra `50328b9`:** startup médio 2,58 s → 2,28 s (**−11,5%**);
+  processo parado segue em 0,0 tick/s; no mesmo Xvfb, RSS 322.096 → 313.928 kB, PSS 209.429 →
+  201.433 kB e anônimo 141.412 → 134.296 kB. A captura para o gate humano está em
+  `/tmp/melodarium-perf-review-x11.png`.
 - **A coleção virou playlist.** Toca inteira (com embaralhar), a linha da lista virou cartão
   com mosaico de capas e "N faixas · tempo", toca sem abrir, e a faixa se arrasta para outro
   lugar com a ordem gravada em `collection_tracks.position`. Lote de 4 fatias planejado,
@@ -82,7 +92,12 @@
 
 ## Em voo
 
-Nada em voo. Os dois runs de 2026-08-29 foram colhidos:
+`docs/plans/2026-08-30-perf-listas-capas.md` está `em-execucao` apenas pelo último checkbox:
+Pedro olhar biblioteca, fila, coleção e painel e confirmar que não houve perda visual. A
+captura da biblioteca/painel foi mostrada nesta conversa. Depois disso, concluir a fatia e
+iniciar `docs/plans/2026-08-30-perf-render-fila.md`, já `aprovado` e dependente dela.
+
+Os dois runs de 2026-08-29 foram colhidos:
 
 - **`melodarium-anima`** (6 fatias de animação) — portão verde, integrado em `main`.
 - **`perf-redesenho`** (o núcleo queimado com o app parado) — portão verde, integrado em
@@ -95,6 +110,17 @@ execução: `collectionsForTrack`, `continueListening`, `setGaplessAggressive` e
 Esperam decisão sobre merecerem tela.
 
 ## Verificação
+
+> Performance, rodada fresca em 2026-08-30 09:3x–09:4x após `538114a`:
+
+- `cmake --build build` → exit 0
+- `ctest --test-dir build -N` → `Total Tests: 13`
+- `ctest --test-dir build --output-on-failure` → 13/13, zero falhas, 7,15 s
+- `bash tools/check-list-reuse.sh` → oito `ListView` com reciclagem
+- `bash tools/check-orfaos.sh` → zero órfãos, quatro reservas declaradas
+- `bash tools/check-layout.sh` e `bash tools/check-fidelidade.sh` → exit 0
+- `tst_ytdlp`, `tst_folderbrowser`, `tst_tracklistmodel`, `tst_roundedimage` e
+  `tst_covercache` foram vistos em RED antes do GREEN; todos terminaram sem skips
 
 > Todos rodados DEPOIS do merge `b7a4fe7` — merge limpo não prova integração correta.
 
