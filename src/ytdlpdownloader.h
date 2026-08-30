@@ -45,8 +45,11 @@ signals:
     void failed(const QUrl &url, const QString &reason);
 
 private:
+    void finishProbe(QProcess *probe, bool completed);
+
     bool m_available = false;
     QString m_toolVersion;
+    QProcess *m_probe = nullptr;
     QHash<QString, QProcess *> m_jobs;
     QHash<QString, int> m_collectionForUrl;
     QHash<QString, QString> m_lastDestination;

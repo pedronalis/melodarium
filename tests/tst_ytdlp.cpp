@@ -1,5 +1,8 @@
 #include <QtTest/QtTest>
+#include <QElapsedTimer>
+#include <QFile>
 #include <QProcess>
+#include <QScopeGuard>
 #include <QSqlError>
 #include <QSqlQuery>
 #include <QTemporaryDir>
@@ -116,6 +119,34 @@ private slots:
             QStringLiteral("[youtube] Extracting URL: https://..."), &got, &total));
         QVERIFY(!YtDlpDownloader::parseProgressLine(QString(), &got, &total));
         QVERIFY(!YtDlpDownloader::parseProgressLine(QStringLiteral("MELODIA_PROGRESS"), &got, &total));
+    }
+
+    void probeReturnsBeforeTheToolFinishes()
+    {
+        QTemporaryDir tools;
+        QVERIFY(tools.isValid());
+        const QString executable = tools.filePath(QStringLiteral("yt-dlp"));
+        QFile script(executable);
+        QVERIFY(script.open(QIODevice::WriteOnly));
+        script.write("#!/bin/sh\n/usr/bin/sleep 1\nprintf 'test-version\\n'\n");
+        script.close();
+        QVERIFY(script.setPermissions(QFileDevice::ReadOwner | QFileDevice::WriteOwner
+                                      | QFileDevice::ExeOwner));
+
+        const QByteArray originalPath = qgetenv("PATH");
+        const auto restorePath = qScopeGuard([originalPath]() { qputenv("PATH", originalPath); });
+        qputenv("PATH", tools.path().toUtf8());
+
+        YtDlpDownloader downloader;
+        QSignalSpy availabilitySpy(&downloader, &YtDlpDownloader::availabilityChanged);
+        QElapsedTimer elapsed;
+        elapsed.start();
+        downloader.probe();
+
+        QVERIFY2(elapsed.elapsed() < 100, "probe() blocked while yt-dlp was running");
+        QVERIFY2(availabilitySpy.wait(3000), "asynchronous probe never completed");
+        QVERIFY(downloader.available());
+        QCOMPARE(downloader.toolVersion(), QStringLiteral("test-version"));
     }
 
     void ingestedFileIsMarkedAsYouTubeAndJoinsTheCollection()
