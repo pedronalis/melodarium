@@ -195,6 +195,14 @@ add_test(NAME tst_resume_queue
     COMMAND bash "${CMAKE_SOURCE_DIR}/tools/check-resume-queue.sh" "$<TARGET_FILE:melodarium>")
 set_tests_properties(tst_resume_queue PROPERTIES WORKING_DIRECTORY "${CMAKE_SOURCE_DIR}")
 
+if(TARGET Qt6::DBus)
+    add_test(NAME tst_mpris
+        COMMAND bash "${CMAKE_SOURCE_DIR}/tools/check-mpris.sh" "$<TARGET_FILE:melodarium>")
+    set_tests_properties(tst_mpris PROPERTIES
+        WORKING_DIRECTORY "${CMAKE_SOURCE_DIR}"
+        TIMEOUT 60)
+endif()
+
 qt_add_executable(tst_covercache
     tst_covercache.cpp
     ../src/covercache.h ../src/covercache.cpp

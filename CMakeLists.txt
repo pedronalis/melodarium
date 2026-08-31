@@ -6,6 +6,9 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_AUTOMOC ON)
 
 find_package(Qt6 REQUIRED COMPONENTS Concurrent Core Network Qml Quick QuickControls2 Sql)
+if(UNIX AND NOT APPLE)
+    find_package(Qt6 REQUIRED COMPONENTS DBus)
+endif()
 find_package(PkgConfig REQUIRED)
 pkg_check_modules(MPV REQUIRED IMPORTED_TARGET mpv)
 pkg_check_modules(TAGLIB REQUIRED IMPORTED_TARGET taglib)
@@ -148,6 +151,15 @@ target_link_libraries(melodarium PRIVATE
     Qt6::Concurrent Qt6::Core Qt6::Network Qt6::Qml Qt6::Quick Qt6::QuickControls2
     Qt6::Sql
     PkgConfig::MPV PkgConfig::TAGLIB)
+
+if(TARGET Qt6::DBus)
+    target_sources(melodarium PRIVATE
+        src/mprisservice.h
+        src/mprisservice.cpp
+    )
+    target_link_libraries(melodarium PRIVATE Qt6::DBus)
+    target_compile_definitions(melodarium PRIVATE MELODARIUM_HAS_MPRIS=1)
+endif()
 
 enable_testing()
 add_subdirectory(tests)

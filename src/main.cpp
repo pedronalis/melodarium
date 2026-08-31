@@ -1,5 +1,9 @@
 #include "database.h"
+#include "audioengine.h"
 #include "libraryscanner.h"
+#ifdef MELODARIUM_HAS_MPRIS
+#include "mprisservice.h"
+#endif
 
 #include <QCoreApplication>
 #include <QDir>
@@ -170,6 +174,12 @@ int main(int argc, char *argv[])
     } else {
         engine.loadFromModule("Melodarium.App", "Main");
     }
+
+#ifdef MELODARIUM_HAS_MPRIS
+    if (auto *audio = engine.singletonInstance<AudioEngine *>(QStringLiteral("Melodarium.App"),
+                                                              QStringLiteral("AudioEngine")))
+        new MprisService(audio, &engine);
+#endif
 
     return app.exec();
 }
