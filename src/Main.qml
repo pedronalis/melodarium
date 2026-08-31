@@ -653,6 +653,11 @@ Window {
                             + " halo=" + (nowPlaying.mostrarHalo ? "on" : "off")
                             + " context=" + root.contextKind
                             + " mini=" + (globalMiniPlayer.visible ? "on" : "off")
+                            + " collectionheader="
+                            + (root.effectiveSection !== "collections"
+                               ? "na"
+                               : (collectionsLoader.item !== null
+                                  && collectionsLoader.item.headerFits ? "fit" : "overflow"))
                             + " motor=" + (AudioEngine.isAvailable() ? "ok" : "MORTO"))
                 if (root.shotPath === "") {
                     Qt.quit()

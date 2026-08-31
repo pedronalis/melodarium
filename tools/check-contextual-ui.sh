@@ -14,6 +14,10 @@ if ! command -v ffmpeg >/dev/null 2>&1; then
     echo "check-contextual-ui: ffmpeg é obrigatório para criar o áudio isolado"
     exit 1
 fi
+if ! command -v sqlite3 >/dev/null 2>&1; then
+    echo "check-contextual-ui: sqlite3 é obrigatório para montar a coleção densa"
+    exit 1
+fi
 if ! python3 -c "import PIL" 2>/dev/null; then
     echo "check-contextual-ui: python3-pillow é obrigatório para comparar as telas"
     exit 1
@@ -83,8 +87,31 @@ run_case() {
 run_case "Biblioteca com música" library player off sim "$TMP/library.png"
 run_case "Podcast sem áudio" podcast podcast off nao ""
 run_case "Podcast preservando música" podcast podcast on sim "$TMP/podcast.png"
+
+DB="$TMP/data/melodarium/melodarium/melodarium.db"
+sqlite3 "$DB" "
+INSERT INTO tracks (id,path,mtime,size,duration_ms,title,added_at,source_kind)
+VALUES (999,'$TMP/faixa.wav',1,1,8000,'Faixa do gate',1,'local_file');
+INSERT INTO collections (id,name,created_at)
+VALUES (999,'Coleção com nome comprido',1);
+INSERT INTO collection_tracks (collection_id,track_id,position,added_at)
+VALUES (999,999,1,1);"
+
 run_case "Coleções sem áudio" collections collections off nao ""
 run_case "Coleções preservando música" collections collections on sim "$TMP/collections.png"
+
+dense_raw=$(XDG_DATA_HOME="$TMP/data" XDG_CONFIG_HOME="$TMP/config" \
+            MELODIA_NULL_AO=1 QT_QPA_PLATFORM=offscreen \
+            QT_LOGGING_RULES="*.debug=true" QT_FORCE_STDERR_LOGGING=1 \
+            timeout 30 "$BIN" --measure 720 --pane collections --open-collection 999 \
+            --no-search --sem-animacao --delay 1800 2>&1)
+dense_line=$(printf '%s\n' "$dense_raw" | grep -ao 'MEDIDA .*' | tail -1)
+if ! printf '%s\n' "$dense_line" | grep -q 'collectionheader=fit'; then
+    echo "FALHA: o cabeçalho da coleção aberta não provou que cabe em 720 px"
+    echo "$dense_line"
+    exit 1
+fi
+echo "ok:    cabeçalho da coleção aberta cabe em 720 px"
 
 python3 - "$TMP/library.png" "$TMP/podcast.png" "$TMP/collections.png" <<'PY'
 import sys

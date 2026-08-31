@@ -131,33 +131,36 @@ agregada já fornecida por `CollectionManager::collections()` e emite ações, e
 - Produces: capturas reproduzíveis da visão geral e da coleção aberta, sem tocar no banco do
   usuário.
 
-- [ ] **Step 1: criar fixture isolada e fotografar**
+- [x] **Step 1: criar fixture isolada e fotografar**
 
-  Criar quatro WAVs temporários, importar ao banco isolado pela inicialização normal do app,
-  inserir uma coleção `Gate contextual` e seus vínculos por SQLite, então salvar as duas
-  capturas de 1100×700 em `docs/telas/`.
+  Gerar quatro MP3s temporários com capas sintéticas embutidas, inicializar o banco isolado
+  pela abertura normal do app e inserir somente a fixture de faixas, coleções e vínculos por
+  SQLite, então salvar as duas capturas de 1100×700 em `docs/telas/`.
 
-- [ ] **Step 2: inspecionar os estados densos**
+- [x] **Step 2: inspecionar os estados densos**
 
-  Conferir que mosaico, nome longo, contagem e duração cabem a 1100×700 e 720×700; confirmar que
-  o mini-player permanece separado do contexto e que tocar/embaralhar continuam disponíveis no
-  painel central e no contextual.
+  Conferir que mosaico, nome longo, contagem, duração e todas as ações cabem a 1100×700 e
+  720×700; confirmar que o mini-player permanece separado do contexto e que tocar/embaralhar
+  continuam disponíveis no painel central e no contextual. O estado denso de 720 px precisa
+  publicar `collectionheader=fit` no gate contextual.
 
-- [ ] **Step 3: rodar verificação fresca completa**
+- [x] **Step 3: rodar verificação fresca completa**
 
   Run: `quiet-run cmake -B build -G Ninja && quiet-run cmake --build build && quiet-run ctest --test-dir build -N && quiet-run ctest --test-dir build --output-on-failure && quiet-run bash tools/check-contextual-ui.sh && quiet-run bash tools/check-orfaos.sh && quiet-run bash tools/check-layout.sh && quiet-run bash tools/check-fidelidade.sh`
 
   Expected: pelo menos 22 testes descobertos, zero falhas, zero órfãos e todas as sondas de
   geometria/cor verdes.
 
-- [ ] **Step 4: revisar impacto e commitar evidência**
+- [x] **Step 4: revisar impacto e commitar evidência**
 
   Rodar `gitnexus detect_changes` contra `main`, marcar a task e executar:
 
   ```bash
-  git add docs/telas/15-contexto-colecoes.png docs/telas/16-contexto-colecao-aberta.png \
-    docs/plans/2026-08-31-contexto-colecoes.md
-  git commit -m "test(ui): capture the collection contextual states"
+  git add src/CollectionsPane.qml src/Main.qml tools/check-contextual-ui.sh \
+    docs/telas/15-contexto-colecoes.png docs/telas/16-contexto-colecao-aberta.png \
+    docs/plans/2026-08-31-contexto-colecoes.md \
+    docs/solutions/ui/2026-08-28-cabecalho-que-nao-encolhe-estoura-a-coluna.md
+  git commit -m "fix(collections): keep contextual header inside narrow panes"
   ```
 
 ## Gate humano

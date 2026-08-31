@@ -73,3 +73,20 @@ botão continua inteiro na janela mínima.
 - **Pôr `elide` só no título, mantendo a linha única.** A conta continuava estourando na soma
   artista + contagem + botão; o teto teria de ser tão apertado que o título viraria reticências
   em nome de salvar uma linha de layout — e brigando com o desenho, que já resolvia isso.
+
+## Recorrência em Coleções (2026-08-31)
+
+O redesenho contextual expôs o mesmo defeito em outro estado denso: ao abrir uma coleção a
+720 px, título, contagem, tocar, embaralhar, baixar, renomear e excluir disputavam uma única
+`RowLayout`. Os últimos botões ficavam parcialmente fora da coluna, embora os gates globais de
+layout e fidelidade continuassem verdes porque não abriam uma coleção nessa largura.
+
+A correção repetiu a solução estrutural, em vez de comprimir todos os controles: título,
+contagem e ações primárias ficam na primeira linha; ações secundárias ficam numa segunda linha
+alinhada à direita. O título recebeu `Layout.fillWidth`, mínimo zero e `Text.ElideRight`.
+
+Para impedir a terceira ocorrência, `CollectionsPane.headerFits` agora mede o último controle
+contra a borda real do painel. `Main.qml` publica o resultado como
+`collectionheader=fit|overflow` e `tools/check-contextual-ui.sh` cria uma coleção, abre o estado
+denso a 720 px e exige `fit`. A lição se mantém: o gate precisa abrir o estado que concentra a
+maior quantidade de conteúdo, não apenas medir o contêiner vazio.

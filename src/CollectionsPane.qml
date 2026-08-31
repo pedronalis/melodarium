@@ -14,6 +14,15 @@ Item {
     property alias model: tracks.model
     property int openId: 0
     property string openName: ""
+    readonly property bool headerFits: {
+        const primaryEnd = root.openId === 0
+                           ? createButton
+                           : (tracks.count > 0 ? shuffleButton : titleBlock)
+        const primaryOk = primaryEnd.x + primaryEnd.width <= primaryHeader.width + 1
+        const actionsOk = !secondaryHeader.visible
+                          || deleteButton.x + deleteButton.width <= secondaryHeader.width + 1
+        return primaryOk && actionsOk
+    }
 
     signal collectionOpened(int id, string name)
     signal closeRequested
@@ -109,133 +118,155 @@ Item {
         anchors.bottomMargin: Theme.marginXL
         spacing: Theme.marginL
 
-        // --- Cabeçalho: o nome do lugar, e o que dá para fazer nele ---
-        RowLayout {
+        // --- Cabeçalho: identidade na primeira linha, ferramentas na segunda quando aberta. ---
+        ColumnLayout {
             Layout.fillWidth: true
-            spacing: Theme.marginM
+            spacing: Theme.marginXS
 
-            IconButton {
-                Layout.preferredWidth: Math.round(22 * Theme.uiScale)
-                Layout.preferredHeight: 22
+            RowLayout {
+                id: primaryHeader
+                Layout.fillWidth: true
+                spacing: Theme.marginM
+
+                IconButton {
+                    Layout.preferredWidth: Math.round(22 * Theme.uiScale)
+                    Layout.preferredHeight: 22
+                    visible: root.openId > 0
+                    icon: "chevron-left"
+                    size: Theme.fontSizeS
+                    tooltip: qsTr("todas as coleções")
+                    onClicked: root.close()
+                }
+
+                ColumnLayout {
+                    id: titleBlock
+                    Layout.fillWidth: true
+                    Layout.minimumWidth: 0
+                    spacing: Theme.marginXXS
+
+                    Text {
+                        Layout.fillWidth: true
+                        Layout.minimumWidth: 0
+                        text: root.openId > 0 ? root.openName : qsTr("Coleções")
+                        elide: Text.ElideRight
+                        font.family: Theme.fontFamily
+                        font.pixelSize: Theme.fontSizeXL
+                        font.weight: Theme.fontWeightSemiBold
+                        color: Theme.cTitle
+                    }
+
+                    Text {
+                        Layout.fillWidth: true
+                        text: root.openId > 0
+                              ? tracks.count + qsTr(" faixas")
+                              : root.items.length + qsTr(" coleções")
+                        elide: Text.ElideRight
+                        font.family: Theme.fontFamilyFixed
+                        font.pixelSize: Theme.fontSizeS
+                        color: Theme.cFaint
+                    }
+                }
+
+                // O único disco claro da tela significa "tocar" — é o mesmo do transporte.
+                Rectangle {
+                    Layout.preferredWidth: Math.round(30 * Theme.uiScale)
+                    Layout.preferredHeight: Math.round(30 * Theme.uiScale)
+                    visible: root.openId > 0 && tracks.count > 0
+                    radius: width / 2
+                    color: tocarArea.containsMouse ? Theme.cStrong : Theme.cTitle
+
+                    Behavior on color {
+                        ColorAnimation { duration: Theme.animationFast; easing.type: Theme.easingType }
+                    }
+
+                    Text {
+                        anchors.centerIn: parent
+                        text: Icons.get("play")
+                        font.family: Icons.fontFamily
+                        font.pixelSize: Theme.fontSizeS
+                        color: Theme.cBase
+                    }
+
+                    MouseArea {
+                        id: tocarArea
+                        anchors.fill: parent
+                        hoverEnabled: true
+                        cursorShape: Qt.PointingHandCursor
+                        onClicked: root.playRequested(false)
+                    }
+                }
+
+                IconButton {
+                    id: shuffleButton
+                    Layout.preferredWidth: Math.round(22 * Theme.uiScale)
+                    Layout.preferredHeight: 22
+                    visible: root.openId > 0 && tracks.count > 0
+                    icon: "shuffle"
+                    size: Theme.fontSizeS
+                    tooltip: qsTr("tocar embaralhado")
+                    onClicked: root.playRequested(true)
+                }
+
+                IconButton {
+                    id: createButton
+                    Layout.preferredWidth: Math.round(22 * Theme.uiScale)
+                    Layout.preferredHeight: 22
+                    visible: root.openId === 0
+                    icon: "plus"
+                    size: Theme.fontSizeS
+                    tooltip: qsTr("nova coleção")
+                    onClicked: root.openCreateDialog()
+                }
+            }
+
+            RowLayout {
+                id: secondaryHeader
+                Layout.fillWidth: true
                 visible: root.openId > 0
-                icon: "chevron-left"
-                size: Theme.fontSizeS
-                tooltip: qsTr("todas as coleções")
-                onClicked: root.close()
-            }
+                spacing: Theme.marginM
 
-            Text {
-                Layout.alignment: Qt.AlignBaseline
-                text: root.openId > 0 ? root.openName : qsTr("Coleções")
-                font.family: Theme.fontFamily
-                font.pixelSize: Theme.fontSizeXL
-                font.weight: Theme.fontWeightSemiBold
-                color: Theme.cTitle
-            }
+                Item { Layout.fillWidth: true }
 
-            Text {
-                Layout.alignment: Qt.AlignBaseline
-                text: root.openId > 0
-                      ? tracks.count + qsTr(" faixas")
-                      : root.items.length + qsTr(" coleções")
-                font.family: Theme.fontFamilyFixed
-                font.pixelSize: Theme.fontSizeS
-                color: Theme.cFaint
-            }
-
-            // O único disco claro da tela significa "tocar" — é o mesmo do transporte.
-            Rectangle {
-                Layout.leftMargin: Theme.marginS
-                Layout.preferredWidth: Math.round(30 * Theme.uiScale)
-                Layout.preferredHeight: Math.round(30 * Theme.uiScale)
-                visible: root.openId > 0 && tracks.count > 0
-                radius: width / 2
-                color: tocarArea.containsMouse ? Theme.cStrong : Theme.cTitle
-
-                Behavior on color {
-                    ColorAnimation { duration: Theme.animationFast; easing.type: Theme.easingType }
+                // Baixar só faz sentido com uma coleção aberta: o arquivo tem de cair em algum
+                // lugar, e o lugar é a coleção que o usuário está olhando.
+                IconButton {
+                    Layout.preferredWidth: Math.round(22 * Theme.uiScale)
+                    Layout.preferredHeight: 22
+                    icon: "download"
+                    size: Theme.fontSizeS
+                    tooltip: qsTr("colar link do YouTube")
+                    onClicked: {
+                        linkDialog.collectionId = root.openId
+                        linkDialog.open()
+                    }
                 }
 
-                Text {
-                    anchors.centerIn: parent
-                    text: Icons.get("play")
-                    font.family: Icons.fontFamily
-                    font.pixelSize: Theme.fontSizeS
-                    color: Theme.cBase
+                IconButton {
+                    Layout.preferredWidth: Math.round(22 * Theme.uiScale)
+                    Layout.preferredHeight: 22
+                    icon: "history"
+                    size: Theme.fontSizeS
+                    tooltip: qsTr("renomear")
+                    onClicked: {
+                        nomeDialog.renameId = root.openId
+                        nomeDialog.initialText = root.openName
+                        nomeDialog.open()
+                    }
                 }
 
-                MouseArea {
-                    id: tocarArea
-                    anchors.fill: parent
-                    hoverEnabled: true
-                    cursorShape: Qt.PointingHandCursor
-                    onClicked: root.playRequested(false)
+                IconButton {
+                    id: deleteButton
+                    Layout.preferredWidth: Math.round(22 * Theme.uiScale)
+                    Layout.preferredHeight: 22
+                    icon: "close"
+                    size: Theme.fontSizeS
+                    tooltip: qsTr("apagar coleção")
+                    onClicked: {
+                        apagar.message = qsTr("Apagar \"%1\"? As faixas continuam na biblioteca.")
+                                         .arg(root.openName)
+                        apagar.open()
+                    }
                 }
-            }
-
-            IconButton {
-                Layout.preferredWidth: Math.round(22 * Theme.uiScale)
-                Layout.preferredHeight: 22
-                visible: root.openId > 0 && tracks.count > 0
-                icon: "shuffle"
-                size: Theme.fontSizeS
-                tooltip: qsTr("tocar embaralhado")
-                onClicked: root.playRequested(true)
-            }
-
-            Item { Layout.fillWidth: true }
-
-            // Baixar só faz sentido com uma coleção aberta: o arquivo tem de cair em algum
-            // lugar, e o lugar é a coleção que o usuário está olhando.
-            IconButton {
-                Layout.preferredWidth: Math.round(22 * Theme.uiScale)
-                Layout.preferredHeight: 22
-                visible: root.openId > 0
-                icon: "download"
-                size: Theme.fontSizeS
-                tooltip: qsTr("colar link do YouTube")
-                onClicked: {
-                    linkDialog.collectionId = root.openId
-                    linkDialog.open()
-                }
-            }
-
-            IconButton {
-                Layout.preferredWidth: Math.round(22 * Theme.uiScale)
-                Layout.preferredHeight: 22
-                visible: root.openId > 0
-                icon: "history"
-                size: Theme.fontSizeS
-                tooltip: qsTr("renomear")
-                onClicked: {
-                    nomeDialog.renameId = root.openId
-                    nomeDialog.initialText = root.openName
-                    nomeDialog.open()
-                }
-            }
-
-            IconButton {
-                Layout.preferredWidth: Math.round(22 * Theme.uiScale)
-                Layout.preferredHeight: 22
-                visible: root.openId > 0
-                icon: "close"
-                size: Theme.fontSizeS
-                tooltip: qsTr("apagar coleção")
-                onClicked: {
-                    apagar.message = qsTr("Apagar \"%1\"? As faixas continuam na biblioteca.")
-                                     .arg(root.openName)
-                    apagar.open()
-                }
-            }
-
-            IconButton {
-                Layout.preferredWidth: Math.round(22 * Theme.uiScale)
-                Layout.preferredHeight: 22
-                visible: root.openId === 0
-                icon: "plus"
-                size: Theme.fontSizeS
-                tooltip: qsTr("nova coleção")
-                onClicked: root.openCreateDialog()
             }
         }
 
