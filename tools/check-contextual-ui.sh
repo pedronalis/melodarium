@@ -18,6 +18,14 @@ if ! command -v sqlite3 >/dev/null 2>&1; then
     echo "check-contextual-ui: sqlite3 é obrigatório para montar a coleção densa"
     exit 1
 fi
+if ! command -v xvfb-run >/dev/null 2>&1 || ! command -v xdotool >/dev/null 2>&1; then
+    echo "check-contextual-ui: Xvfb e xdotool são obrigatórios para testar o menu nativo"
+    exit 1
+fi
+if ! command -v import >/dev/null 2>&1; then
+    echo "check-contextual-ui: ImageMagick é obrigatório para fotografar o menu nativo"
+    exit 1
+fi
 if ! python3 -c "import PIL" 2>/dev/null; then
     echo "check-contextual-ui: python3-pillow é obrigatório para comparar as telas"
     exit 1
@@ -30,6 +38,9 @@ mkdir -p "$TMP/data" "$TMP/config"
 ffmpeg -loglevel error -f lavfi -i "sine=frequency=330:duration=8" \
     -metadata title="Faixa global" -metadata artist="Gate contextual" \
     -y "$TMP/faixa.wav"
+ffmpeg -loglevel error -f lavfi -i "sine=frequency=440:duration=8" \
+    -metadata title="Episódio do gate" -metadata artist="Conversas do gate" \
+    -y "$TMP/episodio.wav"
 
 run_case() {
     local nome="$1"
@@ -38,6 +49,8 @@ run_case() {
     local esperado_mini="$4"
     local tocar="$5"
     local shot="$6"
+    local modo_mini="$7"
+    local menu_velocidade="$8"
     local -a args=(--measure 1100 --pane "$pane" --no-search --sem-animacao --delay 1800)
     if [ "$tocar" = "sim" ]; then
         args+=(--play-track "$TMP/faixa.wav")
@@ -77,6 +90,16 @@ run_case() {
         echo "$line"
         return 1
     fi
+    if [ "$esperado_mini" = "on" ]; then
+        for token in "minilayout=fit" "minicenter=fit" \
+                     "minimode=$modo_mini" "speedmenu=$menu_velocidade"; do
+            if ! printf '%s\n' "$line" | grep -q "$token"; then
+                echo "FALHA: $nome não publicou $token"
+                echo "$line"
+                return 1
+            fi
+        done
+    fi
     if [ -n "$shot" ] && [ ! -s "$shot" ]; then
         echo "FALHA: $nome não produziu a captura"
         return 1
@@ -84,9 +107,9 @@ run_case() {
     echo "ok:    $nome — context=$esperado_contexto mini=$esperado_mini"
 }
 
-run_case "Biblioteca com música" library player off sim "$TMP/library.png"
-run_case "Podcast sem áudio" podcast podcast off nao ""
-run_case "Podcast preservando música" podcast podcast on sim "$TMP/podcast.png"
+run_case "Biblioteca com música" library player off sim "$TMP/library.png" na na
+run_case "Podcast sem áudio" podcast podcast off nao "" na na
+run_case "Podcast preservando música" podcast podcast on sim "$TMP/podcast.png" music na
 
 DB="$TMP/data/melodarium/melodarium/melodarium.db"
 sqlite3 "$DB" "
@@ -95,10 +118,92 @@ VALUES (999,'$TMP/faixa.wav',1,1,8000,'Faixa do gate',1,'local_file');
 INSERT INTO collections (id,name,created_at)
 VALUES (999,'Coleção com nome comprido',1);
 INSERT INTO collection_tracks (collection_id,track_id,position,added_at)
-VALUES (999,999,1,1);"
+VALUES (999,999,1,1);
+INSERT INTO podcast_shows (id,title,feed_url)
+VALUES (999,'Conversas do gate','https://example.com/gate.xml');
+INSERT INTO podcast_episodes
+    (id,show_id,guid,title,published_at,duration_ms,local_path,download_state)
+VALUES
+    (999,999,'gate-999','Como desenhar um player melhor',1,8000,'$TMP/episodio.wav','done');"
 
-run_case "Coleções sem áudio" collections collections off nao ""
-run_case "Coleções preservando música" collections collections on sim "$TMP/collections.png"
+run_case "Coleções sem áudio" collections collections off nao "" na na
+run_case "Coleções preservando música" collections collections on sim \
+    "$TMP/collections.png" music na
+
+episode_raw=$(XDG_DATA_HOME="$TMP/data" XDG_CONFIG_HOME="$TMP/config" \
+              MELODIA_NULL_AO=1 QT_QPA_PLATFORM=offscreen \
+              QT_LOGGING_RULES="*.debug=true" QT_FORCE_STDERR_LOGGING=1 \
+              timeout 30 "$BIN" --measure 1100 --pane collections --play-episode 999 \
+              --no-search --sem-animacao --delay 1800 2>&1)
+episode_line=$(printf '%s\n' "$episode_raw" | grep -ao 'MEDIDA .*' | tail -1)
+for token in 'context=collections' 'mini=on' 'minilayout=fit' 'minicenter=fit' \
+             'minimode=podcast' 'speedmenu=native'; do
+    if ! printf '%s\n' "$episode_line" | grep -q "$token"; then
+        echo "FALHA: Podcast no mini-player não publicou $token"
+        echo "$episode_line"
+        exit 1
+    fi
+done
+echo "ok:    Podcast usa transporte próprio e prefere menu nativo"
+
+narrow_raw=$(XDG_DATA_HOME="$TMP/data" XDG_CONFIG_HOME="$TMP/config" \
+             MELODIA_NULL_AO=1 QT_QPA_PLATFORM=offscreen \
+             QT_LOGGING_RULES="*.debug=true" QT_FORCE_STDERR_LOGGING=1 \
+             timeout 30 "$BIN" --measure 720 --pane collections --play-track "$TMP/faixa.wav" \
+             --no-search --sem-animacao --delay 1800 2>&1)
+narrow_line=$(printf '%s\n' "$narrow_raw" | grep -ao 'MEDIDA .*' | tail -1)
+for token in 'mini=on' 'minilayout=fit' 'minicenter=fit' 'minimode=music'; do
+    if ! printf '%s\n' "$narrow_line" | grep -q "$token"; then
+        echo "FALHA: mini-player de 720 px não publicou $token"
+        echo "$narrow_line"
+        exit 1
+    fi
+done
+echo "ok:    mini-player cabe e permanece centrado em 720 px"
+
+native_log="$TMP/native-menu.log"
+native_shot="$TMP/native-menu.png"
+xvfb-run -a -s '-screen 0 1100x700x24' bash -c '
+    set -euo pipefail
+    bin="$1"
+    data="$2"
+    config="$3"
+    log="$4"
+    shot="$5"
+    XDG_DATA_HOME="$data" XDG_CONFIG_HOME="$config" MELODIA_NULL_AO=1 \
+        QT_QPA_PLATFORM=xcb QT_QPA_PLATFORMTHEME=gnome \
+        QT_LOGGING_RULES="*.debug=true" QT_FORCE_STDERR_LOGGING=1 \
+        "$bin" --measure 1100 --pane collections --play-episode 999 \
+        --open-speed-menu --no-search --sem-animacao --delay 6000 >"$log" 2>&1 &
+    app_pid=$!
+    sleep 2.8
+    import -window root "$shot"
+    xdotool key Home
+    sleep 0.15
+    xdotool key Down
+    sleep 0.15
+    xdotool key Down
+    sleep 0.15
+    xdotool key Down
+    sleep 0.15
+    xdotool key Down
+    sleep 0.15
+    xdotool key Return
+    wait "$app_pid"
+' _ "$BIN" "$TMP/data" "$TMP/config" "$native_log" "$native_shot"
+
+native_line=$(grep -ao 'MEDIDA .*' "$native_log" | tail -1)
+if ! printf '%s\n' "$native_line" | grep -q 'speedmenu=native' \
+   || ! printf '%s\n' "$native_line" | grep -q 'speed=1.50'; then
+    echo "FALHA: o menu nativo não escolheu 1,5× pelo teclado"
+    echo "$native_line"
+    exit 1
+fi
+if [ ! -s "$native_shot" ]; then
+    echo "FALHA: o menu nativo não produziu captura externa"
+    exit 1
+fi
+echo "ok:    menu nativo escolhe 1,5× por interação real"
 
 dense_raw=$(XDG_DATA_HOME="$TMP/data" XDG_CONFIG_HOME="$TMP/config" \
             MELODIA_NULL_AO=1 QT_QPA_PLATFORM=offscreen \

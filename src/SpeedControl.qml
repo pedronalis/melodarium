@@ -2,8 +2,8 @@ import QtQuick
 import QtQuick.Controls
 import Melodarium.App
 
-// A velocidade de fala como o desenho do podcast mostra: uma pílula discreta com o valor
-// atual, e um menu com os passos. Seis botões lado a lado não caberiam no transporte.
+// A velocidade de fala como uma pílula discreta; a lista, porém, pertence à plataforma.
+// Popup.Native entrega foco, navegação por teclado, checkmarks e aparência ao menu do sistema.
 Rectangle {
     id: root
 
@@ -11,7 +11,8 @@ Rectangle {
 
     signal speedPicked(real value)
 
-    readonly property var opcoes: [0.8, 1.0, 1.25, 1.5, 1.75, 2.0]
+    readonly property bool nativeMenuPreferred: menu.popupType === Popup.Native
+    readonly property int optionCount: menu.count
 
     implicitWidth: label.implicitWidth + Theme.marginL * 2
     implicitHeight: Math.round(26 * Theme.uiScale)
@@ -29,6 +30,10 @@ Rectangle {
         return String(Math.round(v * 100) / 100) + "x"
     }
 
+    function openMenu() {
+        menu.popup(root, 0, root.height + Theme.marginXS)
+    }
+
     Text {
         id: label
         anchors.centerIn: parent
@@ -43,20 +48,49 @@ Rectangle {
         anchors.fill: parent
         hoverEnabled: true
         cursorShape: Qt.PointingHandCursor
-        onClicked: menu.popup(root, 0, root.height + Theme.marginXS)
+        onClicked: root.openMenu()
     }
 
     Menu {
         id: menu
+        title: qsTr("Velocidade")
+        popupType: Popup.Native
 
-        Repeater {
-            model: root.opcoes
-
-            MenuItem {
-                required property real modelData
-                text: root.formatSpeed(modelData)
-                onTriggered: root.speedPicked(modelData)
-            }
+        MenuItem {
+            text: root.formatSpeed(0.75)
+            checkable: true
+            checked: Math.abs(root.speed - 0.75) < 0.01
+            onTriggered: root.speedPicked(0.75)
+        }
+        MenuItem {
+            text: root.formatSpeed(1.0)
+            checkable: true
+            checked: Math.abs(root.speed - 1.0) < 0.01
+            onTriggered: root.speedPicked(1.0)
+        }
+        MenuItem {
+            text: root.formatSpeed(1.25)
+            checkable: true
+            checked: Math.abs(root.speed - 1.25) < 0.01
+            onTriggered: root.speedPicked(1.25)
+        }
+        MenuItem {
+            text: root.formatSpeed(1.5)
+            checkable: true
+            checked: Math.abs(root.speed - 1.5) < 0.01
+            onTriggered: root.speedPicked(1.5)
+        }
+        MenuItem {
+            text: root.formatSpeed(1.75)
+            checkable: true
+            checked: Math.abs(root.speed - 1.75) < 0.01
+            onTriggered: root.speedPicked(1.75)
+        }
+        MenuItem {
+            text: root.formatSpeed(2.0)
+            checkable: true
+            checked: Math.abs(root.speed - 2.0) < 0.01
+            onTriggered: root.speedPicked(2.0)
         }
     }
 }
