@@ -1,5 +1,6 @@
 #include <QtTest/QtTest>
 #include <QSignalSpy>
+#include <QSettings>
 #include <QSqlError>
 #include <QSqlQuery>
 #include <QTemporaryDir>
@@ -29,10 +30,23 @@ private:
         return (q.exec(sql) && q.next()) ? q.value(0).toInt() : -1;
     }
 
+    static QSet<int> idsOf(const QVariantList &rows)
+    {
+        QSet<int> ids;
+        for (const QVariant &row : rows)
+            ids.insert(row.toMap().value(QStringLiteral("id")).toInt());
+        return ids;
+    }
+
 private slots:
     void initTestCase()
     {
         QVERIFY(m_dir.isValid());
+        QSettings::setDefaultFormat(QSettings::IniFormat);
+        QSettings::setPath(QSettings::IniFormat, QSettings::UserScope, m_dir.path());
+        QSettings().clear();
+        QSettings().setValue(QStringLiteral("podcast/path"), QStringLiteral("/p"));
+
         QVERIFY(Database::openConnection(QLatin1String(Database::kUiConnection),
                                          m_dir.filePath(QStringLiteral("t.db"))));
         QSqlDatabase db = QSqlDatabase::database(QLatin1String(Database::kUiConnection));
@@ -47,6 +61,30 @@ private slots:
         exec(QStringLiteral(
             "INSERT INTO podcast_episodes (id, show_id, guid, title, published_at, duration_ms, "
             "local_path) VALUES (2, 1, 'g2', 'Ep 2', 200, 600000, '/p/2.mp3')"));
+        exec(QStringLiteral(
+            "INSERT INTO podcast_shows (id, title, folder_path) "
+            "VALUES (10, 'Raiz antiga', '/old')"));
+        exec(QStringLiteral(
+            "INSERT INTO podcast_episodes (id, show_id, guid, title, local_path) "
+            "VALUES (10, 10, 'old', 'Ep antigo', '/old/old.mp3')"));
+        exec(QStringLiteral(
+            "INSERT INTO podcast_shows (id, title, folder_path) "
+            "VALUES (11, 'Filho atual', '/p/show')"));
+        exec(QStringLiteral(
+            "INSERT INTO podcast_episodes (id, show_id, guid, title, local_path) "
+            "VALUES (11, 11, 'child', 'Ep filho', '/p/show/child.mp3')"));
+        exec(QStringLiteral(
+            "INSERT INTO podcast_shows (id, title, folder_path) "
+            "VALUES (12, 'Prefixo parecido', '/podcast')"));
+        exec(QStringLiteral(
+            "INSERT INTO podcast_episodes (id, show_id, guid, title, local_path) "
+            "VALUES (12, 12, 'sibling', 'Ep prefixo', '/podcast/sibling.mp3')"));
+        exec(QStringLiteral(
+            "INSERT INTO podcast_shows (id, title, feed_url) "
+            "VALUES (13, 'Feed assinado', 'https://example.com/feed.xml')"));
+        exec(QStringLiteral(
+            "INSERT INTO podcast_episodes (id, show_id, guid, title, local_path) "
+            "VALUES (13, 13, 'feed', 'Ep feed', '/downloads/feed.mp3')"));
     }
 
     // Same reasoning as tst_collections: assert that migration 4 ran, not that nothing ever
@@ -115,6 +153,45 @@ private slots:
         QCOMPARE(model.rowCount(), 2);
         QCOMPARE(model.data(model.index(0), PodcastEpisodeModel::TitleRole).toString(),
                  QStringLiteral("Ep 2"));
+    }
+
+    void changingFolderScopesLocalContentAndKeepsFeeds()
+    {
+        PodcastLibrary lib;
+
+        lib.setPodcastPath(QStringLiteral("/old"));
+        QCOMPARE(idsOf(lib.shows()), QSet<int>({10, 13}));
+
+        lib.setPodcastPath(QStringLiteral("/p"));
+        QCOMPARE(idsOf(lib.shows()), QSet<int>({1, 11, 13}));
+        QCOMPARE(idsOf(lib.allEpisodes()), QSet<int>({1, 2, 11, 13}));
+        QVERIFY(lib.allEpisodes(10).isEmpty());
+    }
+
+    void continueListeningIgnoresFormerLocalRoot()
+    {
+        exec(QStringLiteral(
+            "UPDATE podcast_episodes SET position_ms = 1000, last_played_at = 1000 "
+            "WHERE id IN (10, 13)"));
+
+        PodcastLibrary lib;
+        lib.setPodcastPath(QStringLiteral("/p"));
+        const QSet<int> ids = idsOf(lib.continueListening());
+        QVERIFY(ids.contains(13));
+        QVERIFY(!ids.contains(10));
+    }
+
+    void episodeModelRejectsAFormerLocalRoot()
+    {
+        PodcastEpisodeModel model;
+        model.loadForShow(10);
+        QCOMPARE(model.rowCount(), 0);
+
+        model.loadForShow(11);
+        QCOMPARE(model.rowCount(), 1);
+
+        model.loadForShow(13);
+        QCOMPARE(model.rowCount(), 1);
     }
 };
 

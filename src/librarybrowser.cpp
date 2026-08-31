@@ -1,6 +1,7 @@
 #include "librarybrowser.h"
 
 #include "database.h"
+#include "podcastscope.h"
 
 #include <QDateTime>
 #include <QLocale>
@@ -385,13 +386,17 @@ QVariantList LibraryBrowser::searchGrouped(const QString &text, int limitPerKind
     }
 
     QSqlQuery eq(db);
-    eq.prepare(QStringLiteral(
-        "SELECT e.id, e.title, IFNULL(s.title,''), IFNULL(e.local_path,''), "
-        "IFNULL(e.published_at,0), IFNULL(e.duration_ms,0), IFNULL(s.cover_path,'') "
-        "FROM podcast_episodes e "
-        "LEFT JOIN podcast_shows s ON s.id = e.show_id "
-        "WHERE e.title LIKE ? ORDER BY e.published_at DESC LIMIT ?"));
+    const QString episodeSql =
+        QStringLiteral(
+            "SELECT e.id, e.title, IFNULL(s.title,''), IFNULL(e.local_path,''), "
+            "IFNULL(e.published_at,0), IFNULL(e.duration_ms,0), IFNULL(s.cover_path,'') "
+            "FROM podcast_episodes e LEFT JOIN podcast_shows s ON s.id = e.show_id "
+            "WHERE e.title LIKE ? AND ")
+        + PodcastScope::visibleShowClause(QStringLiteral("s"))
+        + QStringLiteral(" ORDER BY e.published_at DESC LIMIT ?");
+    eq.prepare(episodeSql);
     eq.addBindValue(like);
+    PodcastScope::bindVisibleShow(eq, PodcastScope::currentRoot());
     eq.addBindValue(limitPerKind);
     if (eq.exec()) {
         while (eq.next()) {

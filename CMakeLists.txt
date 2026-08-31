@@ -37,6 +37,7 @@ qt_add_executable(melodarium
     src/collectionmanager.cpp
     src/podcastlibrary.h
     src/podcastlibrary.cpp
+    src/podcastscope.h
     src/podcastepisodemodel.h
     src/podcastepisodemodel.cpp
     src/podcastfeedfetcher.h
@@ -123,6 +124,7 @@ qt_add_qml_module(melodarium
         src/collectionmanager.cpp
         src/podcastlibrary.h
         src/podcastlibrary.cpp
+        src/podcastscope.h
         src/podcastepisodemodel.h
         src/podcastepisodemodel.cpp
         src/podcastfeedfetcher.h
