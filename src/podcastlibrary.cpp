@@ -214,8 +214,8 @@ QVariantList PodcastLibrary::continueListening(int limit)
     // screen: the opposite of shuffling.
     const QString sql =
         QStringLiteral(
-            "SELECT e.id, e.title, s.title, e.position_ms, e.duration_ms, "
-            "IFNULL(e.local_path,'') "
+            "SELECT e.id, e.title, s.title, s.id, IFNULL(s.cover_path,''), "
+            "e.position_ms, e.duration_ms, IFNULL(e.local_path,'') "
             "FROM podcast_episodes e JOIN podcast_shows s ON s.id = e.show_id "
             "WHERE e.played = 0 AND e.position_ms > 0 AND e.local_path IS NOT NULL AND ")
         + PodcastScope::visibleShowClause(QStringLiteral("s"))
@@ -227,16 +227,18 @@ QVariantList PodcastLibrary::continueListening(int limit)
     if (!q.exec())
         return out;
     while (q.next()) {
-        const int position = q.value(3).toInt();
-        const int duration = q.value(4).toInt();
+        const int position = q.value(5).toInt();
+        const int duration = q.value(6).toInt();
         out.append(QVariantMap{
             {QStringLiteral("id"), q.value(0).toInt()},
             {QStringLiteral("title"), q.value(1).toString()},
             {QStringLiteral("showTitle"), q.value(2).toString()},
+            {QStringLiteral("showId"), q.value(3).toInt()},
+            {QStringLiteral("coverPath"), q.value(4).toString()},
             {QStringLiteral("positionMs"), position},
             {QStringLiteral("durationMs"), duration},
             {QStringLiteral("progress"), duration > 0 ? double(position) / duration : 0.0},
-            {QStringLiteral("path"), q.value(5).toString()}});
+            {QStringLiteral("path"), q.value(7).toString()}});
     }
     return out;
 }
