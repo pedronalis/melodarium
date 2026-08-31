@@ -1,7 +1,7 @@
 ---
 slug: mpris-noctalia
 feature: melodarium
-status: em-execucao
+status: concluido
 depende-de: [motor-audio]
 decisao-humana: sim
 spec: docs/specs/2026-08-27-player-musica-podcast.md
@@ -110,13 +110,13 @@ entra no caminho do áudio nem cria dependência do Quickshell.
 - Consumes: build final, session bus real, Noctalia `MediaService`, teclas XF86 do teclado.
 - Produces: evidência de descoberta e controle no desktop real do Pedro.
 
-- [ ] Rodar build, piso de testes, suíte completa, `check-orfaos.sh`, `check-layout.sh` e
+- [x] Rodar build, piso de testes, suíte completa, `check-orfaos.sh`, `check-layout.sh` e
   `check-fidelidade.sh` por `quiet-run`.
-- [ ] Reiniciar somente o Melodarium com o binário novo; exigir
+- [x] Reiniciar somente o Melodarium com o binário novo; exigir
   `playerctl -l | grep '^melodarium$'` e inspecionar as duas interfaces por `gdbus introspect`.
-- [ ] Tocar uma faixa, acionar Play/Pause e Next pelo IPC exato usado pelos binds:
+- [x] Tocar uma faixa, acionar Play/Pause e Next pelo IPC exato usado pelos binds:
   `~/.config/hypr/scripts/noctalia-ipc.sh call media ...`; comparar estado, arquivo e metadata.
-- [ ] Pedro confirma na tela que o player aparece no Noctalia e que as teclas físicas controlam
+- [x] Pedro confirma na tela que o player aparece no Noctalia e que as teclas físicas controlam
   a faixa; registrar a causa e o diagnóstico em `docs/solutions/integracao/`.
-- [ ] Rodar `gitnexus detect_changes`, marcar a task, concluir a fatia com `planos-lote.py`,
+- [x] Rodar `gitnexus detect_changes`, marcar a task, concluir a fatia com `planos-lote.py`,
   commitar apenas os arquivos da fatia e enviar `main`.
