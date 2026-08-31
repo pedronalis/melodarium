@@ -8,7 +8,7 @@ symptoms:
   - "listra de zebra gritante, faixa tocando invisível"
   - "campo de texto no lugar de um chip pequeno"
   - "gates de layout, testes e órfãos todos verdes"
-tags: [qml, cor, design-fidelity, gate, qquickpainteditem, multieffect]
+tags: [qml, cor, design-fidelity, gate, qquickpainteditem, multieffect, antialiasing]
 ---
 
 O redesenho fechou 14 fatias com suíte verde, `check-layout` verde nas 11 medidas e
@@ -64,6 +64,21 @@ em pixels.
 - **`tools/check-fidelidade.sh`**: mede a COR da tela ponto a ponto contra os hex do desenho,
   com tolerância de 3 níveis por canal, e confere que o canto da capa não é arte. Pegou um
   defeito real na primeira execução (o fundo preto da tela vazia).
+
+### O alvo de pintura também faz parte da máscara
+
+Em 31/08, a máscara continuava correta, mas os arcos da arte real mostravam degraus. O
+`RoundedImage` habilitava antialiasing e, ao mesmo tempo, forçava
+`QQuickPaintedItem::FramebufferObject`. No Qt, FBO favorece pintura OpenGL contínua em troca
+de qualidade de antialiasing; `Image` usa o rasterizador de alta qualidade e é também o alvo
+indicado para itens redimensionados. O placeholder já seguia esse caminho.
+
+A correção foi alinhar a arte real ao alvo `Image`, sem supersampling e sem shader. Isso não
+reintroduz rasterização contínua: a capa só repinta quando a fonte muda ou quando o debounce
+de resize termina; opacidade e crossfade continuam sendo composição da textura pronta. O
+teste de `RoundedImage` agora trava as duas partes do contrato: alvo raster de alta qualidade
+e presença de pixels com cobertura parcial nos quatro arcos. Testar apenas se o pixel do canto
+é transparente prova o formato, mas não prova que a curva entre o canto e a borda é lisa.
 
 ## A lição que fica
 

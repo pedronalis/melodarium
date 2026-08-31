@@ -72,6 +72,39 @@ private slots:
         QVERIFY(image.ready());
     }
 
+    void usesHighQualityRasterTargetForAntialiasedCorners()
+    {
+        RoundedImage image;
+
+        QVERIFY(image.antialiasing());
+        QCOMPARE(image.renderTarget(), QQuickPaintedItem::Image);
+    }
+
+    void roundedMaskKeepsSubpixelCoverage()
+    {
+        RoundedImage image;
+        image.setWidth(64);
+        image.setHeight(64);
+        image.setRadius(16);
+        image.setSource(QUrl::fromLocalFile(m_coverPath));
+
+        const QImage output = paintRoundedImage(image, QSize(64, 64));
+        int partialPixels = 0;
+        for (int y = 0; y < output.height(); ++y) {
+            for (int x = 0; x < output.width(); ++x) {
+                const int alpha = output.pixelColor(x, y).alpha();
+                if (alpha > 0 && alpha < 255)
+                    ++partialPixels;
+            }
+        }
+
+        // A hard clip has no partially covered pixels. Keep enough coverage samples for all
+        // four arcs so a future renderer change cannot silently bring the stair-step back.
+        QVERIFY2(partialPixels >= 16,
+                 qPrintable(QStringLiteral("only %1 partially covered edge pixels")
+                                .arg(partialPixels)));
+    }
+
     void optInPreservesTheExistingColorContract()
     {
         RoundedImage image;
