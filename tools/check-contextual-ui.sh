@@ -83,18 +83,26 @@ run_case() {
 run_case "Biblioteca com música" library player off sim "$TMP/library.png"
 run_case "Podcast sem áudio" podcast podcast off nao ""
 run_case "Podcast preservando música" podcast podcast on sim "$TMP/podcast.png"
+run_case "Coleções sem áudio" collections collections off nao ""
+run_case "Coleções preservando música" collections collections on sim "$TMP/collections.png"
 
-python3 - "$TMP/library.png" "$TMP/podcast.png" <<'PY'
+python3 - "$TMP/library.png" "$TMP/podcast.png" "$TMP/collections.png" <<'PY'
 import sys
 from PIL import Image, ImageChops
 
-library = Image.open(sys.argv[1]).convert("RGB").crop((56, 0, 448, 620))
-podcast = Image.open(sys.argv[2]).convert("RGB").crop((56, 0, 448, 620))
-diff = ImageChops.difference(library, podcast)
-changed = sum(1 for pixel in diff.getdata() if max(pixel) > 8)
-ratio = changed / (library.width * library.height)
-if ratio < 0.02:
-    print(f"FALHA: Biblioteca e Podcast diferem em só {ratio:.1%} da coluna contextual")
-    raise SystemExit(1)
-print(f"ok:    Biblioteca e Podcast diferem em {ratio:.1%} da coluna contextual")
+images = {
+    "Biblioteca": Image.open(sys.argv[1]).convert("RGB").crop((56, 0, 448, 620)),
+    "Podcast": Image.open(sys.argv[2]).convert("RGB").crop((56, 0, 448, 620)),
+    "Coleções": Image.open(sys.argv[3]).convert("RGB").crop((56, 0, 448, 620)),
+}
+for first, second in (("Biblioteca", "Podcast"),
+                      ("Biblioteca", "Coleções"),
+                      ("Podcast", "Coleções")):
+    diff = ImageChops.difference(images[first], images[second])
+    changed = sum(1 for pixel in diff.get_flattened_data() if max(pixel) > 8)
+    ratio = changed / (diff.width * diff.height)
+    if ratio < 0.02:
+        print(f"FALHA: {first} e {second} diferem em só {ratio:.1%} da coluna contextual")
+        raise SystemExit(1)
+    print(f"ok:    {first} e {second} diferem em {ratio:.1%} da coluna contextual")
 PY
