@@ -222,6 +222,7 @@ Window {
            : (root.measurePane === "collections" ? "collections" : "library"))
         : root.section
     property int podcastShowId: 0
+    property int selectedCollectionId: 0
     // Secondary panes keep their state after the first visit, but do not exist before it.
     // Measurement flags opt into the same creation path so every visual gate stays reachable.
     property bool podcastPaneLoaded: root.measuring && root.measurePane === "podcast"
@@ -256,13 +257,11 @@ Window {
     // Which chip of the filter row is lit. The rail picks the pane; this picks the list.
     property string libraryFilter: "all"
 
-    // Nesta primeira fatia, Coleções ainda preserva o painel antigo. A fatia seguinte troca
-    // somente este terceiro ramo pelo painel de curadoria, sem reabrir o shell.
     readonly property bool contextShowsPlayer:
         root.effectiveSection === "library"
-        || root.effectiveSection === "collections"
         || (root.effectiveSection === "podcast" && root.currentEpisodeId > 0)
-    readonly property string contextKind: root.contextShowsPlayer ? "player" : "podcast"
+    readonly property string contextKind: root.contextShowsPlayer
+        ? "player" : (root.effectiveSection === "podcast" ? "podcast" : "collections")
     readonly property bool showGlobalMiniPlayer:
         AudioEngine.currentFile !== "" && !root.contextShowsPlayer
 
@@ -734,7 +733,8 @@ Window {
                     Layout.preferredWidth: nowPlaying.implicitWidth
                     Layout.maximumWidth: nowPlaying.implicitWidth
                     Layout.fillWidth: false
-                    currentIndex: root.contextShowsPlayer ? 0 : 1
+                    currentIndex: root.contextShowsPlayer
+                                  ? 0 : (root.effectiveSection === "podcast" ? 1 : 2)
 
                     NowPlayingPanel {
                         id: nowPlaying
@@ -752,6 +752,18 @@ Window {
                         compact: root.width < 900
                         selectedShowId: root.podcastShowId
                         onShowRequested: function (showId) { root.podcastShowId = showId }
+                    }
+
+                    CollectionContextPanel {
+                        compact: root.width < 900
+                        selectedCollectionId: root.selectedCollectionId
+                        onOpenRequested: function (collectionId, name) {
+                            collectionsLoader.item.open(collectionId, name)
+                        }
+                        onPlayRequested: function (shuffled) {
+                            collectionsLoader.item.playRequested(shuffled)
+                        }
+                        onCreateRequested: collectionsLoader.item.openCreateDialog()
                     }
                 }
 
@@ -829,12 +841,14 @@ Window {
                             id: collectionsPane
                             model: trackModel
                             onCollectionOpened: function (id, name) {
+                                root.selectedCollectionId = id
                                 root.currentSection = "collection"
                                 root.currentId = id
                                 const q = root.clauseFor("collection", id)
                                 trackModel.loadFromQuery(q.clause, q.bindings)
                             }
                             onCloseRequested: {
+                                root.selectedCollectionId = 0
                                 // Sair de uma coleção devolve a lista inteira ao modelo: o painel da
                                 // biblioteca compartilha este modelo e não pode herdar o filtro.
                                 root.currentSection = "all"

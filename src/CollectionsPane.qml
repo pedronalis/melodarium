@@ -55,6 +55,12 @@ Item {
         root.closeRequested()
     }
 
+    function openCreateDialog() {
+        nomeDialog.renameId = 0
+        nomeDialog.initialText = ""
+        nomeDialog.open()
+    }
+
     // Duplicada de LibraryPane.formatTotal de propósito: QML não tem um lugar comum para
     // função pura (Theme é singleton de ESTILO, e pendurar lógica nele mistura os papéis).
     // Se as duas divergirem, a lista e o cabeçalho passam a contar tempo de jeitos diferentes.
@@ -229,11 +235,7 @@ Item {
                 icon: "plus"
                 size: Theme.fontSizeS
                 tooltip: qsTr("nova coleção")
-                onClicked: {
-                    nomeDialog.renameId = 0
-                    nomeDialog.initialText = ""
-                    nomeDialog.open()
-                }
+                onClicked: root.openCreateDialog()
             }
         }
 
