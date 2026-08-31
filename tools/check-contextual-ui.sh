@@ -145,6 +145,8 @@ check_motion() {
         echo "FALHA: a entrada de $pane não publicou amostras MOTION"
         return 1
     fi
+    printf '%s\n' "$motion_raw" | grep -E \
+        'ReferenceError|TypeError|Unable to assign|Binding loop' || true
     python3 - "$pane" "$motion_line" <<'PY'
 import re
 import sys
@@ -152,22 +154,37 @@ import sys
 pane = sys.argv[1]
 line = sys.argv[2]
 values = {key: float(value) for key, value in
-          re.findall(r"(miniStart|miniMid|miniEnd|miniTarget|sectionMid|sectionEnd|duration)=([0-9.]+)", line)}
-required = {"miniStart", "miniMid", "miniEnd", "miniTarget", "sectionMid", "sectionEnd", "duration"}
+          re.findall(
+              r"(miniStart|miniMid|miniRaised|miniTarget|sectionBefore|sectionMid|sectionEnd|"
+              r"playerBefore|playerMid|playerEnd|barDuration|contentDuration)=([0-9.]+)",
+              line,
+          )}
+required = {
+    "miniStart", "miniMid", "miniRaised", "miniTarget",
+    "sectionBefore", "sectionMid", "sectionEnd",
+    "playerBefore", "playerMid", "playerEnd",
+    "barDuration", "contentDuration",
+}
 if set(values) != required:
     print("FALHA: linha MOTION incompleta:", line)
     raise SystemExit(1)
-if values["miniStart"] > 1 or not 1 < values["miniMid"] < values["miniEnd"] - 1:
+if values["miniStart"] > 1 or not 1 < values["miniMid"] < values["miniRaised"] - 1:
     print("FALHA: a barra não subiu progressivamente:", line)
     raise SystemExit(1)
-if abs(values["miniEnd"] - values["miniTarget"]) > 2:
+if abs(values["miniRaised"] - values["miniTarget"]) > 2:
     print("FALHA: a barra não terminou na altura alvo:", line)
     raise SystemExit(1)
-if not 0.05 < values["sectionMid"] < 0.98 or values["sectionEnd"] < 0.99:
-    print("FALHA: a aba não fez entrada progressiva:", line)
+if values["sectionBefore"] > 0.02 or values["playerBefore"] > 0.02:
+    print("FALHA: elementos apareceram antes de a barra terminar:", line)
     raise SystemExit(1)
-if not 0 < values["duration"] < 300:
-    print("FALHA: a entrada contextual deve ficar abaixo de 300 ms:", line)
+if not (0.05 < values["sectionMid"] < 0.98
+        and 0.05 < values["playerMid"] < 0.98
+        and values["sectionEnd"] >= 0.99
+        and values["playerEnd"] >= 0.99):
+    print("FALHA: os elementos não entraram progressivamente depois da barra:", line)
+    raise SystemExit(1)
+if not (0 < values["barDuration"] < 300 and 0 < values["contentDuration"] < 300):
+    print("FALHA: cada fase da entrada deve ficar abaixo de 300 ms:", line)
     raise SystemExit(1)
 print(f"ok:    barra sobe e {pane} entra progressivamente — {line}")
 PY

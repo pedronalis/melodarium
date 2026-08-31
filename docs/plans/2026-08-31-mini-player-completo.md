@@ -230,6 +230,48 @@ ImageMagick e Pillow.
   git commit -m "feat(ui): animate contextual player transitions"
   ```
 
+### Task 5: Coreografia em duas fases e placeholder limpo
+
+**Files:**
+- Modify: `src/Main.qml`
+- Modify: `src/GlobalMiniPlayer.qml`
+- Modify: `src/NowPlayingPanel.qml`
+- Modify: `tools/check-contextual-ui.sh`
+- Modify: `tools/check-fidelidade.sh`
+- Modify: `docs/plans/2026-08-31-mini-player-completo.md`
+
+**Interfaces:**
+- Consumes: `showGlobalMiniPlayer`, `Theme.animationNormal`, `Theme.animationFast`,
+  `Theme.easingType`, `Theme.reduzirMovimento` e o estado vazio de `NowPlayingPanel`.
+- Produces: entrada em duas fases (`revealProgress` e `contentReveal`), amostras temporais separadas
+  para barra/conteúdo e moldura contínua antialiasada no placeholder musical.
+
+- [x] **Step 1: escrever e provar os gates RED da coreografia e do contorno**
+
+  No gate contextual, exigir que a barra tenha chegado a 100% enquanto o conteúdo do
+  mini-player e a aba ainda estão em 0%; só depois ambos podem entrar. No gate de fidelidade,
+  medir a borda horizontal do placeholder e reprovar o padrão claro/escuro da linha tracejada
+  atual (42 transições no gate RED).
+
+- [x] **Step 2: fazer a barra subir antes de revelar qualquer elemento**
+
+  Separar os tempos: shell da barra em 220 ms; depois, conteúdo interno do mini-player,
+  contexto e pane em 180 ms. A barra usa recorte e altura para ceder espaço sem cobrir a lista;
+  os elementos usam apenas opacidade e `Translate.y` de 6 px. Trocas com a barra já aberta não
+  repetem a espera. `Theme.reduzirMovimento` zera as duas fases.
+
+- [x] **Step 3: substituir a moldura tracejada serrilhada**
+
+  Remover o `Canvas` manual do placeholder musical e usar `Rectangle` transparente com raio,
+  borda contínua de 1 px e antialiasing explícito. Preservar o degradê, a sombra, o ícone e o
+  texto existentes.
+
+- [x] **Step 4: revisar motion, provar GREEN e commitar**
+
+  Rodar build, gate contextual, fidelidade, órfãos, layout, piso e suíte CTest; revisar o diff
+  com a régua de motion e executar `gitnexus detect_changes` antes do commit. Reiniciar apenas
+  a instância do Melodarium e confirmar a nova build no workspace 10.
+
 ## Gate humano
 
 - [ ] Pedro testa música e episódio no app real, abre o menu de velocidade, escolhe outro valor

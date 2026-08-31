@@ -11,6 +11,8 @@ Rectangle {
     id: root
 
     property bool episodeMode: false
+    // The shell rises first; metadata and controls enter only after it has settled.
+    property real contentReveal: 1
     property var trackInfo: ({})
     property var episodeInfo: ({})
     property real volumeBeforeMute: 100
@@ -101,6 +103,11 @@ Rectangle {
         anchors.topMargin: Theme.marginS
         anchors.bottomMargin: Theme.marginS
         spacing: 0
+        opacity: root.contentReveal
+        enabled: root.contentReveal >= 0.99
+        transform: Translate {
+            y: (1 - root.contentReveal) * Math.round(6 * Theme.uiScale)
+        }
 
         Item {
             id: leftZone
