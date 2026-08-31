@@ -59,6 +59,12 @@ Window {
         return isNaN(id) ? 0 : id
     }
 
+    // `--open-speed-menu`: abre o Menu real depois de o episódio entrar no motor. Um Popup
+    // nativo pode bloquear o loop enquanto está aberto, então ele tem Timer próprio e o gate
+    // externo fotografa/aciona o menu antes de a medição encerrar.
+    readonly property bool measureOpenSpeedMenu:
+        Qt.application.arguments.indexOf("--open-speed-menu") >= 0
+
     // `--delay <ms>`: quanto esperar antes de medir. Abrir um arquivo no mpv leva mais do que
     // montar a tela.
     readonly property int measureDelay: {
@@ -631,6 +637,12 @@ Window {
             }
 
             Timer {
+                running: root.measureOpenSpeedMenu
+                interval: 1400
+                onTriggered: globalMiniPlayer.openSpeedMenu()
+            }
+
+            Timer {
             running: true
             interval: root.measureDelay
             onTriggered: {
@@ -653,6 +665,19 @@ Window {
                             + " halo=" + (nowPlaying.mostrarHalo ? "on" : "off")
                             + " context=" + root.contextKind
                             + " mini=" + (globalMiniPlayer.visible ? "on" : "off")
+                            + " minilayout="
+                            + (!globalMiniPlayer.visible ? "na"
+                               : (globalMiniPlayer.layoutFits ? "fit" : "overflow"))
+                            + " minicenter="
+                            + (!globalMiniPlayer.visible ? "na"
+                               : (globalMiniPlayer.transportCentered ? "fit" : "off"))
+                            + " minimode="
+                            + (globalMiniPlayer.visible ? globalMiniPlayer.transportKind : "na")
+                            + " speedmenu="
+                            + (!globalMiniPlayer.visible || !globalMiniPlayer.episodeMode
+                               ? "na"
+                               : (globalMiniPlayer.nativeSpeedMenu ? "native" : "qml"))
+                            + " speed=" + AudioEngine.speed.toFixed(2)
                             + " collectionheader="
                             + (root.effectiveSection !== "collections"
                                ? "na"
@@ -898,6 +923,7 @@ Window {
                 Layout.fillWidth: true
                 visible: root.showGlobalMiniPlayer
                 episodeMode: root.currentEpisodeId > 0
+                onQueueOpenRequested: queueOverlay.open()
             }
         }
     }
