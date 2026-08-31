@@ -115,17 +115,27 @@ Rectangle {
         !Theme.medindo && (root.hasTrack || root.haloDeTeste)
         && root.focosDaCapaAtual.length > 0
 
+    function finalizarTrocaDeCapa(alvoAnaFrente) {
+        trocaDeCapa.stop()
+        root.capaAnaFrente = alvoAnaFrente
+    }
+
     onFonteDaCapaChanged: {
-        root.capaDeTras.source = root.fonteDaCapa
+        // Select the destination before assigning the source. A cached cover can become
+        // ready synchronously inside that assignment; arming afterwards would leave a new
+        // timer capable of putting the old layer back in front 350 ms later.
+        trocaDeCapa.alvoAnaFrente = !root.capaAnaFrente
         // Uma faixa sem capa nenhuma nunca fica "pronta": o relógio garante que a troca
         // acontece de qualquer jeito, e o placeholder cruza como cruzaria uma arte.
         trocaDeCapa.restart()
+        root.capaDeTras.source = root.fonteDaCapa
     }
 
     Timer {
         id: trocaDeCapa
+        property bool alvoAnaFrente: true
         interval: 350
-        onTriggered: root.capaAnaFrente = !root.capaAnaFrente
+        onTriggered: root.finalizarTrocaDeCapa(alvoAnaFrente)
     }
 
     // O que a coluna gasta abaixo da capa: título, progresso, transporte, volume, etiquetas e
@@ -374,10 +384,9 @@ Rectangle {
                 // que funcionava.
                 z: root.capaAnaFrente ? 0 : -1
                 onReadyChanged: {
-                    if (capaA.ready && !root.capaAnaFrente && trocaDeCapa.running) {
-                        trocaDeCapa.stop()
-                        root.capaAnaFrente = true
-                    }
+                    if (capaA.ready && trocaDeCapa.running
+                            && trocaDeCapa.alvoAnaFrente)
+                        root.finalizarTrocaDeCapa(true)
                 }
             }
 
@@ -386,10 +395,9 @@ Rectangle {
                 opacity: root.capaAnaFrente ? 0 : 1
                 z: root.capaAnaFrente ? -1 : 0
                 onReadyChanged: {
-                    if (capaB.ready && root.capaAnaFrente && trocaDeCapa.running) {
-                        trocaDeCapa.stop()
-                        root.capaAnaFrente = false
-                    }
+                    if (capaB.ready && trocaDeCapa.running
+                            && !trocaDeCapa.alvoAnaFrente)
+                        root.finalizarTrocaDeCapa(false)
                 }
             }
         }

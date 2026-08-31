@@ -12,6 +12,7 @@ Item {
     readonly property double coverRevision: CoverCache.revision
 
     property var resumeInfo: ({})
+    property int resumeQueueCount: 0
     property int neverCount: 0
     property int forgottenCount: 0
     // No painel ele é uma coluna solta embaixo da capa; no miolo é um bloco centralizado com
@@ -30,14 +31,18 @@ Item {
     readonly property bool temBiblioteca: Database.libraryPath !== ""
 
     function refresh() {
-        root.resumeInfo = LibraryBrowser.lastPlayed()
+        const savedPath = AudioEngine.savedCurrentFile
+        if (savedPath !== "") {
+            root.resumeInfo = LibraryBrowser.trackForPath(savedPath)
+            root.resumeQueueCount = AudioEngine.savedQueueCount
+        } else {
+            // First launch after upgrading: preserve the old one-track invitation, but the
+            // click now starts it at 0:00 and future queues are persisted by AudioEngine.
+            root.resumeInfo = LibraryBrowser.lastPlayed()
+            root.resumeQueueCount = root.resumeInfo.path !== undefined ? 1 : 0
+        }
         root.neverCount = LibraryBrowser.neverPlayedCount()
         root.forgottenCount = LibraryBrowser.forgottenCount()
-    }
-
-    function formatClock(ms) {
-        const total = Math.max(0, Math.floor(ms / 1000))
-        return Math.floor(total / 60) + ":" + ("0" + (total % 60)).slice(-2)
     }
 
     Component.onCompleted: root.refresh()
@@ -49,8 +54,7 @@ Item {
 
     Connections {
         target: AudioEngine
-        // Ao parar de tocar, o que "continuar de onde parou" oferece mudou.
-        function onCurrentFileChanged() { root.refresh() }
+        function onSavedSessionChanged() { root.refresh() }
     }
 
     // Uma das três saídas: ícone, rótulo e, quando faz sentido, quantas faixas esperam ali.
@@ -263,12 +267,11 @@ Item {
                             text: {
                                 const artista = root.resumeInfo.artist !== undefined
                                                 ? root.resumeInfo.artist : ""
-                                const pos = root.resumeInfo.positionMs !== undefined
-                                            ? root.resumeInfo.positionMs : 0
-                                const parou = pos > 0
-                                              ? qsTr("parou em ") + root.formatClock(pos)
-                                              : qsTr("do começo")
-                                return artista !== "" ? artista + " · " + parou : parou
+                                const fila = root.resumeQueueCount === 1
+                                             ? qsTr("1 faixa na fila")
+                                             : qsTr("%1 faixas na fila")
+                                                   .arg(root.resumeQueueCount)
+                                return artista !== "" ? artista + " · " + fila : fila
                             }
                             elide: Text.ElideRight
                             font.family: Theme.fontFamily

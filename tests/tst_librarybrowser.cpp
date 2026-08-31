@@ -327,6 +327,7 @@ private slots:
 
         const QVariantMap m = browser.trackForPath(firstTrackPath());
         QVERIFY(!m.isEmpty());
+        QCOMPARE(m.value(QStringLiteral("path")).toString(), firstTrackPath());
         QCOMPARE(m.value(QStringLiteral("id")).toInt(), firstTrackId());
         QVERIFY(m.contains(QStringLiteral("codec")));
         QCOMPARE(m.value(QStringLiteral("liked")).toBool(), false);

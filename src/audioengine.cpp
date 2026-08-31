@@ -3,7 +3,9 @@
 #include <QtGlobal>
 #include <QMetaObject>
 #include <QRandomGenerator>
+#include <QSettings>
 #include <QVarLengthArray>
+#include <QFileInfo>
 #include <clocale>
 #include <mpv/client.h>
 
@@ -16,11 +18,18 @@ enum PropertyId : uint64_t {
     PROP_PLAYLIST_POS = 5,
     PROP_SPEED = 6,
 };
+
+constexpr auto kSavedQueueKey = "playback/queue";
+constexpr auto kSavedQueueIndexKey = "playback/currentIndex";
 } // namespace
 
 AudioEngine::AudioEngine(QObject *parent, bool headlessAo)
     : QObject(parent)
 {
+    // Session state is useful even when mpv cannot start: the empty pane can still explain
+    // what would be restored. Loading it does not feed anything to mpv until the user clicks.
+    loadSavedSession();
+
     // MANDATORY before mpv_create(): libmpv requires LC_NUMERIC="C". Under pt_BR.UTF-8
     // (decimal comma) mpv_create() fails and the symptom does not point at the cause.
     std::setlocale(LC_NUMERIC, "C");
@@ -154,20 +163,86 @@ void AudioEngine::previous()
     command({QStringLiteral("playlist-prev"), QStringLiteral("weak")});
 }
 
-void AudioEngine::loadPlaylist(const QStringList &files, int startIndex)
+QString AudioEngine::savedCurrentFile() const
+{
+    if (m_savedQueueIndex < 0 || m_savedQueueIndex >= m_savedQueue.size())
+        return {};
+    return m_savedQueue.at(m_savedQueueIndex);
+}
+
+void AudioEngine::loadSavedSession()
+{
+    QSettings settings;
+    m_savedQueue = settings.value(QLatin1String(kSavedQueueKey)).toStringList();
+    m_savedQueueIndex = m_savedQueue.isEmpty()
+                            ? -1
+                            : qBound(0, settings.value(QLatin1String(kSavedQueueIndexKey), 0)
+                                              .toInt(),
+                                     m_savedQueue.size() - 1);
+}
+
+void AudioEngine::saveSession(const QStringList &queue, int currentIndex)
+{
+    if (queue.isEmpty())
+        return;
+
+    const int boundedIndex = qBound(0, currentIndex, queue.size() - 1);
+    const bool changed = queue != m_savedQueue || boundedIndex != m_savedQueueIndex;
+    m_savedQueue = queue;
+    m_savedQueueIndex = boundedIndex;
+
+    QSettings settings;
+    settings.setValue(QLatin1String(kSavedQueueKey), m_savedQueue);
+    settings.setValue(QLatin1String(kSavedQueueIndexKey), m_savedQueueIndex);
+    // Queue mutations and track transitions are rare. Sync here makes the session survive a
+    // crash without introducing the per-position writes that made the old resume expensive.
+    settings.sync();
+
+    if (changed)
+        emit savedSessionChanged();
+}
+
+bool AudioEngine::restoreSavedQueue()
+{
+    if (!m_mpv || m_savedQueue.isEmpty())
+        return false;
+
+    QStringList validQueue;
+    int validIndex = -1;
+    for (int i = 0; i < m_savedQueue.size(); ++i) {
+        if (!QFileInfo::exists(m_savedQueue.at(i)))
+            continue;
+        if (i == m_savedQueueIndex)
+            validIndex = validQueue.size();
+        else if (validIndex < 0 && i > m_savedQueueIndex)
+            validIndex = validQueue.size();
+        validQueue.append(m_savedQueue.at(i));
+    }
+    if (validQueue.isEmpty())
+        return false;
+    if (validIndex < 0)
+        validIndex = validQueue.size() - 1;
+
+    loadPlaylist(validQueue, validIndex, true);
+    return true;
+}
+
+void AudioEngine::loadPlaylist(const QStringList &files, int startIndex, bool rememberSession)
 {
     if (!m_mpv || files.isEmpty())
         return;
+    const int boundedStart = qBound(0, startIndex, files.size() - 1);
     for (int i = 0; i < files.size(); ++i) {
         // "replace" on the first entry clears whatever was queued; "append" keeps the
         // playlist internal to mpv, which is what preserves gapless between entries.
         const QString mode = (i == 0) ? QStringLiteral("replace") : QStringLiteral("append");
         command({QStringLiteral("loadfile"), files.at(i), mode});
     }
-    if (startIndex > 0 && startIndex < files.size())
-        setPropertyString("playlist-pos", QByteArray::number(startIndex).constData());
+    if (boundedStart > 0)
+        setPropertyString("playlist-pos", QByteArray::number(boundedStart).constData());
 
     m_queue = files;
+    m_rememberCurrentQueue = rememberSession;
     // A ordem guardada era da fila que acabou de sair; restaurá-la sobre esta devolveria
     // faixas que não estão mais aqui.
     if (m_shuffle) {
@@ -176,6 +251,8 @@ void AudioEngine::loadPlaylist(const QStringList &files, int startIndex)
     }
     m_queueOriginal.clear();
     emit queueChanged();
+    if (m_rememberCurrentQueue)
+        saveSession(m_queue, boundedStart);
 }
 
 void AudioEngine::appendToQueue(const QString &file)
@@ -187,6 +264,8 @@ void AudioEngine::appendToQueue(const QString &file)
     command({QStringLiteral("loadfile"), file, QStringLiteral("append")});
     m_queue.append(file);
     emit queueChanged();
+    if (m_rememberCurrentQueue)
+        saveSession(m_queue, m_playlistPos >= 0 ? m_playlistPos : 0);
 }
 
 QStringList AudioEngine::upcoming(int limit) const
@@ -253,6 +332,8 @@ void AudioEngine::setShuffle(bool on)
 
     emit shuffleChanged();
     emit queueChanged();
+    if (m_rememberCurrentQueue)
+        saveSession(m_queue, m_playlistPos >= 0 ? m_playlistPos : 0);
 }
 
 // Leva a playlist do mpv da ordem `atual` para a de m_queue, uma entrada por vez.
@@ -366,6 +447,9 @@ void AudioEngine::handleEvent(mpv_event *event)
         case PROP_PLAYLIST_POS:
             m_playlistPos = static_cast<int>(*static_cast<int64_t *>(prop->data));
             emit playlistPosChanged();
+            if (m_rememberCurrentQueue && m_playlistPos >= 0
+                && m_playlistPos < m_queue.size())
+                saveSession(m_queue, m_playlistPos);
             break;
         case PROP_SPEED:
             m_speed = *static_cast<double *>(prop->data);

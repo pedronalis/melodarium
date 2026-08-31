@@ -1,5 +1,6 @@
 #include <QtTest/QtTest>
 #include <QProcess>
+#include <QSettings>
 #include <QSignalSpy>
 #include <QTemporaryDir>
 
@@ -13,6 +14,7 @@ private:
     QTemporaryDir m_dir;
     QString m_toneA;
     QString m_toneB;
+    QString m_longTone;
 
     // Generates a short FLAC with ffmpeg. Returns an empty string when ffmpeg is absent.
     static QString makeTone(const QString &path, int hz, double seconds)
@@ -34,10 +36,21 @@ private slots:
     void initTestCase()
     {
         QVERIFY(m_dir.isValid());
+        QSettings::setDefaultFormat(QSettings::IniFormat);
+        QSettings::setPath(QSettings::IniFormat, QSettings::UserScope, m_dir.path());
+        QSettings().clear();
         m_toneA = makeTone(m_dir.filePath(QStringLiteral("a.flac")), 440, 1.0);
         m_toneB = makeTone(m_dir.filePath(QStringLiteral("b.flac")), 660, 1.0);
-        if (m_toneA.isEmpty() || m_toneB.isEmpty())
+        m_longTone = makeTone(m_dir.filePath(QStringLiteral("long.flac")), 550, 8.0);
+        if (m_toneA.isEmpty() || m_toneB.isEmpty() || m_longTone.isEmpty())
             QSKIP("ffmpeg unavailable: cannot generate audio fixtures");
+    }
+
+    void init()
+    {
+        // Every test gets an isolated playback session. Persistence is tested inside a
+        // single test by constructing two engines against this same temporary QSettings.
+        QSettings().clear();
     }
 
     void engineInitialises()
@@ -143,6 +156,75 @@ private slots:
 
         QCOMPARE(engine.upcoming(4), QStringList({m_toneB}));
         QCOMPARE(engine.upcoming(0), QStringList());
+    }
+
+    // "Continue where you left off" means the whole ordered queue and its current entry,
+    // not a one-track reconstruction derived from play statistics.
+    void savedQueueAndCurrentIndexSurviveEngineRestart()
+    {
+        const QStringList expected = {m_toneA, m_longTone, m_toneB};
+        {
+            AudioEngine engine(nullptr, true);
+            QVERIFY(engine.isAvailable());
+            engine.loadPlaylist(expected, 1);
+            QTRY_COMPARE_WITH_TIMEOUT(engine.playlistPos(), 1, 5000);
+            engine.pause();
+        }
+
+        AudioEngine restored(nullptr, true);
+        QCOMPARE(restored.savedQueue(), expected);
+        QCOMPARE(restored.savedQueueIndex(), 1);
+        QCOMPARE(restored.savedCurrentFile(), m_longTone);
+    }
+
+    // Music resumes at 0:00 even if the previous engine had already reached the end of the
+    // current track. Only podcasts retain a timestamp.
+    void restoringSavedQueueStartsTheCurrentTrackFromTheBeginning()
+    {
+        {
+            AudioEngine engine(nullptr, true);
+            QVERIFY(engine.isAvailable());
+            engine.loadPlaylist({m_toneA, m_longTone, m_toneB}, 1);
+            QTRY_COMPARE_WITH_TIMEOUT(engine.currentFile(), m_longTone, 5000);
+            engine.seek(6.0);
+            QTRY_VERIFY_WITH_TIMEOUT(engine.position() > 5.0, 5000);
+            engine.pause();
+        }
+
+        AudioEngine restored(nullptr, true);
+        QVERIFY(restored.isAvailable());
+        QVERIFY(restored.restoreSavedQueue());
+        restored.play();
+        QTRY_COMPARE_WITH_TIMEOUT(restored.currentFile(), m_longTone, 5000);
+        QTRY_COMPARE_WITH_TIMEOUT(restored.playlistPos(), 1, 5000);
+        restored.pause();
+        QVERIFY2(restored.position() < 1.0,
+                 qPrintable(QStringLiteral("restored at %1 s instead of 0:00")
+                            .arg(restored.position())));
+        QCOMPARE(restored.queue(), QStringList({m_toneA, m_longTone, m_toneB}));
+    }
+
+    // A file may disappear between sessions. Restoring must keep every valid entry and move
+    // the current index to the same surviving track instead of feeding a dead path to mpv.
+    void restoringSavedQueueDropsMissingFiles()
+    {
+        const QString removed = m_dir.filePath(QStringLiteral("removed-session.flac"));
+        QVERIFY(QFile::copy(m_toneA, removed));
+        {
+            AudioEngine engine(nullptr, true);
+            QVERIFY(engine.isAvailable());
+            engine.loadPlaylist({removed, m_longTone, m_toneB}, 1);
+            QTRY_COMPARE_WITH_TIMEOUT(engine.playlistPos(), 1, 5000);
+            engine.pause();
+        }
+        QVERIFY(QFile::remove(removed));
+
+        AudioEngine restored(nullptr, true);
+        restored.pause();
+        QVERIFY(restored.restoreSavedQueue());
+        QCOMPARE(restored.queue(), QStringList({m_longTone, m_toneB}));
+        QTRY_COMPARE_WITH_TIMEOUT(restored.playlistPos(), 0, 5000);
+        QTRY_COMPARE_WITH_TIMEOUT(restored.currentFile(), m_longTone, 5000);
     }
 
     // Três posições, não duas: repetir a fila e repetir a faixa são propriedades
