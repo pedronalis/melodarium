@@ -54,7 +54,8 @@ private slots:
         QVERIFY(Database::migrate(db));
 
         exec(QStringLiteral(
-            "INSERT INTO podcast_shows (id, title, folder_path) VALUES (1, 'Programa', '/p')"));
+            "INSERT INTO podcast_shows (id, title, folder_path, cover_path) "
+            "VALUES (1, 'Programa', '/p', '/covers/programa.jpg')"));
         exec(QStringLiteral(
             "INSERT INTO podcast_episodes (id, show_id, guid, title, published_at, duration_ms, "
             "local_path) VALUES (1, 1, 'g1', 'Ep 1', 100, 600000, '/p/1.mp3')"));
@@ -112,11 +113,18 @@ private slots:
 
     void continueListeningShowsOnlyStartedAndUnfinished()
     {
+        exec(QStringLiteral(
+            "UPDATE podcast_episodes SET position_ms = 120000, last_played_at = 2000 "
+            "WHERE id = 1"));
         PodcastLibrary lib;
         const QVariantList list = lib.continueListening();
         QCOMPARE(list.size(), 1); // episode 1 only: 2 is finished, and nothing else was started
-        QCOMPARE(list.first().toMap().value(QStringLiteral("id")).toInt(), 1);
-        QVERIFY(list.first().toMap().value(QStringLiteral("progress")).toDouble() > 0.15);
+        const QVariantMap episode = list.first().toMap();
+        QCOMPARE(episode.value(QStringLiteral("id")).toInt(), 1);
+        QCOMPARE(episode.value(QStringLiteral("showId")).toInt(), 1);
+        QCOMPARE(episode.value(QStringLiteral("coverPath")).toString(),
+                 QStringLiteral("/covers/programa.jpg"));
+        QVERIFY(episode.value(QStringLiteral("progress")).toDouble() > 0.15);
     }
 
     void resumingRewindsAFewSeconds()
