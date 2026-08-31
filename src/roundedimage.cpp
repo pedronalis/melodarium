@@ -10,9 +10,10 @@ RoundedImage::RoundedImage(QQuickItem *parent)
     : QQuickPaintedItem(parent)
 {
     setAntialiasing(true);
-    // Sem isto o canto arredondado sai serrilhado: o item é desenhado direto na cena, e a
-    // borda curva não ganha as amostras extras que a moldura precisa.
-    setRenderTarget(QQuickPaintedItem::FramebufferObject);
+    // Raster painting keeps subpixel coverage on the rounded mask. FBO painting is faster for
+    // continuously redrawn OpenGL items, but Qt explicitly trades away antialiasing quality;
+    // this item only repaints when its source or settled geometry changes.
+    setRenderTarget(QQuickPaintedItem::Image);
 
     m_resizeTimer.setSingleShot(true);
     m_resizeTimer.setInterval(120);

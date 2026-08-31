@@ -56,10 +56,10 @@ def delta_at(point):
 # The fixed synthetic orange focus is strongest below the artwork at this coordinate.
 near_on, near_off, near = delta_at((400, 390))
 near_peak = max(near)
-if not 16 <= near_peak <= 19:
+if not 19 <= near_peak <= 22:
     print(
         "FAIL: halo peak outside the subtle-intensity band: "
-        f"on={near_on} off={near_off} delta={near}, expected peak 16..19"
+        f"on={near_on} off={near_off} delta={near}, expected peak 19..22"
     )
     raise SystemExit(1)
 if not near[0] > near[1] > near[2]:

@@ -43,9 +43,9 @@ Item {
     property real alcance: 0.85
 
     // The peak opacity at the center of a full-weight focus. The first version used 0.35 and
-    // competed with the artwork; 0.20 gives the approved subtle glow a small lift without
-    // changing its reach, color curve, or softness.
-    property real intensidade: 0.20
+    // competed with the artwork; 0.24 keeps the approved subtle glow while giving it a little
+    // more presence, without changing its reach, color curve, or softness.
+    property real intensidade: 0.24
 
     // Quanto cada foco passeia, em pixels. Um oitavo de segundo de olhar não pega o movimento;
     // meio minuto de música, sim.
