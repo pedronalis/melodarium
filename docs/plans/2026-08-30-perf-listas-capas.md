@@ -1,7 +1,7 @@
 ---
 slug: perf-listas-capas
 feature: melodarium
-status: em-execucao
+status: concluido
 depende-de: [perf-startup-leve]
 decisao-humana: sim
 spec: docs/plans/research/2026-08-29-perf-medicoes.md
@@ -80,5 +80,5 @@ publica revisão quando um arquivo fica pronto.
   de forma preguiçosa sem apagar o cache antigo antes de confirmar o novo arquivo.
 - [x] Rodar testes, cache frio e gates automatizados; commitar com
   `perf(covers): resolve artwork off the UI thread`.
-- [ ] Pedro confirma na tela biblioteca, fila, coleção e painel; então marcar a task e concluir
+- [x] Pedro confirma na tela biblioteca, fila, coleção e painel; então marcar a task e concluir
   a fatia pelo `planos-lote.py`.
