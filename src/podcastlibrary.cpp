@@ -2,6 +2,7 @@
 
 #include "database.h"
 #include "episodedownloader.h"
+#include "podcastscope.h"
 #include "tagreader.h"
 
 #include <QDateTime>
@@ -38,7 +39,7 @@ const QStringList &podcastSuffixes()
 PodcastLibrary::PodcastLibrary(QObject *parent)
     : QObject(parent)
 {
-    m_podcastPath = QSettings().value(QStringLiteral("podcast/path")).toString();
+    m_podcastPath = PodcastScope::currentRoot();
 
     // Anything left in .part came from a crash or a kill: no download survives a restart.
     EpisodeDownloader::sweepOrphanParts(downloadDirectory());
@@ -54,10 +55,11 @@ PodcastLibrary::~PodcastLibrary() = default;
 
 void PodcastLibrary::setPodcastPath(const QString &path)
 {
-    if (m_podcastPath == path)
+    const QString cleanPath = PodcastScope::normaliseRoot(path);
+    if (m_podcastPath == cleanPath)
         return;
-    m_podcastPath = path;
-    QSettings().setValue(QStringLiteral("podcast/path"), path);
+    m_podcastPath = cleanPath;
+    QSettings().setValue(QStringLiteral("podcast/path"), cleanPath);
     emit podcastPathChanged();
 }
 
@@ -143,12 +145,17 @@ QVariantList PodcastLibrary::shows()
 {
     QSqlQuery q(uiDb());
     QVariantList out;
-    if (!q.exec(QStringLiteral(
+    const QString sql =
+        QStringLiteral(
             "SELECT s.id, s.title, IFNULL(s.cover_path,''), COUNT(e.id), "
             "SUM(CASE WHEN e.played = 0 THEN 1 ELSE 0 END), "
             "IFNULL(s.last_checked_at,0), IFNULL(s.feed_url,'') "
-            "FROM podcast_shows s LEFT JOIN podcast_episodes e ON e.show_id = s.id "
-            "GROUP BY s.id ORDER BY s.title COLLATE NOCASE")))
+            "FROM podcast_shows s LEFT JOIN podcast_episodes e ON e.show_id = s.id WHERE ")
+        + PodcastScope::visibleShowClause(QStringLiteral("s"))
+        + QStringLiteral(" GROUP BY s.id ORDER BY s.title COLLATE NOCASE");
+    q.prepare(sql);
+    PodcastScope::bindVisibleShow(q, m_podcastPath);
+    if (!q.exec())
         return out;
     while (q.next()) {
         out.append(QVariantMap{{QStringLiteral("id"), q.value(0).toInt()},
@@ -165,14 +172,18 @@ QVariantList PodcastLibrary::shows()
 QVariantList PodcastLibrary::allEpisodes(int showId, int limit)
 {
     QSqlQuery q(uiDb());
-    q.prepare(QStringLiteral(
-        "SELECT e.id, e.title, IFNULL(s.title,''), s.id, IFNULL(e.published_at,0), "
-        "IFNULL(e.duration_ms,0), e.position_ms, e.played, IFNULL(e.local_path,'') "
-        "FROM podcast_episodes e JOIN podcast_shows s ON s.id = e.show_id "
-        "WHERE (? = 0 OR e.show_id = ?) "
-        "ORDER BY e.published_at DESC, e.id DESC LIMIT ?"));
+    const QString sql =
+        QStringLiteral(
+            "SELECT e.id, e.title, IFNULL(s.title,''), s.id, IFNULL(e.published_at,0), "
+            "IFNULL(e.duration_ms,0), e.position_ms, e.played, IFNULL(e.local_path,'') "
+            "FROM podcast_episodes e JOIN podcast_shows s ON s.id = e.show_id "
+            "WHERE (? = 0 OR e.show_id = ?) AND ")
+        + PodcastScope::visibleShowClause(QStringLiteral("s"))
+        + QStringLiteral(" ORDER BY e.published_at DESC, e.id DESC LIMIT ?");
+    q.prepare(sql);
     q.addBindValue(showId);
     q.addBindValue(showId);
+    PodcastScope::bindVisibleShow(q, m_podcastPath);
     q.addBindValue(limit);
 
     QVariantList out;
@@ -201,11 +212,16 @@ QVariantList PodcastLibrary::continueListening(int limit)
     QSqlQuery q(uiDb());
     // Started but not finished, most recently touched first. This is the top of the podcast
     // screen: the opposite of shuffling.
-    q.prepare(QStringLiteral(
-        "SELECT e.id, e.title, s.title, e.position_ms, e.duration_ms, IFNULL(e.local_path,'') "
-        "FROM podcast_episodes e JOIN podcast_shows s ON s.id = e.show_id "
-        "WHERE e.played = 0 AND e.position_ms > 0 AND e.local_path IS NOT NULL "
-        "ORDER BY e.last_played_at DESC LIMIT ?"));
+    const QString sql =
+        QStringLiteral(
+            "SELECT e.id, e.title, s.title, e.position_ms, e.duration_ms, "
+            "IFNULL(e.local_path,'') "
+            "FROM podcast_episodes e JOIN podcast_shows s ON s.id = e.show_id "
+            "WHERE e.played = 0 AND e.position_ms > 0 AND e.local_path IS NOT NULL AND ")
+        + PodcastScope::visibleShowClause(QStringLiteral("s"))
+        + QStringLiteral(" ORDER BY e.last_played_at DESC LIMIT ?");
+    q.prepare(sql);
+    PodcastScope::bindVisibleShow(q, m_podcastPath);
     q.addBindValue(limit);
     QVariantList out;
     if (!q.exec())

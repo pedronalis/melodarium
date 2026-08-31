@@ -1,6 +1,7 @@
 #include "podcastepisodemodel.h"
 
 #include "database.h"
+#include "podcastscope.h"
 
 #include <QSqlDatabase>
 #include <QSqlQuery>
@@ -82,11 +83,17 @@ void PodcastEpisodeModel::loadForShow(int showId)
 {
     QSqlDatabase db = QSqlDatabase::database(QLatin1String(Database::kUiConnection));
     QSqlQuery q(db);
-    q.prepare(QStringLiteral(
-        "SELECT id, title, IFNULL(local_path,''), IFNULL(published_at,0), "
-        "IFNULL(duration_ms,0), position_ms, played "
-        "FROM podcast_episodes WHERE show_id = ? ORDER BY published_at DESC"));
+    const QString sql =
+        QStringLiteral(
+            "SELECT e.id, e.title, IFNULL(e.local_path,''), IFNULL(e.published_at,0), "
+            "IFNULL(e.duration_ms,0), e.position_ms, e.played "
+            "FROM podcast_episodes e JOIN podcast_shows s ON s.id = e.show_id "
+            "WHERE e.show_id = ? AND ")
+        + PodcastScope::visibleShowClause(QStringLiteral("s"))
+        + QStringLiteral(" ORDER BY e.published_at DESC");
+    q.prepare(sql);
     q.addBindValue(showId);
+    PodcastScope::bindVisibleShow(q, PodcastScope::currentRoot());
 
     QList<EpisodeRowData> rows;
     if (q.exec()) {

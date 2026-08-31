@@ -57,8 +57,8 @@ INSERT INTO artists (id, name) VALUES (101, 'Needle Artist');
 INSERT INTO albums (id, title, album_artist_id, year) VALUES (101, 'Needle Album', 101, 2026);
 INSERT INTO tracks (id, path, mtime, size, title, artist_id, album_id, added_at)
 VALUES (101, '$TRACK', 1, 1, 'Needle Song', 101, 101, 1);
-INSERT INTO podcast_shows (id, title, cover_path)
-VALUES (101, 'Needle Podcast', '$PODCAST_COVER');
+INSERT INTO podcast_shows (id, title, feed_url, cover_path)
+VALUES (101, 'Needle Podcast', 'https://example.com/needle.xml', '$PODCAST_COVER');
 INSERT INTO podcast_episodes (id, show_id, guid, title, published_at)
 VALUES (101, 101, 'needle-episode', 'Needle Episode', 1);
 SQL

@@ -1,5 +1,6 @@
 #include <QtTest/QtTest>
 #include <QSignalSpy>
+#include <QSettings>
 #include <QSqlError>
 #include <QSqlQuery>
 #include <QTemporaryDir>
@@ -39,6 +40,12 @@ private slots:
     void initTestCase()
     {
         QVERIFY(m_dir.isValid());
+        QSettings::setDefaultFormat(QSettings::IniFormat);
+        QSettings::setPath(QSettings::IniFormat, QSettings::UserScope, m_dir.path());
+        QSettings().clear();
+        QSettings().setValue(QStringLiteral("podcast/path"),
+                             QStringLiteral("/podcasts/current"));
+
         QVERIFY(Database::openConnection(QLatin1String(Database::kUiConnection),
                                          m_dir.filePath(QStringLiteral("t.db"))));
         QSqlDatabase db = QSqlDatabase::database(QLatin1String(Database::kUiConnection));
@@ -135,11 +142,12 @@ private slots:
     void searchGroupedCarriesArtworkSourcesForMusicAndPodcasts()
     {
         exec(QStringLiteral(
-            "INSERT INTO podcast_shows (id, title, cover_path) "
-            "VALUES (9, 'Programa Capa', '/podcasts/programa.jpg')"));
+            "INSERT INTO podcast_shows (id, title, folder_path, cover_path) "
+            "VALUES (9, 'Programa Capa', '/podcasts/current', '/podcasts/programa.jpg')"));
         exec(QStringLiteral(
             "INSERT INTO podcast_episodes (id, show_id, guid, title, local_path) "
-            "VALUES (10, 9, 'episode-cover', 'Episódio Capa', '/podcasts/episodio.mp3')"));
+            "VALUES (10, 9, 'episode-cover', 'Episódio Capa', "
+            "'/podcasts/current/episodio.mp3')"));
 
         LibraryBrowser browser;
         const QVariantList musicHits = browser.searchGrouped(QStringLiteral("Coração"), 4);
@@ -172,9 +180,40 @@ private slots:
             QCOMPARE(row.value(QStringLiteral("coverPath")).toString(),
                      QStringLiteral("/podcasts/programa.jpg"));
             QCOMPARE(row.value(QStringLiteral("coverTrackPath")).toString(),
-                     QStringLiteral("/podcasts/episodio.mp3"));
+                     QStringLiteral("/podcasts/current/episodio.mp3"));
         }
         QVERIFY(sawEpisode);
+    }
+
+    void searchGroupedScopesLocalPodcastsAndKeepsFeeds()
+    {
+        exec(QStringLiteral(
+            "INSERT INTO podcast_shows (id, title, folder_path) "
+            "VALUES (11, 'Atual', '/podcasts/current/show')"));
+        exec(QStringLiteral(
+            "INSERT INTO podcast_episodes (id, show_id, guid, title) "
+            "VALUES (11, 11, 'scope-current', 'Scope Current')"));
+        exec(QStringLiteral(
+            "INSERT INTO podcast_shows (id, title, folder_path) "
+            "VALUES (12, 'Antigo', '/podcasts/old')"));
+        exec(QStringLiteral(
+            "INSERT INTO podcast_episodes (id, show_id, guid, title) "
+            "VALUES (12, 12, 'scope-old', 'Scope Old')"));
+        exec(QStringLiteral(
+            "INSERT INTO podcast_shows (id, title, feed_url) "
+            "VALUES (13, 'Feed', 'https://example.com/scope.xml')"));
+        exec(QStringLiteral(
+            "INSERT INTO podcast_episodes (id, show_id, guid, title) "
+            "VALUES (13, 13, 'scope-feed', 'Scope Feed')"));
+
+        QSet<int> episodeIds;
+        const QVariantList hits = LibraryBrowser().searchGrouped(QStringLiteral("Scope"), 10);
+        for (const QVariant &raw : hits) {
+            const QVariantMap row = raw.toMap();
+            if (row.value(QStringLiteral("kind")).toString() == QLatin1String("episode"))
+                episodeIds.insert(row.value(QStringLiteral("id")).toInt());
+        }
+        QCOMPARE(episodeIds, QSet<int>({11, 13}));
     }
 
     // A collection nobody can search for is a collection that only exists for whoever
