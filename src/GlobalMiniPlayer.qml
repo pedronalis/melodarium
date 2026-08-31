@@ -380,7 +380,7 @@ Rectangle {
                     icon: root.muted ? "volume-off"
                                      : (AudioEngine.volume < 50 ? "volume-low" : "volume")
                     size: Theme.fontSizeL
-                    baseColor: Theme.cMuted
+                    baseColor: root.muted ? Theme.cMuted : Theme.cTitle
                     tooltip: root.muted ? qsTr("com som") : qsTr("mudo")
                     onClicked: {
                         if (root.muted) {

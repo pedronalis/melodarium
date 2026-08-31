@@ -13,11 +13,17 @@ Window {
     // linha de filtros aguenta a tela estreita.
     readonly property bool measuring: Qt.application.arguments.indexOf("--measure") >= 0
 
+    // Mantém o movimento ligado só no gate que mede a curva da transição. As capturas
+    // estáticas continuam sem animação, para nunca fotografarem um frame intermediário.
+    readonly property bool measureMiniMotion:
+        Qt.application.arguments.indexOf("--measure-mini-motion") >= 0
+
     // `--sem-animacao`: desliga toda transição sem precisar de tela de ajustes. `--measure`
     // liga junto de qualquer jeito — a foto do gate é tirada num instante fixo e pegaria a
     // animação pela metade, reprovando por movimento em vez de por cor errada.
     readonly property bool semAnimacao:
-        root.measuring || Qt.application.arguments.indexOf("--sem-animacao") >= 0
+        (root.measuring && !root.measureMiniMotion)
+        || Qt.application.arguments.indexOf("--sem-animacao") >= 0
 
     // `--com-halo`: fotografar o halo aceso. O gate de fidelidade mede 15 pontos fixos e o
     // halo tem a cor do acervo de quem roda, por isso `--measure` o desliga — mas então NADA
@@ -80,6 +86,16 @@ Window {
         const i = Qt.application.arguments.indexOf("--play-track")
         return i >= 0 && Qt.application.arguments.length > i + 1
                ? Qt.application.arguments[i + 1] : ""
+    }
+
+    // `--measure-volume <0..100>`: fixa o estado do ícone para o gate comparar som ligado e
+    // mudo sem depender da preferência persistida na máquina que estiver rodando o teste.
+    readonly property int measureVolume: {
+        const i = Qt.application.arguments.indexOf("--measure-volume")
+        if (i < 0 || Qt.application.arguments.length <= i + 1)
+            return -1
+        const volume = parseInt(Qt.application.arguments[i + 1])
+        return isNaN(volume) ? -1 : Math.max(0, Math.min(100, volume))
     }
 
     // `--switch-track <caminho>`: after the first measured track has mounted its cover,
@@ -221,12 +237,25 @@ Window {
     // Which pane the icon rail is showing: "library" or "podcast". Search is an overlay,
     // not a pane. The axis inside the library ("albums", "tags", …) is the chips' job.
     property string section: "library"
+    // O gate de movimento parte da biblioteca e troca de aba depois que a música carregou.
+    // Fora dele, a aba medida continua vindo diretamente de `--pane`.
+    property string measureSectionOverride: root.measureMiniMotion ? "library" : ""
+    readonly property string measuredPane:
+        root.measureSectionOverride !== "" ? root.measureSectionOverride : root.measurePane
     // Em medição, o pane pedido na linha de comando é a aba efetiva. Sem isto o centro
     // fotografava Podcast enquanto o contexto continuava acreditando que estava na Biblioteca.
     readonly property string effectiveSection: root.measuring
-        ? (root.measurePane === "podcast" ? "podcast"
-           : (root.measurePane === "collections" ? "collections" : "library"))
+        ? (root.measuredPane === "podcast" ? "podcast"
+           : (root.measuredPane === "collections" ? "collections" : "library"))
         : root.section
+    property bool transitionsReady: false
+    readonly property int contextualTransitionDuration: Math.min(250, Theme.animationNormal)
+    property real sectionReveal: 1
+    property real motionMiniStart: 0
+    property real motionMiniMid: 0
+    property real motionMiniEnd: 0
+    property real motionSectionMid: 0
+    property real motionSectionEnd: 0
     property int podcastShowId: 0
     property int selectedCollectionId: 0
     // Secondary panes keep their state after the first visit, but do not exist before it.
@@ -270,6 +299,23 @@ Window {
         ? "player" : (root.effectiveSection === "podcast" ? "podcast" : "collections")
     readonly property bool showGlobalMiniPlayer:
         AudioEngine.currentFile !== "" && !root.contextShowsPlayer
+
+    onEffectiveSectionChanged: {
+        if (!root.transitionsReady)
+            return
+        sectionEnter.stop()
+        root.sectionReveal = 0
+        sectionEnter.start()
+    }
+
+    NumberAnimation {
+        id: sectionEnter
+        target: root
+        property: "sectionReveal"
+        to: 1
+        duration: root.contextualTransitionDuration
+        easing.type: Theme.easingType
+    }
 
     readonly property var filterTitles: ({
         "liked": qsTr("Curtidas"),
@@ -600,6 +646,8 @@ Window {
                         AudioEngine.loadPlaylist([root.measureTrack], 0)
                         AudioEngine.play()
                     }
+                    if (root.measureVolume >= 0)
+                        AudioEngine.setVolume(root.measureVolume)
                     if (root.measureQueue) {
                         root.startFromEmpty(root.measureQueueMode)
                         if (root.measureQueueIndex >= 0)
@@ -643,6 +691,44 @@ Window {
             }
 
             Timer {
+                running: root.measureMiniMotion
+                interval: 900
+                onTriggered: {
+                    root.motionMiniStart = globalMiniHost.height
+                    if (root.measurePane === "podcast")
+                        root.podcastPaneLoaded = true
+                    else
+                        root.collectionsPaneLoaded = true
+                    root.measureSectionOverride = root.measurePane
+                }
+            }
+
+            Timer {
+                running: root.measureMiniMotion
+                interval: 1020
+                onTriggered: {
+                    root.motionMiniMid = globalMiniHost.height
+                    root.motionSectionMid = root.sectionReveal
+                }
+            }
+
+            Timer {
+                running: root.measureMiniMotion
+                interval: 1400
+                onTriggered: {
+                    root.motionMiniEnd = globalMiniHost.height
+                    root.motionSectionEnd = root.sectionReveal
+                    console.log("MOTION miniStart=" + root.motionMiniStart.toFixed(2)
+                                + " miniMid=" + root.motionMiniMid.toFixed(2)
+                                + " miniEnd=" + root.motionMiniEnd.toFixed(2)
+                                + " miniTarget=" + globalMiniPlayer.implicitHeight.toFixed(2)
+                                + " sectionMid=" + root.motionSectionMid.toFixed(3)
+                                + " sectionEnd=" + root.motionSectionEnd.toFixed(3)
+                                + " duration=" + root.contextualTransitionDuration)
+                }
+            }
+
+            Timer {
             running: true
             interval: root.measureDelay
             onTriggered: {
@@ -664,17 +750,17 @@ Window {
                             + " movimento=" + (Theme.reduzirMovimento ? "off" : "on")
                             + " halo=" + (nowPlaying.mostrarHalo ? "on" : "off")
                             + " context=" + root.contextKind
-                            + " mini=" + (globalMiniPlayer.visible ? "on" : "off")
+                            + " mini=" + (root.showGlobalMiniPlayer ? "on" : "off")
                             + " minilayout="
-                            + (!globalMiniPlayer.visible ? "na"
+                            + (!root.showGlobalMiniPlayer ? "na"
                                : (globalMiniPlayer.layoutFits ? "fit" : "overflow"))
                             + " minicenter="
-                            + (!globalMiniPlayer.visible ? "na"
+                            + (!root.showGlobalMiniPlayer ? "na"
                                : (globalMiniPlayer.transportCentered ? "fit" : "off"))
                             + " minimode="
-                            + (globalMiniPlayer.visible ? globalMiniPlayer.transportKind : "na")
+                            + (root.showGlobalMiniPlayer ? globalMiniPlayer.transportKind : "na")
                             + " speedmenu="
-                            + (!globalMiniPlayer.visible || !globalMiniPlayer.episodeMode
+                            + (!root.showGlobalMiniPlayer || !globalMiniPlayer.episodeMode
                                ? "na"
                                : (globalMiniPlayer.nativeSpeedMenu ? "native" : "qml"))
                             + " speed=" + AudioEngine.speed.toFixed(2)
@@ -725,6 +811,7 @@ Window {
         // Finding out whether yt-dlp exists costs one process start; finding out at the moment
         // the user clicks costs a dialog that fails in their face.
         YtDlpDownloader.probe()
+        root.transitionsReady = true
     }
 
     // O fundo da cena, e não só o da janela: `Window.color` pinta o "clear color", que existe
@@ -765,6 +852,10 @@ Window {
                     Layout.fillWidth: false
                     currentIndex: root.contextShowsPlayer
                                   ? 0 : (root.effectiveSection === "podcast" ? 1 : 2)
+                    opacity: 0.72 + 0.28 * root.sectionReveal
+                    transform: Translate {
+                        y: (1 - root.sectionReveal) * Math.round(8 * Theme.uiScale)
+                    }
 
                     NowPlayingPanel {
                         id: nowPlaying
@@ -806,14 +897,18 @@ Window {
                     // Medir mede a tela pedida: qual banco a máquina tem não pode mudar o
                     // resultado do gate de layout.
                     currentIndex: root.measuring
-                                  ? (root.measurePane === "podcast"
-                                     ? 1 : (root.measurePane === "empty"
-                                            ? 2 : (root.measurePane === "collections" ? 3 : 0)))
+                                  ? (root.measuredPane === "podcast"
+                                     ? 1 : (root.measuredPane === "empty"
+                                            ? 2 : (root.measuredPane === "collections" ? 3 : 0)))
                                   : (root.section === "podcast"
                                      ? 1
                                      : (root.section === "collections"
                                         ? 3
                                         : (Database.libraryPath === "" ? 2 : 0)))
+                    opacity: 0.72 + 0.28 * root.sectionReveal
+                    transform: Translate {
+                        y: (1 - root.sectionReveal) * Math.round(8 * Theme.uiScale)
+                    }
 
                     LibraryPane {
                         id: libraryPane
@@ -918,12 +1013,37 @@ Window {
                 }
             }
 
-            GlobalMiniPlayer {
-                id: globalMiniPlayer
+            Item {
+                id: globalMiniHost
+                property real revealProgress: root.showGlobalMiniPlayer ? 1 : 0
+
                 Layout.fillWidth: true
-                visible: root.showGlobalMiniPlayer
-                episodeMode: root.currentEpisodeId > 0
-                onQueueOpenRequested: queueOverlay.open()
+                Layout.preferredHeight: globalMiniPlayer.implicitHeight
+                                        * globalMiniHost.revealProgress
+                Layout.minimumHeight: globalMiniPlayer.implicitHeight
+                                      * globalMiniHost.revealProgress
+                Layout.maximumHeight: globalMiniPlayer.implicitHeight
+                                      * globalMiniHost.revealProgress
+                visible: globalMiniHost.revealProgress > 0
+                clip: true
+
+                Behavior on revealProgress {
+                    NumberAnimation {
+                        duration: root.contextualTransitionDuration
+                        easing.type: Theme.easingType
+                    }
+                }
+
+                GlobalMiniPlayer {
+                    id: globalMiniPlayer
+                    anchors.left: parent.left
+                    anchors.right: parent.right
+                    anchors.bottom: parent.bottom
+                    visible: globalMiniHost.revealProgress > 0
+                    opacity: Math.min(1, globalMiniHost.revealProgress * 1.5)
+                    episodeMode: root.currentEpisodeId > 0
+                    onQueueOpenRequested: queueOverlay.open()
+                }
             }
         }
     }

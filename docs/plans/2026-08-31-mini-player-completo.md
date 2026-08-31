@@ -175,6 +175,61 @@ ImageMagick e Pillow.
   Rodar `gitnexus detect_changes` contra `main`, marcar a task, commitar as capturas e reiniciar
   somente a instância `melodarium` pelo mesmo procedimento gracioso já validado.
 
+### Task 4: Entrada suave da aba e estado correto do volume
+
+**Files:**
+- Modify: `src/Main.qml`
+- Modify: `src/GlobalMiniPlayer.qml`
+- Modify: `tools/check-contextual-ui.sh`
+- Modify: `docs/plans/2026-08-31-mini-player-completo.md`
+
+**Interfaces:**
+- Consumes: `Theme.animationNormal`, `Theme.easingType`, `Theme.reduzirMovimento`,
+  `showGlobalMiniPlayer`, `effectiveSection` e `AudioEngine.volume`.
+- Produces: host do mini-player com `revealProgress`, transição de entrada da aba por
+  `sectionReveal`, linha `MOTION` com amostras de altura/opacidade e cor observável do ícone de
+  volume nos estados ligado/mutado.
+
+- [x] **Step 1: escrever os gates vermelhos de movimento e cor**
+
+  Acrescentar `--measure-mini-motion`: iniciar em Biblioteca com música, trocar internamente
+  para Podcast e Coleções, amostrar a altura do host antes, durante e depois dos 250 ms e exigir
+  `0 < mid < target`. Amostrar também `sectionReveal` no meio e no fim. Fotografar o mini-player
+  com volume 100 e com `--measure-volume 0`; no recorte `(955,635)-(990,670)`, exigir pico claro
+  no estado ligado e somente cinza no mutado.
+
+- [x] **Step 2: provar RED**
+
+  Run: `quiet-run cmake --build build && quiet-run bash tools/check-contextual-ui.sh`
+
+  Expected: falha porque `--measure-mini-motion` não publica `MOTION` e o ícone ligado ainda
+  usa `Theme.cMuted` (máximo aproximado `#5d5d5d`) em vez de `Theme.cTitle`.
+
+- [x] **Step 3: animar a entrada sem provocar salto de layout**
+
+  Envolver `GlobalMiniPlayer` num host recortado cuja `Layout.preferredHeight` acompanha
+  `revealProgress * implicitHeight`; ancorar a barra ao fundo do host, produzindo subida real
+  enquanto a lista cede altura. Limitar `Theme.animationNormal` a 250 ms e usar
+  `Theme.easingType`. Ao mudar `effectiveSection`, animar de `sectionReveal=0` para `1`, usando
+  fade de `0,72→1` e `Translate.y` de `8*Theme.uiScale→0` no contexto e no pane central.
+
+- [x] **Step 4: corrigir a semântica visual do volume**
+
+  No botão de volume do mini-player, usar `Theme.cTitle` quando `AudioEngine.volume > 0` e
+  `Theme.cMuted` quando estiver zerado. Preservar os glifos `volume`, `volume-low` e
+  `volume-off`, o clique reversível e o hover atual.
+
+- [x] **Step 5: provar GREEN, revisar impacto e commitar**
+
+  Rodar build, gate contextual, órfãos, layout, fidelidade, suíte completa e
+  `gitnexus detect_changes`. Marcar a task no mesmo commit:
+
+  ```bash
+  git add src/Main.qml src/GlobalMiniPlayer.qml tools/check-contextual-ui.sh \
+    docs/plans/2026-08-31-mini-player-completo.md
+  git commit -m "feat(ui): animate contextual player transitions"
+  ```
+
 ## Gate humano
 
 - [ ] Pedro testa música e episódio no app real, abre o menu de velocidade, escolhe outro valor

@@ -51,7 +51,8 @@ run_case() {
     local shot="$6"
     local modo_mini="$7"
     local menu_velocidade="$8"
-    local -a args=(--measure 1100 --pane "$pane" --no-search --sem-animacao --delay 1800)
+    local -a args=(--measure 1100 --pane "$pane" --measure-volume 100
+                   --no-search --sem-animacao --delay 1800)
     if [ "$tocar" = "sim" ]; then
         args+=(--play-track "$TMP/faixa.wav")
     fi
@@ -129,6 +130,82 @@ VALUES
 run_case "Coleções sem áudio" collections collections off nao "" na na
 run_case "Coleções preservando música" collections collections on sim \
     "$TMP/collections.png" music na
+
+check_motion() {
+    local pane="$1"
+    local motion_raw motion_line
+    motion_raw=$(XDG_DATA_HOME="$TMP/data" XDG_CONFIG_HOME="$TMP/config" \
+                 MELODIA_NULL_AO=1 QT_QPA_PLATFORM=offscreen \
+                 QT_LOGGING_RULES="*.debug=true" QT_FORCE_STDERR_LOGGING=1 \
+                 timeout 30 "$BIN" --measure 1100 --pane "$pane" \
+                 --play-track "$TMP/faixa.wav" --measure-volume 100 \
+                 --measure-mini-motion --no-search --delay 2200 2>&1)
+    motion_line=$(printf '%s\n' "$motion_raw" | grep -ao 'MOTION .*' | tail -1 || true)
+    if [ -z "$motion_line" ]; then
+        echo "FALHA: a entrada de $pane não publicou amostras MOTION"
+        return 1
+    fi
+    python3 - "$pane" "$motion_line" <<'PY'
+import re
+import sys
+
+pane = sys.argv[1]
+line = sys.argv[2]
+values = {key: float(value) for key, value in
+          re.findall(r"(miniStart|miniMid|miniEnd|miniTarget|sectionMid|sectionEnd|duration)=([0-9.]+)", line)}
+required = {"miniStart", "miniMid", "miniEnd", "miniTarget", "sectionMid", "sectionEnd", "duration"}
+if set(values) != required:
+    print("FALHA: linha MOTION incompleta:", line)
+    raise SystemExit(1)
+if values["miniStart"] > 1 or not 1 < values["miniMid"] < values["miniEnd"] - 1:
+    print("FALHA: a barra não subiu progressivamente:", line)
+    raise SystemExit(1)
+if abs(values["miniEnd"] - values["miniTarget"]) > 2:
+    print("FALHA: a barra não terminou na altura alvo:", line)
+    raise SystemExit(1)
+if not 0.05 < values["sectionMid"] < 0.98 or values["sectionEnd"] < 0.99:
+    print("FALHA: a aba não fez entrada progressiva:", line)
+    raise SystemExit(1)
+if not 0 < values["duration"] < 300:
+    print("FALHA: a entrada contextual deve ficar abaixo de 300 ms:", line)
+    raise SystemExit(1)
+print(f"ok:    barra sobe e {pane} entra progressivamente — {line}")
+PY
+}
+
+check_motion podcast
+check_motion collections
+
+muted_raw=$(XDG_DATA_HOME="$TMP/data" XDG_CONFIG_HOME="$TMP/config" \
+            MELODIA_NULL_AO=1 QT_QPA_PLATFORM=offscreen \
+            QT_LOGGING_RULES="*.debug=true" QT_FORCE_STDERR_LOGGING=1 \
+            timeout 30 "$BIN" --measure 1100 --pane collections \
+            --play-track "$TMP/faixa.wav" --measure-volume 0 \
+            --no-search --sem-animacao --delay 1800 --shot "$TMP/muted.png" 2>&1)
+if [ ! -s "$TMP/muted.png" ]; then
+    echo "FALHA: o estado mutado não produziu captura"
+    printf '%s\n' "$muted_raw" | tail -20
+    exit 1
+fi
+python3 - "$TMP/collections.png" "$TMP/muted.png" <<'PY'
+import sys
+from PIL import Image
+
+def peak(path):
+    # Reamostrado no desenho 1100×700: o volume ocupa esta região sem tocar o slider.
+    crop = Image.open(path).convert("RGB").crop((955, 635, 990, 670))
+    return max(max(pixel) for pixel in crop.get_flattened_data())
+
+active = peak(sys.argv[1])
+muted = peak(sys.argv[2])
+if active < 180:
+    print(f"FALHA: ícone com som continua cinza (pico {active})")
+    raise SystemExit(1)
+if muted > 130:
+    print(f"FALHA: ícone mutado não ficou cinza (pico {muted})")
+    raise SystemExit(1)
+print(f"ok:    volume ligado é claro ({active}) e mutado é cinza ({muted})")
+PY
 
 episode_raw=$(XDG_DATA_HOME="$TMP/data" XDG_CONFIG_HOME="$TMP/config" \
               MELODIA_NULL_AO=1 QT_QPA_PLATFORM=offscreen \
