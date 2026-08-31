@@ -30,6 +30,10 @@ private:
     Q_PROPERTY(double speed READ speed WRITE setSpeed NOTIFY speedChanged)
     Q_PROPERTY(QStringList queue READ queue NOTIFY queueChanged)
     Q_PROPERTY(int queueCount READ queueCount NOTIFY queueChanged)
+    Q_PROPERTY(QStringList savedQueue READ savedQueue NOTIFY savedSessionChanged)
+    Q_PROPERTY(int savedQueueIndex READ savedQueueIndex NOTIFY savedSessionChanged)
+    Q_PROPERTY(int savedQueueCount READ savedQueueCount NOTIFY savedSessionChanged)
+    Q_PROPERTY(QString savedCurrentFile READ savedCurrentFile NOTIFY savedSessionChanged)
     Q_PROPERTY(RepeatMode repeatMode READ repeatMode NOTIFY repeatModeChanged)
     Q_PROPERTY(bool shuffle READ shuffle NOTIFY shuffleChanged)
 
@@ -47,6 +51,10 @@ public:
     double speed() const { return m_speed; }
     QStringList queue() const { return m_queue; }
     int queueCount() const { return m_queue.size(); }
+    QStringList savedQueue() const { return m_savedQueue; }
+    int savedQueueIndex() const { return m_savedQueueIndex; }
+    int savedQueueCount() const { return m_savedQueue.size(); }
+    QString savedCurrentFile() const;
     RepeatMode repeatMode() const { return m_repeatMode; }
     bool shuffle() const { return m_shuffle; }
 
@@ -62,7 +70,11 @@ public:
     Q_INVOKABLE void seek(double seconds);
     Q_INVOKABLE void next();
     Q_INVOKABLE void previous();
-    Q_INVOKABLE void loadPlaylist(const QStringList &files, int startIndex = 0);
+    Q_INVOKABLE void loadPlaylist(const QStringList &files, int startIndex = 0,
+                                  bool rememberSession = true);
+    // Restores only queue + current entry. Music deliberately starts at 0:00; podcast
+    // timestamps remain the responsibility of PodcastLibrary.
+    Q_INVOKABLE bool restoreSavedQueue();
     // Pôr no fim sem interromper o que toca. Com a fila vazia, carrega e NÃO começa a
     // tocar: o app só toca quando alguém pede.
     Q_INVOKABLE void appendToQueue(const QString &file);
@@ -90,6 +102,7 @@ signals:
     void playlistPosChanged();
     void speedChanged();
     void queueChanged();
+    void savedSessionChanged();
     void repeatModeChanged();
     void shuffleChanged();
     void trackFinished(const QString &path);
@@ -106,6 +119,8 @@ private:
     void setPropertyString(const char *name, const char *value);
     void command(const QStringList &args);
     void reorderMpvPlaylist(const QStringList &atual);
+    void loadSavedSession();
+    void saveSession(const QStringList &queue, int currentIndex);
 
     mpv_handle *m_mpv = nullptr;
     double m_position = 0.0;
@@ -118,6 +133,9 @@ private:
     // Espelho do que foi mandado ao mpv. Ler playlist/N/filename seria uma consulta por
     // entrada a cada repintura da tirinha de capas.
     QStringList m_queue;
+    QStringList m_savedQueue;
+    int m_savedQueueIndex = -1;
+    bool m_rememberCurrentQueue = true;
     RepeatMode m_repeatMode = RepeatOff;
     bool m_shuffle = false;
     // Sem isto, desligar o aleatório não tem para onde voltar.

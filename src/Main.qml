@@ -76,6 +76,15 @@ Window {
                ? Qt.application.arguments[i + 1] : ""
     }
 
+    // `--switch-track <caminho>`: after the first measured track has mounted its cover,
+    // switch to a second album. This reproduces the asynchronous crossfade race without
+    // desktop automation or touching the user's library.
+    readonly property string measureSwitchTrack: {
+        const i = Qt.application.arguments.indexOf("--switch-track")
+        return i >= 0 && Qt.application.arguments.length > i + 1
+               ? Qt.application.arguments[i + 1] : ""
+    }
+
     // `--open-collection <id>`: abre uma coleção antes de fotografar. Sem isto o painel de
     // coleções só pode ser fotografado no estado "nenhuma aberta", e a metade da fatia que
     // importa — a coleção ABERTA, com as faixas dentro — não teria como ser provada.
@@ -110,6 +119,16 @@ Window {
         const i = Qt.application.arguments.indexOf("--play-queue-mode")
         return i >= 0 && Qt.application.arguments.length > i + 1
                ? Qt.application.arguments[i + 1] : "all"
+    }
+
+    // `--queue-index <n>`: after loading the measured queue, jump through the same function
+    // used by the strip/overlay. A second process can then prove that this index persisted.
+    readonly property int measureQueueIndex: {
+        const i = Qt.application.arguments.indexOf("--queue-index")
+        if (i < 0 || Qt.application.arguments.length <= i + 1)
+            return -1
+        const n = parseInt(Qt.application.arguments[i + 1])
+        return isNaN(n) ? -1 : n
     }
 
     // `--repeat <n>`: avança o repetir n posições (1 = a fila, 2 = esta faixa), para o "1"
@@ -344,15 +363,17 @@ Window {
     // só toca quando alguém pede.
     function startFromEmpty(mode) {
         if (mode === "resume") {
+            if (AudioEngine.restoreSavedQueue()) {
+                AudioEngine.play()
+                return
+            }
+            // Upgrade fallback: older versions only saved one completed track. It still
+            // starts at 0:00; after the next normal playlist load the full queue is saved.
             const info = LibraryBrowser.lastPlayed()
             if (info.path === undefined || info.path === "")
                 return
             AudioEngine.loadPlaylist([info.path], 0)
             AudioEngine.play()
-            if (info.positionMs > 0) {
-                resumeSeek.targetSeconds = Math.floor(info.positionMs / 1000)
-                resumeSeek.restart()
-            }
             return
         }
 
@@ -466,14 +487,12 @@ Window {
             root.currentEpisodeId = episode.id !== undefined ? episode.id : 0
         }
         // Pausing is the moment the user is most likely to walk away: save once more, so the
-        // position survives even if the app is killed before the next 5 s tick.
+        // podcast position survives even if the app is killed before the next 5 s tick.
+        // Music persists queue + index in AudioEngine and deliberately never stores a seek.
         function onPlayingChanged() {
             if (!AudioEngine.playing && root.currentEpisodeId > 0)
                 PodcastLibrary.savePosition(root.currentEpisodeId,
                                             Math.round(AudioEngine.position * 1000))
-            else if (!AudioEngine.playing && root.currentEpisodeId === 0)
-                PlayStatsRecorder.savePosition(AudioEngine.currentFile,
-                                               Math.round(AudioEngine.position * 1000))
         }
     }
 
@@ -482,7 +501,9 @@ Window {
         function onEpisodePlayRequested(path, seekToSeconds) {
             root.podcastPaneLoaded = true
             root.section = "podcast"
-            AudioEngine.loadPlaylist([path], 0)
+            // Podcast position and resume live in PodcastLibrary. Do not replace the last
+            // music queue merely because the user listened to an episode in between.
+            AudioEngine.loadPlaylist([path], 0, false)
             AudioEngine.play()
             // The seek has to wait for the file to actually be loaded: duration only becomes
             // known after mpv opens it.
@@ -515,17 +536,6 @@ Window {
         running: AudioEngine.playing && root.currentEpisodeId > 0
         onTriggered: PodcastLibrary.savePosition(root.currentEpisodeId,
                                                  Math.round(AudioEngine.position * 1000))
-    }
-
-    // Mesma razão do timer do podcast: gravar a cada positionChanged escreveria no SQLite a
-    // cada quadro. Cinco segundos de imprecisão ao retomar não se percebem.
-    Timer {
-        interval: 5000
-        repeat: true
-        running: AudioEngine.playing && root.currentEpisodeId === 0
-                 && AudioEngine.currentFile !== ""
-        onTriggered: PlayStatsRecorder.savePosition(AudioEngine.currentFile,
-                                                    Math.round(AudioEngine.position * 1000))
     }
 
     Connections {
@@ -568,8 +578,11 @@ Window {
                         AudioEngine.loadPlaylist([root.measureTrack], 0)
                         AudioEngine.play()
                     }
-                    if (root.measureQueue)
+                    if (root.measureQueue) {
                         root.startFromEmpty(root.measureQueueMode)
+                        if (root.measureQueueIndex >= 0)
+                            root.pularNaFila(root.measureQueueIndex)
+                    }
                     for (let r = 0; r < root.measureRepeat; ++r)
                         AudioEngine.cycleRepeat()
                     if (root.measureSettings)
@@ -593,6 +606,15 @@ Window {
             }
 
             Timer {
+                running: root.measureSwitchTrack !== ""
+                interval: 1100
+                onTriggered: {
+                    AudioEngine.loadPlaylist([root.measureSwitchTrack], 0)
+                    AudioEngine.play()
+                }
+            }
+
+            Timer {
             running: true
             interval: root.measureDelay
             onTriggered: {
@@ -608,6 +630,9 @@ Window {
                             + " busca=" + Math.round(searchOverlay.width)
                             + "x" + Math.round(searchOverlay.height)
                             + " fila=" + AudioEngine.queueCount
+                            + " queuepos=" + AudioEngine.playlistPos
+                            + " segundos=" + AudioEngine.position.toFixed(3)
+                            + " arquivo=" + AudioEngine.currentFile
                             + " movimento=" + (Theme.reduzirMovimento ? "off" : "on")
                             + " halo=" + (nowPlaying.mostrarHalo ? "on" : "off")
                             + " motor=" + (AudioEngine.isAvailable() ? "ok" : "MORTO"))

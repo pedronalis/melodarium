@@ -213,6 +213,7 @@ QVariantMap LibraryBrowser::trackForPath(const QString &path)
     if (!q.exec() || !q.next())
         return out;
 
+    out.insert(QStringLiteral("path"), path);
     out.insert(QStringLiteral("id"), q.value(0).toInt());
     out.insert(QStringLiteral("title"), q.value(1).toString());
     out.insert(QStringLiteral("artist"), q.value(2).toString());
