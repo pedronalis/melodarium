@@ -224,23 +224,23 @@ Pillow para comparação das capturas offscreen.
 - Produces: duas capturas de 1100×700: Podcast sem áudio e Podcast com música preservada no
   mini-player.
 
-- [ ] **Step 1: fotografar os dois estados reproduzíveis**
+- [x] **Step 1: fotografar os dois estados reproduzíveis**
 
   Usar o mesmo fixture isolado do gate para salvar as duas capturas em `docs/telas/`, com
   `--sem-animacao`, `--no-search` e `--delay 1800`.
 
-- [ ] **Step 2: inspecionar as imagens**
+- [x] **Step 2: inspecionar as imagens**
 
   Conferir visualmente que o painel de Podcast não contém “nada tocando” musical, que a capa e
   os textos não transbordam, e que o mini-player não encobre lista nem trilho.
 
-- [ ] **Step 3: rodar os gates completos da fatia**
+- [x] **Step 3: rodar os gates completos da fatia**
 
   Run: `quiet-run cmake --build build && quiet-run ctest --test-dir build -N && quiet-run ctest --test-dir build --output-on-failure && quiet-run bash tools/check-contextual-ui.sh && quiet-run bash tools/check-orfaos.sh && quiet-run bash tools/check-layout.sh && quiet-run bash tools/check-fidelidade.sh`
 
   Expected: pelo menos 22 testes descobertos, zero falhas e zero órfãos novos.
 
-- [ ] **Step 4: revisar impacto e commitar evidência**
+- [x] **Step 4: revisar impacto e commitar evidência**
 
   Rodar `gitnexus detect_changes` contra `main`, marcar a task e executar:
 
