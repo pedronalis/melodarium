@@ -23,6 +23,8 @@ Item {
     // rolar e perderiam o progresso do que ainda está baixando.
     property var downloads: ({})
 
+    signal showRequested(int showId)
+
     readonly property var filtros: [
         { key: "all",      label: qsTr("Todos") },
         { key: "unplayed", label: qsTr("Não ouvidos") },
@@ -54,6 +56,8 @@ Item {
     readonly property int baixados: root.episodes.filter(function (e) {
         return e.path !== ""
     }).length
+
+    onShowFilterChanged: root.refresh()
 
     function progressOf(episodeId) {
         const entry = root.downloads[episodeId]
@@ -202,10 +206,7 @@ Item {
 
                 MenuItem {
                     text: qsTr("Todos os programas")
-                    onTriggered: {
-                        root.showFilter = 0
-                        root.refresh()
-                    }
+                    onTriggered: root.showRequested(0)
                 }
 
                 Repeater {
@@ -214,10 +215,7 @@ Item {
                     MenuItem {
                         required property var modelData
                         text: modelData.title
-                        onTriggered: {
-                            root.showFilter = modelData.id
-                            root.refresh()
-                        }
+                        onTriggered: root.showRequested(modelData.id)
                     }
                 }
             }

@@ -215,6 +215,13 @@ Window {
     // Which pane the icon rail is showing: "library" or "podcast". Search is an overlay,
     // not a pane. The axis inside the library ("albums", "tags", …) is the chips' job.
     property string section: "library"
+    // Em medição, o pane pedido na linha de comando é a aba efetiva. Sem isto o centro
+    // fotografava Podcast enquanto o contexto continuava acreditando que estava na Biblioteca.
+    readonly property string effectiveSection: root.measuring
+        ? (root.measurePane === "podcast" ? "podcast"
+           : (root.measurePane === "collections" ? "collections" : "library"))
+        : root.section
+    property int podcastShowId: 0
     // Secondary panes keep their state after the first visit, but do not exist before it.
     // Measurement flags opt into the same creation path so every visual gate stays reachable.
     property bool podcastPaneLoaded: root.measuring && root.measurePane === "podcast"
@@ -248,6 +255,16 @@ Window {
     property int currentEpisodeId: 0
     // Which chip of the filter row is lit. The rail picks the pane; this picks the list.
     property string libraryFilter: "all"
+
+    // Nesta primeira fatia, Coleções ainda preserva o painel antigo. A fatia seguinte troca
+    // somente este terceiro ramo pelo painel de curadoria, sem reabrir o shell.
+    readonly property bool contextShowsPlayer:
+        root.effectiveSection === "library"
+        || root.effectiveSection === "collections"
+        || (root.effectiveSection === "podcast" && root.currentEpisodeId > 0)
+    readonly property string contextKind: root.contextShowsPlayer ? "player" : "podcast"
+    readonly property bool showGlobalMiniPlayer:
+        AudioEngine.currentFile !== "" && !root.contextShowsPlayer
 
     readonly property var filterTitles: ({
         "liked": qsTr("Curtidas"),
@@ -635,6 +652,8 @@ Window {
                             + " arquivo=" + AudioEngine.currentFile
                             + " movimento=" + (Theme.reduzirMovimento ? "off" : "on")
                             + " halo=" + (nowPlaying.mostrarHalo ? "on" : "off")
+                            + " context=" + root.contextKind
+                            + " mini=" + (globalMiniPlayer.visible ? "on" : "off")
                             + " motor=" + (AudioEngine.isAvailable() ? "ok" : "MORTO"))
                 if (root.shotPath === "") {
                     Qt.quit()
@@ -699,137 +718,167 @@ Window {
             onSettingsRequested: root.openSettings()
         }
 
-        NowPlayingPanel {
-            id: nowPlaying
-            Layout.fillHeight: true
-            // Both follow the panel's own implicit width so compact mode actually narrows the
-            // frame; fillWidth stays false so the panel can never eat the pane.
-            Layout.preferredWidth: nowPlaying.implicitWidth
-            Layout.maximumWidth: nowPlaying.implicitWidth
-            Layout.fillWidth: false
-            compact: root.width < 900
-            episodeMode: root.currentEpisodeId > 0
-            onLikeRequested: function (id) { LibraryBrowser.toggleLike(id) }
-            onPlayRequested: function (mode) { root.startFromEmpty(mode) }
-            onTagChosen: function (name) { root.showTag(name) }
-            onCollectRequested: function (id) { root.collectTrack(id) }
-            onQueueJumpRequested: function (queueIndex) { root.pularNaFila(queueIndex) }
-            onQueueOpenRequested: queueOverlay.open()
-        }
-
-        StackLayout {
-            id: pane
+        ColumnLayout {
             Layout.fillWidth: true
             Layout.fillHeight: true
-            // A lista é o ponto da tela: nunca cede espaço ao painel.
-            Layout.minimumWidth: Theme.paneMinWidth
-            // Medir mede a tela da biblioteca: qual banco a máquina tem não pode mudar o
-            // resultado do gate de layout.
-            currentIndex: root.measuring
-                          ? (root.measurePane === "podcast"
-                             ? 1 : (root.measurePane === "empty"
-                                    ? 2 : (root.measurePane === "collections" ? 3 : 0)))
-                          : (root.section === "podcast"
-                             ? 1
-                             : (root.section === "collections"
-                                ? 3
-                                : (Database.libraryPath === "" ? 2 : 0)))
+            spacing: 0
 
-            LibraryPane {
-                id: libraryPane
-                model: trackModel
-                // Um assunto, um lugar: o pé da lista só assume a fila quando o cartão do
-                // painel não coube.
-                showQueueStrip: !nowPlaying.mostrandoProxima
-                filter: root.libraryFilter
-                groups: root.groups
-                showingGroups: root.showingGroups
-                groupTitle: root.groupsTitle
-                groupSubtitle: root.groupSubtitle
-                scanning: Database.scanning
-                onGroupChosen: function (key) { root.chooseFilter(key) }
-                onGroupOpened: function (section, id) { root.openGroup(section, id) }
-                onTagOpened: function (name) { root.showTag(name) }
-                onTrackActivated: function (index) { root.activateTrack(index) }
-                onCollectRequested: function (trackId) { root.collectTrack(trackId) }
-                onCollectAllRequested: root.collectAll()
-                onSearchRequested: searchOverlay.open()
-                onQueueActivated: function (queueIndex) { root.pularNaFila(queueIndex) }
-                onQueueExpandRequested: queueOverlay.open()
-            }
-
-            Loader {
-                id: podcastLoader
+            RowLayout {
                 Layout.fillWidth: true
                 Layout.fillHeight: true
-                active: root.podcastPaneLoaded
-                sourceComponent: PodcastPane {
-                    episodePlaying: root.currentEpisodeId > 0
-                    currentPath: AudioEngine.currentFile
+                spacing: 0
+
+                StackLayout {
+                    id: contextStack
+                    Layout.fillHeight: true
+                    Layout.preferredWidth: nowPlaying.implicitWidth
+                    Layout.maximumWidth: nowPlaying.implicitWidth
+                    Layout.fillWidth: false
+                    currentIndex: root.contextShowsPlayer ? 0 : 1
+
+                    NowPlayingPanel {
+                        id: nowPlaying
+                        compact: root.width < 900
+                        episodeMode: root.currentEpisodeId > 0
+                        onLikeRequested: function (id) { LibraryBrowser.toggleLike(id) }
+                        onPlayRequested: function (mode) { root.startFromEmpty(mode) }
+                        onTagChosen: function (name) { root.showTag(name) }
+                        onCollectRequested: function (id) { root.collectTrack(id) }
+                        onQueueJumpRequested: function (queueIndex) { root.pularNaFila(queueIndex) }
+                        onQueueOpenRequested: queueOverlay.open()
+                    }
+
+                    PodcastContextPanel {
+                        compact: root.width < 900
+                        selectedShowId: root.podcastShowId
+                        onShowRequested: function (showId) { root.podcastShowId = showId }
+                    }
+                }
+
+                StackLayout {
+                    id: pane
+                    Layout.fillWidth: true
+                    Layout.fillHeight: true
+                    // A lista é o ponto da tela: nunca cede espaço ao painel.
+                    Layout.minimumWidth: Theme.paneMinWidth
+                    // Medir mede a tela pedida: qual banco a máquina tem não pode mudar o
+                    // resultado do gate de layout.
+                    currentIndex: root.measuring
+                                  ? (root.measurePane === "podcast"
+                                     ? 1 : (root.measurePane === "empty"
+                                            ? 2 : (root.measurePane === "collections" ? 3 : 0)))
+                                  : (root.section === "podcast"
+                                     ? 1
+                                     : (root.section === "collections"
+                                        ? 3
+                                        : (Database.libraryPath === "" ? 2 : 0)))
+
+                    LibraryPane {
+                        id: libraryPane
+                        model: trackModel
+                        // Um assunto, um lugar: o pé da lista só assume a fila quando o cartão do
+                        // painel não coube.
+                        showQueueStrip: !nowPlaying.mostrandoProxima
+                        filter: root.libraryFilter
+                        groups: root.groups
+                        showingGroups: root.showingGroups
+                        groupTitle: root.groupsTitle
+                        groupSubtitle: root.groupSubtitle
+                        scanning: Database.scanning
+                        onGroupChosen: function (key) { root.chooseFilter(key) }
+                        onGroupOpened: function (section, id) { root.openGroup(section, id) }
+                        onTagOpened: function (name) { root.showTag(name) }
+                        onTrackActivated: function (index) { root.activateTrack(index) }
+                        onCollectRequested: function (trackId) { root.collectTrack(trackId) }
+                        onCollectAllRequested: root.collectAll()
+                        onSearchRequested: searchOverlay.open()
+                        onQueueActivated: function (queueIndex) { root.pularNaFila(queueIndex) }
+                        onQueueExpandRequested: queueOverlay.open()
+                    }
+
+                    Loader {
+                        id: podcastLoader
+                        Layout.fillWidth: true
+                        Layout.fillHeight: true
+                        active: root.podcastPaneLoaded
+                        sourceComponent: PodcastPane {
+                            episodePlaying: root.currentEpisodeId > 0
+                            currentPath: AudioEngine.currentFile
+                            showFilter: root.podcastShowId
+                            onShowRequested: function (showId) { root.podcastShowId = showId }
+                        }
+                    }
+
+                    Loader {
+                        id: emptyPaneLoader
+                        Layout.fillWidth: true
+                        Layout.fillHeight: true
+                        active: root.emptyPaneLoaded
+                        sourceComponent: EmptyPane {
+                            framed: true
+                            onPlayRequested: function (mode) { root.startFromEmpty(mode) }
+                        }
+                    }
+
+                    Loader {
+                        id: collectionsLoader
+                        Layout.fillWidth: true
+                        Layout.fillHeight: true
+                        active: root.collectionsPaneLoaded
+                        sourceComponent: CollectionsPane {
+                            id: collectionsPane
+                            model: trackModel
+                            onCollectionOpened: function (id, name) {
+                                root.currentSection = "collection"
+                                root.currentId = id
+                                const q = root.clauseFor("collection", id)
+                                trackModel.loadFromQuery(q.clause, q.bindings)
+                            }
+                            onCloseRequested: {
+                                // Sair de uma coleção devolve a lista inteira ao modelo: o painel da
+                                // biblioteca compartilha este modelo e não pode herdar o filtro.
+                                root.currentSection = "all"
+                                root.currentId = 0
+                                root.showSection("all", 0)
+                            }
+                            onTrackActivated: function (index) { root.activateTrack(index) }
+                            onPlayRequested: function (shuffled) {
+                                // O modelo é o da coleção aberta: allPaths() já devolve as faixas dela na
+                                // ordem manual (clauseForCollection ordena por collection_tracks.position).
+                                const paths = trackModel.allPaths()
+                                if (paths.length === 0)
+                                    return
+                                AudioEngine.loadPlaylist(paths, 0)
+                                // Depois do loadPlaylist, como em startFromEmpty: ligar o modo antes de a
+                                // fila existir deixa o botão do painel aceso sobre uma fila vazia.
+                                AudioEngine.setShuffle(shuffled)
+                                AudioEngine.play()
+                            }
+                            // Sem recarregar, a linha removida continua na tela até alguém trocar de
+                            // painel — e o usuário clica de novo achando que o botão não funcionou.
+                            onTrackRemoved: function (trackId) {
+                                const q = root.clauseFor("collection", collectionsPane.openId)
+                                trackModel.loadFromQuery(q.clause, q.bindings)
+                            }
+                            onTrackMoved: function (trackId, newIndex) {
+                                if (!CollectionManager.moveTrackInCollection(collectionsPane.openId,
+                                                                             trackId, newIndex))
+                                    return
+                                // Recarregar do banco, nunca reordenar a lista na mão: o banco é a fonte
+                                // da ordem, e uma lista remendada mentiria até a próxima troca de painel.
+                                const q = root.clauseFor("collection", collectionsPane.openId)
+                                trackModel.loadFromQuery(q.clause, q.bindings)
+                            }
+                        }
+                    }
                 }
             }
 
-            Loader {
-                id: emptyPaneLoader
+            GlobalMiniPlayer {
+                id: globalMiniPlayer
                 Layout.fillWidth: true
-                Layout.fillHeight: true
-                active: root.emptyPaneLoaded
-                sourceComponent: EmptyPane {
-                    framed: true
-                    onPlayRequested: function (mode) { root.startFromEmpty(mode) }
-                }
-            }
-
-            Loader {
-                id: collectionsLoader
-                Layout.fillWidth: true
-                Layout.fillHeight: true
-                active: root.collectionsPaneLoaded
-                sourceComponent: CollectionsPane {
-                    id: collectionsPane
-                    model: trackModel
-                    onCollectionOpened: function (id, name) {
-                        root.currentSection = "collection"
-                        root.currentId = id
-                        const q = root.clauseFor("collection", id)
-                        trackModel.loadFromQuery(q.clause, q.bindings)
-                    }
-                    onCloseRequested: {
-                        // Sair de uma coleção devolve a lista inteira ao modelo: o painel da
-                        // biblioteca compartilha este modelo e não pode herdar o filtro.
-                        root.currentSection = "all"
-                        root.currentId = 0
-                        root.showSection("all", 0)
-                    }
-                    onTrackActivated: function (index) { root.activateTrack(index) }
-                    onPlayRequested: function (shuffled) {
-                        // O modelo é o da coleção aberta: allPaths() já devolve as faixas dela na
-                        // ordem manual (clauseForCollection ordena por collection_tracks.position).
-                        const paths = trackModel.allPaths()
-                        if (paths.length === 0)
-                            return
-                        AudioEngine.loadPlaylist(paths, 0)
-                        // Depois do loadPlaylist, como em startFromEmpty: ligar o modo antes de a
-                        // fila existir deixa o botão do painel aceso sobre uma fila vazia.
-                        AudioEngine.setShuffle(shuffled)
-                        AudioEngine.play()
-                    }
-                    // Sem recarregar, a linha removida continua na tela até alguém trocar de
-                    // painel — e o usuário clica de novo achando que o botão não funcionou.
-                    onTrackRemoved: function (trackId) {
-                        const q = root.clauseFor("collection", collectionsPane.openId)
-                        trackModel.loadFromQuery(q.clause, q.bindings)
-                    }
-                    onTrackMoved: function (trackId, newIndex) {
-                        if (!CollectionManager.moveTrackInCollection(collectionsPane.openId,
-                                                                     trackId, newIndex))
-                            return
-                        // Recarregar do banco, nunca reordenar a lista na mão: o banco é a fonte
-                        // da ordem, e uma lista remendada mentiria até a próxima troca de painel.
-                        const q = root.clauseFor("collection", collectionsPane.openId)
-                        trackModel.loadFromQuery(q.clause, q.bindings)
-                    }
-                }
+                visible: root.showGlobalMiniPlayer
+                episodeMode: root.currentEpisodeId > 0
             }
         }
     }

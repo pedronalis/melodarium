@@ -70,6 +70,8 @@ qt_add_qml_module(melodarium
         src/MelodariumButton.qml
         src/TrackRow.qml
         src/NowPlayingPanel.qml
+        src/GlobalMiniPlayer.qml
+        src/PodcastContextPanel.qml
         src/LibraryPane.qml
         src/QueueStrip.qml
         src/NextUpCard.qml
