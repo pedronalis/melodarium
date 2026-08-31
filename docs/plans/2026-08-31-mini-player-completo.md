@@ -272,6 +272,36 @@ ImageMagick e Pillow.
   com a régua de motion e executar `gitnexus detect_changes` antes do commit. Reiniciar apenas
   a instância do Melodarium e confirmar a nova build no workspace 10.
 
+### Task 6: Troca instantânea da página, motion restrito ao player
+
+**Files:**
+- Modify: `src/Main.qml`
+- Modify: `tools/check-contextual-ui.sh`
+- Modify: `docs/plans/2026-08-31-mini-player-completo.md`
+
+**Interfaces:**
+- Consumes: `effectiveSection`, `showGlobalMiniPlayer`, `revealProgress` e `contentReveal`.
+- Produces: página contextual sempre em opacidade total e coreografia exclusiva do mini-player:
+  shell sobe primeiro, conteúdo interno entra depois.
+
+- [x] **Step 1: escrever e provar o gate RED da página estática**
+
+  Renomear as amostras de `section*` para `page*` e exigir `pageBefore`, `pageMid` e `pageEnd`
+  iguais a 1. A implementação anterior deve falhar porque ainda reduz a opacidade e desloca a
+  página inteira ao trocar de aba.
+
+- [x] **Step 2: remover fade e deslocamento da página**
+
+  Eliminar `sectionReveal` e sua animação de `contextStack` e `pane`. Preservar a troca imediata
+  da aba, a subida de 220 ms do shell e a entrada posterior de 180 ms apenas dos elementos do
+  mini-player.
+
+- [x] **Step 3: verificar motion, regressão e reabrir no workspace 10**
+
+  Rodar build, piso e suíte CTest, gate contextual, órfãos, layout e fidelidade; revisar o diff
+  com a régua de motion e executar `gitnexus detect_changes` antes do commit. Reiniciar somente
+  a instância exata do Melodarium no workspace 10.
+
 ## Gate humano
 
 - [ ] Pedro testa música e episódio no app real, abre o menu de velocidade, escolhe outro valor

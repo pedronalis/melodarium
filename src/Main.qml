@@ -252,13 +252,12 @@ Window {
     readonly property int miniBarTransitionDuration: Math.min(220, Theme.animationNormal)
     readonly property int contentTransitionGap: Math.min(40, Theme.animationFast)
     readonly property int contentTransitionDuration: Math.min(180, Theme.animationNormal)
-    property real sectionReveal: 1
     property real motionMiniStart: 0
     property real motionMiniMid: 0
     property real motionMiniRaised: 0
-    property real motionSectionBefore: 0
-    property real motionSectionMid: 0
-    property real motionSectionEnd: 0
+    property real motionPageBefore: 1
+    property real motionPageMid: 1
+    property real motionPageEnd: 1
     property real motionPlayerBefore: 0
     property real motionPlayerMid: 0
     property real motionPlayerEnd: 0
@@ -306,21 +305,11 @@ Window {
     readonly property bool showGlobalMiniPlayer:
         AudioEngine.currentFile !== "" && !root.contextShowsPlayer
 
-    function startContextualContentEntrance(revealPlayer) {
-        sectionEnter.start()
-        if (revealPlayer)
-            miniContentEnter.start()
-        else
-            globalMiniPlayer.contentReveal = 1
-    }
-
     onEffectiveSectionChanged: {
         if (!root.transitionsReady)
             return
         contentEntranceDelay.stop()
-        sectionEnter.stop()
         miniContentEnter.stop()
-        root.sectionReveal = 0
         // The derived `showGlobalMiniPlayer` binding updates after this handler. Calculate
         // from the new section directly so content cannot mount one frame ahead of the shell.
         const targetShowsMini = AudioEngine.currentFile !== ""
@@ -331,7 +320,6 @@ Window {
                             && globalMiniHost.revealProgress < 0.99
         if (!barEntering) {
             globalMiniPlayer.contentReveal = 1
-            root.startContextualContentEntrance(false)
             return
         }
         globalMiniPlayer.contentReveal = 0
@@ -339,15 +327,6 @@ Window {
             root.miniBarTransitionDuration * (1 - globalMiniHost.revealProgress))
             + root.contentTransitionGap
         contentEntranceDelay.start()
-    }
-
-    NumberAnimation {
-        id: sectionEnter
-        target: root
-        property: "sectionReveal"
-        to: 1
-        duration: root.contentTransitionDuration
-        easing.type: Theme.easingType
     }
 
     NumberAnimation {
@@ -362,7 +341,7 @@ Window {
     Timer {
         id: contentEntranceDelay
         repeat: false
-        onTriggered: root.startContextualContentEntrance(true)
+        onTriggered: miniContentEnter.start()
     }
 
     readonly property var filterTitles: ({
@@ -764,7 +743,7 @@ Window {
                 interval: 1140
                 onTriggered: {
                     root.motionMiniRaised = globalMiniHost.height
-                    root.motionSectionBefore = root.sectionReveal
+                    root.motionPageBefore = pane.opacity
                     root.motionPlayerBefore = globalMiniPlayer.contentReveal
                 }
             }
@@ -773,7 +752,7 @@ Window {
                 running: root.measureMiniMotion
                 interval: 1250
                 onTriggered: {
-                    root.motionSectionMid = root.sectionReveal
+                    root.motionPageMid = pane.opacity
                     root.motionPlayerMid = globalMiniPlayer.contentReveal
                 }
             }
@@ -782,15 +761,15 @@ Window {
                 running: root.measureMiniMotion
                 interval: 1400
                 onTriggered: {
-                    root.motionSectionEnd = root.sectionReveal
+                    root.motionPageEnd = pane.opacity
                     root.motionPlayerEnd = globalMiniPlayer.contentReveal
                     console.log("MOTION miniStart=" + root.motionMiniStart.toFixed(2)
                                 + " miniMid=" + root.motionMiniMid.toFixed(2)
                                 + " miniRaised=" + root.motionMiniRaised.toFixed(2)
                                 + " miniTarget=" + globalMiniPlayer.implicitHeight.toFixed(2)
-                                + " sectionBefore=" + root.motionSectionBefore.toFixed(3)
-                                + " sectionMid=" + root.motionSectionMid.toFixed(3)
-                                + " sectionEnd=" + root.motionSectionEnd.toFixed(3)
+                                + " pageBefore=" + root.motionPageBefore.toFixed(3)
+                                + " pageMid=" + root.motionPageMid.toFixed(3)
+                                + " pageEnd=" + root.motionPageEnd.toFixed(3)
                                 + " playerBefore=" + root.motionPlayerBefore.toFixed(3)
                                 + " playerMid=" + root.motionPlayerMid.toFixed(3)
                                 + " playerEnd=" + root.motionPlayerEnd.toFixed(3)
@@ -923,10 +902,6 @@ Window {
                     Layout.fillWidth: false
                     currentIndex: root.contextShowsPlayer
                                   ? 0 : (root.effectiveSection === "podcast" ? 1 : 2)
-                    opacity: root.sectionReveal
-                    transform: Translate {
-                        y: (1 - root.sectionReveal) * Math.round(6 * Theme.uiScale)
-                    }
 
                     NowPlayingPanel {
                         id: nowPlaying
@@ -976,10 +951,6 @@ Window {
                                      : (root.section === "collections"
                                         ? 3
                                         : (Database.libraryPath === "" ? 2 : 0)))
-                    opacity: root.sectionReveal
-                    transform: Translate {
-                        y: (1 - root.sectionReveal) * Math.round(6 * Theme.uiScale)
-                    }
 
                     LibraryPane {
                         id: libraryPane
