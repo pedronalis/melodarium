@@ -131,7 +131,7 @@ Pillow para comparação das capturas offscreen.
   `showRequested(int)`; `PodcastPane.showFilter` controlado pelo shell e sinal
   `showRequested(int)`; medição `context=<player|podcast|collections>` e `mini=<on|off>`.
 
-- [ ] **Step 1: escrever e registrar o gate vermelho**
+- [x] **Step 1: escrever e registrar o gate vermelho**
 
   Criar `tools/check-contextual-ui.sh` para gerar um WAV temporário, iniciar o app com dados e
   configurações isolados e exigir estas linhas de execução:
@@ -147,14 +147,14 @@ Pillow para comparação das capturas offscreen.
   indisponível ou binding loop) reprova. Registrar como `tst_contextual_ui` em
   `tests/CMakeLists.txt`.
 
-- [ ] **Step 2: provar RED**
+- [x] **Step 2: provar RED**
 
   Run: `quiet-run cmake -B build -G Ninja && quiet-run cmake --build build && quiet-run ctest --test-dir build -N -R tst_contextual_ui && quiet-run ctest --test-dir build -R tst_contextual_ui --output-on-failure`
 
   Expected: um alvo é descoberto e falha porque `MEDIDA` ainda não publica `context`/`mini` e
   as duas abas ainda compartilham o mesmo painel.
 
-- [ ] **Step 3: implementar o mini-player global**
+- [x] **Step 3: implementar o mini-player global**
 
   Criar um rodapé de altura escalada entre 60 e 68 px com capa de 42 px, título, subtítulo,
   barra de progresso e três controles. Em música, os controles laterais chamam
@@ -162,7 +162,7 @@ Pillow para comparação das capturas offscreen.
   mostram tooltips correspondentes. Resolver metadata e capa no mesmo padrão do
   `NowPlayingPanel`, reagindo a `AudioEngine.currentFileChanged` e `CoverCache.revision`.
 
-- [ ] **Step 4: implementar o painel contextual de Podcast**
+- [x] **Step 4: implementar o painel contextual de Podcast**
 
   O painel usa a mesma largura e o mesmo degradê do player. Com `selectedShowId > 0`, mostra
   capa, título, total e não ouvidos do programa; com “Todos”, prioriza o primeiro item de
@@ -170,14 +170,14 @@ Pillow para comparação das capturas offscreen.
   Sem retomada, mostra o conjunto de programas e uma chamada discreta para escolher um feed no
   menu central. A capa usa `RoundedCover`, placeholder quente e `Theme.uiScale`.
 
-- [ ] **Step 5: tornar o filtro de programa um estado único**
+- [x] **Step 5: tornar o filtro de programa um estado único**
 
   Em `PodcastPane.qml`, substituir atribuições internas a `showFilter` por
   `root.showRequested(id)`. Em `Main.qml`, manter `podcastShowId`, passá-lo ao pane e ao painel
   contextual e atualizar ambos no handler. Assim, selecionar pelo menu ou pelo contexto troca a
   mesma lista sem quebrar binding QML.
 
-- [ ] **Step 6: montar o host contextual no shell**
+- [x] **Step 6: montar o host contextual no shell**
 
   Reorganizar a área à direita do `IconRail` como `ColumnLayout`: linha principal com
   `StackLayout` contextual + pane e, abaixo, `GlobalMiniPlayer`. O contexto efetivo é o pane de
@@ -187,21 +187,21 @@ Pillow para comparação das capturas offscreen.
   library                         -> NowPlayingPanel
   podcast + currentEpisodeId > 0 -> NowPlayingPanel em episodeMode
   podcast sem episódio ativo     -> PodcastContextPanel
-  collections                    -> slot reservado à próxima fatia
+  collections                    -> NowPlayingPanel até a próxima fatia ocupar o terceiro slot
   mini-player                    -> arquivo ativo e contexto atual não é NowPlayingPanel
   ```
 
   Preservar os handlers, a largura `implicitWidth`/`maximumWidth`, o mínimo do pane e a decisão
   de `LibraryPane.showQueueStrip` baseada no mesmo `NowPlayingPanel` vivo.
 
-- [ ] **Step 7: provar GREEN e alcance**
+- [x] **Step 7: provar GREEN e alcance**
 
   Run: `quiet-run cmake --build build && quiet-run ctest --test-dir build -R tst_contextual_ui --output-on-failure && quiet-run bash tools/check-orfaos.sh && quiet-run bash tools/check-layout.sh && quiet-run bash tools/check-fidelidade.sh`
 
   Expected: gate contextual passa os três estados, zero órfãos novos, layout nominal/mínimo e
   quinze sondas de fidelidade permanecem verdes.
 
-- [ ] **Step 8: marcar a task e commitar**
+- [x] **Step 8: marcar a task e commitar**
 
   Marcar estes passos no mesmo commit e executar:
 
