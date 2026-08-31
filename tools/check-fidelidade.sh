@@ -111,5 +111,18 @@ if max(abs(a - b) for a, b in zip(canto, centro)) < 12:
 else:
     print("ok:    a capa está arredondada (o canto não é arte)")
 
+# The old dashed Canvas alternated between the dark stroke and the brighter gradient 44 times
+# across this straight edge, which looked jagged even at rest. Exclude corners and require the
+# replacement outline to remain continuous.
+vazio = fotos["vazio"]
+linha = [max(vazio.getpixel((x, 24))) for x in range(110, 395)]
+escuro = [nivel < 45 for nivel in linha]
+transicoes = sum(a != b for a, b in zip(escuro, escuro[1:]))
+if transicoes > 4 or sum(escuro) < len(escuro) * 0.9:
+    print(f"FALHA: borda do placeholder continua quebrada ({transicoes} transições)")
+    falhas += 1
+else:
+    print(f"ok:    borda do placeholder é contínua ({transicoes} transições)")
+
 sys.exit(1 if falhas else 0)
 PY

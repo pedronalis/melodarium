@@ -277,8 +277,8 @@ Rectangle {
             Layout.preferredHeight: capaRect.lado
             Layout.maximumHeight: capaRect.lado
             Layout.alignment: Qt.AlignHCenter
-            // Sem faixa, a capa não é um retângulo cinza: é uma moldura tracejada que diz o
-            // que está acontecendo (design/SemMusica.dc.html).
+            // Without a track, a quiet continuous outline keeps the placeholder intentional
+            // without the broken corner segments produced by the former dashed Canvas.
 
             // The artwork crossfades through two RoundedCover layers, but the shadow never
             // changes with the artwork. One shared texture avoids calculating the same
@@ -289,34 +289,16 @@ Rectangle {
                 z: -1
             }
 
-            Canvas {
+            Rectangle {
                 anchors.fill: parent
                 visible: !root.hasTrack
                 // Acima do bloco de capa, que é declarado depois e sem isto o cobriria.
                 z: 1
-                onPaint: {
-                    const ctx = getContext("2d")
-                    ctx.reset()
-                    // cLine, e não a cor do painel: no topo do degradê o painel tem quase
-                    // esse mesmo tom, e uma moldura mais escura sumiria ali.
-                    ctx.strokeStyle = Theme.cLine
-                    ctx.lineWidth = Theme.borderS
-                    ctx.setLineDash([6, 5])
-                    const r = Theme.radiusM
-                    const w = width - 1
-                    const h = height - 1
-                    ctx.beginPath()
-                    ctx.moveTo(r, 0.5)
-                    ctx.lineTo(w - r, 0.5)
-                    ctx.arcTo(w, 0.5, w, r, r)
-                    ctx.lineTo(w, h - r)
-                    ctx.arcTo(w, h, w - r, h, r)
-                    ctx.lineTo(r, h)
-                    ctx.arcTo(0.5, h, 0.5, h - r, r)
-                    ctx.lineTo(0.5, r)
-                    ctx.arcTo(0.5, 0.5, r, 0.5, r)
-                    ctx.stroke()
-                }
+                color: "transparent"
+                radius: Theme.radiusM
+                border.width: Theme.borderS
+                border.color: Theme.cLine
+                antialiasing: true
             }
 
             ColumnLayout {

@@ -249,13 +249,19 @@ Window {
            : (root.measuredPane === "collections" ? "collections" : "library"))
         : root.section
     property bool transitionsReady: false
-    readonly property int contextualTransitionDuration: Math.min(250, Theme.animationNormal)
+    readonly property int miniBarTransitionDuration: Math.min(220, Theme.animationNormal)
+    readonly property int contentTransitionGap: Math.min(40, Theme.animationFast)
+    readonly property int contentTransitionDuration: Math.min(180, Theme.animationNormal)
     property real sectionReveal: 1
     property real motionMiniStart: 0
     property real motionMiniMid: 0
-    property real motionMiniEnd: 0
+    property real motionMiniRaised: 0
+    property real motionSectionBefore: 0
     property real motionSectionMid: 0
     property real motionSectionEnd: 0
+    property real motionPlayerBefore: 0
+    property real motionPlayerMid: 0
+    property real motionPlayerEnd: 0
     property int podcastShowId: 0
     property int selectedCollectionId: 0
     // Secondary panes keep their state after the first visit, but do not exist before it.
@@ -300,12 +306,39 @@ Window {
     readonly property bool showGlobalMiniPlayer:
         AudioEngine.currentFile !== "" && !root.contextShowsPlayer
 
+    function startContextualContentEntrance(revealPlayer) {
+        sectionEnter.start()
+        if (revealPlayer)
+            miniContentEnter.start()
+        else
+            globalMiniPlayer.contentReveal = 1
+    }
+
     onEffectiveSectionChanged: {
         if (!root.transitionsReady)
             return
+        contentEntranceDelay.stop()
         sectionEnter.stop()
+        miniContentEnter.stop()
         root.sectionReveal = 0
-        sectionEnter.start()
+        // The derived `showGlobalMiniPlayer` binding updates after this handler. Calculate
+        // from the new section directly so content cannot mount one frame ahead of the shell.
+        const targetShowsMini = AudioEngine.currentFile !== ""
+                                && root.effectiveSection !== "library"
+                                && !(root.effectiveSection === "podcast"
+                                     && root.currentEpisodeId > 0)
+        const barEntering = targetShowsMini
+                            && globalMiniHost.revealProgress < 0.99
+        if (!barEntering) {
+            globalMiniPlayer.contentReveal = 1
+            root.startContextualContentEntrance(false)
+            return
+        }
+        globalMiniPlayer.contentReveal = 0
+        contentEntranceDelay.interval = Math.round(
+            root.miniBarTransitionDuration * (1 - globalMiniHost.revealProgress))
+            + root.contentTransitionGap
+        contentEntranceDelay.start()
     }
 
     NumberAnimation {
@@ -313,8 +346,23 @@ Window {
         target: root
         property: "sectionReveal"
         to: 1
-        duration: root.contextualTransitionDuration
+        duration: root.contentTransitionDuration
         easing.type: Theme.easingType
+    }
+
+    NumberAnimation {
+        id: miniContentEnter
+        target: globalMiniPlayer
+        property: "contentReveal"
+        to: 1
+        duration: root.contentTransitionDuration
+        easing.type: Theme.easingType
+    }
+
+    Timer {
+        id: contentEntranceDelay
+        repeat: false
+        onTriggered: root.startContextualContentEntrance(true)
     }
 
     readonly property var filterTitles: ({
@@ -705,10 +753,28 @@ Window {
 
             Timer {
                 running: root.measureMiniMotion
-                interval: 1020
+                interval: 1000
                 onTriggered: {
                     root.motionMiniMid = globalMiniHost.height
+                }
+            }
+
+            Timer {
+                running: root.measureMiniMotion
+                interval: 1140
+                onTriggered: {
+                    root.motionMiniRaised = globalMiniHost.height
+                    root.motionSectionBefore = root.sectionReveal
+                    root.motionPlayerBefore = globalMiniPlayer.contentReveal
+                }
+            }
+
+            Timer {
+                running: root.measureMiniMotion
+                interval: 1250
+                onTriggered: {
                     root.motionSectionMid = root.sectionReveal
+                    root.motionPlayerMid = globalMiniPlayer.contentReveal
                 }
             }
 
@@ -716,15 +782,20 @@ Window {
                 running: root.measureMiniMotion
                 interval: 1400
                 onTriggered: {
-                    root.motionMiniEnd = globalMiniHost.height
                     root.motionSectionEnd = root.sectionReveal
+                    root.motionPlayerEnd = globalMiniPlayer.contentReveal
                     console.log("MOTION miniStart=" + root.motionMiniStart.toFixed(2)
                                 + " miniMid=" + root.motionMiniMid.toFixed(2)
-                                + " miniEnd=" + root.motionMiniEnd.toFixed(2)
+                                + " miniRaised=" + root.motionMiniRaised.toFixed(2)
                                 + " miniTarget=" + globalMiniPlayer.implicitHeight.toFixed(2)
+                                + " sectionBefore=" + root.motionSectionBefore.toFixed(3)
                                 + " sectionMid=" + root.motionSectionMid.toFixed(3)
                                 + " sectionEnd=" + root.motionSectionEnd.toFixed(3)
-                                + " duration=" + root.contextualTransitionDuration)
+                                + " playerBefore=" + root.motionPlayerBefore.toFixed(3)
+                                + " playerMid=" + root.motionPlayerMid.toFixed(3)
+                                + " playerEnd=" + root.motionPlayerEnd.toFixed(3)
+                                + " barDuration=" + root.miniBarTransitionDuration
+                                + " contentDuration=" + root.contentTransitionDuration)
                 }
             }
 
@@ -852,9 +923,9 @@ Window {
                     Layout.fillWidth: false
                     currentIndex: root.contextShowsPlayer
                                   ? 0 : (root.effectiveSection === "podcast" ? 1 : 2)
-                    opacity: 0.72 + 0.28 * root.sectionReveal
+                    opacity: root.sectionReveal
                     transform: Translate {
-                        y: (1 - root.sectionReveal) * Math.round(8 * Theme.uiScale)
+                        y: (1 - root.sectionReveal) * Math.round(6 * Theme.uiScale)
                     }
 
                     NowPlayingPanel {
@@ -905,9 +976,9 @@ Window {
                                      : (root.section === "collections"
                                         ? 3
                                         : (Database.libraryPath === "" ? 2 : 0)))
-                    opacity: 0.72 + 0.28 * root.sectionReveal
+                    opacity: root.sectionReveal
                     transform: Translate {
-                        y: (1 - root.sectionReveal) * Math.round(8 * Theme.uiScale)
+                        y: (1 - root.sectionReveal) * Math.round(6 * Theme.uiScale)
                     }
 
                     LibraryPane {
@@ -1029,7 +1100,7 @@ Window {
 
                 Behavior on revealProgress {
                     NumberAnimation {
-                        duration: root.contextualTransitionDuration
+                        duration: root.miniBarTransitionDuration
                         easing.type: Theme.easingType
                     }
                 }
