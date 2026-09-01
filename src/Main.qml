@@ -18,11 +18,25 @@ Window {
     readonly property bool measureMiniMotion:
         Qt.application.arguments.indexOf("--measure-mini-motion") >= 0
 
+    readonly property string measureHaloActivityState: {
+        const i = Qt.application.arguments.indexOf("--measure-halo-activity")
+        return i >= 0 && Qt.application.arguments.length > i + 1
+               ? Qt.application.arguments[i + 1] : ""
+    }
+    readonly property bool measureHaloActivity: root.measureHaloActivityState !== ""
+    readonly property int measureHaloActivityDuration: {
+        const i = Qt.application.arguments.indexOf("--halo-activity-duration")
+        if (i < 0 || Qt.application.arguments.length <= i + 1)
+            return 1900
+        const ms = parseInt(Qt.application.arguments[i + 1])
+        return isNaN(ms) ? 1900 : Math.max(500, ms)
+    }
+
     // `--sem-animacao`: desliga toda transição sem precisar de tela de ajustes. `--measure`
     // liga junto de qualquer jeito — a foto do gate é tirada num instante fixo e pegaria a
     // animação pela metade, reprovando por movimento em vez de por cor errada.
     readonly property bool semAnimacao:
-        (root.measuring && !root.measureMiniMotion)
+        (root.measuring && !root.measureMiniMotion && !root.measureHaloActivity)
         || Qt.application.arguments.indexOf("--sem-animacao") >= 0
 
     // `--com-halo`: fotografar o halo aceso. O gate de fidelidade mede 15 pontos fixos e o
@@ -261,6 +275,7 @@ Window {
     property real motionPlayerBefore: 0
     property real motionPlayerMid: 0
     property real motionPlayerEnd: 0
+    property real haloActivityPhaseStart: 0
     property int podcastShowId: 0
     property int selectedCollectionId: 0
     // Secondary panes keep their state after the first visit, but do not exist before it.
@@ -779,6 +794,40 @@ Window {
             }
 
             Timer {
+                running: root.measureHaloActivity
+                interval: 1300
+                onTriggered: {
+                    if (root.measureHaloActivityState === "paused")
+                        AudioEngine.pause()
+                    else if (root.measureHaloActivityState === "hidden")
+                        root.hide()
+                }
+            }
+
+            Timer {
+                running: root.measureHaloActivity
+                interval: 1600
+                onTriggered: {
+                    root.haloActivityPhaseStart = nowPlaying.sampleHaloPhase()
+                }
+            }
+
+            Timer {
+                running: root.measureHaloActivity
+                interval: 1600 + root.measureHaloActivityDuration
+                onTriggered: {
+                    const end = nowPlaying.sampleHaloPhase()
+                    const delta = Math.abs(end - root.haloActivityPhaseStart)
+                    console.log("HALO_ACTIVITY state=" + root.measureHaloActivityState
+                                + " active=" + (nowPlaying.haloActive ? "on" : "off")
+                                + " frame="
+                                + (nowPlaying.haloFrameRetained ? "retained" : "cleared")
+                                + " delta=" + delta.toFixed(3))
+                    Qt.quit()
+                }
+            }
+
+            Timer {
             running: true
             interval: root.measureDelay
             onTriggered: {
@@ -892,6 +941,9 @@ Window {
                     NowPlayingPanel {
                         id: nowPlaying
                         compact: root.width < 900
+                        windowExposed: root.visible
+                                       && root.visibility !== Window.Hidden
+                                       && root.visibility !== Window.Minimized
                         episodeMode: root.currentEpisodeId > 0
                         onLikeRequested: function (id) { LibraryBrowser.toggleLike(id) }
                         onPlayRequested: function (mode) { root.startFromEmpty(mode) }

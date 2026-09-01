@@ -23,6 +23,11 @@ import Melodarium.App
 Item {
     id: root
 
+    // Animation is a render cost, not part of the visual state. Pausing keeps the current
+    // phase painted while playback is paused or the application window is not exposed.
+    property bool active: true
+    readonly property bool animating: root.active && !Theme.reduzirMovimento
+
     // Sem o corte, os focos saem do painel e a luz do álbum invade o trilho de ícones e a
     // lista. A luz termina onde o painel termina — é uma janela iluminada, e a moldura dela é
     // a borda da coluna. Medido nas duas versões em 2026-08-29.
@@ -51,7 +56,13 @@ Item {
     // meio minuto de música, sim.
     readonly property real amplitude: Math.round(14 * Theme.uiScale)
 
+    function samplePhase() {
+        const first = focusRepeater.itemAt(0)
+        return first === null ? 0 : first["fase"]
+    }
+
     Repeater {
+        id: focusRepeater
         model: root.focos
 
         Canvas {
@@ -105,7 +116,8 @@ Item {
             // Um período por foco, todos longos e nenhum múltiplo do outro: períodos que se
             // dividem voltam a coincidir e a luz inteira pulsa junto de tempos em tempos.
             NumberAnimation on fase {
-                running: !Theme.reduzirMovimento
+                running: true
+                paused: !root.animating
                 loops: Animation.Infinite
                 from: foco.index * 1.7
                 to: foco.index * 1.7 + 2 * Math.PI
