@@ -8,8 +8,13 @@ if [ ! -x "$BIN" ]; then
     exit 1
 fi
 
-for contract in 'category: "ui"' 'property bool reduceMotion' 'property bool highContrast' \
-                'function setReduceMotion' 'function setHighContrast'; do
+for contract in 'category: "ui"' 'property bool reduceMotion' 'property bool highContrast'; do
+    if ! rg -Fq "$contract" src/VisualSettings.qml; then
+        echo "VISUAL_PREF_MISSING VisualSettings.qml contract=$contract"
+        exit 1
+    fi
+done
+for contract in 'function setReduceMotion' 'function setHighContrast'; do
     if ! rg -Fq "$contract" src/Theme.qml; then
         echo "VISUAL_PREF_MISSING Theme.qml contract=$contract"
         exit 1

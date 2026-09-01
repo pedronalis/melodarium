@@ -228,6 +228,14 @@ add_test(NAME tst_visual_preferences
     COMMAND bash "${CMAKE_SOURCE_DIR}/tools/check-visual-preferences.sh" "$<TARGET_FILE:melodarium>")
 set_tests_properties(tst_visual_preferences PROPERTIES WORKING_DIRECTORY "${CMAKE_SOURCE_DIR}")
 
+add_test(NAME tst_qmllint_clean
+    COMMAND bash "${CMAKE_SOURCE_DIR}/tools/check-qmllint-clean.sh" "${CMAKE_BINARY_DIR}")
+set_tests_properties(tst_qmllint_clean PROPERTIES WORKING_DIRECTORY "${CMAKE_SOURCE_DIR}")
+
+add_test(NAME tst_orphan_gate
+    COMMAND bash "${CMAKE_SOURCE_DIR}/tools/check-orfaos-selftest.sh")
+set_tests_properties(tst_orphan_gate PROPERTIES WORKING_DIRECTORY "${CMAKE_SOURCE_DIR}")
+
 add_test(NAME tst_search_covers
     COMMAND bash "${CMAKE_SOURCE_DIR}/tools/check-search-covers.sh" "$<TARGET_FILE:melodarium>")
 set_tests_properties(tst_search_covers PROPERTIES WORKING_DIRECTORY "${CMAKE_SOURCE_DIR}")

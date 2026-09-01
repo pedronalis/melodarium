@@ -1,17 +1,12 @@
 pragma Singleton
 
-import QtCore
 import QtQuick
 import Melodarium.App
 
 QtObject {
     id: theme
 
-    readonly property Settings visualSettings: Settings {
-        category: "ui"
-        property bool reduceMotion: false
-        property bool highContrast: false
-    }
+    readonly property VisualSettings visualSettings: VisualSettings {}
 
     readonly property bool preferredReduceMotion: visualSettings.reduceMotion
     readonly property bool highContrast: visualSettings.highContrast

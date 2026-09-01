@@ -1,6 +1,5 @@
 pragma ComponentBehavior: Bound
 
-import QtCore
 import QtQuick
 import QtQuick.Controls
 import QtQuick.Layouts
@@ -9,6 +8,13 @@ import Melodarium.App
 
 Window {
     id: root
+
+    readonly property SettingsDialog settingsDialogItem:
+        settingsLoader.item as SettingsDialog
+    readonly property FolderPickerDialog measureFolderPickerItem:
+        measureFolderPickerLoader.item as FolderPickerDialog
+    readonly property CollectionsPane collectionsPaneItem:
+        collectionsLoader.item as CollectionsPane
     // `--measure [largura]`: medir também na janela mínima é o único jeito de saber se a
     // linha de filtros aguenta a tela estreita.
     readonly property bool measuring: Qt.application.arguments.indexOf("--measure") >= 0
@@ -224,7 +230,7 @@ Window {
         if (i < 0)
             return ""
         const arg = i + 1 < Qt.application.arguments.length ? Qt.application.arguments[i + 1] : ""
-        return arg.startsWith("--") || arg === "" ? "/" : arg
+        return String(arg).startsWith("--") || arg === "" ? "/" : String(arg)
     }
 
     // `--open-queue`: abre a fila inteira antes de fotografar. Mesma razão do de cima — e sem
@@ -573,12 +579,14 @@ Window {
 
     function openSettings() {
         settingsLoader.active = true
-        settingsLoader.item.open()
+        if (root.settingsDialogItem !== null)
+            root.settingsDialogItem.open()
     }
 
     function openMeasureFolderPicker(path) {
         measureFolderPickerLoader.active = true
-        measureFolderPickerLoader.item.abrirEm(path)
+        if (root.measureFolderPickerItem !== null)
+            root.measureFolderPickerItem.abrirEm(path)
     }
 
     function reloadCurrent() {
@@ -821,14 +829,15 @@ Window {
                 running: true
                 interval: 600
                 onTriggered: {
-                    if (root.measureCollection > 0)
-                        collectionsLoader.item.openById(root.measureCollection)
-                    if (root.measurePlayCollection)
-                        collectionsLoader.item.playRequested(false)
+                    if (root.measureCollection > 0 && root.collectionsPaneItem !== null)
+                        root.collectionsPaneItem.openById(root.measureCollection)
+                    if (root.measurePlayCollection && root.collectionsPaneItem !== null)
+                        root.collectionsPaneItem.playRequested(false)
                     // `count`, não `rowCount()`: o modelo expõe a contagem por Q_PROPERTY, e
                     // a chave do id em `trackAt` é `id`, não `trackId`.
-                    if (root.measureMoveLastToTop && trackModel.count > 1)
-                        collectionsLoader.item.trackMoved(
+                    if (root.measureMoveLastToTop && trackModel.count > 1
+                            && root.collectionsPaneItem !== null)
+                        root.collectionsPaneItem.trackMoved(
                             trackModel.trackAt(trackModel.count - 1).id, 0)
                     if (root.measureAlbum > 0) {
                         // O caminho do clique: o eixo carrega os grupos, e o grupo abre a
@@ -1043,8 +1052,8 @@ Window {
                             + " collectionheader="
                             + (root.effectiveSection !== "collections"
                                ? "na"
-                               : (collectionsLoader.item !== null
-                                  && collectionsLoader.item.headerFits ? "fit" : "overflow"))
+                               : (root.collectionsPaneItem !== null
+                                  && root.collectionsPaneItem.headerFits ? "fit" : "overflow"))
                             + " motor=" + (AudioEngine.isAvailable() ? "ok" : "MORTO"))
                 if (root.shotPath === "") {
                     Qt.quit()
@@ -1157,12 +1166,17 @@ Window {
                         compact: root.width < 900
                         selectedCollectionId: root.selectedCollectionId
                         onOpenRequested: function (collectionId, name) {
-                            collectionsLoader.item.open(collectionId, name)
+                            if (root.collectionsPaneItem !== null)
+                                root.collectionsPaneItem.open(collectionId, name)
                         }
                         onPlayRequested: function (shuffled) {
-                            collectionsLoader.item.playRequested(shuffled)
+                            if (root.collectionsPaneItem !== null)
+                                root.collectionsPaneItem.playRequested(shuffled)
                         }
-                        onCreateRequested: collectionsLoader.item.openCreateDialog()
+                        onCreateRequested: {
+                            if (root.collectionsPaneItem !== null)
+                                root.collectionsPaneItem.openCreateDialog()
+                        }
                     }
                 }
 
@@ -1372,7 +1386,8 @@ Window {
         }
         onCollectionChosen: function (collectionId, title) {
             root.showPane("collections")
-            collectionsLoader.item.open(collectionId, title)
+            if (root.collectionsPaneItem !== null)
+                root.collectionsPaneItem.open(collectionId, title)
         }
     }
 

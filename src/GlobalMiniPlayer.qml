@@ -100,14 +100,13 @@ Rectangle {
         anchors.fill: parent
         anchors.leftMargin: Theme.marginL
         anchors.rightMargin: Theme.marginL
-        anchors.topMargin: Theme.marginS
-        anchors.bottomMargin: Theme.marginS
+        readonly property real revealOffset:
+            (1 - root.contentReveal) * Math.round(6 * Theme.uiScale)
+        anchors.topMargin: Theme.marginS + revealOffset
+        anchors.bottomMargin: Theme.marginS - revealOffset
         spacing: 0
         opacity: root.contentReveal
         enabled: root.contentReveal >= 0.99
-        transform: Translate {
-            y: (1 - root.contentReveal) * Math.round(6 * Theme.uiScale)
-        }
 
         Item {
             id: leftZone
