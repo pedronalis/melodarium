@@ -60,10 +60,10 @@ suíte, lint e gates determinísticos; artefatos são anexados ao job, sem publi
 
 ### Task 3: CI com pisos honestos
 
-- [ ] Criar workflow Fedora que instala dependências, configura, compila, exige `Total Tests >= 22`,
+- [x] Criar workflow Fedora que instala dependências, configura, compila, exige `Total Tests >= 22`,
   roda CTest, `all_qmllint`, órfãos e gates headless determinísticos.
-- [ ] Adicionar cache apenas de downloads/build seguro; anexar logs/capturas quando um gate falhar.
-- [ ] Validar YAML localmente e executar os mesmos comandos em container; commitar com
+- [x] Adicionar cache apenas de downloads/build seguro; anexar logs/capturas quando um gate falhar.
+- [x] Validar YAML localmente e executar os mesmos comandos em container; commitar com
   `ci: enforce build tests lint and ui gates`.
 
 ### Task 4: Documentação e gate final do lote

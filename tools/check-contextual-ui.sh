@@ -212,7 +212,9 @@ from PIL import Image
 def brightest(path):
     # Reamostrado no desenho 1100×700: o volume ocupa esta região sem tocar o slider.
     crop = Image.open(path).convert("RGB").crop((955, 635, 990, 670))
-    return max(crop.get_flattened_data(), key=lambda pixel: max(pixel))
+    pixels = (crop.get_flattened_data() if hasattr(crop, "get_flattened_data")
+              else crop.getdata())
+    return max(pixels, key=lambda pixel: max(pixel))
 
 active_rgb = brightest(sys.argv[1])
 muted_rgb = brightest(sys.argv[2])
@@ -334,7 +336,9 @@ for first, second in (("Biblioteca", "Podcast"),
                       ("Biblioteca", "Coleções"),
                       ("Podcast", "Coleções")):
     diff = ImageChops.difference(images[first], images[second])
-    changed = sum(1 for pixel in diff.get_flattened_data() if max(pixel) > 8)
+    pixels = (diff.get_flattened_data() if hasattr(diff, "get_flattened_data")
+              else diff.getdata())
+    changed = sum(1 for pixel in pixels if max(pixel) > 8)
     ratio = changed / (diff.width * diff.height)
     if ratio < 0.02:
         print(f"FALHA: {first} e {second} diferem em só {ratio:.1%} da coluna contextual")

@@ -388,7 +388,10 @@ QVariantList FolderBrowser::volumes() const
             continue;
         const QString type = QString::fromLatin1(si.fileSystemType());
         const QString root = si.rootPath();
-        if (isPseudoFileSystem(type) || isSystemMountPoint(root))
+        // Containers commonly expose / as overlay. It is still the only reachable root and
+        // must not disappear just because every other overlay mount is plumbing.
+        if ((root != QLatin1String("/") && isPseudoFileSystem(type))
+            || isSystemMountPoint(root))
             continue;
         // Bind mounts and btrfs subvolumes show the same disk two or three times over.
         const QString device = QString::fromLatin1(si.device());
