@@ -282,6 +282,7 @@ private slots:
         library.setPodcastPath(rootPath);
         QSignalSpy showsChanged(&library, &PodcastLibrary::showsChanged);
         QSignalSpy episodesChanged(&library, &PodcastLibrary::episodesChanged);
+        QSignalSpy scanFailed(&library, &PodcastLibrary::localScanFailed);
         library.scanPodcastFolder();
         QTRY_VERIFY_WITH_TIMEOUT(!library.scanning(), 10000);
         exec(QStringLiteral("DROP TRIGGER fail_local_podcast"));
@@ -289,6 +290,7 @@ private slots:
         QCOMPARE(scalar(QStringLiteral("SELECT COUNT(*) FROM podcast_shows")), showsBefore);
         QCOMPARE(scalar(QStringLiteral("SELECT COUNT(*) FROM podcast_episodes")), episodesBefore);
         QCOMPARE(showsChanged.count() + episodesChanged.count(), 0);
+        QCOMPARE(scanFailed.count(), 1);
     }
 };
 

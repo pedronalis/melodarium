@@ -74,6 +74,7 @@ signals:
     void episodesChanged(int showId);
     void episodePlayRequested(const QString &path, int seekToSeconds);
     void subscribeFailed(const QString &reason);
+    void localScanFailed(const QString &reason);
     void feedCheckFailed(int showId, const QString &reason);
     void downloadProgress(int episodeId, qint64 received, qint64 total);
     void downloadFinished(int episodeId);

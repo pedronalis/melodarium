@@ -26,6 +26,9 @@ Window {
     readonly property bool measureHaloActivity: root.measureHaloActivityState !== ""
     readonly property bool measureScroll:
         Qt.application.arguments.indexOf("--measure-scroll") >= 0
+    readonly property bool noticeGate:
+        Qt.application.arguments.indexOf("--notice-gate") >= 0
+    property int noticeGateRetryCount: 0
     readonly property int measureHaloActivityDuration: {
         const i = Qt.application.arguments.indexOf("--halo-activity-duration")
         if (i < 0 || Qt.application.arguments.length <= i + 1)
@@ -561,6 +564,123 @@ Window {
         showSection(root.currentSection, root.currentId)
     }
 
+    function showScanFailure(message) {
+        noticeCenter.push({ key: "scan-error", severity: "error", origin: qsTr("Biblioteca"),
+                            message: message, actionLabel: qsTr("Tentar novamente"),
+                            action: function() { Database.startScan() }, progress: -1 })
+    }
+
+    function showScanProgress(done, total) {
+        if (total <= 0)
+            return
+        noticeCenter.push({ key: "scan-progress", severity: "progress",
+                            origin: qsTr("Biblioteca"),
+                            message: qsTr("Lendo a biblioteca: %1 de %2").arg(done).arg(total),
+                            actionLabel: "", action: null, progress: done / total })
+    }
+
+    function showPlaybackFailure(path, message) {
+        noticeCenter.push({ key: "playback-error:" + path, severity: "error",
+                            origin: qsTr("Reprodução"), message: message,
+                            actionLabel: qsTr("Tentar novamente"),
+                            action: function() {
+                                if (path !== "") {
+                                    AudioEngine.loadPlaylist([path], 0)
+                                    AudioEngine.play()
+                                }
+                            }, progress: -1 })
+    }
+
+    function showEngineFailure(message) {
+        noticeCenter.push({ key: "engine-error", severity: "fatal",
+                            origin: qsTr("Reprodução"), message: message,
+                            actionLabel: "", action: null, progress: -1, fatal: true })
+    }
+
+    function showDatabaseFailure(message) {
+        noticeCenter.push({ key: "database-error", severity: "fatal",
+                            origin: qsTr("Banco de dados"), message: message,
+                            actionLabel: "", action: null, progress: -1, fatal: true })
+    }
+
+    function showLocalPodcastScanFailure(message) {
+        noticeCenter.push({ key: "podcast-scan-error", severity: "error",
+                            origin: qsTr("Podcast"), message: message,
+                            actionLabel: qsTr("Tentar novamente"),
+                            action: function() { PodcastLibrary.scanPodcastFolder() },
+                            progress: -1 })
+    }
+
+    function showFeedFailure(showId, message) {
+        noticeCenter.push({ key: "feed-error:" + showId, severity: "error",
+                            origin: qsTr("Podcast"), message: message,
+                            actionLabel: qsTr("Tentar novamente"),
+                            action: function() { PodcastLibrary.checkFeed(showId) }, progress: -1 })
+    }
+
+    function showDownloadFailure(episodeId, message) {
+        noticeCenter.push({ key: "download-error:" + episodeId, severity: "error",
+                            origin: qsTr("Download"), message: message,
+                            actionLabel: qsTr("Tentar novamente"),
+                            action: function() { PodcastLibrary.downloadEpisode(episodeId) },
+                            progress: -1 })
+    }
+
+    function logNoticeGate(source) {
+        const notice = noticeCenter.current
+        console.log("NOTICE source=" + source
+                    + " origin=" + (notice !== null ? notice.origin : "")
+                    + " message=" + (statusBanner.messageText !== "" ? "yes" : "no")
+                    + " action=" + (statusBanner.actionText !== "" ? "retry" : "none")
+                    + " severity=" + statusBanner.severity
+                    + " count=" + noticeCenter.count
+                    + " progress=" + statusBanner.progressValue.toFixed(3))
+    }
+
+    function runNoticeGate() {
+        root.showScanFailure("Falha de scan simulada")
+        root.logNoticeGate("scan")
+        noticeCenter.clearAll()
+        root.showPlaybackFailure("/tmp/falha.flac", "Falha de playback simulada")
+        root.logNoticeGate("playback")
+        noticeCenter.clearAll()
+        root.showFeedFailure(41, "Falha de feed simulada")
+        root.logNoticeGate("feed")
+        noticeCenter.clearAll()
+        root.showDownloadFailure(42, "Falha de download simulada")
+        root.logNoticeGate("download")
+        noticeCenter.clearAll()
+        root.showScanProgress(3, 10)
+        root.logNoticeGate("progress")
+        noticeCenter.clearAll()
+
+        for (let duplicate = 0; duplicate < 3; ++duplicate)
+            root.showScanFailure("Falha duplicada")
+        console.log("NOTICE source=dedupe count=" + noticeCenter.count)
+        noticeCenter.clearAll()
+        for (let item = 0; item < 7; ++item)
+            noticeCenter.push({ key: "limit-" + item, severity: "error", origin: "Gate",
+                                message: "Item " + item, actionLabel: "", action: null,
+                                progress: -1 })
+        console.log("NOTICE source=limit count=" + noticeCenter.count)
+        noticeCenter.clearAll()
+
+        root.showScanFailure("Fechar")
+        const beforeDismiss = noticeCenter.count
+        statusBanner.dismiss()
+        console.log("NOTICE source=dismiss before=" + beforeDismiss
+                    + " after=" + noticeCenter.count)
+        noticeCenter.push({ key: "retry-gate", severity: "error", origin: "Gate",
+                            message: "Tentar", actionLabel: "Tentar novamente",
+                            action: function() { ++root.noticeGateRetryCount }, progress: -1 })
+        const beforeRetry = noticeCenter.count
+        statusBanner.retry()
+        console.log("NOTICE source=retry before=" + beforeRetry
+                    + " after=" + noticeCenter.count
+                    + " retries=" + root.noticeGateRetryCount)
+        root.showEngineFailure("Falha fatal simulada")
+    }
+
     // Tags are picked by name, not by id, so they do not go through showSection().
     function showTag(name) {
         root.section = "library"
@@ -575,7 +695,13 @@ Window {
 
     Connections {
         target: Database
+        function onScanFailed(message) {
+            noticeCenter.clear("scan-progress")
+            root.showScanFailure(message)
+        }
+        function onScanProgress(done, total) { root.showScanProgress(done, total) }
         function onScanFinished(added, updated, removed) {
+            noticeCenter.clear("scan-progress")
             root.reloadCurrent()
         }
     }
@@ -585,10 +711,10 @@ Window {
         // Um motor que não sobe, ou um arquivo que não abre, não podem falhar em silêncio: sem
         // esta linha o sintoma é "clico e não acontece nada".
         function onEngineUnavailable(message) {
-            console.warn("melodarium: motor de áudio indisponível — " + message)
+            root.showEngineFailure(message)
         }
         function onPlaybackError(path, message) {
-            console.warn("melodarium: não consegui tocar " + path + " — " + message)
+            root.showPlaybackFailure(path, message)
         }
         function onTrackFinished(path) {
             PlayStatsRecorder.recordPlay(path)
@@ -610,6 +736,11 @@ Window {
 
     Connections {
         target: PodcastLibrary
+        function onLocalScanFailed(reason) { root.showLocalPodcastScanFailure(reason) }
+        function onFeedCheckFailed(showId, reason) { root.showFeedFailure(showId, reason) }
+        function onDownloadFailed(episodeId, reason) {
+            root.showDownloadFailure(episodeId, reason)
+        }
         function onEpisodePlayRequested(path, seekToSeconds) {
             root.podcastPaneLoaded = true
             root.section = "podcast"
@@ -921,6 +1052,10 @@ Window {
         // Finding out whether yt-dlp exists costs one process start; finding out at the moment
         // the user clicks costs a dialog that fails in their face.
         YtDlpDownloader.probe()
+        if (Database.startupError !== "")
+            root.showDatabaseFailure(Database.startupError)
+        else if (!AudioEngine.isAvailable())
+            root.showEngineFailure(qsTr("O motor de áudio não pôde ser iniciado."))
         root.transitionsReady = true
     }
 
@@ -1151,6 +1286,38 @@ Window {
                     onQueueOpenRequested: queueOverlay.open()
                 }
             }
+        }
+    }
+
+    NoticeCenter { id: noticeCenter }
+
+    StatusBanner {
+        id: statusBanner
+        anchors.top: parent.top
+        anchors.topMargin: Theme.marginL
+        anchors.horizontalCenter: parent.horizontalCenter
+        width: Math.min(parent.width - Theme.marginXL * 2, Math.round(620 * Theme.uiScale))
+        notice: noticeCenter.current
+        z: 1000
+        onDismissRequested: noticeCenter.dismissCurrent()
+        onRetryRequested: noticeCenter.retryCurrent()
+    }
+
+    Timer {
+        running: root.noticeGate
+        interval: 700
+        onTriggered: root.runNoticeGate()
+    }
+
+    Timer {
+        running: root.noticeGate
+        interval: 950
+        onTriggered: {
+            root.logNoticeGate("fatal")
+            console.log("NOTICE source=fatal severity=" + statusBanner.severity
+                        + " focused=" + (statusBanner.activeFocus ? "yes" : "no")
+                        + " focus=" + (statusBanner.focus ? "yes" : "no")
+                        + " windowactive=" + (root.active ? "yes" : "no"))
         }
     }
 

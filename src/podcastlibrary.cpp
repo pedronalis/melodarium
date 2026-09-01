@@ -247,7 +247,7 @@ void PodcastLibrary::scanPodcastFolder()
         m_scanning = false;
         emit scanningChanged();
         if (!result.ok) {
-            qWarning().noquote() << "local podcast scan rolled back:" << result.error;
+            emit localScanFailed(result.error);
             return;
         }
         // PodcastPane refreshes shows and episodes from either signal. Emit one update for
