@@ -60,6 +60,31 @@ Rectangle {
                        ? Theme.cPill
                        : (area.containsMouse ? Theme.cRaised : "transparent")
                 opacity: root.current === cell.modelData.key || area.containsMouse ? 1.0 : 0.85
+                activeFocusOnTab: true
+
+                Accessible.role: Accessible.PageTab
+                Accessible.name: cell.modelData.tip
+                Accessible.description: root.current === cell.modelData.key
+                                        ? qsTr("seção atual") : qsTr("abrir seção")
+                Accessible.selected: root.current === cell.modelData.key
+                Accessible.focusable: true
+                Accessible.onPressAction: root.chosen(cell.modelData.key)
+
+                Keys.onSpacePressed: function(event) {
+                    root.chosen(cell.modelData.key)
+                    event.accepted = true
+                }
+                Keys.onReturnPressed: function(event) {
+                    root.chosen(cell.modelData.key)
+                    event.accepted = true
+                }
+                Keys.onEnterPressed: function(event) {
+                    root.chosen(cell.modelData.key)
+                    event.accepted = true
+                }
+
+                border.width: cell.activeFocus ? Theme.borderM : 0
+                border.color: Theme.cAccent
 
                 Behavior on color {
                     ColorAnimation { duration: Theme.animationFast; easing.type: Theme.easingType }
@@ -94,6 +119,29 @@ Rectangle {
             radius: Theme.iRadiusS
             color: engrenagemArea.containsMouse ? Theme.cRaised : "transparent"
             opacity: engrenagemArea.containsMouse ? 1.0 : 0.7
+            activeFocusOnTab: true
+
+            Accessible.role: Accessible.Button
+            Accessible.name: qsTr("Preferências")
+            Accessible.description: qsTr("abrir preferências")
+            Accessible.focusable: true
+            Accessible.onPressAction: root.settingsRequested()
+
+            Keys.onSpacePressed: function(event) {
+                root.settingsRequested()
+                event.accepted = true
+            }
+            Keys.onReturnPressed: function(event) {
+                root.settingsRequested()
+                event.accepted = true
+            }
+            Keys.onEnterPressed: function(event) {
+                root.settingsRequested()
+                event.accepted = true
+            }
+
+            border.width: engrenagem.activeFocus ? Theme.borderM : 0
+            border.color: Theme.cAccent
 
             Behavior on color {
                 ColorAnimation { duration: Theme.animationFast; easing.type: Theme.easingType }

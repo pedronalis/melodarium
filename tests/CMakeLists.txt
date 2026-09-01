@@ -220,6 +220,10 @@ add_test(NAME tst_notices
     COMMAND bash "${CMAKE_SOURCE_DIR}/tools/check-notices.sh" "$<TARGET_FILE:melodarium>")
 set_tests_properties(tst_notices PROPERTIES WORKING_DIRECTORY "${CMAKE_SOURCE_DIR}")
 
+add_test(NAME tst_accessibility
+    COMMAND bash "${CMAKE_SOURCE_DIR}/tools/check-accessibility.sh" "$<TARGET_FILE:melodarium>")
+set_tests_properties(tst_accessibility PROPERTIES WORKING_DIRECTORY "${CMAKE_SOURCE_DIR}")
+
 add_test(NAME tst_search_covers
     COMMAND bash "${CMAKE_SOURCE_DIR}/tools/check-search-covers.sh" "$<TARGET_FILE:melodarium>")
 set_tests_properties(tst_search_covers PROPERTIES WORKING_DIRECTORY "${CMAKE_SOURCE_DIR}")

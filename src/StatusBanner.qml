@@ -2,7 +2,7 @@ import QtQuick
 import QtQuick.Layouts
 import Melodarium.App
 
-FocusScope {
+Item {
     id: root
 
     property var notice: null
@@ -32,8 +32,10 @@ FocusScope {
     }
 
     visible: root.notice !== null
-    focus: root.fatal
-    activeFocusOnTab: visible
+    // Keep the capability stable while a focused notice is dismissed. Toggling this property
+    // to false on the active item makes Qt warn and can strand focus; effective visibility still
+    // keeps a hidden banner out of the Tab chain.
+    activeFocusOnTab: true
     implicitHeight: body.implicitHeight
     Accessible.role: root.severity === "progress"
                      ? Accessible.ProgressBar : Accessible.AlertMessage
@@ -43,7 +45,7 @@ FocusScope {
                             : qsTr("Pressione Escape para fechar")
     Accessible.focusable: visible
 
-    onNoticeChanged: {
+    onFatalChanged: {
         if (root.fatal) {
             root.focus = true
             Qt.callLater(function() { root.forceActiveFocus(Qt.TabFocusReason) })
