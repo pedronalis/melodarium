@@ -71,15 +71,15 @@ seu momento de execução.
 - Produces: propriedades `ready`, `startupError`, `lastBackupPath`; `busy_timeout=5000` em toda
   conexão; `PRAGMA quick_check`; backup `<db>.pre-v<versao>.bak` antes de alterar schema.
 
-- [ ] Acrescentar casos vermelhos para arquivo corrompido, erro de abertura, `busy_timeout`,
+- [x] Acrescentar casos vermelhos para arquivo corrompido, erro de abertura, `busy_timeout`,
   lock temporário entre UI/scanner e backup restaurável de um schema antigo.
-- [ ] Rodar `quiet-run cmake --build build && quiet-run ./build/tests/tst_library` e confirmar que
+- [x] Rodar `quiet-run cmake --build build && quiet-run ./build/tests/tst_library` e confirmar que
   cada caso falha pela ausência do contrato, não pelo fixture.
-- [ ] Fazer cada pragma/transaction/commit retornar erro; propagar mensagem com caminho e erro
+- [x] Fazer cada pragma/transaction/commit retornar erro; propagar mensagem com caminho e erro
   SQLite, executar `quick_check` antes de migrar e criar backup consistente só quando a versão
   subir.
-- [ ] Reexecutar o alvo, abrir o backup em nova conexão e exigir tabelas/dados anteriores.
-- [ ] Marcar a task e commitar com `fix(database): validate startup and protect migrations`.
+- [x] Reexecutar o alvo, abrir o backup em nova conexão e exigir tabelas/dados anteriores.
+- [x] Marcar a task e commitar com `fix(database): validate startup and protect migrations`.
 
 ### Task 3: Provar a migração do nome antigo e eliminar o caminho fantasma do repo
 
