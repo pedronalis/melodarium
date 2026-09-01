@@ -1,0 +1,100 @@
+name: CI
+
+on:
+  push:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    container: fedora:43
+
+    steps:
+      - name: Check out source
+        uses: actions/checkout@v4
+
+      - name: Install Fedora dependencies
+        run: |
+          dnf install -y \
+            ImageMagick \
+            appstream \
+            ccache \
+            cmake \
+            dbus-daemon \
+            desktop-file-utils \
+            ffmpeg-free \
+            flatpak-builder \
+            gcc-c++ \
+            git \
+            jetbrains-mono-fonts \
+            mpv-devel \
+            ninja-build \
+            playerctl \
+            python3-pillow \
+            python3-pyyaml \
+            qt6-qtbase-devel \
+            qt6-qtdeclarative-devel \
+            ripgrep \
+            rsms-inter-fonts \
+            sqlite \
+            taglib-devel \
+            xdotool \
+            xorg-x11-server-Xvfb
+          dnf clean all
+
+      - name: Restore compiler cache
+        uses: actions/cache@v4
+        with:
+          path: /root/.cache/ccache
+          key: ${{ runner.os }}-fedora43-ccache-${{ hashFiles('CMakeLists.txt', 'src/**', 'tests/**') }}
+          restore-keys: |
+            ${{ runner.os }}-fedora43-ccache-
+
+      - name: Build and run deterministic gates
+        env:
+          CMAKE_GENERATOR: Ninja
+          QT_QPA_PLATFORM: offscreen
+          MELODIA_NULL_AO: '1'
+        run: |
+          set -euo pipefail
+          mkdir -p artifacts
+
+          run_logged() {
+            local label="$1"
+            shift
+            "$@" 2>&1 | tee "artifacts/${label}.log"
+          }
+
+          run_logged configure cmake \
+            -S . -B build -G Ninja \
+            -DCMAKE_BUILD_TYPE=RelWithDebInfo \
+            -DCMAKE_CXX_COMPILER_LAUNCHER=ccache
+          run_logged build cmake --build build
+          run_logged test-floor bash tools/check-test-floor.sh 25
+          run_logged ctest ctest --test-dir build --output-on-failure
+          run_logged qmllint cmake --build build --target all_qmllint
+          run_logged contextual-ui bash tools/check-contextual-ui.sh ./build/melodarium
+          run_logged orphans bash tools/check-orfaos.sh
+          run_logged layout bash tools/check-layout.sh
+          run_logged fidelity bash tools/check-fidelidade.sh
+          run_logged list-reuse bash tools/check-list-reuse.sh
+          run_logged accessibility bash tools/check-accessibility.sh
+          run_logged notices bash tools/check-notices.sh
+          run_logged queue-editing bash tools/check-queue-editing.sh ./build/melodarium
+          run_logged drop bash tools/check-drop.sh ./build/melodarium
+          run_logged portability bash tools/check-portability.sh ./build/melodarium
+          run_logged package bash tools/check-package.sh
+          run_logged diff-check git diff --check
+
+      - name: Upload failure diagnostics
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: ci-diagnostics-${{ github.run_id }}
+          path: artifacts/
+          if-no-files-found: ignore
+          retention-days: 7

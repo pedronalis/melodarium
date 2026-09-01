@@ -2,6 +2,7 @@
 #include <QCoreApplication>
 #include <QFile>
 #include <QProcess>
+#include <QScopeGuard>
 #include <QSignalSpy>
 #include <QSqlError>
 #include <QSqlQuery>
@@ -59,6 +60,16 @@ private:
         QSqlDatabase db = QSqlDatabase::database(QStringLiteral("verify"));
         QSqlQuery q(db);
         return (q.exec(sql) && q.next()) ? q.value(0).toInt() : -1;
+    }
+
+    static bool rewindSchemaToVersion8(QSqlDatabase &db)
+    {
+        QSqlQuery q(db);
+        return q.exec(QStringLiteral(
+                   "ALTER TABLE podcast_shows DROP COLUMN retention_count"))
+            && q.exec(QStringLiteral(
+                "ALTER TABLE podcast_shows DROP COLUMN auto_download"))
+            && q.exec(QStringLiteral("PRAGMA user_version = 8"));
     }
 
 private slots:
@@ -133,7 +144,7 @@ private slots:
                 QSqlQuery marker(db);
                 QVERIFY(marker.exec(QStringLiteral(
                     "INSERT INTO artists (id, name) VALUES (4242, 'Backup Marker')")));
-                QVERIFY(marker.exec(QStringLiteral("PRAGMA user_version = 8")));
+                QVERIFY(rewindSchemaToVersion8(db));
             }
 
             QString migrationError;
@@ -160,9 +171,25 @@ private slots:
 
     void corruptDefaultDatabaseBecomesAVisibleStartupError()
     {
+        QTemporaryDir xdg;
+        QVERIFY(xdg.isValid());
         const QString previousName = QCoreApplication::applicationName();
+        const QByteArray previousDataHome = qgetenv("XDG_DATA_HOME");
+        const QByteArray previousConfigHome = qgetenv("XDG_CONFIG_HOME");
+        const auto restoreEnvironment = qScopeGuard([=]() {
+            if (previousDataHome.isNull())
+                qunsetenv("XDG_DATA_HOME");
+            else
+                qputenv("XDG_DATA_HOME", previousDataHome);
+            if (previousConfigHome.isNull())
+                qunsetenv("XDG_CONFIG_HOME");
+            else
+                qputenv("XDG_CONFIG_HOME", previousConfigHome);
+            QCoreApplication::setApplicationName(previousName);
+        });
+        qputenv("XDG_DATA_HOME", xdg.filePath(QStringLiteral("data")).toUtf8());
+        qputenv("XDG_CONFIG_HOME", xdg.filePath(QStringLiteral("config")).toUtf8());
         QCoreApplication::setApplicationName(QStringLiteral("melodarium-corrupt-db-test"));
-        QStandardPaths::setTestModeEnabled(true);
         const QString path = Database::defaultDatabasePath();
         QDir().mkpath(QFileInfo(path).absolutePath());
         QFile::remove(path);
@@ -182,7 +209,6 @@ private slots:
 
         QSqlDatabase::removeDatabase(QLatin1String(Database::kUiConnection));
         QFile::remove(path);
-        QCoreApplication::setApplicationName(previousName);
     }
 
     void migration4AddsLikedColumn()
@@ -437,8 +463,7 @@ private slots:
 
             // Rewind to just before the invalidation and let it run for real.
             {
-                QSqlQuery back(db);
-                QVERIFY(back.exec(QStringLiteral("PRAGMA user_version = 8")));
+                QVERIFY(rewindSchemaToVersion8(db));
             }
             QVERIFY(Database::migrate(db));
 
