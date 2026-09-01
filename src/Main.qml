@@ -310,6 +310,7 @@ Window {
     property real haloActivityPhaseStart: 0
     property int podcastShowId: 0
     property int selectedCollectionId: 0
+    property string pendingDropFolder: ""
     // Secondary panes keep their state after the first visit, but do not exist before it.
     // Measurement flags opt into the same creation path so every visual gate stays reachable.
     property bool podcastPaneLoaded: root.measuring && root.measurePane === "podcast"
@@ -499,6 +500,31 @@ Window {
     function pularNaFila(queueIndex) {
         AudioEngine.loadPlaylist(AudioEngine.queue, queueIndex)
         AudioEngine.play()
+    }
+
+    function routeDropped(decision) {
+        switch (decision.action) {
+        case "queue-files":
+            for (let i = 0; i < decision.paths.length; ++i)
+                AudioEngine.appendToQueue(decision.paths[i])
+            break
+        case "queue-stream":
+            AudioEngine.appendToQueue(decision.url)
+            break
+        case "scan-folder":
+            root.pendingDropFolder = decision.paths[0]
+            droppedFolderConfirmation.message = qsTr(
+                "Usar “%1” como pasta da biblioteca e iniciar a varredura?")
+                .arg(root.pendingDropFolder)
+            droppedFolderConfirmation.open()
+            break
+        case "subscribe-feed":
+            dropSubscribeDialog.openForUrl(decision.url)
+            break
+        case "confirm-youtube":
+            dropLinkDialog.openForUrl(decision.url)
+            break
+        }
     }
 
     // As três saídas do estado "nada tocando". Nenhuma delas começa a tocar sozinha: o app
@@ -1394,6 +1420,52 @@ Window {
     QueueOverlay {
         id: queueOverlay
         onEntryActivated: function (queueIndex) { root.pularNaFila(queueIndex) }
+    }
+
+    DropArea {
+        anchors.fill: parent
+        onEntered: function(drag) {
+            const decision = DropRouter.classify(drag.urls)
+            drag.accepted = decision.accepted
+            dropOverlay.preview(decision)
+        }
+        onPositionChanged: function(drag) {
+            if (!dropOverlay.dragging)
+                dropOverlay.preview(DropRouter.classify(drag.urls))
+        }
+        onExited: dropOverlay.dismiss()
+        onDropped: function(drop) {
+            const decision = DropRouter.classify(drop.urls)
+            dropOverlay.dismiss()
+            if (!decision.accepted)
+                return
+            drop.acceptProposedAction()
+            root.routeDropped(decision)
+        }
+    }
+
+    DropOverlay {
+        id: dropOverlay
+        anchors.fill: parent
+    }
+
+    ConfirmDialog {
+        id: droppedFolderConfirmation
+        confirmLabel: qsTr("Usar pasta")
+        onConfirmed: {
+            Database.libraryPath = root.pendingDropFolder
+            Database.startScan()
+            root.pendingDropFolder = ""
+        }
+    }
+
+    SubscribeDialog {
+        id: dropSubscribeDialog
+    }
+
+    AddFromLinkDialog {
+        id: dropLinkDialog
+        collectionId: 0
     }
 
     // Ferramentas fechadas não devem montar centenas de objetos nem tocar o filesystem. Os

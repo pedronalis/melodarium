@@ -14,6 +14,7 @@ Popup {
     property string infoChannel: ""
     property int infoDuration: 0
     property string infoThumbnail: ""
+    property string initialUrl: ""
 
     signal accepted(string url)
 
@@ -30,13 +31,19 @@ Popup {
     }
 
     onOpened: {
-        linkInput.text = ""
+        linkInput.text = root.initialUrl
+        root.initialUrl = ""
         warning.text = ""
         root.hasInfo = false
         root.waitingForInfo = false
         root.pendingUrl = ""
         YtDlpDownloader.probe()
         linkInput.forceActiveFocus()
+    }
+
+    function openForUrl(url) {
+        root.initialUrl = String(url)
+        root.open()
     }
 
     function formatDuration(seconds) {

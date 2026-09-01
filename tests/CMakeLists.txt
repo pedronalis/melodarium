@@ -28,6 +28,16 @@ add_test(NAME tst_sleep_timer_ui
 set_tests_properties(tst_sleep_timer_ui PROPERTIES
     WORKING_DIRECTORY "${CMAKE_SOURCE_DIR}" TIMEOUT 30)
 
+qt_add_executable(tst_droprouter
+    tst_droprouter.cpp
+    ../src/audioformats.h
+    ../src/droprouter.h ../src/droprouter.cpp
+)
+target_include_directories(tst_droprouter PRIVATE ../src)
+target_link_libraries(tst_droprouter PRIVATE Qt6::Core Qt6::Test Qt6::Qml)
+add_test(NAME tst_droprouter COMMAND tst_droprouter)
+set_tests_properties(tst_droprouter PROPERTIES ENVIRONMENT "QT_QPA_PLATFORM=offscreen")
+
 add_test(NAME tst_audio_preferences
     COMMAND bash "${CMAKE_SOURCE_DIR}/tools/check-audio-preferences.sh")
 set_tests_properties(tst_audio_preferences PROPERTIES WORKING_DIRECTORY "${CMAKE_SOURCE_DIR}")

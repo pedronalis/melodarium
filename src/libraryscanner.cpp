@@ -1,5 +1,6 @@
 #include "libraryscanner.h"
 
+#include "audioformats.h"
 #include "database.h"
 #include "tagreader.h"
 
@@ -103,12 +104,7 @@ void bindTrack(QSqlQuery &q, const TrackRecord &r, int artistId, int albumId, in
 
 const QStringList &LibraryScanner::audioSuffixes()
 {
-    static const QStringList list = {
-        QStringLiteral("flac"), QStringLiteral("mp3"),  QStringLiteral("m4a"),
-        QStringLiteral("mp4"),  QStringLiteral("opus"), QStringLiteral("ogg"),
-        QStringLiteral("oga"),  QStringLiteral("wav"),  QStringLiteral("aiff"),
-    };
-    return list;
+    return AudioFormats::supportedSuffixes();
 }
 
 LibraryScanner::LibraryScanner(QObject *parent)
