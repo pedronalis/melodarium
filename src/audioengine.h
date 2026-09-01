@@ -89,6 +89,10 @@ public:
     // Pôr no fim sem interromper o que toca. Com a fila vazia, carrega e NÃO começa a
     // tocar: o app só toca quando alguém pede.
     Q_INVOKABLE void appendToQueue(const QString &file);
+    Q_INVOKABLE bool playNext(const QString &file);
+    Q_INVOKABLE bool removeQueueItem(int index);
+    Q_INVOKABLE bool moveQueueItem(int from, int to);
+    Q_INVOKABLE bool clearUpcoming();
     // Os próximos `limit` caminhos, sem incluir o que toca — é o que a tirinha desenha.
     Q_INVOKABLE QStringList upcoming(int limit) const;
     // Avança Off → All → One → Off. Um botão só, como no desenho.
@@ -147,6 +151,8 @@ private:
     // Espelho do que foi mandado ao mpv. Ler playlist/N/filename seria uma consulta por
     // entrada a cada repintura da tirinha de capas.
     QStringList m_queue;
+    QVector<quint64> m_queueOccurrenceIds;
+    quint64 m_nextQueueOccurrenceId = 1;
     QStringList m_savedQueue;
     int m_savedQueueIndex = -1;
     bool m_rememberCurrentQueue = true;
@@ -154,4 +160,5 @@ private:
     bool m_shuffle = false;
     // Sem isto, desligar o aleatório não tem para onde voltar.
     QStringList m_queueOriginal;
+    QVector<quint64> m_queueOriginalOccurrenceIds;
 };
