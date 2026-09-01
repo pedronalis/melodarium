@@ -38,6 +38,7 @@ set_tests_properties(tst_legacy_migration PROPERTIES WORKING_DIRECTORY "${CMAKE_
 qt_add_executable(tst_library
     tst_library.cpp
     ../src/database.h ../src/database.cpp
+    ../src/librarywatcher.h ../src/librarywatcher.cpp
     ../src/tagreader.h ../src/tagreader.cpp
     ../src/libraryscanner.h ../src/libraryscanner.cpp
 )
@@ -54,6 +55,7 @@ qt_add_executable(tst_tracklistmodel
     ../src/covercache.h ../src/covercache.cpp
     ../src/tagreader.h ../src/tagreader.cpp
     ../src/database.h ../src/database.cpp
+    ../src/librarywatcher.h ../src/librarywatcher.cpp
     ../src/libraryscanner.h ../src/libraryscanner.cpp
 )
 target_include_directories(tst_tracklistmodel PRIVATE ../src)
@@ -66,6 +68,7 @@ set_tests_properties(tst_tracklistmodel PROPERTIES ENVIRONMENT "QT_QPA_PLATFORM=
 qt_add_executable(tst_librarybrowser
     tst_librarybrowser.cpp
     ../src/database.h ../src/database.cpp
+    ../src/librarywatcher.h ../src/librarywatcher.cpp
     ../src/tagreader.h ../src/tagreader.cpp
     ../src/libraryscanner.h ../src/libraryscanner.cpp
     ../src/librarybrowser.h ../src/librarybrowser.cpp
@@ -83,6 +86,7 @@ set_tests_properties(tst_librarybrowser PROPERTIES ENVIRONMENT "QT_QPA_PLATFORM=
 qt_add_executable(tst_collections
     tst_collections.cpp
     ../src/database.h ../src/database.cpp
+    ../src/librarywatcher.h ../src/librarywatcher.cpp
     ../src/tagreader.h ../src/tagreader.cpp
     ../src/libraryscanner.h ../src/libraryscanner.cpp
     ../src/librarybrowser.h ../src/librarybrowser.cpp
@@ -98,6 +102,7 @@ set_tests_properties(tst_collections PROPERTIES ENVIRONMENT "QT_QPA_PLATFORM=off
 qt_add_executable(tst_podcast
     tst_podcast.cpp
     ../src/database.h ../src/database.cpp
+    ../src/librarywatcher.h ../src/librarywatcher.cpp
     ../src/tagreader.h ../src/tagreader.cpp
     ../src/libraryscanner.h ../src/libraryscanner.cpp
     ../src/podcastlibrary.h ../src/podcastlibrary.cpp
@@ -125,6 +130,7 @@ set_tests_properties(tst_feedparser PROPERTIES ENVIRONMENT "QT_QPA_PLATFORM=offs
 qt_add_executable(tst_ytdlp
     tst_ytdlp.cpp
     ../src/database.h ../src/database.cpp
+    ../src/librarywatcher.h ../src/librarywatcher.cpp
     ../src/tagreader.h ../src/tagreader.cpp
     ../src/libraryscanner.h ../src/libraryscanner.cpp
     ../src/librarybrowser.h ../src/librarybrowser.cpp
@@ -143,6 +149,7 @@ qt_add_executable(tst_folderbrowser
     ../src/folderbrowser.h ../src/folderbrowser.cpp
     ../src/libraryscanner.h ../src/libraryscanner.cpp
     ../src/database.h ../src/database.cpp
+    ../src/librarywatcher.h ../src/librarywatcher.cpp
     ../src/tagreader.h ../src/tagreader.cpp
 )
 target_include_directories(tst_folderbrowser PRIVATE ../src)
@@ -151,6 +158,20 @@ target_link_libraries(tst_folderbrowser PRIVATE
 
 add_test(NAME tst_folderbrowser COMMAND tst_folderbrowser)
 set_tests_properties(tst_folderbrowser PROPERTIES ENVIRONMENT "QT_QPA_PLATFORM=offscreen")
+
+qt_add_executable(tst_librarywatcher
+    tst_librarywatcher.cpp
+    ../src/librarywatcher.h ../src/librarywatcher.cpp
+    ../src/database.h ../src/database.cpp
+    ../src/libraryscanner.h ../src/libraryscanner.cpp
+    ../src/tagreader.h ../src/tagreader.cpp
+)
+target_include_directories(tst_librarywatcher PRIVATE ../src)
+target_link_libraries(tst_librarywatcher PRIVATE
+    Qt6::Core Qt6::Test Qt6::Qml Qt6::Sql PkgConfig::TAGLIB)
+
+add_test(NAME tst_librarywatcher COMMAND tst_librarywatcher)
+set_tests_properties(tst_librarywatcher PROPERTIES ENVIRONMENT "QT_QPA_PLATFORM=offscreen")
 
 qt_add_executable(tst_dominantcolor
     tst_dominantcolor.cpp

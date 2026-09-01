@@ -7,6 +7,7 @@
 
 class QThread;
 class LibraryScanner;
+class LibraryWatcher;
 
 class Database : public QObject
 {
@@ -65,4 +66,6 @@ private:
     QString m_lastBackupPath;
     QThread *m_scanThread = nullptr;
     LibraryScanner *m_scanner = nullptr;
+    LibraryWatcher *m_libraryWatcher = nullptr;
+    bool m_rescanPending = false;
 };
