@@ -7,10 +7,24 @@ fallback embutido.
 
 ## Dependências
 
-Fedora:
+No Fedora 43, o pacote de desenvolvimento atual do libmpv é `mpv-devel` (ele fornece o nome
+virtual histórico `mpv-libs-devel`). Para compilar e executar:
 
 ```bash
-sudo dnf install cmake ninja-build gcc-c++ qt6-qtbase-devel qt6-qtdeclarative-devel
+sudo dnf install cmake ninja-build gcc-c++ \
+  qt6-qtbase-devel qt6-qtdeclarative-devel \
+  mpv-devel taglib-devel \
+  rsms-inter-fonts jetbrains-mono-fonts
+```
+
+Inter é a fonte da interface e JetBrains Mono é usada para metadados técnicos. Há fallbacks, mas
+instalar as duas preserva a geometria e a aparência verificadas pelos gates. Para a suíte e todos
+os gates locais:
+
+```bash
+sudo dnf install ImageMagick appstream dbus-daemon desktop-file-utils \
+  ffmpeg-free flac flatpak-builder playerctl python3-pillow python3-pyyaml \
+  ripgrep sqlite xdotool xorg-x11-server-Xvfb
 ```
 
 ## Build
@@ -21,11 +35,82 @@ cmake --build build
 ./build/melodarium
 ```
 
+Instalação nativa em um prefixo do usuário:
+
+```bash
+cmake --install build --prefix "$HOME/.local"
+```
+
+Isso instala o binário, a entrada `.desktop`, os metadados AppStream e o ícone Freedesktop.
+
+## Flatpak local
+
+O manifesto usa KDE/Qt 6.9 e fixa libass, libplacebo, libmpv 0.41.0 e TagLib 2.3.1 por tag e
+commit. Ele não instala nem publica nada por conta própria:
+
+```bash
+flatpak install --user flathub org.kde.Sdk//6.9
+flatpak-builder --force-clean /tmp/melodarium-flatpak-build \
+  packaging/io.github.pedronalis.melodarium.yml
+flatpak-builder --run /tmp/melodarium-flatpak-build \
+  packaging/io.github.pedronalis.melodarium.yml melodarium
+```
+
+O sandbox recebe áudio, Wayland com fallback X11, rede, MPRIS, aceleração gráfica e leitura da
+pasta XDG de música; seleções fora dela dependem da permissão persistente do portal. O manifesto
+não empacota `yt-dlp`: RSS e mídia direta funcionam, mas downloads que exigem o executável externo
+ficam indisponíveis no Flatpak atual.
+
 ## Testes
 
 ```bash
+bash tools/check-test-floor.sh 25
 ctest --test-dir build --output-on-failure
+cmake --build build --target all_qmllint
+bash tools/check-orfaos.sh
+bash tools/check-layout.sh
+bash tools/check-fidelidade.sh
 ```
+
+O workflow em `.github/workflows/ci.yml` reproduz o build em Fedora 43, exige pelo menos 25 testes
+descobertos, roda 35 alvos CTest e os gates determinísticos. Em falha, anexa os logs do job; não
+faz push, release nem publicação.
+
+## Controles e recursos
+
+- `Ctrl+K` ou `Ctrl+F` foca a busca; teclas Play/Pause, Próxima e Anterior do teclado seguem
+  MPRIS. Os controles principais também respondem a Tab, Espaço, Enter e Escape.
+- A fila permite tocar a seguir, remover, mover e limpar as próximas entradas sem reiniciar a
+  faixa atual. O player e o mini-player oferecem timer de 15/30/60 minutos e “parar após esta”.
+- Arrastar arquivo, pasta, feed ou URL sobre a janela mostra a ação antes de executar. Downloads e
+  assinaturas continuam exigindo confirmação.
+- Podcasts suportam cancelar download, desassinar mantendo ou apagando arquivos, auto-download
+  opt-in e retenção por feed (`0` significa ilimitada).
+- Preferências incluem ReplayGain, saída exclusiva, gapless agressivo, alto contraste e movimento
+  reduzido. Erros de banco, scan, playback, feed e download aparecem na própria interface.
+
+## Importação, exportação e backup
+
+- Assinaturas de podcast entram e saem em OPML; duplicatas e entradas inválidas são resumidas.
+- Coleções exportam M3U UTF-8 com caminhos absolutos na ordem manual. Faixas ausentes são ignoradas
+  e contabilizadas.
+- Preferências → Backup e restauração cria um `.melodarium-backup` versionado. Antes de restaurar,
+  o app valida versão, hashes, integridade SQLite e espaço; preserva o estado atual em um bundle de
+  retorno e pede reinício após a troca.
+
+Não edite nem copie o banco aberto à mão. Para migração entre máquinas, use o bundle da interface.
+
+## Dados locais
+
+O app segue XDG. Na instalação nativa, os principais caminhos são:
+
+- banco, podcasts e downloads: `$XDG_DATA_HOME/melodarium/melodarium/`;
+- preferências: `$XDG_CONFIG_HOME/melodarium/melodarium.conf`;
+- capas: `$XDG_CACHE_HOME/melodarium/melodarium/covers/`.
+
+Quando as variáveis não existem, Qt usa `~/.local/share`, `~/.config` e `~/.cache`. No Flatpak,
+essas bases ficam sob `~/.var/app/io.github.pedronalis.melodarium/`. Na primeira abertura, a
+migração do nome antigo preserva biblioteca, capas, downloads e podcasts.
 
 ## Modo de desenvolvimento da tela
 
