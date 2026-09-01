@@ -41,6 +41,12 @@ private slots:
         QVERIFY(q.exec(QStringLiteral(
             "CREATE TABLE podcast_shows (id INTEGER PRIMARY KEY, title TEXT, feed_url TEXT UNIQUE)")));
         QVERIFY(q.exec(QStringLiteral(
+            "CREATE TABLE collections (id INTEGER PRIMARY KEY, name TEXT)")));
+        QVERIFY(q.exec(QStringLiteral(
+            "CREATE TABLE tracks (id INTEGER PRIMARY KEY, path TEXT, removed_at INTEGER)")));
+        QVERIFY(q.exec(QStringLiteral(
+            "CREATE TABLE collection_tracks (collection_id INTEGER, track_id INTEGER, position INTEGER)")));
+        QVERIFY(q.exec(QStringLiteral(
             "INSERT INTO podcast_shows (title,feed_url) VALUES "
             "('Existing','https://existing.test/feed.xml')")));
         QVERIFY(m_dir.isValid());
@@ -116,6 +122,65 @@ private slots:
         QCOMPARE(requested.count(), 1);
         QCOMPARE(requested.first().first().toUrl(),
                  QUrl(QStringLiteral("https://new.test/feed.xml")));
+    }
+
+    void m3uKeepsManualOrderUnicodeAndSkipsDuplicatesAndMissingTracks()
+    {
+        const QString first = m_dir.filePath(QStringLiteral("01-Coração.flac"));
+        const QString second = m_dir.filePath(QStringLiteral("02-Noite.opus"));
+        for (const QString &path : {first, second}) {
+            QFile file(path);
+            QVERIFY(file.open(QIODevice::WriteOnly));
+            QCOMPARE(file.write("fixture"), 7);
+        }
+        const QString missing = m_dir.filePath(QStringLiteral("03-ausente.mp3"));
+
+        QBuffer output;
+        QVERIFY(output.open(QIODevice::WriteOnly));
+        const Portability::M3uWriteResult result =
+            Portability::writeM3u(&output, {second, first, first, missing});
+        QVERIFY2(result.error.isEmpty(), qPrintable(result.error));
+        QCOMPARE(result.written, 2);
+        QCOMPARE(result.skipped, 2);
+        QCOMPARE(QString::fromUtf8(output.data()),
+                 QStringLiteral("#EXTM3U\n%1\n%2\n").arg(second, first));
+    }
+
+    void collectionM3uUsesDatabasePositionAndAtomicFile()
+    {
+        const QString first = m_dir.filePath(QStringLiteral("manual-Coração.flac"));
+        const QString second = m_dir.filePath(QStringLiteral("manual-Noite.opus"));
+        for (const QString &path : {first, second}) {
+            QFile file(path);
+            QVERIFY(file.open(QIODevice::WriteOnly));
+            QCOMPARE(file.write("fixture"), 7);
+        }
+        const QString missing = m_dir.filePath(QStringLiteral("manual-ausente.mp3"));
+
+        QSqlQuery q(m_db);
+        QVERIFY(q.exec(QStringLiteral("INSERT INTO collections (id,name) VALUES (7,'Manual')")));
+        q.prepare(QStringLiteral("INSERT INTO tracks (id,path) VALUES (?,?)"));
+        const QList<QPair<int, QString>> tracks = {{71, first}, {72, second}, {73, missing}};
+        for (const auto &[id, path] : tracks) {
+            q.bindValue(0, id);
+            q.bindValue(1, path);
+            QVERIFY(q.exec());
+        }
+        QVERIFY(q.exec(QStringLiteral(
+            "INSERT INTO collection_tracks (collection_id,track_id,position) VALUES "
+            "(7,71,2000),(7,72,1000),(7,73,3000)")));
+
+        const QString destination = m_dir.filePath(QStringLiteral("manual.m3u"));
+        PortabilityService service;
+        const QVariantMap result =
+            service.exportCollectionM3u(7, QUrl::fromLocalFile(destination));
+        QCOMPARE(result.value(QStringLiteral("error")).toString(), QString());
+        QCOMPARE(result.value(QStringLiteral("exported")).toInt(), 2);
+        QCOMPARE(result.value(QStringLiteral("skipped")).toInt(), 1);
+        QFile exported(destination);
+        QVERIFY(exported.open(QIODevice::ReadOnly));
+        QCOMPARE(QString::fromUtf8(exported.readAll()),
+                 QStringLiteral("#EXTM3U\n%1\n%2\n").arg(second, first));
     }
 
 private:

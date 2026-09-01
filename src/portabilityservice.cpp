@@ -2,7 +2,9 @@
 
 #include "database.h"
 
+#include <QDir>
 #include <QFile>
+#include <QFileInfo>
 #include <QSaveFile>
 #include <QSet>
 #include <QSqlDatabase>
@@ -155,6 +157,40 @@ bool Portability::writeOpml(QIODevice *device, QList<OpmlSubscription> subscript
     return true;
 }
 
+Portability::M3uWriteResult Portability::writeM3u(QIODevice *device,
+                                                  const QStringList &paths)
+{
+    M3uWriteResult result;
+    if (!device || !device->isWritable()) {
+        result.error = QObject::tr("Não foi possível escrever a playlist M3U.");
+        return result;
+    }
+
+    if (device->write("#EXTM3U\n") < 0) {
+        result.error = QObject::tr("Falha ao escrever o cabeçalho M3U.");
+        return result;
+    }
+
+    QSet<QString> seen;
+    for (const QString &path : paths) {
+        const QFileInfo info(path);
+        const QString cleanPath = QDir::cleanPath(info.absoluteFilePath());
+        if (!info.isAbsolute() || !info.exists() || !info.isFile()
+            || seen.contains(cleanPath)) {
+            ++result.skipped;
+            continue;
+        }
+        seen.insert(cleanPath);
+        const QByteArray line = cleanPath.toUtf8() + '\n';
+        if (device->write(line) != line.size()) {
+            result.error = QObject::tr("Falha ao escrever uma faixa na playlist M3U.");
+            return result;
+        }
+        ++result.written;
+    }
+    return result;
+}
+
 PortabilityService::PortabilityService(QObject *parent)
     : QObject(parent)
 {
@@ -222,4 +258,48 @@ QVariantMap PortabilityService::exportOpml(const QUrl &fileUrl)
                            error.isEmpty() ? tr("Não foi possível salvar o arquivo OPML.")
                                            : error);
     return opmlSummary(subscriptions.size(), 0, 0);
+}
+
+QVariantMap PortabilityService::exportCollectionM3u(int collectionId, const QUrl &fileUrl)
+{
+    auto resultMap = [](int exported, int skipped, const QString &error = QString()) {
+        return QVariantMap{{QStringLiteral("exported"), exported},
+                           {QStringLiteral("skipped"), skipped},
+                           {QStringLiteral("error"), error}};
+    };
+
+    if (collectionId <= 0 || !fileUrl.isLocalFile())
+        return resultMap(0, 0, tr("Escolha uma coleção e um destino local."));
+    if (!QSqlDatabase::contains(QLatin1String(Database::kUiConnection)))
+        return resultMap(0, 0, tr("O banco de dados não está disponível."));
+
+    QSqlDatabase db = QSqlDatabase::database(QLatin1String(Database::kUiConnection));
+    QSqlQuery collection(db);
+    collection.prepare(QStringLiteral("SELECT 1 FROM collections WHERE id = ?"));
+    collection.addBindValue(collectionId);
+    if (!collection.exec() || !collection.next())
+        return resultMap(0, 0, tr("A coleção não existe mais."));
+
+    QStringList paths;
+    QSqlQuery query(db);
+    query.prepare(QStringLiteral(
+        "SELECT t.path FROM collection_tracks ct "
+        "JOIN tracks t ON t.id = ct.track_id "
+        "WHERE ct.collection_id = ? AND t.removed_at IS NULL "
+        "ORDER BY ct.position, ct.track_id"));
+    query.addBindValue(collectionId);
+    if (!query.exec())
+        return resultMap(0, 0, tr("Não foi possível ler a coleção."));
+    while (query.next())
+        paths.append(query.value(0).toString());
+
+    QSaveFile file(fileUrl.toLocalFile());
+    if (!file.open(QIODevice::WriteOnly))
+        return resultMap(0, 0, tr("Não foi possível criar a playlist M3U."));
+    const Portability::M3uWriteResult result = Portability::writeM3u(&file, paths);
+    if (!result.error.isEmpty() || !file.commit())
+        return resultMap(0, result.skipped,
+                         result.error.isEmpty()
+                             ? tr("Não foi possível salvar a playlist M3U.") : result.error);
+    return resultMap(result.written, result.skipped);
 }

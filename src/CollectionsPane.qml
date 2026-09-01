@@ -1,6 +1,7 @@
 pragma ComponentBehavior: Bound
 
 import QtQuick
+import QtQuick.Dialogs
 import QtQuick.Layouts
 import Melodarium.App
 
@@ -82,6 +83,17 @@ Item {
         if (hours > 0)
             return hours + " h " + (minutes % 60) + " min"
         return minutes + " min"
+    }
+
+    function showM3uResult(result) {
+        if (result.error !== "") {
+            exportStatus.text = ""
+            aviso.text = result.error
+            return
+        }
+        aviso.text = ""
+        exportStatus.text = qsTr("M3U salvo: %1 faixas · %2 ignoradas")
+                            .arg(result.exported).arg(result.skipped)
     }
 
     Component.onCompleted: root.refresh()
@@ -227,6 +239,15 @@ Item {
 
                 Item { Layout.fillWidth: true }
 
+                IconButton {
+                    Layout.preferredWidth: Math.round(22 * Theme.uiScale)
+                    Layout.preferredHeight: 22
+                    icon: "playlist"
+                    size: Theme.fontSizeS
+                    tooltip: qsTr("exportar coleção como M3U")
+                    onClicked: exportM3uDialog.open()
+                }
+
                 // Baixar só faz sentido com uma coleção aberta: o arquivo tem de cair em algum
                 // lugar, e o lugar é a coleção que o usuário está olhando.
                 IconButton {
@@ -281,6 +302,17 @@ Item {
                 total: root.activeDownloads[modelData].total
                 onCancelRequested: YtDlpDownloader.cancel(modelData)
             }
+        }
+
+        Text {
+            id: exportStatus
+            Layout.fillWidth: true
+            visible: exportStatus.text !== ""
+            text: ""
+            wrapMode: Text.WordWrap
+            font.family: Theme.fontFamily
+            font.pixelSize: Theme.fontSizeXS
+            color: Theme.cMuted
         }
 
         Text {
@@ -641,5 +673,15 @@ Item {
 
     AddFromLinkDialog {
         id: linkDialog
+    }
+
+    FileDialog {
+        id: exportM3uDialog
+        title: qsTr("Exportar coleção como M3U")
+        fileMode: FileDialog.SaveFile
+        defaultSuffix: "m3u"
+        nameFilters: [qsTr("Playlists M3U (*.m3u)")]
+        onAccepted: root.showM3uResult(
+            PortabilityService.exportCollectionM3u(root.openId, selectedFile))
     }
 }
