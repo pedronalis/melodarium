@@ -41,7 +41,7 @@ worker e publica resultados em uma transação curta na conexão writer.
 
 ### Task 1: Concluir render e fila leves
 
-- [ ] Executar integralmente Tasks 1, 3 e 4 de `docs/plans/2026-08-30-perf-render-fila.md`, com
+- [x] Executar integralmente Tasks 1, 3 e 4 de `docs/plans/2026-08-30-perf-render-fila.md`, com
   RED/GREEN, medições e commits previstos naquele ledger.
 
 ### Task 2: Atualizar biblioteca automaticamente
