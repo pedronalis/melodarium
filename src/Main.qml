@@ -24,6 +24,8 @@ Window {
                ? Qt.application.arguments[i + 1] : ""
     }
     readonly property bool measureHaloActivity: root.measureHaloActivityState !== ""
+    readonly property bool measureScroll:
+        Qt.application.arguments.indexOf("--measure-scroll") >= 0
     readonly property int measureHaloActivityDuration: {
         const i = Qt.application.arguments.indexOf("--halo-activity-duration")
         if (i < 0 || Qt.application.arguments.length <= i + 1)
@@ -793,28 +795,51 @@ Window {
                 }
             }
 
+            // Wait for mpv's observed state instead of assuming that a large software-rendered
+            // window loaded the file within a fixed number of milliseconds.
             Timer {
                 running: root.measureHaloActivity
-                interval: 1300
+                interval: 100
+                repeat: true
                 onTriggered: {
-                    if (root.measureHaloActivityState === "paused")
+                    const state = root.measureHaloActivityState
+                    if (state === "stopped") {
+                        stop()
+                        haloPhaseStart.restart()
+                        return
+                    }
+                    if (AudioEngine.currentFile === "")
+                        return
+                    if (state === "paused" && AudioEngine.playing) {
                         AudioEngine.pause()
-                    else if (root.measureHaloActivityState === "hidden")
+                        return
+                    }
+                    if (state === "hidden" && root.visible) {
                         root.hide()
+                        return
+                    }
+                    const ready = state === "playing"
+                        ? AudioEngine.playing && nowPlaying.haloActive
+                        : !nowPlaying.haloActive
+                    if (ready) {
+                        stop()
+                        haloPhaseStart.restart()
+                    }
                 }
             }
 
             Timer {
-                running: root.measureHaloActivity
-                interval: 1600
+                id: haloPhaseStart
+                interval: 300
                 onTriggered: {
                     root.haloActivityPhaseStart = nowPlaying.sampleHaloPhase()
+                    haloPhaseResult.restart()
                 }
             }
 
             Timer {
-                running: root.measureHaloActivity
-                interval: 1600 + root.measureHaloActivityDuration
+                id: haloPhaseResult
+                interval: root.measureHaloActivityDuration
                 onTriggered: {
                     const end = nowPlaying.sampleHaloPhase()
                     const delta = Math.abs(end - root.haloActivityPhaseStart)
@@ -993,6 +1018,7 @@ Window {
                     LibraryPane {
                         id: libraryPane
                         model: trackModel
+                        measureScroll: root.measureScroll
                         // Um assunto, um lugar: o pé da lista só assume a fila quando o cartão do
                         // painel não coube.
                         showQueueStrip: !nowPlaying.mostrandoProxima
