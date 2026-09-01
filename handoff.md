@@ -35,8 +35,14 @@
 
 ## Em voo
 
-- Nenhum run autônomo. Não há `RUN_GATE` nem `.run_gate_count` no cwd.
-- Aplicativo interativo aberto: `./build/melodarium`, PID `1823009`, workspace 10, `mapped=true`.
+- Run autônomo iniciado em 2026-09-01 10:17 -03.
+- Objetivo: executar todas as tarefas mecanicamente verificáveis dos planos de 01/09, mais as
+  Tasks pendentes de `perf-render-fila`, preservando gates humanos abertos.
+- Cwd: `/home/pedro/dev/active/melodarium`.
+- Conferência: executar cada linha de `RUN_GATE`; o lote só fecha com todas verdes e ao menos
+  25 testes descobertos. Transcript/final ficam em `/tmp/melodarium-solidez-run.jsonl` e
+  `/tmp/melodarium-solidez-final.md`.
+- Fronteiras: sem PR, sem push, sem mudar visibilidade; dados reais do usuário são somente leitura.
 
 ## Verificação
 
