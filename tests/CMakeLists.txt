@@ -27,6 +27,14 @@ add_test(NAME tst_audio_preferences
     COMMAND bash "${CMAKE_SOURCE_DIR}/tools/check-audio-preferences.sh")
 set_tests_properties(tst_audio_preferences PROPERTIES WORKING_DIRECTORY "${CMAKE_SOURCE_DIR}")
 
+add_test(NAME tst_data_paths
+    COMMAND bash "${CMAKE_SOURCE_DIR}/tools/check-data-paths.sh")
+set_tests_properties(tst_data_paths PROPERTIES WORKING_DIRECTORY "${CMAKE_SOURCE_DIR}")
+
+add_test(NAME tst_legacy_migration
+    COMMAND bash "${CMAKE_SOURCE_DIR}/tools/check-legacy-migration.sh" "$<TARGET_FILE:melodarium>")
+set_tests_properties(tst_legacy_migration PROPERTIES WORKING_DIRECTORY "${CMAKE_SOURCE_DIR}")
+
 qt_add_executable(tst_library
     tst_library.cpp
     ../src/database.h ../src/database.cpp

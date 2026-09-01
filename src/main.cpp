@@ -1,20 +1,17 @@
 #include "database.h"
 #include "audioengine.h"
+#include "legacymigration.h"
 #include "libraryscanner.h"
 #ifdef MELODARIUM_HAS_MPRIS
 #include "mprisservice.h"
 #endif
 
 #include <QCoreApplication>
-#include <QDir>
-#include <QFile>
-#include <QFileInfo>
 #include <QFileSystemWatcher>
 #include <QGuiApplication>
 #include <QQmlApplicationEngine>
 #include <QSettings>
 #include <QSqlDatabase>
-#include <QStandardPaths>
 #include <QSurfaceFormat>
 #include <QTextStream>
 #include <QUrl>
@@ -30,58 +27,8 @@ namespace {
 // Roda uma vez só: assim que o diretório novo existe, ela não faz mais nada.
 void migrarDoNomeAntigo()
 {
-    const QString antigo = QStringLiteral("melodia");
-    const QString atual = QCoreApplication::applicationName();
-
-    struct Caminho {
-        QString novo;
-        QString velho;
-    };
-    const QList<Caminho> caminhos = {
-        { QStandardPaths::writableLocation(QStandardPaths::AppDataLocation),
-          QStandardPaths::writableLocation(QStandardPaths::GenericDataLocation)
-              + QLatin1Char('/') + antigo + QLatin1Char('/') + antigo },
-        { QStandardPaths::writableLocation(QStandardPaths::CacheLocation),
-          QStandardPaths::writableLocation(QStandardPaths::GenericCacheLocation)
-              + QLatin1Char('/') + antigo + QLatin1Char('/') + antigo },
-    };
-
-    // As preferências vêm antes, e por outro caminho: o QSettings cria o arquivo novo (vazio)
-    // logo na primeira leitura, então "mover se o destino não existe" nunca dispararia — o app
-    // esqueceria a pasta de música e os dois compromissos de qualidade de áudio, e o usuário
-    // veria a tela de "escolha uma pasta" com a biblioteca inteira já varrida atrás dela.
-    // Copiar chave a chave é idempotente e não sobrescreve nada que já tenha sido escolhido.
-    {
-        QSettings atuais;
-        // NativeFormat, e não IniFormat: pedir Ini explicitamente faz o Qt procurar
-        // `melodia.ini`, e o arquivo que existe de verdade é `melodia.conf` — o nativo no
-        // Unix. A diferença é uma palavra, e ela custou a pasta de música do usuário.
-        QSettings velhas(QSettings::NativeFormat, QSettings::UserScope, antigo, antigo);
-        const QStringList chaves = velhas.allKeys();
-        for (const QString &chave : chaves) {
-            if (!atuais.contains(chave))
-                atuais.setValue(chave, velhas.value(chave));
-        }
-        atuais.sync();
-    }
-
-    for (const Caminho &c : caminhos) {
-        if (c.novo.isEmpty() || QDir(c.novo).exists() || !QDir(c.velho).exists())
-            continue;
-        QDir().mkpath(QFileInfo(c.novo).absolutePath());
-        if (!QDir().rename(c.velho, c.novo))
-            continue;
-        // O arquivo do banco leva o nome do app no próprio nome; mover a pasta não basta.
-        QDir destino(c.novo);
-        const QStringList sufixos = { QString(), QStringLiteral("-wal"), QStringLiteral("-shm") };
-        for (const QString &sufixo : sufixos) {
-            const QString de = destino.filePath(antigo + QStringLiteral(".db") + sufixo);
-            if (QFile::exists(de))
-                QFile::rename(de, destino.filePath(atual + QStringLiteral(".db") + sufixo));
-        }
-        // A pasta da organização antiga fica para trás vazia; rmdir só remove se estiver.
-        QDir().rmdir(QFileInfo(c.velho).absolutePath());
-    }
+    migrateLegacyApplicationData(QStringLiteral("melodia"),
+                                 QCoreApplication::applicationName());
 }
 
 } // namespace
