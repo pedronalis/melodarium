@@ -1,7 +1,7 @@
 ---
 slug: refresh-e-trabalho-background
 feature: melodarium
-status: pendente
+status: concluido
 depende-de: [confiabilidade-playback-banco, perf-render-fila]
 decisao-humana: nao
 spec: docs/plans/2026-09-01-refresh-e-trabalho-background.md
@@ -66,5 +66,6 @@ worker e publica resultados em uma transação curta na conexão writer.
 
 ### Task 4: Gate da fatia
 
-- [ ] Rodar configure/build, piso de testes, suíte, gates de performance e medições antes/depois.
-- [ ] Rodar `gitnexus detect-changes`, registrar a solução e concluir os dois ledgers.
+- [x] Rodar configure/build, piso de testes, suíte, gates de performance e medições antes/depois.
+- [x] Rodar `gitnexus detect-changes`, registrar a solução e concluir este ledger.
+- [ ] Após Pedro validar o halo em reprodução, concluir também `perf-render-fila`.
