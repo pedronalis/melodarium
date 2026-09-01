@@ -2,6 +2,7 @@ pragma ComponentBehavior: Bound
 
 import QtQuick
 import QtQuick.Controls
+import QtQuick.Dialogs
 import QtQuick.Layouts
 import Melodarium.App
 
@@ -79,6 +80,21 @@ Item {
         return qsTr("Programas")
     }
 
+    function showOpmlResult(action, result) {
+        if (result.error !== "") {
+            opmlStatus.text = ""
+            erro.text = result.error
+            return
+        }
+        erro.text = ""
+        if (action === "import") {
+            opmlStatus.text = qsTr("OPML: %1 importados · %2 duplicados · %3 inválidos")
+                              .arg(result.imported).arg(result.duplicates).arg(result.failed)
+        } else {
+            opmlStatus.text = qsTr("OPML salvo com %1 assinaturas").arg(result.imported)
+        }
+    }
+
     Component.onCompleted: root.refresh()
 
     Connections {
@@ -104,6 +120,11 @@ Item {
         }
         function onSubscribeFailed(reason) { erro.text = reason }
         function onFeedCheckFailed(showId, reason) { erro.text = reason }
+    }
+
+    Connections {
+        target: PortabilityService
+        function onSubscriptionRequested(feedUrl) { PodcastLibrary.subscribe(feedUrl) }
     }
 
     ColumnLayout {
@@ -142,6 +163,25 @@ Item {
                 label: PodcastLibrary.checkingFeeds ? qsTr("verificando…") : qsTr("Assinar feed")
                 glyph: Icons.get("rss")
                 onClicked: subscribeDialog.open()
+            }
+
+            Chip {
+                id: opmlChip
+                label: qsTr("OPML")
+                glyph: Icons.get("playlist")
+                onClicked: opmlMenu.popup(opmlChip, 0, opmlChip.height + Theme.marginXS)
+            }
+
+            Menu {
+                id: opmlMenu
+                MenuItem {
+                    text: qsTr("Importar assinaturas…")
+                    onTriggered: importOpmlDialog.open()
+                }
+                MenuItem {
+                    text: qsTr("Exportar assinaturas…")
+                    onTriggered: exportOpmlDialog.open()
+                }
             }
 
             IconButton {
@@ -296,6 +336,17 @@ Item {
         }
 
         Text {
+            id: opmlStatus
+            Layout.fillWidth: true
+            visible: opmlStatus.text !== ""
+            wrapMode: Text.WordWrap
+            text: ""
+            font.family: Theme.fontFamily
+            font.pixelSize: Theme.fontSizeS
+            color: Theme.cMuted
+        }
+
+        Text {
             id: erro
             Layout.fillWidth: true
             visible: erro.text !== ""
@@ -400,6 +451,25 @@ Item {
 
     SubscribeDialog {
         id: subscribeDialog
+    }
+
+    FileDialog {
+        id: importOpmlDialog
+        title: qsTr("Importar assinaturas OPML")
+        fileMode: FileDialog.OpenFile
+        nameFilters: [qsTr("Arquivos OPML (*.opml *.xml)")]
+        onAccepted: root.showOpmlResult("import",
+                                        PortabilityService.importOpml(selectedFile))
+    }
+
+    FileDialog {
+        id: exportOpmlDialog
+        title: qsTr("Exportar assinaturas OPML")
+        fileMode: FileDialog.SaveFile
+        defaultSuffix: "opml"
+        nameFilters: [qsTr("Arquivos OPML (*.opml)")]
+        onAccepted: root.showOpmlResult("export",
+                                        PortabilityService.exportOpml(selectedFile))
     }
 
     FolderPickerDialog {

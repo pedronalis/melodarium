@@ -52,10 +52,10 @@ versionado, escrito com `QSaveFile` e validado integralmente antes do restore.
 
 ### Task 2: OPML import/export
 
-- [ ] Escrever testes RED para namespaces, duplicatas, URL inválida, XML malformado e round-trip.
-- [ ] Implementar parser streaming e export determinístico; assinatura usa `subscribe()` e retorna
+- [x] Escrever testes RED para namespaces, duplicatas, URL inválida, XML malformado e round-trip.
+- [x] Implementar parser streaming e export determinístico; assinatura usa `subscribe()` e retorna
   resumo importados/duplicados/falhos.
-- [ ] Expor ações e mensagens na tela; commitar com `feat(podcast): import and export subscriptions`.
+- [x] Expor ações e mensagens na tela; commitar com `feat(podcast): import and export subscriptions`.
 
 ### Task 3: Exportar coleções M3U
 
