@@ -4,6 +4,7 @@
 #include <QPair>
 #include <QString>
 #include <QStringList>
+#include <QTimer>
 #include <QVector>
 #include <QtQmlIntegration/qqmlintegration.h>
 
@@ -47,6 +48,10 @@ private:
     Q_PROPERTY(QString savedCurrentFile READ savedCurrentFile NOTIFY savedSessionChanged)
     Q_PROPERTY(RepeatMode repeatMode READ repeatMode NOTIFY repeatModeChanged)
     Q_PROPERTY(bool shuffle READ shuffle NOTIFY shuffleChanged)
+    Q_PROPERTY(int sleepRemainingSeconds READ sleepRemainingSeconds NOTIFY sleepTimerChanged)
+    Q_PROPERTY(bool sleepActive READ sleepActive NOTIFY sleepTimerChanged)
+    Q_PROPERTY(bool stopAfterCurrent READ stopAfterCurrent WRITE setStopAfterCurrent
+               NOTIFY stopAfterCurrentChanged)
 
 public:
     // headlessAo = true forces --ao=null: never opens a real device, for automated tests.
@@ -68,6 +73,9 @@ public:
     QString savedCurrentFile() const;
     RepeatMode repeatMode() const { return m_repeatMode; }
     bool shuffle() const { return m_shuffle; }
+    int sleepRemainingSeconds() const { return m_sleepRemainingSeconds; }
+    bool sleepActive() const { return m_sleepTimer.isActive(); }
+    bool stopAfterCurrent() const { return m_stopAfterCurrent; }
 
     // Q_INVOKABLE and not just a Q_PROPERTY WRITE: the podcast slice calls
     // AudioEngine.setSpeed(x) as a function. A bare WRITE method is invisible to QML.
@@ -93,6 +101,9 @@ public:
     Q_INVOKABLE bool removeQueueItem(int index);
     Q_INVOKABLE bool moveQueueItem(int from, int to);
     Q_INVOKABLE bool clearUpcoming();
+    Q_INVOKABLE void startSleepTimer(int seconds);
+    Q_INVOKABLE void cancelSleepTimer();
+    Q_INVOKABLE void setStopAfterCurrent(bool on);
     // Os próximos `limit` caminhos, sem incluir o que toca — é o que a tirinha desenha.
     Q_INVOKABLE QStringList upcoming(int limit) const;
     // Avança Off → All → One → Off. Um botão só, como no desenho.
@@ -120,12 +131,15 @@ signals:
     void savedSessionChanged();
     void repeatModeChanged();
     void shuffleChanged();
+    void sleepTimerChanged();
+    void stopAfterCurrentChanged();
     void trackFinished(const QString &path);
     void playbackError(const QString &path, const QString &message);
     void engineUnavailable(const QString &message);
 
 private slots:
     void onMpvEvents();
+    void onSleepTimerTick();
 
 private:
     static void wakeup(void *ctx);
@@ -161,4 +175,7 @@ private:
     // Sem isto, desligar o aleatório não tem para onde voltar.
     QStringList m_queueOriginal;
     QVector<quint64> m_queueOriginalOccurrenceIds;
+    QTimer m_sleepTimer;
+    int m_sleepRemainingSeconds = 0;
+    bool m_stopAfterCurrent = false;
 };

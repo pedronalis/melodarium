@@ -166,6 +166,81 @@ private slots:
         QCOMPARE(settings.value(QStringLiteral("audio/exclusiveOutput")).toBool(), true);
     }
 
+    void sleepTimerCanBeCancelledAndExpiresCleanly()
+    {
+        AudioEngine engine(nullptr, true);
+        QVERIFY(engine.isAvailable());
+        engine.loadPlaylist({m_longTone}, 0);
+        QTRY_VERIFY_WITH_TIMEOUT(engine.playing(), 5000);
+
+        engine.startSleepTimer(2);
+        QCOMPARE(engine.sleepActive(), true);
+        QCOMPARE(engine.sleepRemainingSeconds(), 2);
+        QTRY_VERIFY_WITH_TIMEOUT(engine.sleepRemainingSeconds() <= 1, 2000);
+        engine.cancelSleepTimer();
+        QCOMPARE(engine.sleepActive(), false);
+        QCOMPARE(engine.sleepRemainingSeconds(), 0);
+        QTest::qWait(1200);
+        QVERIFY(engine.playing());
+
+        engine.startSleepTimer(1);
+        QTRY_VERIFY_WITH_TIMEOUT(!engine.sleepActive(), 3000);
+        QTRY_VERIFY_WITH_TIMEOUT(!engine.playing(), 3000);
+        QCOMPARE(engine.sleepRemainingSeconds(), 0);
+    }
+
+    void stopAfterCurrentFiresOnceOnEof()
+    {
+        AudioEngine engine(nullptr, true);
+        QVERIFY(engine.isAvailable());
+        engine.loadPlaylist({m_toneA, m_longTone}, 0);
+        QTRY_COMPARE_WITH_TIMEOUT(engine.currentFile(), m_toneA, 5000);
+
+        QSignalSpy finishedSpy(&engine, &AudioEngine::trackFinished);
+        QSignalSpy stopAfterSpy(&engine, &AudioEngine::stopAfterCurrentChanged);
+        engine.setStopAfterCurrent(true);
+        QCOMPARE(engine.stopAfterCurrent(), true);
+        QTRY_VERIFY_WITH_TIMEOUT(!engine.stopAfterCurrent(), 5000);
+        QTRY_VERIFY_WITH_TIMEOUT(!engine.playing(), 5000);
+        QCOMPARE(finishedSpy.count(), 1);
+        QCOMPARE(stopAfterSpy.count(), 2);
+        QTest::qWait(1200);
+        QCOMPARE(finishedSpy.count(), 1);
+        QCOMPARE(stopAfterSpy.count(), 2);
+    }
+
+    void stopAfterCurrentSurvivesAManualTrackChange()
+    {
+        AudioEngine engine(nullptr, true);
+        QVERIFY(engine.isAvailable());
+        engine.loadPlaylist({m_longTone, m_toneA}, 0);
+        QTRY_COMPARE_WITH_TIMEOUT(engine.currentFile(), m_longTone, 5000);
+
+        engine.setStopAfterCurrent(true);
+        engine.next();
+        QTRY_COMPARE_WITH_TIMEOUT(engine.currentFile(), m_toneA, 5000);
+        QCOMPARE(engine.stopAfterCurrent(), true);
+        QTRY_VERIFY_WITH_TIMEOUT(!engine.stopAfterCurrent(), 5000);
+        QTRY_VERIFY_WITH_TIMEOUT(!engine.playing(), 5000);
+    }
+
+    void sleepStateDoesNotSurviveEngineRestart()
+    {
+        {
+            AudioEngine engine(nullptr, true);
+            QVERIFY(engine.isAvailable());
+            engine.startSleepTimer(60);
+            engine.setStopAfterCurrent(true);
+            QCOMPARE(engine.sleepActive(), true);
+            QCOMPARE(engine.stopAfterCurrent(), true);
+        }
+
+        AudioEngine restored(nullptr, true);
+        QCOMPARE(restored.sleepActive(), false);
+        QCOMPARE(restored.sleepRemainingSeconds(), 0);
+        QCOMPARE(restored.stopAfterCurrent(), false);
+    }
+
     // A ordem de reprodução existia só dentro do mpv e numa variável de QML que ninguém
     // lia. Sem isto não há como desenhar "o que vem a seguir".
     void queueMirrorsWhatWasLoaded()

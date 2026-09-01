@@ -23,6 +23,11 @@ target_link_libraries(tst_audioengine PRIVATE Qt6::Core Qt6::Test Qt6::Qml PkgCo
 add_test(NAME tst_audioengine COMMAND tst_audioengine)
 set_tests_properties(tst_audioengine PROPERTIES ENVIRONMENT "QT_QPA_PLATFORM=offscreen" TIMEOUT 60)
 
+add_test(NAME tst_sleep_timer_ui
+    COMMAND bash "${CMAKE_SOURCE_DIR}/tools/check-sleep-timer.sh" "$<TARGET_FILE:melodarium>")
+set_tests_properties(tst_sleep_timer_ui PROPERTIES
+    WORKING_DIRECTORY "${CMAKE_SOURCE_DIR}" TIMEOUT 30)
+
 add_test(NAME tst_audio_preferences
     COMMAND bash "${CMAKE_SOURCE_DIR}/tools/check-audio-preferences.sh")
 set_tests_properties(tst_audio_preferences PROPERTIES WORKING_DIRECTORY "${CMAKE_SOURCE_DIR}")

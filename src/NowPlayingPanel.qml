@@ -749,6 +749,8 @@ Rectangle {
             visible: root.hasTrack
             spacing: Theme.marginS
 
+            SleepControl {}
+
             Item { Layout.fillWidth: true }
 
             IconButton {

@@ -83,6 +83,9 @@ std::optional<QVector<AudioQueue::PlaylistMove>> AudioQueue::planMoves(
 AudioEngine::AudioEngine(QObject *parent, bool headlessAo)
     : QObject(parent)
 {
+    m_sleepTimer.setInterval(1000);
+    connect(&m_sleepTimer, &QTimer::timeout, this, &AudioEngine::onSleepTimerTick);
+
     // Session state is useful even when mpv cannot start: the empty pane can still explain
     // what would be restored. Loading it does not feed anything to mpv until the user clicks.
     loadSavedSession();
@@ -226,6 +229,8 @@ void AudioEngine::togglePause()
 void AudioEngine::stop()
 {
     command({QStringLiteral("stop")});
+    cancelSleepTimer();
+    setStopAfterCurrent(false);
 }
 
 void AudioEngine::seek(double seconds)
@@ -543,6 +548,49 @@ bool AudioEngine::clearUpcoming()
     return true;
 }
 
+void AudioEngine::startSleepTimer(int seconds)
+{
+    if (seconds <= 0) {
+        cancelSleepTimer();
+        return;
+    }
+    m_sleepRemainingSeconds = seconds;
+    m_sleepTimer.start();
+    emit sleepTimerChanged();
+}
+
+void AudioEngine::cancelSleepTimer()
+{
+    if (!m_sleepTimer.isActive() && m_sleepRemainingSeconds == 0)
+        return;
+    m_sleepTimer.stop();
+    m_sleepRemainingSeconds = 0;
+    emit sleepTimerChanged();
+}
+
+void AudioEngine::setStopAfterCurrent(bool on)
+{
+    if (m_stopAfterCurrent == on)
+        return;
+    m_stopAfterCurrent = on;
+    emit stopAfterCurrentChanged();
+}
+
+void AudioEngine::onSleepTimerTick()
+{
+    if (m_sleepRemainingSeconds <= 0) {
+        cancelSleepTimer();
+        return;
+    }
+
+    --m_sleepRemainingSeconds;
+    if (m_sleepRemainingSeconds == 0)
+        m_sleepTimer.stop();
+    emit sleepTimerChanged();
+    if (m_sleepRemainingSeconds == 0)
+        stop();
+}
+
 QStringList AudioEngine::upcoming(int limit) const
 {
     if (limit <= 0 || m_queue.isEmpty())
@@ -760,12 +808,18 @@ void AudioEngine::handleEvent(mpv_event *event)
             emit playbackError(m_currentFile, QString::fromUtf8(mpv_error_string(ef->error)));
         } else if (ef->reason == MPV_END_FILE_REASON_EOF) {
             emit trackFinished(m_currentFile);
+            if (m_stopAfterCurrent)
+                stop();
         }
         break;
     }
     case MPV_EVENT_IDLE:
         m_playlistPos = -1;
         m_currentFile.clear();
+        if (m_playing) {
+            m_playing = false;
+            emit playingChanged();
+        }
         emit playlistPosChanged();
         emit currentFileChanged();
         break;

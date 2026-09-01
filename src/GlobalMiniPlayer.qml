@@ -382,6 +382,8 @@ Rectangle {
                     onClicked: root.queueOpenRequested()
                 }
 
+                SleepControl {}
+
                 IconButton {
                     icon: root.muted ? "volume-off"
                                      : (AudioEngine.volume < 50 ? "volume-low" : "volume")
