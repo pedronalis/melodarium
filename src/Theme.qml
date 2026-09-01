@@ -1,10 +1,31 @@
 pragma Singleton
 
+import QtCore
 import QtQuick
 import Melodarium.App
 
 QtObject {
     id: theme
+
+    readonly property Settings visualSettings: Settings {
+        category: "ui"
+        property bool reduceMotion: false
+        property bool highContrast: false
+    }
+
+    readonly property bool preferredReduceMotion: visualSettings.reduceMotion
+    readonly property bool highContrast: visualSettings.highContrast
+    property bool forcedReduceMotion: false
+
+    function setReduceMotion(enabled) {
+        visualSettings.reduceMotion = enabled
+        visualSettings.sync()
+    }
+
+    function setHighContrast(enabled) {
+        visualSettings.highContrast = enabled
+        visualSettings.sync()
+    }
 
     // --- Colors: passthrough from the C++ provider (falls back when Noctalia is absent) ---
     readonly property color mPrimary: ColorSchemeProvider.mPrimary
@@ -59,20 +80,26 @@ QtObject {
     readonly property color cRowCurrent: "#1c1c1c"    // a linha que está tocando
     readonly property color cRowWide: "#1e1e1e"       // a linha tocando na lista de álbum
     readonly property color cPill: "#232323"          // pílula de tag, ícone escolhido no trilho
-    readonly property color cLine: "#262626"          // borda, trilho de progresso
-    readonly property color cGhost: "#2f2f2f"         // traço do coração apagado
-    readonly property color cFaint: "#3c3c3c"         // número da faixa, rótulo de seção
-    readonly property color cDim: "#4a4a4a"           // metadados, ícone não escolhido
-    readonly property color cMuted: "#5d5d5d"         // duração, tempo, texto de pílula
-    readonly property color cSubtle: "#6e6e6e"        // texto de botão discreto
-    readonly property color cSecondary: "#828282"     // artista no painel, texto de apoio
-    readonly property color cBody: "#a4a4a4"          // título de faixa em repouso
-    readonly property color cStrong: "#cccccc"        // progresso, triângulo do que toca
-    readonly property color cTitle: "#dddddd"         // títulos, botão de tocar
+    readonly property color cLine: theme.highContrast ? "#6f6f6f" : "#262626"
+    readonly property color cGhost: theme.highContrast ? "#bebebe" : "#737373"
+    // Papéis decorativos preservam o desenho onde contraste de texto não se aplica. Usar estes
+    // em texto é defeito; os oito papéis abaixo são medidos contra a superfície mais clara.
+    readonly property color cDecorativeFaint: "#3c3c3c"
+    readonly property color cDecorativeDim: "#4a4a4a"
+    readonly property color cFaint: theme.highContrast ? "#b5b5b5" : "#8b8b8b"
+    readonly property color cDim: theme.highContrast ? "#bebebe" : "#929292"
+    readonly property color cMuted: theme.highContrast ? "#c7c7c7" : "#999999"
+    readonly property color cSubtle: theme.highContrast ? "#d0d0d0" : "#a0a0a0"
+    readonly property color cSecondary: theme.highContrast ? "#d9d9d9" : "#a4a4a4"
+    readonly property color cBody: theme.highContrast ? "#e2e2e2" : "#b0b0b0"
+    readonly property color cStrong: theme.highContrast ? "#f0f0f0" : "#cccccc"
+    readonly property color cTitle: theme.highContrast ? "#ffffff" : "#dddddd"
 
     // O acento é a única porta por onde uma cor do tema do sistema entra na tela. Sem Noctalia
     // (ou com um Noctalia monocromático como o do Pedro) ele é o branco do desenho.
-    readonly property color cAccent: theme.usingNoctalia ? theme.mPrimary : theme.cStrong
+    readonly property color cAccent: theme.highContrast
+                                     ? theme.cTitle
+                                     : (theme.usingNoctalia ? theme.mPrimary : theme.cStrong)
 
     // --- Escala da interface ---
     // Todo tamanho abaixo nasceu de um desenho feito para uma janela de 1100x700. Numa tela
@@ -146,7 +173,8 @@ QtObject {
     // transição. Existe por dois motivos que apontam para o mesmo lugar — a foto do gate de
     // fidelidade é tirada num instante fixo e pegaria qualquer animação pela metade, e
     // "movimento reduzido" é o que quem se incomoda com tela que se mexe precisa poder pedir.
-    property bool reduzirMovimento: false
+    readonly property bool reduzirMovimento:
+        theme.forcedReduceMotion || theme.preferredReduceMotion
 
     // Ligado SÓ por `--measure`, e separado do de cima de propósito: ele não desliga
     // movimento, desliga efeito cuja cor vem do acervo de quem roda. O halo do painel tem a

@@ -5,6 +5,7 @@ Item {
     id: root
 
     property string text: ""
+    property string accessibleName: text
     property bool outlined: false
 
     signal clicked
@@ -15,7 +16,7 @@ Item {
     activeFocusOnTab: enabled && visible
 
     Accessible.role: Accessible.Button
-    Accessible.name: root.text
+    Accessible.name: root.accessibleName
     Accessible.description: root.text
     Accessible.focusable: enabled && visible
     Accessible.onPressAction: if (root.enabled) root.clicked()

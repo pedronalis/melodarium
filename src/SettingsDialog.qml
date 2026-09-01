@@ -105,7 +105,107 @@ Popup {
         Rectangle {
             Layout.fillWidth: true
             Layout.preferredHeight: Theme.borderS
-            color: Theme.cFaint
+            color: Theme.cDecorativeFaint
+        }
+
+        // --- Acessibilidade visual ---
+        ColumnLayout {
+            Layout.fillWidth: true
+            spacing: Theme.marginM
+
+            Text {
+                text: qsTr("Acessibilidade visual")
+                font.family: Theme.fontFamily
+                font.pixelSize: Theme.fontSizeS
+                font.weight: Theme.fontWeightSemiBold
+                color: Theme.cMuted
+            }
+
+            RowLayout {
+                Layout.fillWidth: true
+                spacing: Theme.marginM
+
+                ColumnLayout {
+                    Layout.fillWidth: true
+                    spacing: 0
+
+                    Text {
+                        text: qsTr("Movimento reduzido")
+                        font.family: Theme.fontFamily
+                        font.pixelSize: Theme.fontSizeM
+                        color: Theme.cTitle
+                    }
+                    Text {
+                        Layout.fillWidth: true
+                        wrapMode: Text.WordWrap
+                        text: qsTr("Interrompe animações contínuas e encurta transições sem remover o retorno visual dos controles.")
+                        font.family: Theme.fontFamily
+                        font.pixelSize: Theme.fontSizeXS
+                        color: Theme.cFaint
+                    }
+                }
+
+                MelodariumButton {
+                    id: movimentoReduzido
+
+                    property bool checked: false
+
+                    Layout.alignment: Qt.AlignVCenter
+                    text: movimentoReduzido.checked ? qsTr("ligado") : qsTr("desligado")
+                    accessibleName: qsTr("Movimento reduzido: %1").arg(text)
+                    outlined: !movimentoReduzido.checked
+                    onClicked: {
+                        movimentoReduzido.checked = !movimentoReduzido.checked
+                        Theme.setReduceMotion(movimentoReduzido.checked)
+                    }
+                }
+            }
+
+            RowLayout {
+                Layout.fillWidth: true
+                spacing: Theme.marginM
+
+                ColumnLayout {
+                    Layout.fillWidth: true
+                    spacing: 0
+
+                    Text {
+                        text: qsTr("Alto contraste")
+                        font.family: Theme.fontFamily
+                        font.pixelSize: Theme.fontSizeM
+                        color: Theme.cTitle
+                    }
+                    Text {
+                        Layout.fillWidth: true
+                        wrapMode: Text.WordWrap
+                        text: qsTr("Aumenta a separação entre textos, controles e superfícies escuras.")
+                        font.family: Theme.fontFamily
+                        font.pixelSize: Theme.fontSizeXS
+                        color: Theme.cFaint
+                    }
+                }
+
+                MelodariumButton {
+                    id: altoContraste
+
+                    property bool checked: false
+
+                    Layout.alignment: Qt.AlignVCenter
+                    text: altoContraste.checked ? qsTr("ligado") : qsTr("desligado")
+                    accessibleName: qsTr("Alto contraste: %1").arg(text)
+                    outlined: !altoContraste.checked
+                    onClicked: {
+                        altoContraste.checked = !altoContraste.checked
+                        Theme.setHighContrast(altoContraste.checked)
+                    }
+                }
+            }
+        }
+
+        Rectangle {
+            Layout.fillWidth: true
+            Layout.preferredHeight: Theme.borderS
+            color: Theme.cDecorativeFaint
         }
 
         // --- Qualidade de áudio ---
@@ -220,6 +320,8 @@ Popup {
     function carregar() {
         nivelar.checked = melodariumSettings.replayGain
         exclusiva.checked = melodariumSettings.exclusiveOutput
+        movimentoReduzido.checked = Theme.preferredReduceMotion
+        altoContraste.checked = Theme.highContrast
     }
 
     function aplicar() {

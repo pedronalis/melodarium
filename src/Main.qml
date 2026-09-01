@@ -28,7 +28,28 @@ Window {
         Qt.application.arguments.indexOf("--measure-scroll") >= 0
     readonly property bool noticeGate:
         Qt.application.arguments.indexOf("--notice-gate") >= 0
+    readonly property bool visualPreferencesRead:
+        Qt.application.arguments.indexOf("--visual-preferences-read") >= 0
+    readonly property bool visualPreferencesSetOn:
+        Qt.application.arguments.indexOf("--visual-preferences-set-on") >= 0
     property int noticeGateRetryCount: 0
+
+    function visualPreferenceSummary(mode) {
+        return "VISUAL_PREF mode=" + mode
+            + " preferredReduce=" + (Theme.preferredReduceMotion ? "on" : "off")
+            + " high=" + (Theme.highContrast ? "on" : "off")
+            + " effectiveReduce=" + (Theme.reduzirMovimento ? "on" : "off")
+            + " duration=" + Theme.animationFast
+            + " continuous=" + (Theme.reduzirMovimento ? "off" : "on")
+            + " cFaint=" + Theme.cFaint
+            + " cDim=" + Theme.cDim
+            + " cMuted=" + Theme.cMuted
+            + " cSubtle=" + Theme.cSubtle
+            + " cSecondary=" + Theme.cSecondary
+            + " cBody=" + Theme.cBody
+            + " cStrong=" + Theme.cStrong
+            + " cTitle=" + Theme.cTitle
+    }
     readonly property int measureHaloActivityDuration: {
         const i = Qt.application.arguments.indexOf("--halo-activity-duration")
         if (i < 0 || Qt.application.arguments.length <= i + 1)
@@ -1045,7 +1066,7 @@ Window {
 
     Component.onCompleted: {
         Theme.uiScale = root.escalaDaJanela
-        Theme.reduzirMovimento = root.semAnimacao
+        Theme.forcedReduceMotion = root.semAnimacao
         Theme.medindo = root.measuring && !root.comHalo
         if (Database.libraryPath !== "")
             trackModel.loadAllTracks()
@@ -1057,6 +1078,19 @@ Window {
         else if (!AudioEngine.isAvailable())
             root.showEngineFailure(qsTr("O motor de áudio não pôde ser iniciado."))
         root.transitionsReady = true
+        if (root.visualPreferencesSetOn) {
+            Theme.setReduceMotion(true)
+            Theme.setHighContrast(true)
+            Qt.callLater(function() {
+                console.log(root.visualPreferenceSummary("set"))
+                Qt.quit()
+            })
+        } else if (root.visualPreferencesRead) {
+            Qt.callLater(function() {
+                console.log(root.visualPreferenceSummary("read"))
+                Qt.quit()
+            })
+        }
     }
 
     // O fundo da cena, e não só o da janela: `Window.color` pinta o "clear color", que existe
