@@ -55,6 +55,7 @@ modules:
       - -Dcplayer=false
       - -Dlibmpv=true
       - -Dmanpage-build=disabled
+      - -Dplain-gl=enabled
       - -Dpulse=enabled
       - -Dtests=false
     sources:
