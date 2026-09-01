@@ -59,9 +59,9 @@ versionado, escrito com `QSaveFile` e validado integralmente antes do restore.
 
 ### Task 3: Exportar coleções M3U
 
-- [ ] Escrever teste RED com ordem manual, Unicode, duplicata e faixa ausente.
-- [ ] Implementar export por `QSaveFile`, cabeçalho `#EXTM3U` e caminhos válidos na ordem do banco.
-- [ ] Ligar ação em Coleções e commitar com `feat(collections): export playlists as m3u`.
+- [x] Escrever teste RED com ordem manual, Unicode, duplicata e faixa ausente.
+- [x] Implementar export por `QSaveFile`, cabeçalho `#EXTM3U` e caminhos válidos na ordem do banco.
+- [x] Ligar ação em Coleções e commitar com `feat(collections): export playlists as m3u`.
 
 ### Task 4: Backup e restore completo
 

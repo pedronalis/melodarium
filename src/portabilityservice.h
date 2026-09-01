@@ -25,9 +25,17 @@ struct OpmlParseResult
     QString error;
 };
 
+struct M3uWriteResult
+{
+    int written = 0;
+    int skipped = 0;
+    QString error;
+};
+
 OpmlParseResult parseOpml(QIODevice *device);
 bool writeOpml(QIODevice *device, QList<OpmlSubscription> subscriptions,
                QString *error = nullptr);
+M3uWriteResult writeM3u(QIODevice *device, const QStringList &paths);
 
 } // namespace Portability
 
@@ -42,6 +50,7 @@ public:
 
     Q_INVOKABLE QVariantMap importOpml(const QUrl &fileUrl);
     Q_INVOKABLE QVariantMap exportOpml(const QUrl &fileUrl);
+    Q_INVOKABLE QVariantMap exportCollectionM3u(int collectionId, const QUrl &fileUrl);
 
 signals:
     void subscriptionRequested(const QUrl &feedUrl);
