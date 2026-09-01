@@ -1,7 +1,7 @@
 ---
 slug: confiabilidade-playback-banco
 feature: melodarium
-status: em-execucao
+status: concluido
 depende-de: []
 decisao-humana: nao
 spec: docs/plans/2026-09-01-confiabilidade-playback-banco.md
@@ -102,6 +102,6 @@ seu momento de execução.
 
 ### Task 4: Gate da fatia
 
-- [ ] Rodar configure/build, piso de testes, suíte completa e `tools/check-data-paths.sh`.
-- [ ] Rodar `gitnexus detect-changes --scope compare --base-ref main`; revisar símbolos/fluxos.
-- [ ] Atualizar a solução, marcar esta task, definir o plano como `concluido` e commitar o ledger.
+- [x] Rodar configure/build, piso de testes, suíte completa e `tools/check-data-paths.sh`.
+- [x] Rodar `gitnexus detect-changes --scope compare --base-ref main`; revisar símbolos/fluxos.
+- [x] Atualizar a solução, marcar esta task, definir o plano como `concluido` e commitar o ledger.
