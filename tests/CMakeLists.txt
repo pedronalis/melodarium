@@ -142,6 +142,16 @@ target_link_libraries(tst_feedparser PRIVATE Qt6::Core Qt6::Test Qt6::Network)
 add_test(NAME tst_feedparser COMMAND tst_feedparser)
 set_tests_properties(tst_feedparser PROPERTIES ENVIRONMENT "QT_QPA_PLATFORM=offscreen")
 
+qt_add_executable(tst_portability
+    tst_portability.cpp
+    ../src/portabilityservice.h ../src/portabilityservice.cpp
+)
+target_include_directories(tst_portability PRIVATE ../src)
+target_link_libraries(tst_portability PRIVATE Qt6::Core Qt6::Test Qt6::Qml Qt6::Sql)
+
+add_test(NAME tst_portability COMMAND tst_portability)
+set_tests_properties(tst_portability PROPERTIES ENVIRONMENT "QT_QPA_PLATFORM=offscreen")
+
 qt_add_executable(tst_ytdlp
     tst_ytdlp.cpp
     ../src/database.h ../src/database.cpp

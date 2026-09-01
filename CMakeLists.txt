@@ -52,6 +52,8 @@ qt_add_executable(melodarium
     src/podcastepisodemodel.cpp
     src/podcastfeedfetcher.h
     src/podcastfeedfetcher.cpp
+    src/portabilityservice.h
+    src/portabilityservice.cpp
     src/episodedownloader.h
     src/episodedownloader.cpp
     src/ytdlpdownloader.h
@@ -150,6 +152,8 @@ qt_add_qml_module(melodarium
         src/podcastepisodemodel.cpp
         src/podcastfeedfetcher.h
         src/podcastfeedfetcher.cpp
+        src/portabilityservice.h
+        src/portabilityservice.cpp
         src/episodedownloader.h
         src/episodedownloader.cpp
         src/ytdlpdownloader.h
