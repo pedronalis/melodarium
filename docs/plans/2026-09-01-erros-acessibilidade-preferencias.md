@@ -61,11 +61,11 @@ Qt Test e scripts de interação/captura.
 
 ### Task 3: Contraste, alto contraste e movimento reduzido
 
-- [ ] Criar medição RED das combinações texto/fundo e prova de persistência das duas preferências.
-- [ ] Ajustar `cFaint`, `cDim`, `cMuted` onde representam texto; criar papéis decorativos separados
+- [x] Criar medição RED das combinações texto/fundo e prova de persistência das duas preferências.
+- [x] Ajustar `cFaint`, `cDim`, `cMuted` onde representam texto; criar papéis decorativos separados
   quando baixo contraste for intencional; persistir `ui/reduceMotion` e `ui/highContrast`.
-- [ ] Condicionar halo/transições/animators à preferência, atualizar capturas e rodar fidelidade.
-- [ ] Commmitar com `feat(a11y): add contrast and reduced motion preferences`.
+- [x] Condicionar halo/transições/animators à preferência, atualizar capturas e rodar fidelidade.
+- [x] Commmitar com `feat(a11y): add contrast and reduced motion preferences`.
 
 ### Task 4: Limpar o contrato QML
 

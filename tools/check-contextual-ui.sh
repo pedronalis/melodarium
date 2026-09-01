@@ -209,20 +209,28 @@ python3 - "$TMP/collections.png" "$TMP/muted.png" <<'PY'
 import sys
 from PIL import Image
 
-def peak(path):
+def brightest(path):
     # Reamostrado no desenho 1100×700: o volume ocupa esta região sem tocar o slider.
     crop = Image.open(path).convert("RGB").crop((955, 635, 990, 670))
-    return max(max(pixel) for pixel in crop.get_flattened_data())
+    return max(crop.get_flattened_data(), key=lambda pixel: max(pixel))
 
-active = peak(sys.argv[1])
-muted = peak(sys.argv[2])
+active_rgb = brightest(sys.argv[1])
+muted_rgb = brightest(sys.argv[2])
+active = max(active_rgb)
+muted = max(muted_rgb)
 if active < 180:
     print(f"FALHA: ícone com som continua cinza (pico {active})")
     raise SystemExit(1)
-if muted > 130:
-    print(f"FALHA: ícone mutado não ficou cinza (pico {muted})")
+if muted < 135:
+    print(f"FALHA: ícone mutado ficou abaixo do piso acessível (pico {muted})")
     raise SystemExit(1)
-print(f"ok:    volume ligado é claro ({active}) e mutado é cinza ({muted})")
+if active - muted < 25:
+    print(f"FALHA: volume ligado e mutado perderam distinção ({active} vs {muted})")
+    raise SystemExit(1)
+if max(muted_rgb) - min(muted_rgb) > 4:
+    print(f"FALHA: ícone mutado deixou de ser neutro ({muted_rgb})")
+    raise SystemExit(1)
+print(f"ok:    volume ligado é claro ({active}) e mutado é cinza acessível ({muted})")
 PY
 
 episode_raw=$(XDG_DATA_HOME="$TMP/data" XDG_CONFIG_HOME="$TMP/config" \
