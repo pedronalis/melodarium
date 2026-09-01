@@ -100,6 +100,7 @@ qt_add_qml_module(melodarium
         src/TagEditor.qml
         src/EpisodeRow.qml
         src/SpeedControl.qml
+        src/SleepControl.qml
         src/SubscribeDialog.qml
         src/FeedStatusRow.qml
         src/AddFromLinkDialog.qml

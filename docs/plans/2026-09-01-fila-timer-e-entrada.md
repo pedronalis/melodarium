@@ -56,10 +56,10 @@ classifica URLs/arquivos/pastas e o QML apenas apresenta confirmação e feedbac
 
 ### Task 3: Sleep timer e parar após atual
 
-- [ ] Escrever testes RED com relógio curto para cancelamento, expiração, EOF único e troca de faixa.
-- [ ] Expor `sleepRemainingSeconds`, `sleepActive`, `stopAfterCurrent` e métodos de configuração;
+- [x] Escrever testes RED com relógio curto para cancelamento, expiração, EOF único e troca de faixa.
+- [x] Expor `sleepRemainingSeconds`, `sleepActive`, `stopAfterCurrent` e métodos de configuração;
   persistir apenas `stopAfterCurrent` durante a sessão, nunca timer absoluto entre processos.
-- [ ] Adicionar menu ao player/mini-player e provar ações; commitar com
+- [x] Adicionar menu ao player/mini-player e provar ações; commitar com
   `feat(playback): add sleep timer and stop-after-current`.
 
 ### Task 4: Drag and drop
