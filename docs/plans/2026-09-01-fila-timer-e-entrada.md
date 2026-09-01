@@ -49,9 +49,9 @@ classifica URLs/arquivos/pastas e o QML apenas apresenta confirmação e feedbac
 
 ### Task 2: Fila operável na tela
 
-- [ ] Criar gate RED para “tocar a seguir”, remover, mover por botões/teclado e limpar restantes.
-- [ ] Implementar ações no overlay, estados de foco/Accessible e confirmação somente para limpar.
-- [ ] Rodar órfãos, interação, layout e fidelidade; commitar com
+- [x] Criar gate RED para “tocar a seguir”, remover, mover por botões/teclado e limpar restantes.
+- [x] Implementar ações no overlay, estados de foco/Accessible e confirmação somente para limpar.
+- [x] Rodar órfãos, interação, layout e fidelidade; commitar com
   `feat(queue): expose complete queue controls`.
 
 ### Task 3: Sleep timer e parar após atual

@@ -13,9 +13,8 @@ import Melodarium.App
 // enfileiradas, quatro visíveis, e nenhum jeito de ver o resto — o "+N" era a própria confissão
 // de que faltava lugar. Aqui a fila aparece inteira e um clique pula para qualquer faixa.
 //
-// O que ele NÃO faz: tirar da fila e reordenar. O motor não tem esses dois verbos (só
-// `loadPlaylist`, `appendToQueue` e `upcoming`), e inventá-los é mudança em C++ que esta fatia
-// não abre.
+// Cada ocorrência pode ser movida ou removida sem reconstruir a playlist do mpv. Duplicatas
+// continuam sendo ocorrências independentes; por isso todas as ações usam o índice da linha.
 Popup {
     id: root
     readonly property double coverRevision: CoverCache.revision
@@ -160,6 +159,12 @@ Popup {
                 readonly property var info: LibraryBrowser.trackForPath(linha.modelData)
                 readonly property bool atual: linha.index === AudioEngine.playlistPos
                 readonly property bool jaTocou: linha.index < AudioEngine.playlistPos
+                readonly property bool actionsFocused: playNextButton.activeFocus
+                                                       || moveUpButton.activeFocus
+                                                       || moveDownButton.activeFocus
+                                                       || removeButton.activeFocus
+                readonly property bool showActions: area.containsMouse || linha.activeFocus
+                                                    || linha.actionsFocused
 
                 width: ListView.view.width
                 height: Math.round(48 * Theme.uiScale)
@@ -183,12 +188,50 @@ Popup {
                     root.close()
                 }
 
+                function playNextEntry() {
+                    AudioEngine.playNext(linha.modelData)
+                }
+
+                function removeEntry() {
+                    if (!linha.atual)
+                        AudioEngine.removeQueueItem(linha.index)
+                }
+
+                function moveUp() {
+                    if (linha.index <= 0)
+                        return
+                    const target = linha.index - 1
+                    if (AudioEngine.moveQueueItem(linha.index, linha.index - 1)) {
+                        lista.currentIndex = target
+                        Qt.callLater(function() {
+                            if (lista.currentItem)
+                                lista.currentItem.forceActiveFocus(Qt.TabFocusReason)
+                        })
+                    }
+                }
+
+                function moveDown() {
+                    if (linha.index >= AudioEngine.queueCount - 1)
+                        return
+                    const target = linha.index + 1
+                    if (AudioEngine.moveQueueItem(linha.index, linha.index + 1)) {
+                        lista.currentIndex = target
+                        Qt.callLater(function() {
+                            if (lista.currentItem)
+                                lista.currentItem.forceActiveFocus(Qt.TabFocusReason)
+                        })
+                    }
+                }
+
                 Keys.onSpacePressed: function(event) {
                     linha.activateEntry()
                     event.accepted = true
                 }
                 Keys.onReturnPressed: function(event) {
-                    linha.activateEntry()
+                    if (event.modifiers & Qt.ShiftModifier)
+                        linha.playNextEntry()
+                    else
+                        linha.activateEntry()
                     event.accepted = true
                 }
                 Keys.onEnterPressed: function(event) {
@@ -196,17 +239,29 @@ Popup {
                     event.accepted = true
                 }
                 Keys.onUpPressed: function(event) {
-                    lista.decrementCurrentIndex()
-                    lista.positionViewAtIndex(lista.currentIndex, ListView.Contain)
-                    if (lista.currentItem)
-                        lista.currentItem.forceActiveFocus(Qt.TabFocusReason)
+                    if (event.modifiers & Qt.ControlModifier) {
+                        linha.moveUp()
+                    } else {
+                        lista.decrementCurrentIndex()
+                        lista.positionViewAtIndex(lista.currentIndex, ListView.Contain)
+                        if (lista.currentItem)
+                            lista.currentItem.forceActiveFocus(Qt.TabFocusReason)
+                    }
                     event.accepted = true
                 }
                 Keys.onDownPressed: function(event) {
-                    lista.incrementCurrentIndex()
-                    lista.positionViewAtIndex(lista.currentIndex, ListView.Contain)
-                    if (lista.currentItem)
-                        lista.currentItem.forceActiveFocus(Qt.TabFocusReason)
+                    if (event.modifiers & Qt.ControlModifier) {
+                        linha.moveDown()
+                    } else {
+                        lista.incrementCurrentIndex()
+                        lista.positionViewAtIndex(lista.currentIndex, ListView.Contain)
+                        if (lista.currentItem)
+                            lista.currentItem.forceActiveFocus(Qt.TabFocusReason)
+                    }
+                    event.accepted = true
+                }
+                Keys.onDeletePressed: function(event) {
+                    linha.removeEntry()
                     event.accepted = true
                 }
 
@@ -222,6 +277,7 @@ Popup {
                     anchors.leftMargin: Theme.marginL
                     anchors.rightMargin: Theme.marginL
                     spacing: Theme.marginL
+                    z: 1
 
                     // O número da posição some na que toca, como na lista da biblioteca: o
                     // triângulo é a marca de estado, e as duas juntas competiriam.
@@ -280,11 +336,49 @@ Popup {
                     }
 
                     Text {
-                        visible: linha.jaTocou
+                        visible: linha.jaTocou && !linha.showActions
                         text: qsTr("já tocou")
                         font.family: Theme.fontFamily
                         font.pixelSize: Theme.fontSizeXS
                         color: Theme.cFaint
+                    }
+
+                    RowLayout {
+                        visible: linha.showActions
+                        spacing: Theme.marginXXS
+
+                        IconButton {
+                            id: playNextButton
+                            icon: "track-next"
+                            size: Theme.fontSizeM
+                            tooltip: qsTr("Tocar a seguir")
+                            onClicked: linha.playNextEntry()
+                        }
+                        IconButton {
+                            id: moveUpButton
+                            icon: "arrow-up"
+                            size: Theme.fontSizeM
+                            tooltip: qsTr("Mover para cima")
+                            enabled: linha.index > 0
+                            onClicked: linha.moveUp()
+                        }
+                        IconButton {
+                            id: moveDownButton
+                            icon: "arrow-up"
+                            size: Theme.fontSizeM
+                            rotation: 180
+                            tooltip: qsTr("Mover para baixo")
+                            enabled: linha.index < AudioEngine.queueCount - 1
+                            onClicked: linha.moveDown()
+                        }
+                        IconButton {
+                            id: removeButton
+                            icon: "close"
+                            size: Theme.fontSizeM
+                            tooltip: qsTr("Remover da fila")
+                            enabled: !linha.atual
+                            onClicked: linha.removeEntry()
+                        }
                     }
                 }
 
@@ -323,13 +417,24 @@ Popup {
             spacing: Theme.marginS
 
             Text {
-                text: qsTr("clique para pular para a faixa")
+                text: qsTr("Enter toca · Shift+Enter põe a seguir · Ctrl+↑/↓ move")
                 font.family: Theme.fontFamily
                 font.pixelSize: Theme.fontSizeS
                 color: Theme.cFaint
             }
 
             Item { Layout.fillWidth: true }
+
+            MelodariumButton {
+                text: qsTr("Limpar restantes")
+                outlined: true
+                enabled: AudioEngine.playlistPos >= 0 && AudioEngine.queueCount > 1
+                onClicked: {
+                    clearConfirmation.message = qsTr(
+                        "Manter somente a faixa atual e remover o restante da fila?")
+                    clearConfirmation.open()
+                }
+            }
 
             Text {
                 text: "esc"
@@ -343,5 +448,11 @@ Popup {
                 color: Theme.cFaint
             }
         }
+    }
+
+    ConfirmDialog {
+        id: clearConfirmation
+        confirmLabel: qsTr("Limpar fila")
+        onConfirmed: AudioEngine.clearUpcoming()
     }
 }
