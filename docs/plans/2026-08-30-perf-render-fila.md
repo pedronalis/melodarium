@@ -66,13 +66,13 @@ playlist interna do mpv como autoridade sonora.
 
 ### Task 3: Carga e shuffle escaláveis
 
-- [ ] Criar teste puro para filas com caminhos duplicados e teste de integração com centenas de
+- [x] Criar teste puro para filas com caminhos duplicados e teste de integração com centenas de
   entradas; registrar duração e provar que a faixa corrente não reinicia.
-- [ ] Trocar carga inicial por uma única playlist M3U temporária validada pelo mpv ou por lote
+- [x] Trocar carga inicial por uma única playlist M3U temporária validada pelo mpv ou por lote
   equivalente; manter `appendToQueue()` sem autoplay.
-- [ ] Pré-computar movimentos do shuffle sem `QStringList::indexOf` repetido, preservando cada
+- [x] Pré-computar movimentos do shuffle sem `QStringList::indexOf` repetido, preservando cada
   ocorrência duplicada e usando apenas `playlist-move` durante reprodução.
-- [ ] Rodar todos os testes de áudio com zero skips, medir fila grande, marcar a task e commitar
+- [x] Rodar todos os testes de áudio com zero skips, medir fila grande, marcar a task e commitar
   com `perf(audio): scale playlist loading and reordering`.
 
 ### Task 4: Gate final e lição durável

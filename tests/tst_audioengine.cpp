@@ -1,4 +1,5 @@
 #include <QtTest/QtTest>
+#include <QElapsedTimer>
 #include <QProcess>
 #include <QSettings>
 #include <QSignalSpy>
@@ -182,6 +183,97 @@ private slots:
         QCOMPARE(engine.queue(), QStringList({m_toneA, m_toneB}));
         QCOMPARE(engine.queueCount(), 2);
         QCOMPARE(spy.count(), 1);
+    }
+
+    void playlistMovePlanPreservesDuplicateOccurrences()
+    {
+        const QStringList current = {
+            QStringLiteral("a"), QStringLiteral("b"), QStringLiteral("a"),
+            QStringLiteral("c"), QStringLiteral("b"), QStringLiteral("a")};
+        const QStringList target = {
+            QStringLiteral("b"), QStringLiteral("a"), QStringLiteral("b"),
+            QStringLiteral("a"), QStringLiteral("a"), QStringLiteral("c")};
+
+        const auto plan = AudioQueue::planMoves(current, target);
+        QVERIFY(plan.has_value());
+
+        QStringList transformed = current;
+        for (const auto &move : *plan)
+            transformed.move(move.first, move.second);
+        QCOMPARE(transformed, target);
+        QVERIFY(plan->size() <= current.size());
+
+        QVERIFY(!AudioQueue::planMoves(current, {QStringLiteral("a")}).has_value());
+    }
+
+    void loadsHundredsOfDuplicateEntriesAsOneScalablePlaylist()
+    {
+        AudioEngine engine(nullptr, true);
+        if (!engine.isAvailable())
+            QSKIP("mpv unavailable");
+
+        QStringList files;
+        files.reserve(500);
+        for (int i = 0; i < 500; ++i)
+            files.append(i % 2 == 0 ? m_toneA : m_toneB);
+
+        QElapsedTimer timer;
+        timer.start();
+        engine.loadPlaylist(files, 317);
+        const qint64 loadMs = timer.elapsed();
+        engine.pause();
+
+        QCOMPARE(engine.queue(), files);
+        QTRY_COMPARE_WITH_TIMEOUT(engine.playlistPos(), 317, 5000);
+        QTRY_COMPARE_WITH_TIMEOUT(engine.currentFile(), files.at(317), 5000);
+        QVERIFY2(loadMs < 2000,
+                 qPrintable(QStringLiteral("500-entry load took %1 ms").arg(loadMs)));
+        qInfo().noquote() << QStringLiteral("AUDIO_PERF load500_ms=%1").arg(loadMs);
+    }
+
+    void shufflesHundredsOfDuplicatesWithoutRestartingTheCurrentTrack()
+    {
+        AudioEngine engine(nullptr, true);
+        if (!engine.isAvailable())
+            QSKIP("mpv unavailable");
+
+        QStringList files = {m_longTone};
+        files.reserve(500);
+        for (int i = 1; i < 500; ++i)
+            files.append(i % 2 == 0 ? m_toneA : m_toneB);
+
+        engine.loadPlaylist(files, 0);
+        engine.play();
+        QTRY_VERIFY_WITH_TIMEOUT(engine.position() > 2.0, 10000);
+        const QString current = engine.currentFile();
+        const double positionBefore = engine.position();
+
+        QElapsedTimer timer;
+        timer.start();
+        int attempts = 0;
+        do {
+            engine.setShuffle(false);
+            engine.setShuffle(true);
+        } while (engine.queue().at(1) == files.at(1) && ++attempts < 30);
+        const qint64 shuffleMs = timer.elapsed();
+
+        QVERIFY2(engine.queue().at(1) != files.at(1),
+                 "thirty shuffles never changed the next duplicate occurrence");
+        QCOMPARE(engine.currentFile(), current);
+        QVERIFY2(engine.position() >= positionBefore,
+                 qPrintable(QStringLiteral("current track restarted: %1 -> %2")
+                            .arg(positionBefore).arg(engine.position())));
+        QCOMPARE(engine.queue().count(m_toneA), files.count(m_toneA));
+        QCOMPARE(engine.queue().count(m_toneB), files.count(m_toneB));
+
+        const QString expectedNext = engine.queue().at(1);
+        engine.pause();
+        engine.next();
+        QTRY_COMPARE_WITH_TIMEOUT(engine.playlistPos(), 1, 5000);
+        QTRY_COMPARE_WITH_TIMEOUT(engine.currentFile(), expectedNext, 5000);
+        QVERIFY2(shuffleMs < 2000,
+                 qPrintable(QStringLiteral("500-entry shuffle took %1 ms").arg(shuffleMs)));
+        qInfo().noquote() << QStringLiteral("AUDIO_PERF shuffle500_ms=%1").arg(shuffleMs);
     }
 
     // Pôr no fim não pode reiniciar o que toca: é o gesto de "depois dessa, essa".

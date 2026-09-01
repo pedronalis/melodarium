@@ -1,9 +1,14 @@
 #include "audioengine.h"
 
+#include <QDir>
 #include <QtGlobal>
 #include <QMetaObject>
+#include <QHash>
+#include <QQueue>
 #include <QRandomGenerator>
 #include <QSettings>
+#include <QTemporaryFile>
+#include <QUrl>
 #include <QVarLengthArray>
 #include <QFileInfo>
 #include <clocale>
@@ -17,6 +22,7 @@ enum PropertyId : uint64_t {
     PROP_PATH = 4,
     PROP_PLAYLIST_POS = 5,
     PROP_SPEED = 6,
+    PROP_PLAYLIST_COUNT = 7,
 };
 
 constexpr auto kSavedQueueKey = "playback/queue";
@@ -28,6 +34,51 @@ constexpr auto kLegacyReplayGainKey = "audio/replayGain";
 constexpr auto kGaplessAggressiveKey = "audio/gaplessAggressive";
 constexpr auto kExclusiveOutputKey = "audio/exclusiveOutput";
 } // namespace
+
+std::optional<QVector<AudioQueue::PlaylistMove>> AudioQueue::planMoves(
+    const QStringList &current, const QStringList &target)
+{
+    if (current.size() != target.size())
+        return std::nullopt;
+
+    QHash<QString, QQueue<int>> occurrences;
+    for (int i = 0; i < current.size(); ++i)
+        occurrences[current.at(i)].enqueue(i);
+
+    QVector<int> targetOccurrences;
+    targetOccurrences.reserve(target.size());
+    for (const QString &path : target) {
+        auto it = occurrences.find(path);
+        if (it == occurrences.end() || it->isEmpty())
+            return std::nullopt;
+        targetOccurrences.append(it->dequeue());
+    }
+
+    QVector<int> fenwick(current.size() + 1);
+    const auto add = [&fenwick](int index, int delta) {
+        for (int i = index + 1; i < fenwick.size(); i += i & -i)
+            fenwick[i] += delta;
+    };
+    const auto prefixSum = [&fenwick](int index) {
+        int sum = 0;
+        for (int i = index + 1; i > 0; i -= i & -i)
+            sum += fenwick.at(i);
+        return sum;
+    };
+    for (int i = 0; i < current.size(); ++i)
+        add(i, 1);
+
+    QVector<PlaylistMove> moves;
+    moves.reserve(current.size());
+    for (int targetIndex = 0; targetIndex < targetOccurrences.size(); ++targetIndex) {
+        const int originalIndex = targetOccurrences.at(targetIndex);
+        const int from = targetIndex + prefixSum(originalIndex) - 1;
+        if (from != targetIndex)
+            moves.append({from, targetIndex});
+        add(originalIndex, -1);
+    }
+    return moves;
+}
 
 AudioEngine::AudioEngine(QObject *parent, bool headlessAo)
     : QObject(parent)
@@ -109,6 +160,7 @@ AudioEngine::AudioEngine(QObject *parent, bool headlessAo)
     mpv_observe_property(m_mpv, PROP_PATH, "path", MPV_FORMAT_STRING);
     mpv_observe_property(m_mpv, PROP_PLAYLIST_POS, "playlist-pos", MPV_FORMAT_INT64);
     mpv_observe_property(m_mpv, PROP_SPEED, "speed", MPV_FORMAT_DOUBLE);
+    mpv_observe_property(m_mpv, PROP_PLAYLIST_COUNT, "playlist-count", MPV_FORMAT_INT64);
     mpv_set_wakeup_callback(m_mpv, &AudioEngine::wakeup, this);
 }
 
@@ -133,10 +185,10 @@ void AudioEngine::setPropertyString(const char *name, const char *value)
         mpv_set_property_string(m_mpv, name, value);
 }
 
-void AudioEngine::command(const QStringList &args)
+bool AudioEngine::command(const QStringList &args)
 {
     if (!m_mpv)
-        return;
+        return false;
     QList<QByteArray> owned;
     owned.reserve(args.size());
     for (const QString &a : args)
@@ -147,7 +199,7 @@ void AudioEngine::command(const QStringList &args)
         argv.append(b.constData());
     argv.append(nullptr);
 
-    mpv_command(m_mpv, argv.data());
+    return mpv_command(m_mpv, argv.data()) >= 0;
 }
 
 void AudioEngine::play()
@@ -267,14 +319,39 @@ void AudioEngine::loadPlaylist(const QStringList &files, int startIndex, bool re
         emit speedChanged();
     }
     const int boundedStart = qBound(0, startIndex, files.size() - 1);
-    for (int i = 0; i < files.size(); ++i) {
-        // "replace" on the first entry clears whatever was queued; "append" keeps the
-        // playlist internal to mpv, which is what preserves gapless between entries.
-        const QString mode = (i == 0) ? QStringLiteral("replace") : QStringLiteral("append");
-        command({QStringLiteral("loadfile"), files.at(i), mode});
+
+    QTemporaryFile playlist(QDir::tempPath()
+                            + QStringLiteral("/melodarium-queue-XXXXXX.m3u8"));
+    QByteArray contents("#EXTM3U\n");
+    for (const QString &file : files) {
+        QUrl url(file);
+        if (url.scheme().isEmpty())
+            url = QUrl::fromLocalFile(QFileInfo(file).absoluteFilePath());
+        contents += url.toEncoded(QUrl::FullyEncoded);
+        contents += '\n';
     }
-    if (boundedStart > 0)
-        setPropertyString("playlist-pos", QByteArray::number(boundedStart).constData());
+
+    bool loadedAsPlaylist = false;
+    m_pendingStartIndex = boundedStart > 0 ? boundedStart : -1;
+    if (playlist.open()
+        && playlist.write(contents) == contents.size()
+        && playlist.flush()) {
+        loadedAsPlaylist = command({QStringLiteral("loadlist"), playlist.fileName(),
+                                    QStringLiteral("replace")});
+    }
+
+    // A temporary directory can be unavailable under an unusually restricted runtime.
+    // Preserve correctness there; the normal path remains a single validated mpv command.
+    if (!loadedAsPlaylist) {
+        m_pendingStartIndex = -1;
+        for (int i = 0; i < files.size(); ++i) {
+            const QString mode = i == 0 ? QStringLiteral("replace")
+                                        : QStringLiteral("append");
+            command({QStringLiteral("loadfile"), files.at(i), mode});
+        }
+        if (boundedStart > 0)
+            setPropertyString("playlist-pos", QByteArray::number(boundedStart).constData());
+    }
 
     m_queue = files;
     m_rememberCurrentQueue = rememberSession;
@@ -380,17 +457,12 @@ void AudioEngine::reorderMpvPlaylist(const QStringList &atual)
     if (!m_mpv || m_queue.size() != atual.size())
         return;
 
-    QStringList ordem = atual;
-    for (int alvo = 0; alvo < m_queue.size(); ++alvo) {
-        // A busca começa em `alvo` porque tudo antes dele já está no lugar certo. É também
-        // o que mantém isto correto quando a mesma faixa aparece duas vezes na fila.
-        const int de = ordem.indexOf(m_queue.at(alvo), alvo);
-        if (de < 0 || de == alvo)
-            continue;
-        command({QStringLiteral("playlist-move"), QString::number(de),
-                 QString::number(alvo)});
-        ordem.move(de, alvo);
-    }
+    const auto moves = AudioQueue::planMoves(atual, m_queue);
+    if (!moves)
+        return;
+    for (const auto &move : *moves)
+        command({QStringLiteral("playlist-move"), QString::number(move.first),
+                 QString::number(move.second)});
 }
 
 void AudioEngine::setVolume(double v)
@@ -501,6 +573,15 @@ void AudioEngine::handleEvent(mpv_event *event)
             m_speed = *static_cast<double *>(prop->data);
             emit speedChanged();
             break;
+        case PROP_PLAYLIST_COUNT: {
+            const int count = static_cast<int>(*static_cast<int64_t *>(prop->data));
+            if (m_pendingStartIndex >= 0 && count > m_pendingStartIndex) {
+                const int target = m_pendingStartIndex;
+                m_pendingStartIndex = -1;
+                command({QStringLiteral("playlist-play-index"), QString::number(target)});
+            }
+            break;
+        }
         default:
             break;
         }

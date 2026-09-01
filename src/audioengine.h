@@ -1,12 +1,23 @@
 #pragma once
 
 #include <QObject>
+#include <QPair>
 #include <QString>
 #include <QStringList>
+#include <QVector>
 #include <QtQmlIntegration/qqmlintegration.h>
+
+#include <optional>
 
 struct mpv_handle;
 struct mpv_event;
+
+namespace AudioQueue {
+using PlaylistMove = QPair<int, int>;
+
+std::optional<QVector<PlaylistMove>> planMoves(const QStringList &current,
+                                               const QStringList &target);
+}
 
 class AudioEngine : public QObject
 {
@@ -117,7 +128,7 @@ private:
     void handleEvent(mpv_event *event);
     void setOptionString(const char *name, const char *value);
     void setPropertyString(const char *name, const char *value);
-    void command(const QStringList &args);
+    bool command(const QStringList &args);
     void reorderMpvPlaylist(const QStringList &atual);
     void loadSavedSession();
     void saveSession(const QStringList &queue, int currentIndex);
@@ -129,6 +140,7 @@ private:
     double m_volume = 100.0;
     QString m_currentFile;
     int m_playlistPos = -1;
+    int m_pendingStartIndex = -1;
     double m_speed = 1.0;
     double m_podcastSpeed = 1.0;
     bool m_podcastMode = false;
