@@ -21,6 +21,10 @@ Item {
     // two same-named albums by different artists are indistinguishable (design/Main.dc.html:82).
     property string groupSubtitle: ""
     property bool scanning: false
+    // Benchmark-only switch. Normal sessions never start the animation or the frame sampler.
+    property bool measureScroll: false
+    property var scrollFrameSamples: []
+    property real scrollDistance: 0
 
     // Quem decide é a janela, que sabe se o painel da capa já mostrou o que vem a seguir.
     property bool showQueueStrip: true
@@ -57,6 +61,66 @@ Item {
 
     function withThousands(n) {
         return String(n).replace(/\B(?=(\d{3})+(?!\d))/g, ".")
+    }
+
+    function runScrollBenchmark() {
+        scrollFrameSamples = []
+        list.contentY = 0
+        scrollDistance = Math.max(0, list.contentHeight - list.height)
+        if (list.count < 2 || scrollDistance <= 0) {
+            console.log("SCROLL_PERF frames=0 avg_ms=0.000 p95_ms=0.000"
+                        + " max_ms=0.000 distance=" + scrollDistance.toFixed(1))
+            Qt.quit()
+            return
+        }
+        scrollFrameSampler.start()
+        scrollAnimation.restart()
+    }
+
+    function finishScrollBenchmark() {
+        scrollFrameSampler.stop()
+        const samples = scrollFrameSamples.slice().sort(function(a, b) { return a - b })
+        let total = 0
+        for (let i = 0; i < samples.length; ++i)
+            total += samples[i]
+        const average = samples.length > 0 ? total / samples.length : 0
+        const p95Index = samples.length > 0
+            ? Math.min(samples.length - 1, Math.ceil(samples.length * 0.95) - 1) : 0
+        const p95 = samples.length > 0 ? samples[p95Index] : 0
+        const maximum = samples.length > 0 ? samples[samples.length - 1] : 0
+        console.log("SCROLL_PERF frames=" + samples.length
+                    + " avg_ms=" + average.toFixed(3)
+                    + " p95_ms=" + p95.toFixed(3)
+                    + " max_ms=" + maximum.toFixed(3)
+                    + " distance=" + scrollDistance.toFixed(1))
+        Qt.quit()
+    }
+
+    Timer {
+        running: root.measureScroll
+        interval: 1200
+        onTriggered: root.runScrollBenchmark()
+    }
+
+    FrameAnimation {
+        id: scrollFrameSampler
+        running: false
+        onTriggered: {
+            // frameTime is seconds. Ignore the priming callback before a frame was presented.
+            if (frameTime > 0)
+                root.scrollFrameSamples.push(frameTime * 1000)
+        }
+    }
+
+    NumberAnimation {
+        id: scrollAnimation
+        target: list
+        property: "contentY"
+        from: 0
+        to: root.scrollDistance
+        duration: 3500
+        easing.type: Easing.Linear
+        onStopped: root.finishScrollBenchmark()
     }
 
     Component.onCompleted: root.reload()

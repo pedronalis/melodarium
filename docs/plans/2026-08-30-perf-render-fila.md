@@ -77,8 +77,9 @@ playlist interna do mpv como autoridade sonora.
 
 ### Task 4: Gate final e lição durável
 
-- [ ] Rodar build, contagem de testes, `ctest`, órfãos, layout e fidelidade.
-- [ ] Medir startup frio/quente, CPU parado/pausado/tocando, PSS e frame time de scroll com o
+- [x] Rodar build, contagem de testes, `ctest`, órfãos, layout e fidelidade.
+- [x] Medir startup frio/quente, CPU parado/pausado/tocando, PSS e frame time de scroll com o
   mesmo banco e geometria das medições de 29/08.
-- [ ] Registrar números, comandos, decisões e limites em `docs/solutions/perf/`, concluir a
-  fatia pelo `planos-lote.py` e commitar apenas os arquivos da task.
+- [x] Registrar números, comandos, decisões e limites em `docs/solutions/perf/` e commitar
+  apenas os arquivos da task.
+- [ ] Após Pedro validar o halo em reprodução na tela, concluir a fatia pelo `planos-lote.py`.
