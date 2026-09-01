@@ -1,7 +1,7 @@
 ---
 slug: ci-e-distribuicao
 feature: melodarium
-status: em-execucao
+status: travado
 depende-de: [erros-acessibilidade-preferencias, fila-timer-e-entrada, podcast-e-portabilidade]
 decisao-humana: nao
 spec: docs/plans/2026-09-01-ci-e-distribuicao.md
@@ -84,3 +84,10 @@ suíte, lint e gates determinísticos; artefatos são anexados ao job, sem publi
   gate termina vermelho de propósito ao constatar a ausência do builder/SDK.
 - O Flatpak não empacota `yt-dlp`: RSS e URLs de mídia diretas continuam suportadas, mas downloads
   que dependam do executável externo ficam indisponíveis dentro do sandbox até ele ser empacotado.
+- RUN_GATE final de 2026-09-01: 16/17 linhas passaram. Build limpo (279 passos), piso 35/25,
+  CTest 35/35, qmllint, gates QML/feature e `git diff --check` ficaram verdes.
+- A única linha vermelha foi `quiet-run bash tools/check-package.sh`: install tree,
+  desktop/AppStream/ícone, contrato do manifesto e `--scan` XDG isolado passaram antes de o gate
+  parar em `FLATPAK_BUILDER_MISSING`. A prova `flatpak-builder --force-clean` continua impossível
+  sem instalar externamente `flatpak-builder` e `org.kde.Sdk//6.9`; por isso as duas últimas
+  tarefas de fechamento e a linha combinada da Task 2 permanecem desmarcadas.
