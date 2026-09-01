@@ -16,6 +16,8 @@ qt_standard_project_setup(REQUIRES 6.5)
 
 qt_add_executable(melodarium
     src/main.cpp
+    src/legacymigration.h
+    src/legacymigration.cpp
     src/colorschemeprovider.h
     src/colorschemeprovider.cpp
     src/audioengine.h
