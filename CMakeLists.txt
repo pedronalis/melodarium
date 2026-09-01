@@ -1,6 +1,8 @@
 cmake_minimum_required(VERSION 3.21)
 project(melodarium LANGUAGES CXX)
 
+include(GNUInstallDirs)
+
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_AUTOMOC ON)
@@ -13,6 +15,9 @@ find_package(PkgConfig REQUIRED)
 pkg_check_modules(MPV REQUIRED IMPORTED_TARGET mpv)
 pkg_check_modules(TAGLIB REQUIRED IMPORTED_TARGET taglib)
 qt_standard_project_setup(REQUIRES 6.5)
+qt_policy(SET QTP0004 NEW)
+
+set(MELODARIUM_APP_ID io.github.pedronalis.melodarium)
 
 qt_add_executable(melodarium
     src/main.cpp
@@ -183,6 +188,19 @@ if(TARGET Qt6::DBus)
     target_link_libraries(melodarium PRIVATE Qt6::DBus)
     target_compile_definitions(melodarium PRIVATE MELODARIUM_HAS_MPRIS=1)
 endif()
+
+install(TARGETS melodarium
+    RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
+)
+install(FILES data/${MELODARIUM_APP_ID}.desktop
+    DESTINATION ${CMAKE_INSTALL_DATADIR}/applications
+)
+install(FILES data/${MELODARIUM_APP_ID}.metainfo.xml
+    DESTINATION ${CMAKE_INSTALL_DATADIR}/metainfo
+)
+install(FILES data/icons/hicolor/scalable/apps/${MELODARIUM_APP_ID}.svg
+    DESTINATION ${CMAKE_INSTALL_DATADIR}/icons/hicolor/scalable/apps
+)
 
 enable_testing()
 add_subdirectory(tests)
