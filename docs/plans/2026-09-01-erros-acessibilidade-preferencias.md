@@ -1,7 +1,7 @@
 ---
 slug: erros-acessibilidade-preferencias
 feature: melodarium
-status: pendente
+status: em-execucao
 depende-de: [confiabilidade-playback-banco]
 decisao-humana: sim
 spec: docs/plans/2026-09-01-erros-acessibilidade-preferencias.md
@@ -52,11 +52,11 @@ Qt Test e scripts de interação/captura.
 
 ### Task 2: Teclado e semântica acessível
 
-- [ ] Criar gate RED que enumera controles interativos sem `Accessible.name`, exercita Tab,
+- [x] Criar gate RED que enumera controles interativos sem `Accessible.name`, exercita Tab,
   Espaço/Enter, Escape, Ctrl+K e teclas de mídia sem mouse.
-- [ ] Corrigir componentes base e depois consumidores: role/name/description, `activeFocusOnTab`,
+- [x] Corrigir componentes base e depois consumidores: role/name/description, `activeFocusOnTab`,
   estados de foco visíveis e teclas equivalentes a cada MouseArea.
-- [ ] Rodar o gate em offscreen e a superfície real Wayland; commitar com
+- [x] Rodar o gate em offscreen e a superfície real Wayland; commitar com
   `feat(a11y): make playback surfaces keyboard accessible`.
 
 ### Task 3: Contraste, alto contraste e movimento reduzido

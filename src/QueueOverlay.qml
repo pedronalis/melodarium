@@ -49,11 +49,28 @@ Popup {
 
     // Abrir no que está tocando, e não no topo: numa fila de mil e duzentas, o começo da lista
     // não é o lugar de onde alguém quer olhar.
-    onOpened: lista.positionViewAtIndex(Math.max(0, AudioEngine.playlistPos), ListView.Center)
+    onOpened: {
+        lista.currentIndex = Math.max(0, AudioEngine.playlistPos)
+        lista.positionViewAtIndex(lista.currentIndex, ListView.Center)
+        Qt.callLater(function() {
+            if (lista.currentItem)
+                lista.currentItem.forceActiveFocus(Qt.PopupFocusReason)
+        })
+    }
+
+    Keys.onEscapePressed: function(event) {
+        root.close()
+        event.accepted = true
+    }
 
     ColumnLayout {
         anchors.fill: parent
         spacing: 0
+
+        Accessible.role: Accessible.Dialog
+        Accessible.name: qsTr("Fila de reprodução")
+        Accessible.description: qsTr("Escolha uma faixa da fila; Escape fecha")
+        Accessible.focusable: root.visible
 
         RowLayout {
             Layout.fillWidth: true
@@ -151,6 +168,50 @@ Popup {
                        ? Theme.cPill
                        : (linha.atual ? Theme.cRowCurrent : "transparent")
                 opacity: linha.jaTocou && !area.containsMouse ? 0.45 : 1.0
+                activeFocusOnTab: true
+
+                Accessible.role: Accessible.ListItem
+                Accessible.name: linha.info.title !== undefined && linha.info.title !== ""
+                                 ? linha.info.title : linha.modelData
+                Accessible.description: linha.info.artist !== undefined ? linha.info.artist : ""
+                Accessible.focusable: true
+                Accessible.selected: linha.atual
+                Accessible.onPressAction: linha.activateEntry()
+
+                function activateEntry() {
+                    root.entryActivated(linha.index)
+                    root.close()
+                }
+
+                Keys.onSpacePressed: function(event) {
+                    linha.activateEntry()
+                    event.accepted = true
+                }
+                Keys.onReturnPressed: function(event) {
+                    linha.activateEntry()
+                    event.accepted = true
+                }
+                Keys.onEnterPressed: function(event) {
+                    linha.activateEntry()
+                    event.accepted = true
+                }
+                Keys.onUpPressed: function(event) {
+                    lista.decrementCurrentIndex()
+                    lista.positionViewAtIndex(lista.currentIndex, ListView.Contain)
+                    if (lista.currentItem)
+                        lista.currentItem.forceActiveFocus(Qt.TabFocusReason)
+                    event.accepted = true
+                }
+                Keys.onDownPressed: function(event) {
+                    lista.incrementCurrentIndex()
+                    lista.positionViewAtIndex(lista.currentIndex, ListView.Contain)
+                    if (lista.currentItem)
+                        lista.currentItem.forceActiveFocus(Qt.TabFocusReason)
+                    event.accepted = true
+                }
+
+                border.width: linha.activeFocus ? Theme.borderM : 0
+                border.color: Theme.cAccent
 
                 Behavior on color {
                     ColorAnimation { duration: Theme.animationFast; easing.type: Theme.easingType }
@@ -233,8 +294,7 @@ Popup {
                     hoverEnabled: true
                     cursorShape: Qt.PointingHandCursor
                     onClicked: {
-                        root.entryActivated(linha.index)
-                        root.close()
+                        linha.activateEntry()
                     }
                 }
             }

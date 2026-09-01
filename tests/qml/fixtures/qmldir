@@ -1,0 +1,7 @@
+module Melodarium.App
+singleton ColorSchemeProvider 1.0 ColorSchemeProvider.qml
+singleton Theme 1.0 Theme.qml
+singleton Icons 1.0 Icons.qml
+IconButton 1.0 IconButton.qml
+MelodariumButton 1.0 MelodariumButton.qml
+StatusBanner 1.0 StatusBanner.qml

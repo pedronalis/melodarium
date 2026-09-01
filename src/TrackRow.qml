@@ -37,6 +37,28 @@ Item {
     signal likeToggled
 
     implicitHeight: Math.round(34 * Theme.uiScale)
+    activeFocusOnTab: enabled && visible
+
+    Accessible.role: Accessible.ListItem
+    Accessible.name: root.artist !== "" ? root.title + ", " + root.artist : root.title
+    Accessible.description: root.album !== ""
+                            ? root.album + ", " + root.formatDuration(root.durationMs)
+                            : root.formatDuration(root.durationMs)
+    Accessible.focusable: enabled && visible
+    Accessible.onPressAction: root.activated()
+
+    Keys.onSpacePressed: function(event) {
+        root.activated()
+        event.accepted = true
+    }
+    Keys.onReturnPressed: function(event) {
+        root.activated()
+        event.accepted = true
+    }
+    Keys.onEnterPressed: function(event) {
+        root.activated()
+        event.accepted = true
+    }
 
     function formatDuration(ms) {
         if (ms <= 0)
@@ -68,6 +90,8 @@ Item {
                ? Theme.cPill
                : (root.isCurrent ? Theme.cRowCurrent
                                  : (root.alternate ? Theme.cRowAlt : "transparent"))
+        border.width: root.activeFocus ? Theme.borderM : 0
+        border.color: Theme.cAccent
 
         Behavior on color {
             ColorAnimation { duration: Theme.animationFast; easing.type: Theme.easingType }
@@ -174,6 +198,8 @@ Item {
                 size: Theme.fontSizeS
                 visible: root.showCollectButton
                 opacity: mouse.containsMouse ? 1.0 : 0.35
+                tooltip: root.collectGlyph === "close"
+                         ? qsTr("remover da coleção") : qsTr("adicionar a uma coleção")
                 onClicked: root.collectRequested()
 
                 Behavior on opacity {
@@ -184,8 +210,45 @@ Item {
             // Curtir mora na linha, não num menu: o coração apagado é discreto o bastante
             // para não competir com o título, e presente o bastante para ser achado sem hover.
             Item {
+                id: heartControl
+
                 Layout.preferredWidth: Math.round(16 * Theme.uiScale)
                 Layout.fillHeight: true
+                activeFocusOnTab: root.enabled && root.visible
+
+                Accessible.role: Accessible.Button
+                Accessible.name: root.liked ? qsTr("descurtir %1").arg(root.title)
+                                             : qsTr("curtir %1").arg(root.title)
+                Accessible.focusable: true
+                Accessible.onPressAction: heartControl.toggleLike()
+
+                Keys.onSpacePressed: function(event) {
+                    heartControl.toggleLike()
+                    event.accepted = true
+                }
+                Keys.onReturnPressed: function(event) {
+                    heartControl.toggleLike()
+                    event.accepted = true
+                }
+                Keys.onEnterPressed: function(event) {
+                    heartControl.toggleLike()
+                    event.accepted = true
+                }
+
+                function toggleLike() {
+                    if (!root.liked)
+                        puloDoCoracao.restart()
+                    root.likeToggled()
+                }
+
+                Rectangle {
+                    anchors.fill: parent
+                    anchors.margins: -Theme.marginXXS
+                    radius: Theme.radiusXS
+                    color: "transparent"
+                    border.width: heartControl.activeFocus ? Theme.borderM : 0
+                    border.color: Theme.cAccent
+                }
 
                 Text {
                     id: heart
@@ -235,9 +298,7 @@ Item {
                         // vai curtir, e é só aí que se comemora. E o disparo sai do clique,
                         // nunca de `onLikedChanged`: a ListView recicla o delegate ao rolar, e
                         // uma faixa já curtida entrando na tela faria a lista inteira pular.
-                        if (!root.liked)
-                            puloDoCoracao.restart()
-                        root.likeToggled()
+                        heartControl.toggleLike()
                     }
                 }
             }

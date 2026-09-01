@@ -32,6 +32,26 @@ Item {
     signal downloadRequested
 
     implicitHeight: Math.round(58 * Theme.uiScale)
+    activeFocusOnTab: enabled && visible
+
+    Accessible.role: Accessible.ListItem
+    Accessible.name: root.showTitle !== "" ? root.title + ", " + root.showTitle : root.title
+    Accessible.description: root.formatLength(root.durationMs)
+    Accessible.focusable: enabled && visible
+    Accessible.onPressAction: root.activated()
+
+    Keys.onSpacePressed: function(event) {
+        root.activated()
+        event.accepted = true
+    }
+    Keys.onReturnPressed: function(event) {
+        root.activated()
+        event.accepted = true
+    }
+    Keys.onEnterPressed: function(event) {
+        root.activated()
+        event.accepted = true
+    }
 
     function formatLength(ms) {
         if (ms <= 0)
@@ -55,6 +75,8 @@ Item {
         radius: Theme.iRadiusS
         color: mouse.containsMouse ? Theme.cPill
                                    : (root.isCurrent ? Theme.cRaised : "transparent")
+        border.width: root.activeFocus ? Theme.borderM : 0
+        border.color: Theme.cAccent
 
         Behavior on color {
             ColorAnimation { duration: Theme.animationFast; easing.type: Theme.easingType }

@@ -20,6 +20,41 @@ Item {
     implicitWidth: Math.round(size * 1.8)
     implicitHeight: Math.round(size * 1.8)
     opacity: enabled ? 1.0 : 0.4
+    activeFocusOnTab: enabled && visible
+
+    Accessible.role: Accessible.Button
+    Accessible.name: tooltip !== "" ? tooltip : icon
+    Accessible.description: tooltip
+    Accessible.focusable: enabled && visible
+    Accessible.onPressAction: if (root.enabled) root.clicked()
+
+    Keys.onSpacePressed: function(event) {
+        if (root.enabled)
+            root.clicked()
+        event.accepted = true
+    }
+    Keys.onReturnPressed: function(event) {
+        if (root.enabled)
+            root.clicked()
+        event.accepted = true
+    }
+    Keys.onEnterPressed: function(event) {
+        if (root.enabled)
+            root.clicked()
+        event.accepted = true
+    }
+    Keys.onTabPressed: function(event) {
+        const next = root.nextItemInFocusChain(true)
+        if (next)
+            next.forceActiveFocus(Qt.TabFocusReason)
+        event.accepted = true
+    }
+    Keys.onBacktabPressed: function(event) {
+        const previous = root.nextItemInFocusChain(false)
+        if (previous)
+            previous.forceActiveFocus(Qt.BacktabFocusReason)
+        event.accepted = true
+    }
 
     // A cor de repouso do glifo, num lugar só: os dois Text abaixo a leem, e escrita duas
     // vezes ela derraparia na primeira edição.
@@ -83,6 +118,8 @@ Item {
         // O realce do desenho é a pílula escura, não um disco claro: com mHover (quase branco)
         // o hover apagava o próprio ícone que ele deveria destacar.
         color: mouse.containsMouse && root.enabled ? Theme.cPill : "transparent"
+        border.width: root.activeFocus ? Theme.borderM : 0
+        border.color: Theme.cAccent
 
         Behavior on color {
             ColorAnimation { duration: Theme.animationFast; easing.type: Theme.easingType }

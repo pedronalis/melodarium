@@ -1374,6 +1374,21 @@ Window {
         onActivated: searchOverlay.open()
     }
 
+    Shortcut {
+        sequence: "Media Play"
+        onActivated: AudioEngine.togglePause()
+    }
+
+    Shortcut {
+        sequence: "Media Next"
+        onActivated: AudioEngine.next()
+    }
+
+    Shortcut {
+        sequence: "Media Previous"
+        onActivated: AudioEngine.previous()
+    }
+
     // The single manual gesture: one click on the row's plus, one click on a collection.
     Menu {
         id: collectMenu
