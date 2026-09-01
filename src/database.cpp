@@ -2,6 +2,8 @@
 #include "libraryscanner.h"
 
 #include <QDir>
+#include <QFile>
+#include <QFileInfo>
 #include <QSettings>
 #include <QSqlError>
 #include <QSqlQuery>
@@ -246,6 +248,60 @@ QStringList splitStatements(const QString &script)
     return out;
 }
 
+bool quickCheck(QSqlDatabase &db, QString *error)
+{
+    QSqlQuery check(db);
+    if (!check.exec(QStringLiteral("PRAGMA quick_check"))) {
+        if (error)
+            *error = check.lastError().text();
+        return false;
+    }
+    while (check.next()) {
+        const QString result = check.value(0).toString();
+        if (result != QStringLiteral("ok")) {
+            if (error)
+                *error = result;
+            return false;
+        }
+    }
+    return true;
+}
+
+bool createMigrationBackup(QSqlDatabase &db, int currentVersion, QString *backupPath,
+                           QString *error)
+{
+    if (currentVersion <= 0)
+        return true;
+
+    const QString path = db.databaseName()
+                         + QStringLiteral(".pre-v%1.bak").arg(currentVersion);
+    if (QFileInfo::exists(path)) {
+        if (backupPath)
+            *backupPath = path;
+        return true;
+    }
+
+    QSqlQuery checkpoint(db);
+    if (!checkpoint.exec(QStringLiteral("PRAGMA wal_checkpoint(FULL)"))) {
+        if (error)
+            *error = checkpoint.lastError().text();
+        return false;
+    }
+    checkpoint.finish();
+
+    QString escapedPath = path;
+    escapedPath.replace(QLatin1Char('\''), QStringLiteral("''"));
+    QSqlQuery backup(db);
+    if (!backup.exec(QStringLiteral("VACUUM INTO '%1'").arg(escapedPath))) {
+        if (error)
+            *error = backup.lastError().text();
+        return false;
+    }
+    if (backupPath)
+        *backupPath = path;
+    return true;
+}
+
 } // namespace
 
 Database::Database(QObject *parent)
@@ -254,10 +310,22 @@ Database::Database(QObject *parent)
     m_dbPath = defaultDatabasePath();
     QDir().mkpath(QFileInfo(m_dbPath).absolutePath());
 
+    QString error;
     if (openConnection(QLatin1String(kUiConnection), m_dbPath)) {
         QSqlDatabase db = QSqlDatabase::database(QLatin1String(kUiConnection));
-        applyPragmas(db);
-        migrate(db);
+        if (!quickCheck(db, &error)) {
+            m_startupError = QStringLiteral("%1: integrity check failed: %2")
+                                 .arg(m_dbPath, error);
+        } else if (!migrate(db, &error, &m_lastBackupPath)) {
+            m_startupError = QStringLiteral("%1: migration failed: %2").arg(m_dbPath, error);
+        } else {
+            m_ready = true;
+        }
+    } else {
+        const QSqlDatabase db = QSqlDatabase::database(QLatin1String(kUiConnection), false);
+        m_startupError = QStringLiteral("%1: open failed: %2")
+                             .arg(m_dbPath, db.isValid() ? db.lastError().text()
+                                                       : QStringLiteral("QSQLITE unavailable"));
     }
 
     QSettings settings;
@@ -287,28 +355,54 @@ bool Database::openConnection(const QString &connectionName, const QString &dbPa
                           ? QSqlDatabase::database(connectionName)
                           : QSqlDatabase::addDatabase(QStringLiteral("QSQLITE"), connectionName);
     db.setDatabaseName(dbPath);
-    return db.open();
-}
-
-void Database::applyPragmas(QSqlDatabase &db)
-{
-    QSqlQuery q(db);
-    q.exec(QStringLiteral("PRAGMA foreign_keys = ON"));
-    // WAL lets the scanner write while the UI reads, with no blocking.
-    q.exec(QStringLiteral("PRAGMA journal_mode = WAL"));
-    q.exec(QStringLiteral("PRAGMA synchronous = NORMAL"));
-}
-
-bool Database::migrate(QSqlDatabase &db)
-{
-    QSqlQuery q(db);
-    if (!q.exec(QStringLiteral("PRAGMA user_version")) || !q.next())
+    if (!db.open())
         return false;
+    return applyPragmas(db);
+}
+
+bool Database::applyPragmas(QSqlDatabase &db, QString *error)
+{
+    QSqlQuery q(db);
+    const QStringList pragmas = {
+        QStringLiteral("PRAGMA foreign_keys = ON"),
+        // WAL lets the scanner write while the UI reads. busy_timeout handles the one
+        // remaining contention SQLite cannot remove: two writers arriving together.
+        QStringLiteral("PRAGMA journal_mode = WAL"),
+        QStringLiteral("PRAGMA synchronous = NORMAL"),
+        QStringLiteral("PRAGMA busy_timeout = 5000"),
+    };
+    for (const QString &pragma : pragmas) {
+        if (q.exec(pragma))
+            continue;
+        if (error)
+            *error = q.lastError().text();
+        return false;
+    }
+    return true;
+}
+
+bool Database::migrate(QSqlDatabase &db, QString *error, QString *backupPath)
+{
+    QSqlQuery q(db);
+    if (!q.exec(QStringLiteral("PRAGMA user_version")) || !q.next()) {
+        if (error)
+            *error = q.lastError().text();
+        return false;
+    }
     int current = q.value(0).toInt();
+    // VACUUM INTO needs an idle connection. Even a one-row PRAGMA cursor keeps a read
+    // statement active until it is explicitly finished.
+    q.finish();
 
     const QList<QString> &all = migrations();
+    if (current < all.size() && !createMigrationBackup(db, current, backupPath, error))
+        return false;
     for (int v = current; v < all.size(); ++v) {
-        db.transaction();
+        if (!db.transaction()) {
+            if (error)
+                *error = db.lastError().text();
+            return false;
+        }
         bool ok = true;
         // Each migration is a script: split on ";" and run statement by statement,
         // because QSqlQuery::exec runs exactly one statement per call.
@@ -319,6 +413,8 @@ bool Database::migrate(QSqlDatabase &db)
                 continue;
             QSqlQuery mq(db);
             if (!mq.exec(stmt)) {
+                if (error)
+                    *error = mq.lastError().text();
                 ok = false;
                 break;
             }
@@ -328,8 +424,18 @@ bool Database::migrate(QSqlDatabase &db)
             return false;
         }
         QSqlQuery vq(db);
-        vq.exec(QStringLiteral("PRAGMA user_version = %1").arg(v + 1));
-        db.commit();
+        if (!vq.exec(QStringLiteral("PRAGMA user_version = %1").arg(v + 1))) {
+            if (error)
+                *error = vq.lastError().text();
+            db.rollback();
+            return false;
+        }
+        if (!db.commit()) {
+            if (error)
+                *error = db.lastError().text();
+            db.rollback();
+            return false;
+        }
     }
     return true;
 }

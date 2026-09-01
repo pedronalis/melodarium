@@ -1,8 +1,11 @@
 #include <QtTest/QtTest>
+#include <QCoreApplication>
+#include <QFile>
 #include <QProcess>
 #include <QSignalSpy>
 #include <QSqlError>
 #include <QSqlQuery>
+#include <QStandardPaths>
 #include <QTemporaryDir>
 
 #include "database.h"
@@ -93,6 +96,93 @@ private slots:
         QSqlDatabase db = QSqlDatabase::database(QStringLiteral("verify"));
         QVERIFY(Database::migrate(db)); // running it again must not fail nor duplicate anything
         QCOMPARE(scalar(QStringLiteral("PRAGMA user_version")), before);
+    }
+
+    void databaseConnectionsWaitForTheOtherWriter()
+    {
+        QTemporaryDir dir;
+        QVERIFY(dir.isValid());
+        const QString path = dir.filePath(QStringLiteral("busy.db"));
+        QVERIFY(Database::openConnection(QStringLiteral("busy"), path));
+        {
+            QSqlDatabase db = QSqlDatabase::database(QStringLiteral("busy"));
+            QSqlQuery reset(db);
+            QVERIFY(reset.exec(QStringLiteral("PRAGMA busy_timeout = 0")));
+            Database::applyPragmas(db);
+            QSqlQuery timeout(db);
+            QVERIFY(timeout.exec(QStringLiteral("PRAGMA busy_timeout")));
+            QVERIFY(timeout.next());
+            QCOMPARE(timeout.value(0).toInt(), 5000);
+        }
+        QSqlDatabase::removeDatabase(QStringLiteral("busy"));
+    }
+
+    void migrationCreatesARestorableBackupBeforeChangingSchema()
+    {
+        QTemporaryDir dir;
+        QVERIFY(dir.isValid());
+        const QString path = dir.filePath(QStringLiteral("upgrade.db"));
+        const QString backupPath = path + QStringLiteral(".pre-v8.bak");
+        QVERIFY(Database::openConnection(QStringLiteral("upgrade"), path));
+        {
+            QSqlDatabase db = QSqlDatabase::database(QStringLiteral("upgrade"));
+            Database::applyPragmas(db);
+            QVERIFY(Database::migrate(db));
+
+            {
+                QSqlQuery marker(db);
+                QVERIFY(marker.exec(QStringLiteral(
+                    "INSERT INTO artists (id, name) VALUES (4242, 'Backup Marker')")));
+                QVERIFY(marker.exec(QStringLiteral("PRAGMA user_version = 8")));
+            }
+
+            QString migrationError;
+            QVERIFY2(Database::migrate(db, &migrationError), qPrintable(migrationError));
+            QVERIFY2(QFileInfo::exists(backupPath), qPrintable(backupPath));
+        }
+        QSqlDatabase::removeDatabase(QStringLiteral("upgrade"));
+
+        QVERIFY(Database::openConnection(QStringLiteral("backup"), backupPath));
+        {
+            QSqlDatabase backup = QSqlDatabase::database(QStringLiteral("backup"));
+            QSqlQuery version(backup);
+            QVERIFY(version.exec(QStringLiteral("PRAGMA user_version")));
+            QVERIFY(version.next());
+            QCOMPARE(version.value(0).toInt(), 8);
+            QSqlQuery marker(backup);
+            QVERIFY(marker.exec(QStringLiteral(
+                "SELECT COUNT(*) FROM artists WHERE id = 4242 AND name = 'Backup Marker'")));
+            QVERIFY(marker.next());
+            QCOMPARE(marker.value(0).toInt(), 1);
+        }
+        QSqlDatabase::removeDatabase(QStringLiteral("backup"));
+    }
+
+    void corruptDefaultDatabaseBecomesAVisibleStartupError()
+    {
+        const QString previousName = QCoreApplication::applicationName();
+        QCoreApplication::setApplicationName(QStringLiteral("melodarium-corrupt-db-test"));
+        QStandardPaths::setTestModeEnabled(true);
+        const QString path = Database::defaultDatabasePath();
+        QDir().mkpath(QFileInfo(path).absolutePath());
+        QFile::remove(path);
+        QFile corrupt(path);
+        QVERIFY(corrupt.open(QIODevice::WriteOnly));
+        QCOMPARE(corrupt.write("this is not sqlite", 18), 18);
+        corrupt.close();
+
+        {
+            Database database;
+            QVERIFY(database.metaObject()->indexOfProperty("ready") >= 0);
+            QVERIFY(database.metaObject()->indexOfProperty("startupError") >= 0);
+            QCOMPARE(database.property("ready").toBool(), false);
+            QVERIFY(!database.property("startupError").toString().isEmpty());
+            QVERIFY(database.property("startupError").toString().contains(path));
+        }
+
+        QSqlDatabase::removeDatabase(QLatin1String(Database::kUiConnection));
+        QFile::remove(path);
+        QCoreApplication::setApplicationName(previousName);
     }
 
     void migration4AddsLikedColumn()
