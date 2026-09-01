@@ -100,6 +100,7 @@ qt_add_qml_module(melodarium
         src/NewCollectionDialog.qml
         src/ConfirmDialog.qml
         src/SettingsDialog.qml
+        src/BackupRestoreDialog.qml
         src/FolderPickerDialog.qml
         src/FolderPlaceRow.qml
         src/TagChip.qml
