@@ -52,11 +52,11 @@ suíte, lint e gates determinísticos; artefatos são anexados ao job, sem publi
 
 ### Task 2: Flatpak reproduzível
 
-- [ ] Criar manifesto com runtime KDE/Qt compatível, módulos libmpv/taglib e permissões mínimas
+- [x] Criar manifesto com runtime KDE/Qt compatível, módulos libmpv/taglib e permissões mínimas
   para áudio, Wayland/X11 fallback, D-Bus MPRIS, rede e portal de arquivos.
 - [ ] Rodar `flatpak-builder --force-clean` em diretório temporário e `tools/check-package.sh`
   para abrir `--scan` sob XDG isolado; registrar limitações do yt-dlp externo.
-- [ ] Commitar com `build(flatpak): package the local player`.
+- [x] Commitar com `build(flatpak): package the local player`.
 
 ### Task 3: CI com pisos honestos
 
@@ -72,3 +72,15 @@ suíte, lint e gates determinísticos; artefatos são anexados ao job, sem publi
   documentar install/Flatpak, dados/backup e controles novos.
 - [ ] Rodar build limpo, piso, suíte, lint, todos os gates e validação de pacote.
 - [ ] Rodar `gitnexus detect-changes`, concluir plano; não publicar nem mudar visibilidade.
+
+## Diagnóstico Flatpak local — 2026-09-01
+
+- `flatpak-builder --force-clean /tmp/melodarium-flatpak-build ...` não inicia porque o host não
+  tem `flatpak-builder`; também faltam `org.kde.Sdk//6.9` e `org.flatpak.Builder`.
+- O runtime já instalado `org.kde.Platform//6.9` foi inspecionado sem alteração. O manifesto fixa
+  libass, libplacebo, libmpv 0.41.0 e TagLib 2.3.1 por tag e commit.
+- `tools/check-package.sh` instala em prefixo temporário, valida desktop/AppStream/ícone, valida o
+  contrato YAML e executa `melodarium --scan` com todos os XDG isolados. Essas etapas passam; o
+  gate termina vermelho de propósito ao constatar a ausência do builder/SDK.
+- O Flatpak não empacota `yt-dlp`: RSS e URLs de mídia diretas continuam suportadas, mas downloads
+  que dependam do executável externo ficam indisponíveis dentro do sandbox até ele ser empacotado.
