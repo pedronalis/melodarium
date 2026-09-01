@@ -64,11 +64,11 @@ classifica URLs/arquivos/pastas e o QML apenas apresenta confirmação e feedbac
 
 ### Task 4: Drag and drop
 
-- [ ] Escrever matriz RED para arquivo suportado/não suportado, pasta, feed HTTP(S), link YouTube e
+- [x] Escrever matriz RED para arquivo suportado/não suportado, pasta, feed HTTP(S), link YouTube e
   URL local; rejeitar esquemas perigosos ou desconhecidos.
-- [ ] Implementar `DropRouter`, `DropArea` na janela e overlay que mostra a ação antes do drop;
+- [x] Implementar `DropRouter`, `DropArea` na janela e overlay que mostra a ação antes do drop;
   encaminhar pasta ao scan, feed à assinatura, YouTube ao diálogo e arquivos à fila.
-- [ ] Rodar testes/gate real e commitar com `feat(import): route dropped media and links`.
+- [x] Rodar testes/gate real e commitar com `feat(import): route dropped media and links`.
 
 ### Task 5: Gate humano
 

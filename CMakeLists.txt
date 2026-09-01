@@ -22,6 +22,9 @@ qt_add_executable(melodarium
     src/colorschemeprovider.cpp
     src/audioengine.h
     src/audioengine.cpp
+    src/audioformats.h
+    src/droprouter.h
+    src/droprouter.cpp
     src/tagreader.h
     src/tagreader.cpp
     src/database.h
@@ -85,6 +88,7 @@ qt_add_qml_module(melodarium
         src/NextUpCard.qml
         src/ListFade.qml
         src/QueueOverlay.qml
+        src/DropOverlay.qml
         src/CollectionsPane.qml
         src/Chip.qml
         src/FilterChips.qml

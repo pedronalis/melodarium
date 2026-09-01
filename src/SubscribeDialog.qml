@@ -6,6 +6,8 @@ import Melodarium.App
 Popup {
     id: root
 
+    property string initialUrl: ""
+
     modal: true
     anchors.centerIn: Overlay.overlay
     padding: Theme.marginL
@@ -19,9 +21,15 @@ Popup {
     }
 
     onOpened: {
-        urlInput.text = ""
+        urlInput.text = root.initialUrl
+        root.initialUrl = ""
         warning.text = ""
         urlInput.forceActiveFocus()
+    }
+
+    function openForUrl(url) {
+        root.initialUrl = String(url)
+        root.open()
     }
 
     Connections {
