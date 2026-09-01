@@ -109,6 +109,62 @@ private slots:
         QCOMPARE(engine.speed(), 0.25);
     }
 
+    void podcastSpeedDoesNotLeakIntoMusicAndSurvivesRestart()
+    {
+        {
+            AudioEngine engine(nullptr, /*headlessAo=*/true);
+            QVERIFY(engine.isAvailable());
+
+            // rememberSession=false is the existing podcast load contract. Podcast position
+            // belongs to PodcastLibrary and must not replace the saved music queue.
+            engine.loadPlaylist({m_toneA}, 0, false);
+            engine.setSpeed(1.5);
+            QCOMPARE(engine.speed(), 1.5);
+
+            engine.loadPlaylist({m_toneB}, 0, true);
+            QCOMPARE(engine.speed(), 1.0);
+
+            engine.loadPlaylist({m_toneA}, 0, false);
+            QCOMPARE(engine.speed(), 1.5);
+        }
+
+        AudioEngine restored(nullptr, /*headlessAo=*/true);
+        QVERIFY(restored.isAvailable());
+        restored.loadPlaylist({m_toneA}, 0, false);
+        QCOMPARE(restored.speed(), 1.5);
+    }
+
+    void volumeSurvivesEngineRestart()
+    {
+        {
+            AudioEngine engine(nullptr, /*headlessAo=*/true);
+            QVERIFY(engine.isAvailable());
+            engine.setVolume(37.0);
+            QCOMPARE(engine.volume(), 37.0);
+        }
+
+        AudioEngine restored(nullptr, /*headlessAo=*/true);
+        QVERIFY(restored.isAvailable());
+        QCOMPARE(restored.volume(), 37.0);
+    }
+
+    void audioQualityPreferencesArePersisted()
+    {
+        AudioEngine engine(nullptr, /*headlessAo=*/true);
+        QVERIFY(engine.isAvailable());
+
+        engine.setReplayGainMode(QStringLiteral("album"));
+        engine.setGaplessAggressive(true);
+        engine.setExclusiveOutput(true);
+
+        QSettings settings;
+        settings.sync();
+        QCOMPARE(settings.value(QStringLiteral("audio/replayGainMode")).toString(),
+                 QStringLiteral("album"));
+        QCOMPARE(settings.value(QStringLiteral("audio/gaplessAggressive")).toBool(), true);
+        QCOMPARE(settings.value(QStringLiteral("audio/exclusiveOutput")).toBool(), true);
+    }
+
     // A ordem de reprodução existia só dentro do mpv e numa variável de QML que ninguém
     // lia. Sem isto não há como desenhar "o que vem a seguir".
     void queueMirrorsWhatWasLoaded()

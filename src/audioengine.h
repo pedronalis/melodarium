@@ -130,6 +130,8 @@ private:
     QString m_currentFile;
     int m_playlistPos = -1;
     double m_speed = 1.0;
+    double m_podcastSpeed = 1.0;
+    bool m_podcastMode = false;
     // Espelho do que foi mandado ao mpv. Ler playlist/N/filename seria uma consulta por
     // entrada a cada repintura da tirinha de capas.
     QStringList m_queue;
