@@ -42,7 +42,6 @@ SCOPED_QML_RECEIVERS = {
 CPP_RESERVA = {
     "AudioEngine.setGaplessAggressive",
     "CollectionManager.collectionsForTrack",
-    "PodcastLibrary.unsubscribe",
 }
 
 

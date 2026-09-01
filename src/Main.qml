@@ -778,6 +778,7 @@ Window {
         function onCurrentFileChanged() {
             const episode = PodcastLibrary.episodeForPath(AudioEngine.currentFile)
             root.currentEpisodeId = episode.id !== undefined ? episode.id : 0
+            PodcastLibrary.setCurrentEpisodeId(root.currentEpisodeId)
         }
         // Pausing is the moment the user is most likely to walk away: save once more, so the
         // podcast position survives even if the app is killed before the next 5 s tick.

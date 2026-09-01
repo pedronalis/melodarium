@@ -194,6 +194,12 @@ ALTER TABLE track_stats ADD COLUMN last_position_ms INTEGER NOT NULL DEFAULT 0;
         QStringLiteral(R"SQL(
 UPDATE tracks SET mtime = 0;
 )SQL"),
+        QStringLiteral(R"SQL(
+ALTER TABLE podcast_shows ADD COLUMN auto_download INTEGER NOT NULL DEFAULT 0
+    CHECK(auto_download IN (0,1));
+ALTER TABLE podcast_shows ADD COLUMN retention_count INTEGER NOT NULL DEFAULT 0
+    CHECK(retention_count >= 0);
+)SQL"),
     };
     return list;
 }

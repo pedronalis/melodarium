@@ -7,6 +7,7 @@
 #include <QSettings>
 #include <QSqlError>
 #include <QSqlQuery>
+#include <QStandardPaths>
 #include <QTemporaryDir>
 
 #include "database.h"
@@ -68,6 +69,7 @@ private slots:
         QVERIFY(m_dir.isValid());
         QSettings::setDefaultFormat(QSettings::IniFormat);
         QSettings::setPath(QSettings::IniFormat, QSettings::UserScope, m_dir.path());
+        qputenv("XDG_DATA_HOME", m_dir.filePath(QStringLiteral("xdg-data")).toUtf8());
         QSettings().clear();
         QSettings().setValue(QStringLiteral("podcast/path"), QStringLiteral("/p"));
 
@@ -291,6 +293,120 @@ private slots:
         QCOMPARE(scalar(QStringLiteral("SELECT COUNT(*) FROM podcast_episodes")), episodesBefore);
         QCOMPARE(showsChanged.count() + episodesChanged.count(), 0);
         QCOMPARE(scanFailed.count(), 1);
+    }
+
+    void feedPolicyMigrationDefaultsAreOptInAndUnlimited()
+    {
+        QCOMPARE(scalar(QStringLiteral(
+                     "SELECT auto_download FROM podcast_shows WHERE id = 13")), 0);
+        QCOMPARE(scalar(QStringLiteral(
+                     "SELECT retention_count FROM podcast_shows WHERE id = 13")), 0);
+    }
+
+    void unsubscribeKeepsOrDeletesOnlyManagedDownloadsAfterCommit()
+    {
+        PodcastLibrary library;
+        const QString managedDir = library.downloadDirectory() + QStringLiteral("/Policy Show");
+        QVERIFY(QDir().mkpath(managedDir));
+        const QString kept = managedDir + QStringLiteral("/kept.mp3");
+        const QString removed = managedDir + QStringLiteral("/removed.mp3");
+        const QString external = m_dir.filePath(QStringLiteral("external.mp3"));
+        for (const QString &path : {kept, removed, external}) {
+            QFile file(path);
+            QVERIFY(file.open(QIODevice::WriteOnly));
+            QCOMPARE(file.write("fixture"), 7);
+        }
+
+        exec(QStringLiteral(
+            "INSERT INTO podcast_shows (id,title,feed_url) VALUES "
+            "(40,'Keep','https://example.test/keep.xml'),"
+            "(41,'Delete','https://example.test/delete.xml')"));
+        exec(QStringLiteral(
+                 "INSERT INTO podcast_episodes (show_id,guid,title,local_path) VALUES "
+                 "(40,'keep','Keep',%1),(41,'remove','Remove',%2),"
+                 "(41,'external','External',%3)")
+                 .arg(quoted(kept), quoted(removed), quoted(external)));
+
+        library.unsubscribe(40, false);
+        QCOMPARE(scalar(QStringLiteral("SELECT COUNT(*) FROM podcast_shows WHERE id=40")), 0);
+        QVERIFY(QFileInfo::exists(kept));
+
+        library.unsubscribe(41, true);
+        QCOMPARE(scalar(QStringLiteral("SELECT COUNT(*) FROM podcast_shows WHERE id=41")), 0);
+        QVERIFY(!QFileInfo::exists(removed));
+        QVERIFY(QFileInfo::exists(external));
+    }
+
+    void feedIngestionSchedulesOnlyNewEpisodesAfterCommit()
+    {
+        exec(QStringLiteral(
+            "INSERT INTO podcast_shows (id,title,feed_url,auto_download) VALUES "
+            "(42,'Auto','https://example.test/auto.xml',1)"));
+        exec(QStringLiteral(
+            "INSERT INTO podcast_episodes (show_id,guid,title,remote_url) VALUES "
+            "(42,'existing','Existing','https://cdn.test/existing.mp3')"));
+
+        ParsedChannel channel;
+        channel.title = QStringLiteral("Auto");
+        ParsedEpisode existing;
+        existing.guid = QStringLiteral("existing");
+        existing.title = QStringLiteral("Existing");
+        existing.enclosureUrl = QUrl(QStringLiteral("https://cdn.test/existing.mp3"));
+        ParsedEpisode fresh;
+        fresh.guid = QStringLiteral("fresh");
+        fresh.title = QStringLiteral("Fresh");
+        fresh.enclosureUrl = QUrl(QStringLiteral("https://cdn.test/fresh.mp3"));
+
+        PodcastLibrary library;
+        QSignalSpy scheduled(&library, &PodcastLibrary::autoDownloadScheduled);
+        library.ingestFeed(42, channel, {existing, fresh}, {}, {});
+        QCOMPARE(scheduled.count(), 1);
+        const int freshId = scheduled.first().first().toInt();
+        QCOMPARE(scalar(QStringLiteral(
+                     "SELECT COUNT(*) FROM podcast_episodes WHERE id=%1 AND guid='fresh'")
+                     .arg(freshId)), 1);
+
+        library.ingestFeed(42, channel, {existing, fresh}, {}, {});
+        QCOMPARE(scheduled.count(), 1);
+    }
+
+    void retentionPreservesNewestCurrentAndDownloadingEpisodes()
+    {
+        PodcastLibrary library;
+        const QString managedDir = library.downloadDirectory() + QStringLiteral("/Retention");
+        QVERIFY(QDir().mkpath(managedDir));
+        QStringList files;
+        for (int id = 501; id <= 504; ++id) {
+            const QString path = managedDir + QStringLiteral("/%1.mp3").arg(id);
+            QFile file(path);
+            QVERIFY(file.open(QIODevice::WriteOnly));
+            QCOMPARE(file.write("fixture"), 7);
+            files.append(path);
+        }
+
+        exec(QStringLiteral(
+            "INSERT INTO podcast_shows (id,title,feed_url) VALUES "
+            "(500,'Retention','https://example.test/retention.xml')"));
+        exec(QStringLiteral(
+                 "INSERT INTO podcast_episodes "
+                 "(id,show_id,guid,title,published_at,local_path,download_state) VALUES "
+                 "(501,500,'new','New',400,%1,'done'),"
+                 "(502,500,'current','Current',300,%2,'done'),"
+                 "(503,500,'downloading','Downloading',200,%3,'downloading'),"
+                 "(504,500,'old','Old',100,%4,'done')")
+                 .arg(quoted(files.at(0)), quoted(files.at(1)),
+                      quoted(files.at(2)), quoted(files.at(3))));
+
+        library.setCurrentEpisodeId(502);
+        library.setFeedPolicy(500, false, 1);
+
+        QVERIFY(QFileInfo::exists(files.at(0)));
+        QVERIFY(QFileInfo::exists(files.at(1)));
+        QVERIFY(QFileInfo::exists(files.at(2)));
+        QVERIFY(!QFileInfo::exists(files.at(3)));
+        QCOMPARE(scalar(QStringLiteral(
+                     "SELECT COUNT(*) FROM podcast_episodes WHERE id=504 AND local_path IS NULL")),
+                 1);
     }
 };
 

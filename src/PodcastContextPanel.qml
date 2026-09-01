@@ -1,6 +1,7 @@
 pragma ComponentBehavior: Bound
 
 import QtQuick
+import QtQuick.Controls
 import QtQuick.Layouts
 import Melodarium.App
 
@@ -58,6 +59,12 @@ Rectangle {
         const episodes = show.episodeCount !== undefined ? show.episodeCount : 0
         const unplayed = show.unplayedCount !== undefined ? show.unplayedCount : 0
         return episodes + qsTr(" episódios") + " · " + unplayed + qsTr(" não ouvidos")
+    }
+
+    function retentionLabel(count) {
+        if (count === undefined || count <= 0)
+            return qsTr("Manter todos")
+        return qsTr("Manter %1").arg(count)
     }
 
     Component.onCompleted: root.refresh()
@@ -168,6 +175,46 @@ Rectangle {
 
                 Item { Layout.fillWidth: true }
             }
+
+            ColumnLayout {
+                Layout.fillWidth: true
+                visible: root.showingShow && root.selectedShow.feedUrl !== ""
+                spacing: Theme.marginXS
+
+                RowLayout {
+                    Layout.fillWidth: true
+                    spacing: Theme.marginXS
+
+                    MelodariumButton {
+                        text: root.selectedShow.autoDownload
+                              ? qsTr("Baixar novos: sim") : qsTr("Baixar novos: não")
+                        outlined: !root.selectedShow.autoDownload
+                        accessibleName: qsTr("Alternar download automático de novos episódios")
+                        onClicked: PodcastLibrary.setFeedPolicy(
+                            root.selectedShow.id, !root.selectedShow.autoDownload,
+                            root.selectedShow.retentionCount)
+                    }
+
+                    MelodariumButton {
+                        id: retentionButton
+                        text: root.retentionLabel(root.selectedShow.retentionCount)
+                        outlined: true
+                        accessibleName: qsTr("Escolher retenção de downloads")
+                        onClicked: retentionMenu.popup(retentionButton, 0,
+                                                       retentionButton.height + Theme.marginXS)
+                    }
+
+                    Item { Layout.fillWidth: true }
+                }
+
+                MelodariumButton {
+                    text: qsTr("Deixar de seguir")
+                    outlined: true
+                    accessibleName: qsTr("Deixar de seguir este podcast")
+                    onClicked: unsubscribeDialog.openForShow(root.selectedShow.id,
+                                                              root.selectedShow.title)
+                }
+            }
         }
 
         Rectangle {
@@ -253,5 +300,24 @@ Rectangle {
         }
 
         Item { Layout.fillHeight: true }
+    }
+
+    Menu {
+        id: retentionMenu
+
+        function apply(count) {
+            PodcastLibrary.setFeedPolicy(root.selectedShow.id,
+                                         root.selectedShow.autoDownload, count)
+        }
+
+        MenuItem { text: qsTr("Manter todos"); onTriggered: retentionMenu.apply(0) }
+        MenuItem { text: qsTr("Manter os 3 mais recentes"); onTriggered: retentionMenu.apply(3) }
+        MenuItem { text: qsTr("Manter os 5 mais recentes"); onTriggered: retentionMenu.apply(5) }
+        MenuItem { text: qsTr("Manter os 10 mais recentes"); onTriggered: retentionMenu.apply(10) }
+    }
+
+    UnsubscribeDialog {
+        id: unsubscribeDialog
+        onUnsubscribed: root.showRequested(0)
     }
 }
