@@ -24,11 +24,18 @@ fi
 
 TMP=$(mktemp -d)
 trap 'rm -rf "$TMP"' EXIT
+mkdir -p "$TMP/config" "$TMP/data" "$TMP/cache"
 
 foto() {
     local nome="$1"; shift
-    QT_QPA_PLATFORM=offscreen timeout 60 "$BIN" --measure 1100 "$@" \
-        --shot "$TMP/$nome.png" --delay 1800 >/dev/null 2>&1
+    if ! QT_QPA_PLATFORM=offscreen MELODIA_NULL_AO=1 \
+         XDG_CONFIG_HOME="$TMP/config" XDG_DATA_HOME="$TMP/data" \
+         XDG_CACHE_HOME="$TMP/cache" \
+         timeout 15 "$BIN" --measure 1100 "$@" \
+         --shot "$TMP/$nome.png" --delay 1800 >"$TMP/$nome.log" 2>&1; then
+        tail -20 "$TMP/$nome.log"
+        return 1
+    fi
     [ -s "$TMP/$nome.png" ]
 }
 
@@ -72,13 +79,10 @@ PONTOS = [
     # O seletor de pasta: superfície elevada por fora, painéis fundos por dentro, zebra na
     # lista e a pílula no disco em que se está. Quatro papéis diferentes que, medidos só de
     # olho, é exatamente onde a escada de cinza colapsa num tom só.
-    # A pílula do disco fica na 2ª faixa da seção DISCOS; numa máquina sem a pasta Downloads
-    # a coluna inteira sobe ~30 px e este é o ponto que acusa primeiro.
     ("seletor: fundo do diálogo","seletor",  (170, 300), "#191919"),
     ("seletor: campo do caminho","seletor",  (420, 135), "#111111"),
     ("seletor: painel da lista", "seletor",  (700, 250), "#111111"),
     ("seletor: zebra da lista",  "seletor",  (700, 280), "#151515"),
-    ("seletor: disco escolhido", "seletor",  (340, 330), "#232323"),
 ]
 
 # 3 níveis de tolerância por canal: o mesmo hex desenhado pelo Qt pode variar de 1 em arredon-
@@ -99,17 +103,34 @@ for nome, foto, (x, y), esperado in PONTOS:
     else:
         print(f"ok:    {nome} = {esperado}")
 
+# Music and Downloads are optional standard folders, so the root-volume row moves vertically
+# across machines. Probe the stable right edge of the sidebar and require one full selected-row
+# run instead of binding the color contract to a host-specific y coordinate.
+seletor = fotos["seletor"]
+pill = (0x23, 0x23, 0x23)
+selected_rows = [
+    y for y in range(200, 430)
+    if max(abs(a - b) for a, b in zip(seletor.getpixel((340, y)), pill)) <= TOLERANCIA
+]
+if len(selected_rows) < 20:
+    print("FALHA: seletor não mostra uma faixa de disco escolhido em #232323")
+    falhas += 1
+else:
+    print(f"ok:    seletor mostra disco escolhido em #232323 ({len(selected_rows)} px)")
+
 # A capa arredondada: no canto do quadrado a arte NÃO pode aparecer, senão o `radius` está
 # desenhado embaixo de uma imagem de canto vivo — o defeito que o RoundedImage existe para
 # resolver, e que compila verde de qualquer jeito.
 capa = fotos["biblioteca"]
 canto = capa.getpixel((84, 24))     # 2 px para dentro do canto superior esquerdo da capa
+fora = capa.getpixel((80, 24))      # painel imediatamente antes da capa
 centro = capa.getpixel((250, 190))  # no meio da arte
-if max(abs(a - b) for a, b in zip(canto, centro)) < 12:
-    print(f"FALHA: o canto da capa {canto} é igual ao miolo dela {centro} — a capa está quadrada")
+if (max(abs(a - b) for a, b in zip(canto, fora)) > TOLERANCIA
+        or max(abs(a - b) for a, b in zip(fora, centro)) < 8):
+    print(f"FALHA: canto={canto}, fora={fora}, miolo={centro} — a capa está quadrada")
     falhas += 1
 else:
-    print("ok:    a capa está arredondada (o canto não é arte)")
+    print("ok:    a capa está arredondada (o canto preserva o painel)")
 
 # The old dashed Canvas alternated between the dark stroke and the brighter gradient 44 times
 # across this straight edge, which looked jagged even at rest. Exclude corners and require the

@@ -43,12 +43,12 @@ playlist interna do mpv como autoridade sonora.
 
 ### Task 1: Halo ativo somente quando visível e tocando
 
-- [ ] Acrescentar `active` ao `AmbientGlow` e uma prova de execução no harness de medição.
-- [ ] Ver a prova falhar; condicionar a animação a `active && !Theme.reduzirMovimento`, mantendo
+- [x] Acrescentar `active` ao `AmbientGlow` e uma prova de execução no harness de medição.
+- [x] Ver a prova falhar; condicionar a animação a `active && !Theme.reduzirMovimento`, mantendo
   o último frame quando inativa.
-- [ ] Passar `AudioEngine.playing` e exposição da janela desde o painel; medir parado, pausado,
+- [x] Passar `AudioEngine.playing` e exposição da janela desde o painel; medir parado, pausado,
   oculto e tocando por 20 s.
-- [ ] Comparar screenshot tocando, marcar e commitar com
+- [x] Comparar screenshot tocando, marcar e commitar com
   `perf(render): suspend the halo when it cannot animate`.
 
 ### Task 2: Raster e decode estáveis durante resize

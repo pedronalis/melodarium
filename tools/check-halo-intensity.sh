@@ -14,20 +14,30 @@ if ! python3 -c "import PIL" 2>/dev/null; then
     echo "check-halo-intensity: python3-pillow is required"
     exit 1
 fi
+if ! command -v ffmpeg >/dev/null 2>&1; then
+    echo "check-halo-intensity: ffmpeg is required"
+    exit 1
+fi
 
 TMP=$(mktemp -d)
 trap 'rm -rf "$TMP"' EXIT
 mkdir -p "$TMP/config" "$TMP/data" "$TMP/cache"
+ffmpeg -loglevel error -f lavfi -i "sine=frequency=330:duration=8" \
+    -y "$TMP/tone.wav"
 
 shot() {
     local name="$1"
     shift
-    QT_QPA_PLATFORM=offscreen \
-    XDG_CONFIG_HOME="$TMP/config" \
-    XDG_DATA_HOME="$TMP/data" \
-    XDG_CACHE_HOME="$TMP/cache" \
-        timeout 60 "$BIN" --measure 1100 --measure-height 700 --no-search \
-        --halo-teste --shot "$TMP/$name.png" --delay 1800 "$@" >/dev/null 2>&1
+    if ! QT_QPA_PLATFORM=offscreen MELODIA_NULL_AO=1 \
+         XDG_CONFIG_HOME="$TMP/config" \
+         XDG_DATA_HOME="$TMP/data" \
+         XDG_CACHE_HOME="$TMP/cache" \
+         timeout 15 "$BIN" --measure 1100 --measure-height 700 --no-search \
+         --halo-teste --play-track "$TMP/tone.wav" \
+         --shot "$TMP/$name.png" --delay 1800 "$@" >"$TMP/$name.log" 2>&1; then
+        tail -20 "$TMP/$name.log"
+        return 1
+    fi
     [ -s "$TMP/$name.png" ]
 }
 

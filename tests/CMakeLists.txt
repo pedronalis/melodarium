@@ -191,6 +191,10 @@ add_test(NAME tst_halo_intensity
     COMMAND bash "${CMAKE_SOURCE_DIR}/tools/check-halo-intensity.sh" "$<TARGET_FILE:melodarium>")
 set_tests_properties(tst_halo_intensity PROPERTIES WORKING_DIRECTORY "${CMAKE_SOURCE_DIR}")
 
+add_test(NAME tst_halo_activity
+    COMMAND bash "${CMAKE_SOURCE_DIR}/tools/check-halo-activity.sh" "$<TARGET_FILE:melodarium>")
+set_tests_properties(tst_halo_activity PROPERTIES WORKING_DIRECTORY "${CMAKE_SOURCE_DIR}")
+
 add_test(NAME tst_search_covers
     COMMAND bash "${CMAKE_SOURCE_DIR}/tools/check-search-covers.sh" "$<TARGET_FILE:melodarium>")
 set_tests_properties(tst_search_covers PROPERTIES WORKING_DIRECTORY "${CMAKE_SOURCE_DIR}")
