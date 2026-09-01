@@ -27,6 +27,7 @@ jobs:
             dbus-daemon \
             desktop-file-utils \
             ffmpeg-free \
+            flac \
             flatpak-builder \
             gcc-c++ \
             git \

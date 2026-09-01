@@ -68,7 +68,7 @@ suíte, lint e gates determinísticos; artefatos são anexados ao job, sem publi
 
 ### Task 4: Documentação e gate final do lote
 
-- [ ] Corrigir dependências Fedora (`mpv-libs-devel`, `taglib-devel`, DBus/playerctl e fontes),
+- [x] Corrigir dependências Fedora (`mpv-libs-devel`, `taglib-devel`, DBus/playerctl e fontes),
   documentar install/Flatpak, dados/backup e controles novos.
 - [ ] Rodar build limpo, piso, suíte, lint, todos os gates e validação de pacote.
 - [ ] Rodar `gitnexus detect-changes`, concluir plano; não publicar nem mudar visibilidade.
