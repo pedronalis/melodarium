@@ -9,11 +9,15 @@
 #include <QDir>
 #include <QDirIterator>
 #include <QFileInfo>
+#include <QFutureWatcher>
 #include <QSettings>
 #include <QSqlDatabase>
+#include <QSqlError>
 #include <QSqlQuery>
 #include <QStandardPaths>
+#include <QSet>
 #include <QVariant>
+#include <QtConcurrent/QtConcurrentRun>
 
 // No collection and no tag queries live in this file, on purpose: the spec keeps podcast
 // organized by show only, so CollectionManager is not a dependency of the podcast library.
@@ -34,6 +38,163 @@ const QStringList &podcastSuffixes()
     return list;
 }
 
+struct LocalEpisode
+{
+    QString title;
+    qint64 publishedAt = 0;
+    qint64 durationMs = 0;
+    QString path;
+};
+
+struct LocalShowBatch
+{
+    QString folderPath;
+    QString title;
+    QList<LocalEpisode> episodes;
+};
+
+struct PodcastScanResult
+{
+    bool ok = false;
+    bool changed = false;
+    QString error;
+};
+
+struct PodcastWriterGuard
+{
+    QString connectionName;
+
+    ~PodcastWriterGuard()
+    {
+        if (!QSqlDatabase::contains(connectionName))
+            return;
+        {
+            QSqlDatabase db = QSqlDatabase::database(connectionName, false);
+            if (db.isValid())
+                db.close();
+        }
+        QSqlDatabase::removeDatabase(connectionName);
+    }
+};
+
+PodcastScanResult runLocalPodcastScan(const QString &rootPath, const QString &dbPath)
+{
+    const QString connectionName = QStringLiteral("melodarium-podcast-writer");
+    const PodcastWriterGuard guard{connectionName};
+    PodcastScanResult result;
+    if (!Database::openConnection(connectionName, dbPath)) {
+        result.error = QStringLiteral("could not open podcast writer connection");
+        return result;
+    }
+    QSqlDatabase db = QSqlDatabase::database(connectionName);
+
+    QSet<QString> knownPaths;
+    QSqlQuery known(db);
+    if (!known.exec(QStringLiteral(
+            "SELECT local_path FROM podcast_episodes WHERE local_path IS NOT NULL"))) {
+        result.error = known.lastError().text();
+        return result;
+    }
+    while (known.next())
+        knownPaths.insert(known.value(0).toString());
+    known.finish();
+
+    // All filesystem and TagLib work happens before the short writer transaction.
+    const QDir root(rootPath);
+    QStringList folders = root.entryList(QDir::Dirs | QDir::NoDotAndDotDot);
+    folders.prepend(QString());
+    QList<LocalShowBatch> batches;
+    for (const QString &folder : folders) {
+        LocalShowBatch batch;
+        batch.folderPath = folder.isEmpty() ? root.absolutePath() : root.absoluteFilePath(folder);
+        batch.title = folder.isEmpty() ? QObject::tr("Avulsos") : folder;
+
+        const QDir showDir(batch.folderPath);
+        const QStringList files = showDir.entryList(QDir::Files);
+        for (const QString &file : files) {
+            if (!podcastSuffixes().contains(QFileInfo(file).suffix().toLower()))
+                continue;
+            const QString path = showDir.absoluteFilePath(file);
+            if (knownPaths.contains(path))
+                continue;
+            const TrackRecord record = TagReader::read(path);
+            const QFileInfo info(path);
+            batch.episodes.append(
+                {record.valid && !record.title.isEmpty() ? record.title
+                                                         : info.completeBaseName(),
+                 info.lastModified().toSecsSinceEpoch(),
+                 record.valid ? record.durationMs : 0,
+                 path});
+        }
+        if (!batch.episodes.isEmpty())
+            batches.append(std::move(batch));
+    }
+
+    if (!db.transaction()) {
+        result.error = db.lastError().text();
+        return result;
+    }
+
+    bool changed = false;
+    for (const LocalShowBatch &batch : batches) {
+        int showId = 0;
+        QSqlQuery selectShow(db);
+        selectShow.prepare(QStringLiteral(
+            "SELECT id FROM podcast_shows WHERE folder_path = ?"));
+        selectShow.addBindValue(batch.folderPath);
+        if (!selectShow.exec()) {
+            result.error = selectShow.lastError().text();
+            db.rollback();
+            return result;
+        }
+        if (selectShow.next()) {
+            showId = selectShow.value(0).toInt();
+        } else {
+            QSqlQuery insertShow(db);
+            insertShow.prepare(QStringLiteral(
+                "INSERT INTO podcast_shows (title, folder_path) VALUES (?, ?)"));
+            insertShow.addBindValue(batch.title);
+            insertShow.addBindValue(batch.folderPath);
+            if (!insertShow.exec()) {
+                result.error = insertShow.lastError().text();
+                db.rollback();
+                return result;
+            }
+            showId = insertShow.lastInsertId().toInt();
+            changed = true;
+        }
+
+        for (const LocalEpisode &episode : batch.episodes) {
+            QSqlQuery insertEpisode(db);
+            insertEpisode.prepare(QStringLiteral(
+                "INSERT OR IGNORE INTO podcast_episodes "
+                "(show_id, guid, title, published_at, duration_ms, local_path) "
+                "VALUES (?, ?, ?, ?, ?, ?)"));
+            insertEpisode.addBindValue(showId);
+            insertEpisode.addBindValue(episode.path);
+            insertEpisode.addBindValue(episode.title);
+            insertEpisode.addBindValue(episode.publishedAt);
+            insertEpisode.addBindValue(episode.durationMs);
+            insertEpisode.addBindValue(episode.path);
+            if (!insertEpisode.exec()) {
+                result.error = insertEpisode.lastError().text();
+                db.rollback();
+                return result;
+            }
+            changed = changed || insertEpisode.numRowsAffected() > 0;
+        }
+    }
+
+    if (!db.commit()) {
+        result.error = db.lastError().text();
+        db.rollback();
+        return result;
+    }
+    result.ok = true;
+    result.changed = changed;
+    return result;
+}
+
 } // namespace
 
 PodcastLibrary::PodcastLibrary(QObject *parent)
@@ -51,7 +212,11 @@ PodcastLibrary::PodcastLibrary(QObject *parent)
     QTimer::singleShot(0, this, [this]() { refreshCheckTimer(); });
 }
 
-PodcastLibrary::~PodcastLibrary() = default;
+PodcastLibrary::~PodcastLibrary()
+{
+    if (m_scanWatcher)
+        m_scanWatcher->waitForFinished();
+}
 
 void PodcastLibrary::setPodcastPath(const QString &path)
 {
@@ -63,21 +228,6 @@ void PodcastLibrary::setPodcastPath(const QString &path)
     emit podcastPathChanged();
 }
 
-int PodcastLibrary::ensureShow(const QString &folderPath, const QString &title)
-{
-    QSqlQuery sel(uiDb());
-    sel.prepare(QStringLiteral("SELECT id FROM podcast_shows WHERE folder_path = ?"));
-    sel.addBindValue(folderPath);
-    if (sel.exec() && sel.next())
-        return sel.value(0).toInt();
-
-    QSqlQuery ins(uiDb());
-    ins.prepare(QStringLiteral("INSERT INTO podcast_shows (title, folder_path) VALUES (?, ?)"));
-    ins.addBindValue(title);
-    ins.addBindValue(folderPath);
-    return ins.exec() ? ins.lastInsertId().toInt() : 0;
-}
-
 void PodcastLibrary::scanPodcastFolder()
 {
     if (m_podcastPath.isEmpty() || m_scanning)
@@ -86,59 +236,26 @@ void PodcastLibrary::scanPodcastFolder()
     m_scanning = true;
     emit scanningChanged();
 
-    // One folder per show. Files loose at the root go into a catch-all show so nothing
-    // silently disappears from the user's view.
-    const QDir root(m_podcastPath);
-    QStringList folders = root.entryList(QDir::Dirs | QDir::NoDotAndDotDot);
-    folders.prepend(QString()); // the root itself
-
-    for (const QString &folder : folders) {
-        const QString folderPath = folder.isEmpty() ? root.absolutePath()
-                                                    : root.absoluteFilePath(folder);
-        const QString showTitle = folder.isEmpty() ? QObject::tr("Avulsos") : folder;
-
-        QDir showDir(folderPath);
-        const QStringList files = showDir.entryList(QDir::Files);
-        QStringList audio;
-        for (const QString &f : files) {
-            if (podcastSuffixes().contains(QFileInfo(f).suffix().toLower()))
-                audio.append(showDir.absoluteFilePath(f));
+    const QString rootPath = m_podcastPath;
+    const QString dbPath = uiDb().databaseName();
+    auto *watcher = new QFutureWatcher<PodcastScanResult>(this);
+    m_scanWatcher = watcher;
+    connect(watcher, &QFutureWatcherBase::finished, this, [this, watcher]() {
+        const PodcastScanResult result = watcher->result();
+        m_scanWatcher = nullptr;
+        watcher->deleteLater();
+        m_scanning = false;
+        emit scanningChanged();
+        if (!result.ok) {
+            qWarning().noquote() << "local podcast scan rolled back:" << result.error;
+            return;
         }
-        if (audio.isEmpty())
-            continue;
-
-        const int showId = ensureShow(folderPath, showTitle);
-        if (showId <= 0)
-            continue;
-
-        for (const QString &path : audio) {
-            QSqlQuery exists(uiDb());
-            exists.prepare(QStringLiteral("SELECT id FROM podcast_episodes WHERE local_path = ?"));
-            exists.addBindValue(path);
-            if (exists.exec() && exists.next())
-                continue; // already catalogued: never re-read tags nor reset the position
-
-            const TrackRecord rec = TagReader::read(path);
-            const QFileInfo info(path);
-            QSqlQuery ins(uiDb());
-            ins.prepare(QStringLiteral(
-                "INSERT INTO podcast_episodes (show_id, guid, title, published_at, duration_ms, "
-                "local_path) VALUES (?, ?, ?, ?, ?, ?)"));
-            ins.addBindValue(showId);
-            // A local file has no RSS guid: the path is its identity until a feed claims it.
-            ins.addBindValue(path);
-            ins.addBindValue(rec.valid && !rec.title.isEmpty() ? rec.title : info.completeBaseName());
-            ins.addBindValue(info.lastModified().toSecsSinceEpoch());
-            ins.addBindValue(rec.valid ? rec.durationMs : 0);
-            ins.addBindValue(path);
-            ins.exec();
-        }
-        emit episodesChanged(showId);
-    }
-
-    m_scanning = false;
-    emit scanningChanged();
-    emit showsChanged();
+        // PodcastPane refreshes shows and episodes from either signal. Emit one update for
+        // the whole committed batch, not one per folder plus another global refresh.
+        if (result.changed)
+            emit showsChanged();
+    }, Qt::QueuedConnection);
+    watcher->setFuture(QtConcurrent::run(runLocalPodcastScan, rootPath, dbPath));
 }
 
 QVariantList PodcastLibrary::shows()

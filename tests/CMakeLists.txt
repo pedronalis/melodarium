@@ -112,7 +112,7 @@ qt_add_executable(tst_podcast
 )
 target_include_directories(tst_podcast PRIVATE ../src)
 target_link_libraries(tst_podcast PRIVATE
-    Qt6::Core Qt6::Network Qt6::Test Qt6::Qml Qt6::Sql PkgConfig::TAGLIB)
+    Qt6::Concurrent Qt6::Core Qt6::Network Qt6::Test Qt6::Qml Qt6::Sql PkgConfig::TAGLIB)
 
 add_test(NAME tst_podcast COMMAND tst_podcast)
 set_tests_properties(tst_podcast PROPERTIES ENVIRONMENT "QT_QPA_PLATFORM=offscreen")

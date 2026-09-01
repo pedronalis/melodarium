@@ -12,6 +12,7 @@
 #include "podcastfeedfetcher.h"
 
 class EpisodeDownloader;
+class QFutureWatcherBase;
 
 // Deliberate boundary: podcast has no collection and no tag support, so CollectionManager is
 // never consumed here. The spec organizes podcast by show only, with "continue listening" on
@@ -79,7 +80,6 @@ signals:
     void downloadFailed(int episodeId, const QString &reason);
 
 private:
-    int ensureShow(const QString &folderPath, const QString &title);
     void autoMarkPlayed(int episodeId);
     void startFetch(int showId, const QUrl &feedUrl);
     void setCheckingFeeds(bool checking);
@@ -92,4 +92,5 @@ private:
     int m_pendingChecks = 0;
     QTimer m_checkTimer;
     QHash<int, EpisodeDownloader *> m_downloads;
+    QFutureWatcherBase *m_scanWatcher = nullptr;
 };

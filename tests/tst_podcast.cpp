@@ -1,4 +1,8 @@
 #include <QtTest/QtTest>
+#include <QDir>
+#include <QElapsedTimer>
+#include <QFile>
+#include <QProcess>
 #include <QSignalSpy>
 #include <QSettings>
 #include <QSqlError>
@@ -36,6 +40,26 @@ private:
         for (const QVariant &row : rows)
             ids.insert(row.toMap().value(QStringLiteral("id")).toInt());
         return ids;
+    }
+
+    static void makeAudioFixture(const QString &path)
+    {
+        QProcess process;
+        process.start(QStringLiteral("ffmpeg"),
+                      {QStringLiteral("-hide_banner"), QStringLiteral("-loglevel"),
+                       QStringLiteral("error"), QStringLiteral("-f"), QStringLiteral("lavfi"),
+                       QStringLiteral("-i"), QStringLiteral("sine=330:d=0.1"),
+                       QStringLiteral("-metadata"), QStringLiteral("title=Fixture"),
+                       QStringLiteral("-y"), path});
+        QVERIFY(process.waitForStarted(3000));
+        QVERIFY(process.waitForFinished(15000));
+        QCOMPARE(process.exitCode(), 0);
+    }
+
+    static QString quoted(QString value)
+    {
+        value.replace(QLatin1Char('\''), QStringLiteral("''"));
+        return QLatin1Char('\'') + value + QLatin1Char('\'');
     }
 
 private slots:
@@ -200,6 +224,71 @@ private slots:
 
         model.loadForShow(13);
         QCOMPARE(model.rowCount(), 1);
+    }
+
+    void localScanKeepsTheMainThreadAliveAndRefreshesOnce()
+    {
+        const QString rootPath = m_dir.filePath(QStringLiteral("heartbeat-podcasts"));
+        const QString showPath = rootPath + QStringLiteral("/Heartbeat Show");
+        QVERIFY(QDir().mkpath(showPath));
+        const QString seed = showPath + QStringLiteral("/seed.flac");
+        makeAudioFixture(seed);
+        for (int i = 0; i < 300; ++i) {
+            QVERIFY(QFile::copy(seed, showPath + QStringLiteral("/episode-%1.flac").arg(i)));
+        }
+
+        PodcastLibrary library;
+        library.setPodcastPath(rootPath);
+        QSignalSpy showsChanged(&library, &PodcastLibrary::showsChanged);
+        QSignalSpy episodesChanged(&library, &PodcastLibrary::episodesChanged);
+        int heartbeat = 0;
+        QTimer timer;
+        timer.setInterval(1);
+        connect(&timer, &QTimer::timeout, this, [&heartbeat]() { ++heartbeat; });
+        timer.start();
+        QElapsedTimer wall;
+        wall.start();
+
+        library.scanPodcastFolder();
+        QVERIFY(library.scanning());
+        QTRY_VERIFY_WITH_TIMEOUT(!library.scanning(), 30000);
+        timer.stop();
+
+        QVERIFY2(heartbeat >= 1, qPrintable(QStringLiteral("heartbeat=%1").arg(heartbeat)));
+        QCOMPARE(showsChanged.count() + episodesChanged.count(), 1);
+        QCOMPARE(scalar(QStringLiteral("SELECT COUNT(*) FROM podcast_episodes WHERE local_path "
+                                       "LIKE %1").arg(quoted(rootPath + QStringLiteral("/%")))),
+                 301);
+        qInfo().noquote() << QStringLiteral("PODCAST_PERF fixtures=301 wall_ms=%1 heartbeat=%2")
+                                 .arg(wall.elapsed())
+                                 .arg(heartbeat);
+    }
+
+    void localScanRollsBackTheWholeBatchOnFailure()
+    {
+        const QString rootPath = m_dir.filePath(QStringLiteral("rollback-podcasts"));
+        const QString showPath = rootPath + QStringLiteral("/Rollback Show");
+        QVERIFY(QDir().mkpath(showPath));
+        makeAudioFixture(showPath + QStringLiteral("/episode.flac"));
+
+        const int showsBefore = scalar(QStringLiteral("SELECT COUNT(*) FROM podcast_shows"));
+        const int episodesBefore = scalar(QStringLiteral("SELECT COUNT(*) FROM podcast_episodes"));
+        exec(QStringLiteral(
+                 "CREATE TRIGGER fail_local_podcast BEFORE INSERT ON podcast_episodes "
+                 "WHEN NEW.local_path LIKE %1 BEGIN SELECT RAISE(ABORT, 'forced'); END")
+                 .arg(quoted(rootPath + QStringLiteral("/%"))));
+
+        PodcastLibrary library;
+        library.setPodcastPath(rootPath);
+        QSignalSpy showsChanged(&library, &PodcastLibrary::showsChanged);
+        QSignalSpy episodesChanged(&library, &PodcastLibrary::episodesChanged);
+        library.scanPodcastFolder();
+        QTRY_VERIFY_WITH_TIMEOUT(!library.scanning(), 10000);
+        exec(QStringLiteral("DROP TRIGGER fail_local_podcast"));
+
+        QCOMPARE(scalar(QStringLiteral("SELECT COUNT(*) FROM podcast_shows")), showsBefore);
+        QCOMPARE(scalar(QStringLiteral("SELECT COUNT(*) FROM podcast_episodes")), episodesBefore);
+        QCOMPARE(showsChanged.count() + episodesChanged.count(), 0);
     }
 };
 
