@@ -67,12 +67,16 @@ if missing_permissions:
         "FLATPAK_PERMISSIONS_MISSING " + " ".join(missing_permissions)
     )
 
-module_names = {
-    module.get("name") for module in manifest.get("modules", []) if isinstance(module, dict)
-}
+modules = [module for module in manifest.get("modules", []) if isinstance(module, dict)]
+module_names = {module.get("name") for module in modules}
 missing_modules = sorted({"libmpv", "taglib", "melodarium"} - module_names)
 if missing_modules:
     raise SystemExit("FLATPAK_MODULES_MISSING " + " ".join(missing_modules))
+
+libmpv = next(module for module in modules if module.get("name") == "libmpv")
+libmpv_options = set(libmpv.get("config-opts", []))
+if "-Dplain-gl=enabled" not in libmpv_options:
+    raise SystemExit("FLATPAK_LIBMPV_PLAIN_GL_MISSING")
 PY
 
 XDG_CONFIG_HOME="$TMP/xdg-config" \
