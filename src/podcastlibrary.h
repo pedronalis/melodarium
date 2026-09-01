@@ -53,7 +53,9 @@ public:
     Q_INVOKABLE QVariantMap episodeForPath(const QString &path);
 
     Q_INVOKABLE void subscribe(const QUrl &feedUrl);
-    Q_INVOKABLE void unsubscribe(int showId);
+    Q_INVOKABLE void unsubscribe(int showId, bool deleteFiles);
+    Q_INVOKABLE void setFeedPolicy(int showId, bool autoDownload, int retentionCount);
+    Q_INVOKABLE void setCurrentEpisodeId(int episodeId);
     Q_INVOKABLE void checkAllFeeds();
     Q_INVOKABLE void checkFeed(int showId);
     Q_INVOKABLE void downloadEpisode(int episodeId);
@@ -65,6 +67,7 @@ public:
     void ingestFeed(int showId, const ParsedChannel &channel,
                     const QList<ParsedEpisode> &episodes, const QByteArray &etag,
                     const QByteArray &lastModified);
+    void enforceRetention(int showId);
 
 signals:
     void podcastPathChanged();
@@ -79,6 +82,7 @@ signals:
     void downloadProgress(int episodeId, qint64 received, qint64 total);
     void downloadFinished(int episodeId);
     void downloadFailed(int episodeId, const QString &reason);
+    void autoDownloadScheduled(int episodeId);
 
 private:
     void autoMarkPlayed(int episodeId);
@@ -94,4 +98,5 @@ private:
     QTimer m_checkTimer;
     QHash<int, EpisodeDownloader *> m_downloads;
     QFutureWatcherBase *m_scanWatcher = nullptr;
+    int m_currentEpisodeId = 0;
 };

@@ -1,7 +1,7 @@
 ---
 slug: podcast-e-portabilidade
 feature: melodarium
-status: pendente
+status: em-execucao
 depende-de: [confiabilidade-playback-banco, refresh-e-trabalho-background]
 decisao-humana: sim
 spec: docs/plans/2026-09-01-podcast-e-portabilidade.md
@@ -44,10 +44,10 @@ versionado, escrito com `QSaveFile` e validado integralmente antes do restore.
 
 ### Task 1: Unsubscribe e políticas por feed
 
-- [ ] Criar migração/testes RED para `auto_download` e `retention_count`, defaults e upgrade.
-- [ ] Testar unsubscribe com manter/apagar arquivos, ingestão idempotente que agenda só episódios
+- [x] Criar migração/testes RED para `auto_download` e `retention_count`, defaults e upgrade.
+- [x] Testar unsubscribe com manter/apagar arquivos, ingestão idempotente que agenda só episódios
   novos e retenção que nunca apaga episódio tocando/em download.
-- [ ] Implementar transação, fila pós-commit e limpeza segura; commitar com
+- [x] Implementar transação, fila pós-commit e limpeza segura; commitar com
   `feat(podcast): manage subscriptions and retention`.
 
 ### Task 2: OPML import/export

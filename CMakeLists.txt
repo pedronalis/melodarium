@@ -106,6 +106,7 @@ qt_add_qml_module(melodarium
         src/SpeedControl.qml
         src/SleepControl.qml
         src/SubscribeDialog.qml
+        src/UnsubscribeDialog.qml
         src/FeedStatusRow.qml
         src/AddFromLinkDialog.qml
         src/DownloadProgressRow.qml

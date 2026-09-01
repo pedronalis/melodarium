@@ -266,7 +266,8 @@ QVariantList PodcastLibrary::shows()
         QStringLiteral(
             "SELECT s.id, s.title, IFNULL(s.cover_path,''), COUNT(e.id), "
             "SUM(CASE WHEN e.played = 0 THEN 1 ELSE 0 END), "
-            "IFNULL(s.last_checked_at,0), IFNULL(s.feed_url,'') "
+            "IFNULL(s.last_checked_at,0), IFNULL(s.feed_url,''), "
+            "s.auto_download, s.retention_count "
             "FROM podcast_shows s LEFT JOIN podcast_episodes e ON e.show_id = s.id WHERE ")
         + PodcastScope::visibleShowClause(QStringLiteral("s"))
         + QStringLiteral(" GROUP BY s.id ORDER BY s.title COLLATE NOCASE");
@@ -281,7 +282,9 @@ QVariantList PodcastLibrary::shows()
                                {QStringLiteral("episodeCount"), q.value(3).toInt()},
                                {QStringLiteral("unplayedCount"), q.value(4).toInt()},
                                {QStringLiteral("lastCheckedAt"), q.value(5).toLongLong()},
-                               {QStringLiteral("feedUrl"), q.value(6).toString()}});
+                               {QStringLiteral("feedUrl"), q.value(6).toString()},
+                               {QStringLiteral("autoDownload"), q.value(7).toBool()},
+                               {QStringLiteral("retentionCount"), q.value(8).toInt()}});
     }
     return out;
 }
@@ -517,7 +520,18 @@ void PodcastLibrary::ingestFeed(int showId, const ParsedChannel &channel,
                                 const QList<ParsedEpisode> &episodes, const QByteArray &etag,
                                 const QByteArray &lastModified)
 {
-    QSqlQuery meta(uiDb());
+    QSqlDatabase db = uiDb();
+    if (!db.transaction())
+        return;
+
+    QSqlQuery policy(db);
+    policy.prepare(QStringLiteral(
+        "SELECT auto_download FROM podcast_shows WHERE id = ?"));
+    policy.addBindValue(showId);
+    const bool autoDownload = policy.exec() && policy.next() && policy.value(0).toBool();
+    policy.finish();
+
+    QSqlQuery meta(db);
     meta.prepare(QStringLiteral(
         "UPDATE podcast_shows SET title = CASE WHEN ? <> '' THEN ? ELSE title END, "
         "etag = ?, last_modified = ?, last_checked_at = ? WHERE id = ?"));
@@ -527,13 +541,16 @@ void PodcastLibrary::ingestFeed(int showId, const ParsedChannel &channel,
     meta.addBindValue(QString::fromUtf8(lastModified));
     meta.addBindValue(QDateTime::currentSecsSinceEpoch());
     meta.addBindValue(showId);
-    meta.exec();
+    if (!meta.exec()) {
+        db.rollback();
+        return;
+    }
 
-    int inserted = 0;
+    QList<int> insertedIds;
     for (const ParsedEpisode &e : episodes) {
         // UNIQUE(show_id, guid) makes re-ingesting the same feed a no-op: a server that
         // ignores conditional GET costs bandwidth, never duplicate rows.
-        QSqlQuery ins(uiDb());
+        QSqlQuery ins(db);
         ins.prepare(QStringLiteral(
             "INSERT OR IGNORE INTO podcast_episodes (show_id, guid, title, published_at, "
             "duration_ms, remote_url) VALUES (?, ?, ?, ?, ?, ?)"));
@@ -543,14 +560,30 @@ void PodcastLibrary::ingestFeed(int showId, const ParsedChannel &channel,
         ins.addBindValue(e.publishedAt.toSecsSinceEpoch());
         ins.addBindValue(e.durationSeconds * 1000);
         ins.addBindValue(e.enclosureUrl.toString());
-        if (ins.exec() && ins.numRowsAffected() > 0)
-            ++inserted;
+        if (!ins.exec()) {
+            db.rollback();
+            return;
+        }
+        if (ins.numRowsAffected() > 0)
+            insertedIds.append(ins.lastInsertId().toInt());
     }
 
-    if (inserted > 0) {
+    if (!db.commit()) {
+        db.rollback();
+        return;
+    }
+
+    if (!insertedIds.isEmpty()) {
         emit episodesChanged(showId);
         emit showsChanged();
     }
+    if (autoDownload) {
+        for (int episodeId : insertedIds) {
+            emit autoDownloadScheduled(episodeId);
+            QTimer::singleShot(0, this, [this, episodeId]() { downloadEpisode(episodeId); });
+        }
+    }
+    enforceRetention(showId);
 }
 
 void PodcastLibrary::startFetch(int showId, const QUrl &feedUrl)
@@ -636,15 +669,128 @@ void PodcastLibrary::subscribe(const QUrl &feedUrl)
     startFetch(showId, feedUrl);
 }
 
-void PodcastLibrary::unsubscribe(int showId)
+void PodcastLibrary::unsubscribe(int showId, bool deleteFiles)
 {
-    QSqlQuery q(uiDb());
+    QSqlDatabase db = uiDb();
+    if (!db.transaction())
+        return;
+
+    QStringList downloadedPaths;
+    QSqlQuery paths(db);
+    paths.prepare(QStringLiteral(
+        "SELECT local_path FROM podcast_episodes WHERE show_id = ? "
+        "AND local_path IS NOT NULL"));
+    paths.addBindValue(showId);
+    if (!paths.exec()) {
+        db.rollback();
+        return;
+    }
+    while (paths.next())
+        downloadedPaths.append(paths.value(0).toString());
+    paths.finish();
+
+    QSqlQuery q(db);
     q.prepare(QStringLiteral("DELETE FROM podcast_shows WHERE id = ? AND feed_url IS NOT NULL"));
     q.addBindValue(showId);
-    if (q.exec() && q.numRowsAffected() > 0) {
-        emit showsChanged();
-        refreshCheckTimer();
+    if (!q.exec() || q.numRowsAffected() <= 0 || !db.commit()) {
+        db.rollback();
+        return;
     }
+
+    if (deleteFiles) {
+        const QString managedRoot = QDir::cleanPath(downloadDirectory()) + QLatin1Char('/');
+        for (const QString &path : downloadedPaths) {
+            const QString cleanPath = QDir::cleanPath(QFileInfo(path).absoluteFilePath());
+            if (cleanPath.startsWith(managedRoot))
+                QFile::remove(cleanPath);
+        }
+    }
+    emit showsChanged();
+    refreshCheckTimer();
+}
+
+void PodcastLibrary::setFeedPolicy(int showId, bool autoDownload, int retentionCount)
+{
+    QSqlQuery q(uiDb());
+    q.prepare(QStringLiteral(
+        "UPDATE podcast_shows SET auto_download = ?, retention_count = ? "
+        "WHERE id = ? AND feed_url IS NOT NULL"));
+    q.addBindValue(autoDownload ? 1 : 0);
+    q.addBindValue(qMax(0, retentionCount));
+    q.addBindValue(showId);
+    if (!q.exec() || q.numRowsAffected() <= 0)
+        return;
+    emit showsChanged();
+    enforceRetention(showId);
+}
+
+void PodcastLibrary::setCurrentEpisodeId(int episodeId)
+{
+    m_currentEpisodeId = qMax(0, episodeId);
+}
+
+void PodcastLibrary::enforceRetention(int showId)
+{
+    QSqlQuery policy(uiDb());
+    policy.prepare(QStringLiteral(
+        "SELECT retention_count FROM podcast_shows WHERE id = ?"));
+    policy.addBindValue(showId);
+    if (!policy.exec() || !policy.next())
+        return;
+    const int retentionCount = policy.value(0).toInt();
+    if (retentionCount <= 0)
+        return;
+
+    struct Removal { int id; QString path; };
+    QList<Removal> removals;
+    QSqlQuery episodes(uiDb());
+    episodes.prepare(QStringLiteral(
+        "SELECT id, local_path, IFNULL(download_state,'none') "
+        "FROM podcast_episodes WHERE show_id = ? AND local_path IS NOT NULL "
+        "ORDER BY IFNULL(published_at,0) DESC, id DESC"));
+    episodes.addBindValue(showId);
+    if (!episodes.exec())
+        return;
+
+    const QString managedRoot = QDir::cleanPath(downloadDirectory()) + QLatin1Char('/');
+    int rank = 0;
+    while (episodes.next()) {
+        const int episodeId = episodes.value(0).toInt();
+        const QString path = episodes.value(1).toString();
+        const QString state = episodes.value(2).toString();
+        if (rank++ < retentionCount || episodeId == m_currentEpisodeId
+            || state == QLatin1String("downloading") || m_downloads.contains(episodeId))
+            continue;
+        const QString cleanPath = QDir::cleanPath(QFileInfo(path).absoluteFilePath());
+        if (cleanPath.startsWith(managedRoot))
+            removals.append({episodeId, cleanPath});
+    }
+    episodes.finish();
+    if (removals.isEmpty())
+        return;
+
+    QSqlDatabase db = uiDb();
+    if (!db.transaction())
+        return;
+    for (const Removal &removal : removals) {
+        QSqlQuery clear(db);
+        clear.prepare(QStringLiteral(
+            "UPDATE podcast_episodes SET local_path = NULL, download_state = 'none' "
+            "WHERE id = ?"));
+        clear.addBindValue(removal.id);
+        if (!clear.exec()) {
+            db.rollback();
+            return;
+        }
+    }
+    if (!db.commit()) {
+        db.rollback();
+        return;
+    }
+    for (const Removal &removal : removals)
+        QFile::remove(removal.path);
+    emit episodesChanged(showId);
+    emit showsChanged();
 }
 
 void PodcastLibrary::checkFeed(int showId)
@@ -731,12 +877,17 @@ void PodcastLibrary::downloadEpisode(int episodeId)
                 show.prepare(QStringLiteral(
                     "SELECT show_id FROM podcast_episodes WHERE id = ?"));
                 show.addBindValue(id);
-                if (show.exec() && show.next())
-                    emit episodesChanged(show.value(0).toInt());
+                int showId = 0;
+                if (show.exec() && show.next()) {
+                    showId = show.value(0).toInt();
+                    emit episodesChanged(showId);
+                }
 
                 m_downloads.remove(id);
                 downloader->deleteLater();
                 emit downloadFinished(id);
+                if (showId > 0)
+                    enforceRetention(showId);
             });
 
     connect(downloader, &EpisodeDownloader::failed, this,
