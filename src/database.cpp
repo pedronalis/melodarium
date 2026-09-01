@@ -1,5 +1,6 @@
 #include "database.h"
 #include "libraryscanner.h"
+#include "librarywatcher.h"
 
 #include <QDir>
 #include <QFile>
@@ -10,6 +11,7 @@
 #include <QCoreApplication>
 #include <QStandardPaths>
 #include <QThread>
+#include <QTimer>
 #include <QVariant>
 
 namespace {
@@ -330,10 +332,20 @@ Database::Database(QObject *parent)
 
     QSettings settings;
     m_libraryPath = settings.value(QStringLiteral("library/path")).toString();
+
+    m_libraryWatcher = new LibraryWatcher(this);
+    connect(m_libraryWatcher, &LibraryWatcher::scanRequested, this, &Database::startScan);
+    connect(m_libraryWatcher, &LibraryWatcher::changeDetected, this, [this]() {
+        if (m_scanning || m_scanThread)
+            m_rescanPending = true;
+    });
+    m_libraryWatcher->setRoot(m_libraryPath);
 }
 
 Database::~Database()
 {
+    m_rescanPending = false;
+    m_libraryWatcher->setEnabled(false);
     cancelScan();
 }
 
@@ -454,14 +466,23 @@ void Database::setLibraryPath(const QString &path)
     if (m_libraryPath == path)
         return;
     m_libraryPath = path;
+    m_rescanPending = false;
+    m_libraryWatcher->setRoot(path);
     QSettings().setValue(QStringLiteral("library/path"), path);
     emit libraryPathChanged();
 }
 
 void Database::startScan()
 {
-    if (m_scanning || m_libraryPath.isEmpty())
+    if (m_libraryPath.isEmpty())
         return;
+    if (m_scanning || m_scanThread) {
+        m_rescanPending = true;
+        return;
+    }
+
+    m_rescanPending = false;
+    m_libraryWatcher->scanStarted();
 
     m_scanThread = new QThread(this);
     m_scanner = new LibraryScanner;
@@ -473,7 +494,11 @@ void Database::startScan()
         m_scanner->run(root, dbPath);
     });
     connect(m_scanner, &LibraryScanner::progress, this, &Database::scanProgress);
-    connect(m_scanner, &LibraryScanner::failed, this, &Database::scanFailed);
+    connect(m_scanner, &LibraryScanner::failed, this, [this](const QString &message) {
+        m_scanning = false;
+        emit scanningChanged();
+        emit scanFailed(message);
+    });
     connect(m_scanner, &LibraryScanner::finished, this,
             [this](int added, int updated, int removed) {
                 m_scanning = false;
@@ -481,11 +506,18 @@ void Database::startScan()
                 emit scanFinished(added, updated, removed);
             });
     connect(m_scanner, &LibraryScanner::finished, m_scanThread, &QThread::quit);
+    connect(m_scanner, &LibraryScanner::failed, m_scanThread, &QThread::quit);
     connect(m_scanThread, &QThread::finished, m_scanner, &QObject::deleteLater);
     connect(m_scanThread, &QThread::finished, this, [this]() {
         m_scanner = nullptr;
         m_scanThread = nullptr;
+        m_libraryWatcher->scanFinished();
+        if (m_rescanPending && !m_libraryPath.isEmpty()) {
+            m_rescanPending = false;
+            QTimer::singleShot(0, this, &Database::startScan);
+        }
     });
+    connect(m_scanThread, &QThread::finished, m_scanThread, &QObject::deleteLater);
 
     m_scanning = true;
     emit scanningChanged();
@@ -494,6 +526,7 @@ void Database::startScan()
 
 void Database::cancelScan()
 {
+    m_rescanPending = false;
     if (m_scanner)
         m_scanner->cancel();
     if (m_scanThread) {

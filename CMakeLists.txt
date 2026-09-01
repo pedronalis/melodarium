@@ -28,6 +28,8 @@ qt_add_executable(melodarium
     src/database.cpp
     src/libraryscanner.h
     src/libraryscanner.cpp
+    src/librarywatcher.h
+    src/librarywatcher.cpp
     src/covercache.h
     src/covercache.cpp
     src/tracklistmodel.h
@@ -118,6 +120,8 @@ qt_add_qml_module(melodarium
         src/audioengine.cpp
         src/database.h
         src/database.cpp
+        src/librarywatcher.h
+        src/librarywatcher.cpp
         src/covercache.h
         src/covercache.cpp
         src/tracklistmodel.h

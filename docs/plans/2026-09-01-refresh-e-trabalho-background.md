@@ -46,12 +46,12 @@ worker e publica resultados em uma transação curta na conexão writer.
 
 ### Task 2: Atualizar biblioteca automaticamente
 
-- [ ] Escrever `tst_librarywatcher` exigindo debounce de rajada, inclusão de subdiretório novo,
+- [x] Escrever `tst_librarywatcher` exigindo debounce de rajada, inclusão de subdiretório novo,
   rearm após rename e nenhuma emissão depois de trocar/desativar a raiz.
-- [ ] Rodar o novo alvo e confirmar RED por tipo ausente.
-- [ ] Implementar `LibraryWatcher`, conectar `scanRequested` a `Database::startScan()` e manter
+- [x] Rodar o novo alvo e confirmar RED por tipo ausente.
+- [x] Implementar `LibraryWatcher`, conectar `scanRequested` a `Database::startScan()` e manter
   `rescanPending` quando já houver scan; rearmar árvore somente após o scan terminar.
-- [ ] Rodar o alvo e uma prova real com arquivos temporários; marcar e commitar com
+- [x] Rodar o alvo e uma prova real com arquivos temporários; marcar e commitar com
   `feat(library): refresh watched folders automatically`.
 
 ### Task 3: Tirar scan de podcast da GUI thread
