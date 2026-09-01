@@ -69,6 +69,8 @@ qt_add_qml_module(melodarium
         src/Main.qml
         src/Theme.qml
         src/Icons.qml
+        src/NoticeCenter.qml
+        src/StatusBanner.qml
         src/IconButton.qml
         src/IconRail.qml
         src/MelodariumButton.qml

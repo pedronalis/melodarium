@@ -44,11 +44,11 @@ Qt Test e scripts de interação/captura.
 
 ### Task 1: Avisos e progresso visíveis
 
-- [ ] Criar gate RED que injeta `scanFailed`, `playbackError`, `feedCheckFailed` e
+- [x] Criar gate RED que injeta `scanFailed`, `playbackError`, `feedCheckFailed` e
   `downloadFailed`, exigindo mensagem, origem, ação de fechar/tentar novamente e progresso do scan.
-- [ ] Implementar fila limitada e deduplicada, `StatusBanner` com `Accessible.role/status`, foco
+- [x] Implementar fila limitada e deduplicada, `StatusBanner` com `Accessible.role/status`, foco
   quando erro fatal e Connections para todos os sinais de backend.
-- [ ] Rodar gate e suíte; commitar com `feat(ui): surface backend errors and progress`.
+- [x] Rodar gate e suíte; commitar com `feat(ui): surface backend errors and progress`.
 
 ### Task 2: Teclado e semântica acessível
 
