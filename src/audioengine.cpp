@@ -354,6 +354,10 @@ void AudioEngine::loadPlaylist(const QStringList &files, int startIndex, bool re
     }
 
     m_queue = files;
+    m_queueOccurrenceIds.clear();
+    m_queueOccurrenceIds.reserve(files.size());
+    for (qsizetype i = 0; i < files.size(); ++i)
+        m_queueOccurrenceIds.append(m_nextQueueOccurrenceId++);
     m_rememberCurrentQueue = rememberSession;
     // A ordem guardada era da fila que acabou de sair; restaurá-la sobre esta devolveria
     // faixas que não estão mais aqui.
@@ -362,6 +366,7 @@ void AudioEngine::loadPlaylist(const QStringList &files, int startIndex, bool re
         emit shuffleChanged();
     }
     m_queueOriginal.clear();
+    m_queueOriginalOccurrenceIds.clear();
     emit queueChanged();
     if (m_rememberCurrentQueue)
         saveSession(m_queue, boundedStart);
@@ -373,11 +378,169 @@ void AudioEngine::appendToQueue(const QString &file)
         return;
     // "append" e não "append-play": pôr no fim é um gesto de organizar a fila, não de
     // mandar tocar. Quem quiser tocar chama play().
-    command({QStringLiteral("loadfile"), file, QStringLiteral("append")});
+    if (!command({QStringLiteral("loadfile"), file, QStringLiteral("append")}))
+        return;
+    const quint64 occurrenceId = m_nextQueueOccurrenceId++;
     m_queue.append(file);
+    m_queueOccurrenceIds.append(occurrenceId);
+    if (m_shuffle) {
+        m_queueOriginal.append(file);
+        m_queueOriginalOccurrenceIds.append(occurrenceId);
+    }
     emit queueChanged();
     if (m_rememberCurrentQueue)
         saveSession(m_queue, m_playlistPos >= 0 ? m_playlistPos : 0);
+}
+
+bool AudioEngine::playNext(const QString &file)
+{
+    if (!m_mpv || file.isEmpty() || m_playlistPos < 0
+        || m_playlistPos >= m_queue.size())
+        return false;
+
+    const int insertionIndex = m_playlistPos + 1;
+    if (!command({QStringLiteral("loadfile"), file, QStringLiteral("insert-at"),
+                  QString::number(insertionIndex)}))
+        return false;
+
+    const quint64 currentId = m_queueOccurrenceIds.at(m_playlistPos);
+    const quint64 occurrenceId = m_nextQueueOccurrenceId++;
+    m_queue.insert(insertionIndex, file);
+    m_queueOccurrenceIds.insert(insertionIndex, occurrenceId);
+    if (m_shuffle) {
+        const int originalCurrent = m_queueOriginalOccurrenceIds.indexOf(currentId);
+        const int originalInsertion = originalCurrent >= 0
+                                          ? originalCurrent + 1
+                                          : m_queueOriginal.size();
+        m_queueOriginal.insert(originalInsertion, file);
+        m_queueOriginalOccurrenceIds.insert(originalInsertion, occurrenceId);
+    }
+
+    emit queueChanged();
+    if (m_rememberCurrentQueue)
+        saveSession(m_queue, m_playlistPos);
+    return true;
+}
+
+bool AudioEngine::removeQueueItem(int index)
+{
+    if (!m_mpv || index < 0 || index >= m_queue.size() || index == m_playlistPos)
+        return false;
+    if (!command({QStringLiteral("playlist-remove"), QString::number(index)}))
+        return false;
+
+    const quint64 occurrenceId = m_queueOccurrenceIds.at(index);
+    m_queue.removeAt(index);
+    m_queueOccurrenceIds.removeAt(index);
+    if (m_shuffle) {
+        const int originalIndex = m_queueOriginalOccurrenceIds.indexOf(occurrenceId);
+        if (originalIndex >= 0) {
+            m_queueOriginal.removeAt(originalIndex);
+            m_queueOriginalOccurrenceIds.removeAt(originalIndex);
+        }
+    }
+
+    if (index < m_playlistPos) {
+        --m_playlistPos;
+        emit playlistPosChanged();
+    }
+    emit queueChanged();
+    if (m_rememberCurrentQueue)
+        saveSession(m_queue, m_playlistPos >= 0 ? m_playlistPos : 0);
+    return true;
+}
+
+bool AudioEngine::moveQueueItem(int from, int to)
+{
+    if (!m_mpv || from < 0 || from >= m_queue.size()
+        || to < 0 || to >= m_queue.size())
+        return false;
+    if (from == to)
+        return true;
+
+    // mpv's destination is the entry to insert before, not the final index. Moving an
+    // occurrence towards the tail is therefore expressed as adjacent moves so the public
+    // contract remains the same as QStringList::move(), including the last position.
+    if (from < to) {
+        for (int index = from + 1; index <= to; ++index) {
+            if (!command({QStringLiteral("playlist-move"), QString::number(index),
+                          QString::number(index - 1)}))
+                return false;
+        }
+    } else if (!command({QStringLiteral("playlist-move"), QString::number(from),
+                         QString::number(to)})) {
+        return false;
+    }
+
+    const quint64 occurrenceId = m_queueOccurrenceIds.at(from);
+    m_queue.move(from, to);
+    m_queueOccurrenceIds.move(from, to);
+    if (m_shuffle) {
+        const int originalIndex = m_queueOriginalOccurrenceIds.indexOf(occurrenceId);
+        if (originalIndex >= 0) {
+            const QString path = m_queueOriginal.takeAt(originalIndex);
+            m_queueOriginalOccurrenceIds.removeAt(originalIndex);
+
+            int originalInsertion = m_queueOriginal.size();
+            if (to > 0) {
+                const quint64 previousId = m_queueOccurrenceIds.at(to - 1);
+                const int previousOriginal =
+                    m_queueOriginalOccurrenceIds.indexOf(previousId);
+                if (previousOriginal >= 0)
+                    originalInsertion = previousOriginal + 1;
+            } else if (m_queueOccurrenceIds.size() > 1) {
+                const quint64 nextId = m_queueOccurrenceIds.at(1);
+                const int nextOriginal = m_queueOriginalOccurrenceIds.indexOf(nextId);
+                if (nextOriginal >= 0)
+                    originalInsertion = nextOriginal;
+            } else {
+                originalInsertion = 0;
+            }
+            m_queueOriginal.insert(originalInsertion, path);
+            m_queueOriginalOccurrenceIds.insert(originalInsertion, occurrenceId);
+        }
+    }
+
+    const int oldPlaylistPos = m_playlistPos;
+    if (m_playlistPos == from)
+        m_playlistPos = to;
+    else if (from < m_playlistPos && to >= m_playlistPos)
+        --m_playlistPos;
+    else if (from > m_playlistPos && to <= m_playlistPos)
+        ++m_playlistPos;
+    if (m_playlistPos != oldPlaylistPos)
+        emit playlistPosChanged();
+
+    emit queueChanged();
+    if (m_rememberCurrentQueue)
+        saveSession(m_queue, m_playlistPos >= 0 ? m_playlistPos : 0);
+    return true;
+}
+
+bool AudioEngine::clearUpcoming()
+{
+    if (!m_mpv || m_playlistPos < 0 || m_playlistPos >= m_queue.size())
+        return false;
+    if (!command({QStringLiteral("playlist-clear")}))
+        return false;
+
+    const QString currentPath = m_queue.at(m_playlistPos);
+    const quint64 currentId = m_queueOccurrenceIds.at(m_playlistPos);
+    m_queue = {currentPath};
+    m_queueOccurrenceIds = {currentId};
+    if (m_shuffle) {
+        m_queueOriginal = m_queue;
+        m_queueOriginalOccurrenceIds = m_queueOccurrenceIds;
+    }
+
+    const bool indexChanged = m_playlistPos != 0;
+    m_playlistPos = 0;
+    if (indexChanged)
+        emit playlistPosChanged();
+    emit queueChanged();
+    if (m_rememberCurrentQueue)
+        saveSession(m_queue, 0);
+    return true;
 }
 
 QStringList AudioEngine::upcoming(int limit) const
@@ -416,6 +579,7 @@ void AudioEngine::setShuffle(bool on)
 
     if (on) {
         m_queueOriginal = m_queue;
+        m_queueOriginalOccurrenceIds = m_queueOccurrenceIds;
         const int atual = m_playlistPos < 0 ? -1 : m_playlistPos;
         // Fisher-Yates a partir da PRÓXIMA entrada: embaralhar o que já está tocando
         // faria o mpv recarregar o arquivo no meio da faixa.
@@ -423,12 +587,15 @@ void AudioEngine::setShuffle(bool on)
             const int j = atual + 1
                           + int(QRandomGenerator::global()->bounded(i - atual));
             m_queue.swapItemsAt(i, j);
+            m_queueOccurrenceIds.swapItemsAt(i, j);
         }
     } else {
         if (m_queueOriginal.isEmpty())
             return;
         m_queue = m_queueOriginal;
+        m_queueOccurrenceIds = m_queueOriginalOccurrenceIds;
         m_queueOriginal.clear();
+        m_queueOriginalOccurrenceIds.clear();
     }
 
     m_shuffle = on;

@@ -291,6 +291,113 @@ private slots:
         QCOMPARE(spy.count(), 1);
     }
 
+    void playNextInsertsOneDuplicateOccurrenceWithoutRestarting()
+    {
+        AudioEngine engine(nullptr, true);
+        if (!engine.isAvailable())
+            QSKIP("mpv unavailable");
+
+        engine.loadPlaylist({m_longTone, m_toneA, m_toneB, m_toneA}, 0);
+        QTRY_VERIFY_WITH_TIMEOUT(engine.position() > 1.0, 10000);
+        const double positionBefore = engine.position();
+
+        QVERIFY(engine.playNext(m_toneA));
+        QCOMPARE(engine.queue(),
+                 QStringList({m_longTone, m_toneA, m_toneA, m_toneB, m_toneA}));
+        QCOMPARE(engine.currentFile(), m_longTone);
+        QCOMPARE(engine.playlistPos(), 0);
+        QVERIFY(engine.position() >= positionBefore);
+    }
+
+    void removeQueueItemTargetsOneDuplicateAndPreservesCurrentTrack()
+    {
+        AudioEngine engine(nullptr, true);
+        if (!engine.isAvailable())
+            QSKIP("mpv unavailable");
+
+        engine.loadPlaylist({m_toneA, m_longTone, m_toneA, m_toneB, m_toneA}, 1);
+        QTRY_VERIFY_WITH_TIMEOUT(engine.position() > 1.0, 10000);
+        const double positionBefore = engine.position();
+
+        QVERIFY(engine.removeQueueItem(2));
+        QCOMPARE(engine.queue(), QStringList({m_toneA, m_longTone, m_toneB, m_toneA}));
+        QVERIFY(engine.removeQueueItem(0));
+        QCOMPARE(engine.queue(), QStringList({m_longTone, m_toneB, m_toneA}));
+        QTRY_COMPARE_WITH_TIMEOUT(engine.playlistPos(), 0, 5000);
+        QCOMPARE(engine.currentFile(), m_longTone);
+        QVERIFY(engine.position() >= positionBefore);
+        QVERIFY(!engine.removeQueueItem(0));
+        QCOMPARE(engine.queue(), QStringList({m_longTone, m_toneB, m_toneA}));
+    }
+
+    void moveQueueItemKeepsTheCurrentOccurrenceAndPosition()
+    {
+        AudioEngine engine(nullptr, true);
+        if (!engine.isAvailable())
+            QSKIP("mpv unavailable");
+
+        engine.loadPlaylist({m_toneA, m_longTone, m_toneA, m_toneB, m_toneA}, 1);
+        QTRY_VERIFY_WITH_TIMEOUT(engine.position() > 1.0, 10000);
+        const double positionBefore = engine.position();
+
+        QVERIFY(engine.moveQueueItem(3, 2));
+        QCOMPARE(engine.queue(),
+                 QStringList({m_toneA, m_longTone, m_toneB, m_toneA, m_toneA}));
+        QVERIFY(engine.moveQueueItem(0, 4));
+        QCOMPARE(engine.queue(),
+                 QStringList({m_longTone, m_toneB, m_toneA, m_toneA, m_toneA}));
+        QTRY_COMPARE_WITH_TIMEOUT(engine.playlistPos(), 0, 5000);
+        QCOMPARE(engine.currentFile(), m_longTone);
+        QVERIFY(engine.position() >= positionBefore);
+        QVERIFY(!engine.moveQueueItem(-1, 2));
+
+        engine.pause();
+        engine.next();
+        QTRY_COMPARE_WITH_TIMEOUT(engine.playlistPos(), 1, 5000);
+        QTRY_COMPARE_WITH_TIMEOUT(engine.currentFile(), m_toneB, 5000);
+    }
+
+    void clearUpcomingKeepsOnlyTheCurrentOccurrence()
+    {
+        AudioEngine engine(nullptr, true);
+        if (!engine.isAvailable())
+            QSKIP("mpv unavailable");
+
+        engine.loadPlaylist({m_toneA, m_longTone, m_toneA, m_toneB, m_toneA}, 1);
+        QTRY_VERIFY_WITH_TIMEOUT(engine.position() > 1.0, 10000);
+        const double positionBefore = engine.position();
+
+        QVERIFY(engine.clearUpcoming());
+        QCOMPARE(engine.queue(), QStringList({m_longTone}));
+        QTRY_COMPARE_WITH_TIMEOUT(engine.playlistPos(), 0, 5000);
+        QCOMPARE(engine.currentFile(), m_longTone);
+        QVERIFY(engine.position() >= positionBefore);
+    }
+
+    void duplicateQueueEditsSurviveShuffleUndo()
+    {
+        AudioEngine engine(nullptr, true);
+        if (!engine.isAvailable())
+            QSKIP("mpv unavailable");
+
+        engine.loadPlaylist({m_longTone, m_toneA, m_toneB, m_toneA}, 0);
+        QTRY_COMPARE_WITH_TIMEOUT(engine.playlistPos(), 0, 5000);
+        QTRY_COMPARE_WITH_TIMEOUT(engine.currentFile(), m_longTone, 5000);
+        engine.pause();
+        engine.setShuffle(true);
+
+        QVERIFY(engine.playNext(m_toneA));
+        const int uniqueEntry = engine.queue().indexOf(m_toneB);
+        QVERIFY(uniqueEntry > 0);
+        QVERIFY(engine.removeQueueItem(uniqueEntry));
+        engine.setShuffle(false);
+
+        QCOMPARE(engine.queue(),
+                 QStringList({m_longTone, m_toneA, m_toneA, m_toneA}));
+        QCOMPARE(engine.playlistPos(), 0);
+        QCOMPARE(engine.currentFile(), m_longTone);
+    }
+
     // A tirinha da tela pede "os próximos quatro": o que toca não entra, e pedir mais do
     // que existe devolve o que existe em vez de estourar.
     void upcomingSkipsTheCurrentAndClampsToWhatExists()

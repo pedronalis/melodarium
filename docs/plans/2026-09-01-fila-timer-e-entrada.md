@@ -1,7 +1,7 @@
 ---
 slug: fila-timer-e-entrada
 feature: melodarium
-status: pendente
+status: em-execucao
 depende-de: [confiabilidade-playback-banco, perf-render-fila]
 decisao-humana: sim
 spec: docs/plans/2026-09-01-fila-timer-e-entrada.md
@@ -40,11 +40,11 @@ classifica URLs/arquivos/pastas e o QML apenas apresenta confirmação e feedbac
 
 ### Task 1: Operações incrementais de fila
 
-- [ ] Escrever testes RED com duplicatas para `playNext(path)`, `removeQueueItem(index)`,
+- [x] Escrever testes RED com duplicatas para `playNext(path)`, `removeQueueItem(index)`,
   `moveQueueItem(from,to)` e `clearUpcoming()`, verificando fila, índice, arquivo e posição.
-- [ ] Implementar usando `playlist-insert`, `playlist-remove` e `playlist-move`; atualizar espelho,
+- [x] Implementar usando `playlist-insert`, `playlist-remove` e `playlist-move`; atualizar espelho,
   sessão e shuffle original de forma atômica.
-- [ ] Rodar teste de centenas de entradas e gate real; commitar com
+- [x] Rodar teste de centenas de entradas e gate real; commitar com
   `feat(queue): edit playback order without restarting`.
 
 ### Task 2: Fila operável na tela
