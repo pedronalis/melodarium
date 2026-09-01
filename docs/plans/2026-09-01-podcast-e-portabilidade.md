@@ -65,11 +65,11 @@ versionado, escrito com `QSaveFile` e validado integralmente antes do restore.
 
 ### Task 4: Backup e restore completo
 
-- [ ] Escrever testes RED de round-trip de DB/QSettings, hash inválido, bundle truncado, versão
+- [x] Escrever testes RED de round-trip de DB/QSettings, hash inválido, bundle truncado, versão
   futura e rollback quando a troca falha.
-- [ ] Implementar bundle versionado com manifest, banco consistente e preferências; restore cria
+- [x] Implementar bundle versionado com manifest, banco consistente e preferências; restore cria
   backup de retorno, fecha conexões, troca por rename atômico e solicita reinício.
-- [ ] Expor em Preferências com seleção nativa e confirmação; commitar com
+- [x] Expor em Preferências com seleção nativa e confirmação; commitar com
   `feat(data): add verified backup and restore bundles`.
 
 ### Task 5: Gate humano

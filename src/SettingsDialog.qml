@@ -108,6 +108,48 @@ Popup {
             color: Theme.cDecorativeFaint
         }
 
+        RowLayout {
+            Layout.fillWidth: true
+            spacing: Theme.marginM
+
+            ColumnLayout {
+                Layout.fillWidth: true
+                spacing: 0
+
+                Text {
+                    text: qsTr("Backup e restauração")
+                    font.family: Theme.fontFamily
+                    font.pixelSize: Theme.fontSizeM
+                    color: Theme.cTitle
+                }
+                Text {
+                    Layout.fillWidth: true
+                    wrapMode: Text.WordWrap
+                    text: qsTr("Move biblioteca, podcasts e preferências em um bundle verificado.")
+                    font.family: Theme.fontFamily
+                    font.pixelSize: Theme.fontSizeXS
+                    color: Theme.cFaint
+                }
+            }
+
+            MelodariumButton {
+                text: qsTr("Abrir")
+                outlined: true
+                enabled: !Database.scanning
+                accessibleName: qsTr("Abrir backup e restauração")
+                onClicked: {
+                    root.close()
+                    backupRestoreDialog.open()
+                }
+            }
+        }
+
+        Rectangle {
+            Layout.fillWidth: true
+            Layout.preferredHeight: Theme.borderS
+            color: Theme.cDecorativeFaint
+        }
+
         // --- Acessibilidade visual ---
         ColumnLayout {
             Layout.fillWidth: true
@@ -350,5 +392,9 @@ Popup {
             Database.startScan()
             root.libraryPathPicked(path)
         }
+    }
+
+    BackupRestoreDialog {
+        id: backupRestoreDialog
     }
 }

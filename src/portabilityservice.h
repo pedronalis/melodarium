@@ -32,10 +32,22 @@ struct M3uWriteResult
     QString error;
 };
 
+struct BundleResult
+{
+    bool ok = false;
+    QString error;
+    QString rollbackBundlePath;
+    bool restartRequired = false;
+};
+
 OpmlParseResult parseOpml(QIODevice *device);
 bool writeOpml(QIODevice *device, QList<OpmlSubscription> subscriptions,
                QString *error = nullptr);
 M3uWriteResult writeM3u(QIODevice *device, const QStringList &paths);
+BundleResult createBundle(const QString &bundlePath, const QString &databasePath,
+                          const QString &settingsPath);
+BundleResult restoreBundle(const QString &bundlePath, const QString &databasePath,
+                           const QString &settingsPath, bool failAfterDatabaseSwap = false);
 
 } // namespace Portability
 
@@ -51,6 +63,8 @@ public:
     Q_INVOKABLE QVariantMap importOpml(const QUrl &fileUrl);
     Q_INVOKABLE QVariantMap exportOpml(const QUrl &fileUrl);
     Q_INVOKABLE QVariantMap exportCollectionM3u(int collectionId, const QUrl &fileUrl);
+    Q_INVOKABLE QVariantMap createBackup(const QUrl &fileUrl);
+    Q_INVOKABLE QVariantMap restoreBackup(const QUrl &fileUrl);
 
 signals:
     void subscriptionRequested(const QUrl &feedUrl);

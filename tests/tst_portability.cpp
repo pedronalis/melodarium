@@ -5,7 +5,9 @@
 #include <QSignalSpy>
 #include <QSqlDatabase>
 #include <QSqlQuery>
+#include <QSettings>
 #include <QTemporaryDir>
+#include <QUuid>
 
 #include "database.h"
 #include "portabilityservice.h"
@@ -22,6 +24,63 @@ QByteArray namespacedFixture()
                              "<op:outline text=\"Inválido\" xmlUrl=\"ftp://invalid.test/feed.xml\"/>\n"
                              "<op:outline text=\"Sem URL\"/>\n"
                              "</op:body></op:opml>");
+}
+
+bool writeDatabaseValue(const QString &path, const QString &value)
+{
+    QFile::remove(path);
+    const QString connection = QStringLiteral("bundle-write-")
+                               + QUuid::createUuid().toString(QUuid::WithoutBraces);
+    bool ok = false;
+    {
+        QSqlDatabase db = QSqlDatabase::addDatabase(QStringLiteral("QSQLITE"), connection);
+        db.setDatabaseName(path);
+        if (db.open()) {
+            QSqlQuery q(db);
+            ok = q.exec(QStringLiteral("CREATE TABLE state (value TEXT)"));
+            if (ok) {
+                q.prepare(QStringLiteral("INSERT INTO state (value) VALUES (?)"));
+                q.addBindValue(value);
+                ok = q.exec();
+            }
+        }
+        db.close();
+    }
+    QSqlDatabase::removeDatabase(connection);
+    return ok;
+}
+
+QString readDatabaseValue(const QString &path)
+{
+    const QString connection = QStringLiteral("bundle-read-")
+                               + QUuid::createUuid().toString(QUuid::WithoutBraces);
+    QString value;
+    {
+        QSqlDatabase db = QSqlDatabase::addDatabase(QStringLiteral("QSQLITE"), connection);
+        db.setDatabaseName(path);
+        if (db.open()) {
+            QSqlQuery q(db);
+            if (q.exec(QStringLiteral("SELECT value FROM state")) && q.next())
+                value = q.value(0).toString();
+        }
+        db.close();
+    }
+    QSqlDatabase::removeDatabase(connection);
+    return value;
+}
+
+void writeSettingValue(const QString &path, const QString &value)
+{
+    QSettings settings(path, QSettings::IniFormat);
+    settings.clear();
+    settings.setValue(QStringLiteral("fixture/value"), value);
+    settings.sync();
+}
+
+QString readSettingValue(const QString &path)
+{
+    return QSettings(path, QSettings::IniFormat)
+        .value(QStringLiteral("fixture/value")).toString();
 }
 
 } // namespace
@@ -181,6 +240,117 @@ private slots:
         QVERIFY(exported.open(QIODevice::ReadOnly));
         QCOMPARE(QString::fromUtf8(exported.readAll()),
                  QStringLiteral("#EXTM3U\n%1\n%2\n").arg(second, first));
+    }
+
+    void backupRestoreRoundTripsDatabaseAndSettings()
+    {
+        const QString dbPath = m_dir.filePath(QStringLiteral("roundtrip.db"));
+        const QString settingsPath = m_dir.filePath(QStringLiteral("roundtrip.ini"));
+        const QString bundlePath = m_dir.filePath(QStringLiteral("roundtrip.melodarium-backup"));
+        QVERIFY(writeDatabaseValue(dbPath, QStringLiteral("backup")));
+        writeSettingValue(settingsPath, QStringLiteral("backup"));
+
+        const Portability::BundleResult created =
+            Portability::createBundle(bundlePath, dbPath, settingsPath);
+        QVERIFY2(created.ok, qPrintable(created.error));
+        QVERIFY(writeDatabaseValue(dbPath, QStringLiteral("current")));
+        writeSettingValue(settingsPath, QStringLiteral("current"));
+
+        const Portability::BundleResult restored =
+            Portability::restoreBundle(bundlePath, dbPath, settingsPath);
+        QVERIFY2(restored.ok, qPrintable(restored.error));
+        QVERIFY(restored.restartRequired);
+        QVERIFY(QFileInfo::exists(restored.rollbackBundlePath));
+        QCOMPARE(readDatabaseValue(dbPath), QStringLiteral("backup"));
+        QCOMPARE(readSettingValue(settingsPath), QStringLiteral("backup"));
+    }
+
+    void restoreRejectsInvalidHashBeforeMutation()
+    {
+        const QString dbPath = m_dir.filePath(QStringLiteral("hash.db"));
+        const QString settingsPath = m_dir.filePath(QStringLiteral("hash.ini"));
+        const QString bundlePath = m_dir.filePath(QStringLiteral("hash.melodarium-backup"));
+        QVERIFY(writeDatabaseValue(dbPath, QStringLiteral("backup")));
+        writeSettingValue(settingsPath, QStringLiteral("backup"));
+        QVERIFY(Portability::createBundle(bundlePath, dbPath, settingsPath).ok);
+        QVERIFY(writeDatabaseValue(dbPath, QStringLiteral("current")));
+        writeSettingValue(settingsPath, QStringLiteral("current"));
+
+        QFile bundle(bundlePath);
+        QVERIFY(bundle.open(QIODevice::ReadWrite));
+        QVERIFY(bundle.seek(bundle.size() - 1));
+        const char original = bundle.read(1).at(0);
+        QVERIFY(bundle.seek(bundle.size() - 1));
+        QCOMPARE(bundle.write(QByteArray(1, original ^ 0x01)), 1);
+        bundle.close();
+
+        const Portability::BundleResult result =
+            Portability::restoreBundle(bundlePath, dbPath, settingsPath);
+        QVERIFY(!result.ok);
+        QVERIFY(result.error.contains(QStringLiteral("hash"), Qt::CaseInsensitive));
+        QCOMPARE(readDatabaseValue(dbPath), QStringLiteral("current"));
+        QCOMPARE(readSettingValue(settingsPath), QStringLiteral("current"));
+    }
+
+    void restoreRejectsTruncatedAndFutureBundles()
+    {
+        const QString dbPath = m_dir.filePath(QStringLiteral("reject.db"));
+        const QString settingsPath = m_dir.filePath(QStringLiteral("reject.ini"));
+        const QString originalPath = m_dir.filePath(QStringLiteral("reject.melodarium-backup"));
+        QVERIFY(writeDatabaseValue(dbPath, QStringLiteral("backup")));
+        writeSettingValue(settingsPath, QStringLiteral("backup"));
+        QVERIFY(Portability::createBundle(originalPath, dbPath, settingsPath).ok);
+
+        QFile original(originalPath);
+        QVERIFY(original.open(QIODevice::ReadOnly));
+        const QByteArray bytes = original.readAll();
+        original.close();
+
+        const QString truncatedPath = m_dir.filePath(QStringLiteral("truncated.backup"));
+        QFile truncated(truncatedPath);
+        QVERIFY(truncated.open(QIODevice::WriteOnly));
+        QCOMPARE(truncated.write(bytes.left(bytes.size() - 9)), bytes.size() - 9);
+        truncated.close();
+        QVERIFY(writeDatabaseValue(dbPath, QStringLiteral("current")));
+        writeSettingValue(settingsPath, QStringLiteral("current"));
+        QVERIFY(!Portability::restoreBundle(truncatedPath, dbPath, settingsPath).ok);
+        QCOMPARE(readDatabaseValue(dbPath), QStringLiteral("current"));
+
+        QByteArray futureBytes = bytes;
+        const QByteArray versionOne = QByteArrayLiteral("\"version\":1");
+        const int versionOffset = futureBytes.indexOf(versionOne);
+        QVERIFY(versionOffset >= 0);
+        futureBytes[versionOffset + versionOne.size() - 1] = '9';
+        const QString futurePath = m_dir.filePath(QStringLiteral("future.backup"));
+        QFile future(futurePath);
+        QVERIFY(future.open(QIODevice::WriteOnly));
+        QCOMPARE(future.write(futureBytes), futureBytes.size());
+        future.close();
+        const Portability::BundleResult futureResult =
+            Portability::restoreBundle(futurePath, dbPath, settingsPath);
+        QVERIFY(!futureResult.ok);
+        QVERIFY(futureResult.error.contains(QStringLiteral("versão"), Qt::CaseInsensitive));
+        QCOMPARE(readDatabaseValue(dbPath), QStringLiteral("current"));
+        QCOMPARE(readSettingValue(settingsPath), QStringLiteral("current"));
+    }
+
+    void restoreRollsBackWhenSecondSwapFails()
+    {
+        const QString dbPath = m_dir.filePath(QStringLiteral("rollback.db"));
+        const QString settingsPath = m_dir.filePath(QStringLiteral("rollback.ini"));
+        const QString bundlePath = m_dir.filePath(QStringLiteral("rollback.melodarium-backup"));
+        QVERIFY(writeDatabaseValue(dbPath, QStringLiteral("backup")));
+        writeSettingValue(settingsPath, QStringLiteral("backup"));
+        QVERIFY(Portability::createBundle(bundlePath, dbPath, settingsPath).ok);
+        QVERIFY(writeDatabaseValue(dbPath, QStringLiteral("current")));
+        writeSettingValue(settingsPath, QStringLiteral("current"));
+
+        const Portability::BundleResult result =
+            Portability::restoreBundle(bundlePath, dbPath, settingsPath, true);
+        QVERIFY(!result.ok);
+        QVERIFY(QFileInfo::exists(result.rollbackBundlePath));
+        QCOMPARE(readDatabaseValue(dbPath), QStringLiteral("current"));
+        QCOMPARE(readSettingValue(settingsPath), QStringLiteral("current"));
     }
 
 private:
