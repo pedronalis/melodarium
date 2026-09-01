@@ -1,7 +1,7 @@
 ---
 slug: ci-e-distribuicao
 feature: melodarium
-status: pendente
+status: em-execucao
 depende-de: [erros-acessibilidade-preferencias, fila-timer-e-entrada, podcast-e-portabilidade]
 decisao-humana: nao
 spec: docs/plans/2026-09-01-ci-e-distribuicao.md
@@ -44,11 +44,11 @@ suíte, lint e gates determinísticos; artefatos são anexados ao job, sem publi
 
 ### Task 1: CMake e metadados instaláveis
 
-- [ ] Criar gate RED que executa `cmake --install` em prefixo temporário e exige binário, desktop,
+- [x] Criar gate RED que executa `cmake --install` em prefixo temporário e exige binário, desktop,
   AppStream e ícone nos caminhos GNU corretos.
-- [ ] Definir QTP0004 explicitamente, `GNUInstallDirs`, install rules e IDs consistentes; validar
+- [x] Definir QTP0004 explicitamente, `GNUInstallDirs`, install rules e IDs consistentes; validar
   desktop/AppStream com as ferramentas oficiais.
-- [ ] Rodar build/test/gate e commitar com `build: add freedesktop install metadata`.
+- [x] Rodar build/test/gate e commitar com `build: add freedesktop install metadata`.
 
 ### Task 2: Flatpak reproduzível
 

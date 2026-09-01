@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<component type="desktop-application">
+  <id>io.github.pedronalis.melodarium</id>
+  <metadata_license>FSFAP</metadata_license>
+  <project_license>LicenseRef-proprietary</project_license>
+  <name>Melodarium</name>
+  <summary>Local music and podcast player</summary>
+  <summary xml:lang="pt-BR">Player local de música e podcast</summary>
+  <description>
+    <p>
+      Melodarium plays a local music library through libmpv and keeps playlists, tags,
+      playback history and podcast subscriptions in a local SQLite database.
+    </p>
+    <p xml:lang="pt-BR">
+      O Melodarium toca uma biblioteca local pelo libmpv e mantém playlists, tags,
+      histórico e assinaturas de podcast em um banco SQLite local.
+    </p>
+  </description>
+  <launchable type="desktop-id">io.github.pedronalis.melodarium.desktop</launchable>
+  <developer id="io.github.pedronalis">
+    <name>Pedro Nalis</name>
+  </developer>
+  <url type="homepage">https://github.com/pedronalis/melodarium</url>
+  <provides>
+    <binary>melodarium</binary>
+  </provides>
+  <categories>
+    <category>AudioVideo</category>
+    <category>Audio</category>
+    <category>Player</category>
+  </categories>
+  <content_rating type="oars-1.1" />
+  <releases>
+    <release version="0.1.0" date="2026-09-01" />
+  </releases>
+</component>
