@@ -21,6 +21,12 @@ enum PropertyId : uint64_t {
 
 constexpr auto kSavedQueueKey = "playback/queue";
 constexpr auto kSavedQueueIndexKey = "playback/currentIndex";
+constexpr auto kVolumeKey = "playback/volume";
+constexpr auto kPodcastSpeedKey = "playback/podcastSpeed";
+constexpr auto kReplayGainModeKey = "audio/replayGainMode";
+constexpr auto kLegacyReplayGainKey = "audio/replayGain";
+constexpr auto kGaplessAggressiveKey = "audio/gaplessAggressive";
+constexpr auto kExclusiveOutputKey = "audio/exclusiveOutput";
 } // namespace
 
 AudioEngine::AudioEngine(QObject *parent, bool headlessAo)
@@ -29,6 +35,25 @@ AudioEngine::AudioEngine(QObject *parent, bool headlessAo)
     // Session state is useful even when mpv cannot start: the empty pane can still explain
     // what would be restored. Loading it does not feed anything to mpv until the user clicks.
     loadSavedSession();
+
+    QSettings settings;
+    m_volume = qBound(0.0, settings.value(QLatin1String(kVolumeKey), 100.0).toDouble(), 100.0);
+    m_podcastSpeed = qBound(0.25,
+                            settings.value(QLatin1String(kPodcastSpeedKey), 1.0).toDouble(),
+                            4.0);
+    QString replayGainMode = settings.value(QLatin1String(kReplayGainModeKey)).toString();
+    if (replayGainMode.isEmpty()) {
+        replayGainMode = settings.value(QLatin1String(kLegacyReplayGainKey), false).toBool()
+                             ? QStringLiteral("track") : QStringLiteral("no");
+        settings.setValue(QLatin1String(kReplayGainModeKey), replayGainMode);
+    }
+    if (replayGainMode != QStringLiteral("track")
+        && replayGainMode != QStringLiteral("album"))
+        replayGainMode = QStringLiteral("no");
+    const bool gaplessAggressive =
+        settings.value(QLatin1String(kGaplessAggressiveKey), false).toBool();
+    const bool exclusiveOutput =
+        settings.value(QLatin1String(kExclusiveOutputKey), false).toBool();
 
     // MANDATORY before mpv_create(): libmpv requires LC_NUMERIC="C". Under pt_BR.UTF-8
     // (decimal comma) mpv_create() fails and the symptom does not point at the cause.
@@ -61,9 +86,10 @@ AudioEngine::AudioEngine(QObject *parent, bool headlessAo)
     // of them a value forces swresample to convert every track to it, which is exactly what
     // the quality requirement forbids. Their literal names are kept out of this file on
     // purpose so the grep guard in the plan stays meaningful.
-    setOptionString("gapless-audio", "weak");
-    setOptionString("replaygain", "no");
+    setOptionString("gapless-audio", gaplessAggressive ? "yes" : "weak");
+    setOptionString("replaygain", replayGainMode.toUtf8().constData());
     setOptionString("replaygain-clip", "no");
+    setOptionString("audio-exclusive", exclusiveOutput ? "yes" : "no");
     setOptionString("hr-seek", "yes");
     setOptionString("keep-open", "no");
 
@@ -74,6 +100,8 @@ AudioEngine::AudioEngine(QObject *parent, bool headlessAo)
         m_mpv = nullptr;
         return;
     }
+
+    mpv_set_property(m_mpv, "volume", MPV_FORMAT_DOUBLE, &m_volume);
 
     mpv_observe_property(m_mpv, PROP_TIME_POS, "time-pos", MPV_FORMAT_DOUBLE);
     mpv_observe_property(m_mpv, PROP_DURATION, "duration", MPV_FORMAT_DOUBLE);
@@ -231,6 +259,13 @@ void AudioEngine::loadPlaylist(const QStringList &files, int startIndex, bool re
 {
     if (!m_mpv || files.isEmpty())
         return;
+    m_podcastMode = !rememberSession;
+    const double desiredSpeed = m_podcastMode ? m_podcastSpeed : 1.0;
+    if (!qFuzzyCompare(m_speed, desiredSpeed)) {
+        m_speed = desiredSpeed;
+        mpv_set_property(m_mpv, "speed", MPV_FORMAT_DOUBLE, &m_speed);
+        emit speedChanged();
+    }
     const int boundedStart = qBound(0, startIndex, files.size() - 1);
     for (int i = 0; i < files.size(); ++i) {
         // "replace" on the first entry clears whatever was queued; "append" keeps the
@@ -360,10 +395,12 @@ void AudioEngine::reorderMpvPlaylist(const QStringList &atual)
 
 void AudioEngine::setVolume(double v)
 {
-    if (qFuzzyCompare(m_volume, v) || !m_mpv)
+    const double clamped = qBound(0.0, v, 100.0);
+    if (qFuzzyCompare(m_volume, clamped) || !m_mpv)
         return;
-    m_volume = qBound(0.0, v, 100.0);
+    m_volume = clamped;
     mpv_set_property(m_mpv, "volume", MPV_FORMAT_DOUBLE, &m_volume);
+    QSettings().setValue(QLatin1String(kVolumeKey), m_volume);
     emit volumeChanged();
 }
 
@@ -374,6 +411,10 @@ void AudioEngine::setSpeed(double s)
         return;
     m_speed = clamped;
     mpv_set_property(m_mpv, "speed", MPV_FORMAT_DOUBLE, &m_speed);
+    if (m_podcastMode) {
+        m_podcastSpeed = m_speed;
+        QSettings().setValue(QLatin1String(kPodcastSpeedKey), m_podcastSpeed);
+    }
     emit speedChanged();
 }
 
@@ -382,6 +423,7 @@ void AudioEngine::setGaplessAggressive(bool on)
     // "yes" keeps the device open across entries but resamples tracks whose format differs
     // from the first one. "weak" (default) only goes gapless when the format matches.
     setPropertyString("gapless-audio", on ? "yes" : "weak");
+    QSettings().setValue(QLatin1String(kGaplessAggressiveKey), on);
 }
 
 void AudioEngine::setReplayGainMode(const QString &mode)
@@ -390,12 +432,16 @@ void AudioEngine::setReplayGainMode(const QString &mode)
                                  ? mode.toUtf8()
                                  : QByteArrayLiteral("no");
     setPropertyString("replaygain", value.constData());
+    QSettings settings;
+    settings.setValue(QLatin1String(kReplayGainModeKey), QString::fromUtf8(value));
+    settings.setValue(QLatin1String(kLegacyReplayGainKey), value != QByteArrayLiteral("no"));
 }
 
 void AudioEngine::setExclusiveOutput(bool on)
 {
     // Exclusive mode silences every other application on the system while a file is loaded.
     setPropertyString("audio-exclusive", on ? "yes" : "no");
+    QSettings().setValue(QLatin1String(kExclusiveOutputKey), on);
 }
 
 void AudioEngine::wakeup(void *ctx)

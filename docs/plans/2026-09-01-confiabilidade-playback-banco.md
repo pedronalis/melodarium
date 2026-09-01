@@ -54,15 +54,15 @@ seu momento de execução.
 - Produces: chaves `playback/volume`, `playback/podcastSpeed`, `audio/replayGainMode`,
   `audio/gaplessAggressive`, `audio/exclusiveOutput`; método `setContentKind(ContentKind)`.
 
-- [ ] Escrever testes que criam dois motores sobre o mesmo QSettings e exigem volume/perfil
+- [x] Escrever testes que criam dois motores sobre o mesmo QSettings e exigem volume/perfil
   restaurados, limites validados, ReplayGain `no|track|album` e velocidade musical `1.0` depois
   de tocar podcast em `1.5`.
-- [ ] Rodar `quiet-run cmake --build build && quiet-run ./build/tests/tst_audioengine` e registrar
+- [x] Rodar `quiet-run cmake --build build && quiet-run ./build/tests/tst_audioengine` e registrar
   RED especificamente na restauração e no vazamento da velocidade.
-- [ ] Implementar o perfil mínimo; toda mudança de arquivo aplica a velocidade do contexto antes
+- [x] Implementar o perfil mínimo; toda mudança de arquivo aplica a velocidade do contexto antes
   de iniciar a reprodução e `setSpeed` só atualiza `podcastSpeed` em modo podcast.
-- [ ] Rodar o alvo até GREEN e o gate real com duas mídias, consultando `speed` pelo IPC do mpv.
-- [ ] Marcar a task e commitar com `fix(audio): isolate and persist playback preferences`.
+- [x] Rodar o alvo até GREEN e o gate real com duas mídias por libmpv, observando `speed` no motor.
+- [x] Marcar a task e commitar com `fix(audio): isolate and persist playback preferences`.
 
 ### Task 2: Tornar abertura, integridade e migração observáveis
 

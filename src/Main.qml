@@ -838,24 +838,10 @@ Window {
         }
     }
 
-    // As mesmas chaves que o SettingsDialog grava. Duplicadas de propósito: um Settings do
-    // QML é um par (categoria, propriedade), e a janela precisa lê-las antes de o diálogo
-    // existir.
-    Settings {
-        id: prefsAudio
-        category: "audio"
-        property bool replayGain: false
-        property bool exclusiveOutput: false
-    }
-
     Component.onCompleted: {
         Theme.uiScale = root.escalaDaJanela
         Theme.reduzirMovimento = root.semAnimacao
         Theme.medindo = root.measuring && !root.comHalo
-        // Preferência que não vale na partida não é preferência: o diálogo só aplica quando
-        // é aberto, e ninguém abre ajustes toda vez que liga o app.
-        AudioEngine.setReplayGainMode(prefsAudio.replayGain ? "track" : "no")
-        AudioEngine.setExclusiveOutput(prefsAudio.exclusiveOutput)
         if (Database.libraryPath !== "")
             trackModel.loadAllTracks()
         // Finding out whether yt-dlp exists costs one process start; finding out at the moment

@@ -23,6 +23,10 @@ target_link_libraries(tst_audioengine PRIVATE Qt6::Core Qt6::Test Qt6::Qml PkgCo
 add_test(NAME tst_audioengine COMMAND tst_audioengine)
 set_tests_properties(tst_audioengine PROPERTIES ENVIRONMENT "QT_QPA_PLATFORM=offscreen" TIMEOUT 60)
 
+add_test(NAME tst_audio_preferences
+    COMMAND bash "${CMAKE_SOURCE_DIR}/tools/check-audio-preferences.sh")
+set_tests_properties(tst_audio_preferences PROPERTIES WORKING_DIRECTORY "${CMAKE_SOURCE_DIR}")
+
 qt_add_executable(tst_library
     tst_library.cpp
     ../src/database.h ../src/database.cpp
