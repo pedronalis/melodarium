@@ -1,3 +1,5 @@
+pragma ComponentBehavior: Bound
+
 import QtQuick
 import Melodarium.App
 
@@ -55,15 +57,23 @@ Item {
     // Quanto cada foco passeia, em pixels. Um oitavo de segundo de olhar não pega o movimento;
     // meio minuto de música, sim.
     readonly property real amplitude: Math.round(14 * Theme.uiScale)
+    property var firstFocus: null
 
     function samplePhase() {
-        const first = focusRepeater.itemAt(0)
-        return first === null ? 0 : first["fase"]
+        return root.firstFocus === null ? 0 : root.firstFocus.fase
     }
 
     Repeater {
         id: focusRepeater
         model: root.focos
+        onItemAdded: function(index, item) {
+            if (index === 0)
+                root.firstFocus = item
+        }
+        onItemRemoved: function(index, item) {
+            if (root.firstFocus === item)
+                root.firstFocus = null
+        }
 
         Canvas {
             id: foco

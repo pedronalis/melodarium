@@ -69,12 +69,13 @@ Qt Test e scripts de interação/captura.
 
 ### Task 4: Limpar o contrato QML
 
-- [ ] Capturar a lista atual de 34 warnings de `all_qmllint` e transformar o piso em zero warnings.
-- [ ] Qualificar 22 acessos, tipar/guardar os 11 `Loader.item` e resolver o posicionamento restante
+- [x] Capturar a lista atual — 44 warnings na execução, contra 34 previstos no ledger — de
+  `all_qmllint` e transformar o piso em zero warnings.
+- [x] Qualificar 22 acessos, tipar/guardar os 11 `Loader.item` e resolver o posicionamento restante
   sem suprimir diagnósticos globalmente.
-- [ ] Fortalecer `check-orfaos.sh` para distinguir métodos homônimos por tipo e remover reservas
+- [x] Fortalecer `check-orfaos.sh` para distinguir métodos homônimos por tipo e remover reservas
   somente quando as respectivas UIs existirem.
-- [ ] Rodar lint, órfãos, contextual, layout e fidelidade; commitar com
+- [x] Rodar lint, órfãos, contextual, layout e fidelidade; commitar com
   `chore(qml): enforce warning-free reachable interfaces`.
 
 ### Task 5: Gate humano

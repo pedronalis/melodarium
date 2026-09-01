@@ -54,7 +54,7 @@ trap 'rm -rf "$TMP"' EXIT
 mkdir -p "$TMP/config" "$TMP/data" "$TMP/cache"
 mkdir -p "$TMP/imports/Melodarium/App"
 cp tests/qml/fixtures/qmldir tests/qml/fixtures/ColorSchemeProvider.qml \
-   src/Theme.qml src/Icons.qml src/IconButton.qml src/MelodariumButton.qml \
+   src/Theme.qml src/VisualSettings.qml src/Icons.qml src/IconButton.qml src/MelodariumButton.qml \
    src/StatusBanner.qml "$TMP/imports/Melodarium/App/"
 
 QT_QPA_PLATFORM="${A11Y_QPA_PLATFORM:-offscreen}" \
