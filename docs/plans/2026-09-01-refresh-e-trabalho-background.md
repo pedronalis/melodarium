@@ -56,12 +56,12 @@ worker e publica resultados em uma transação curta na conexão writer.
 
 ### Task 3: Tirar scan de podcast da GUI thread
 
-- [ ] Criar teste com centenas de fixtures e um heartbeat no thread principal; exigir heartbeat
+- [x] Criar teste com centenas de fixtures e um heartbeat no thread principal; exigir heartbeat
   durante scan, uma única atualização de modelos e rollback em falha.
-- [ ] Confirmar RED no comportamento síncrono atual.
-- [ ] Mover caminhada/TagReader para worker, aplicar lote numa transação writer e voltar sinais
+- [x] Confirmar RED no comportamento síncrono atual.
+- [x] Mover caminhada/TagReader para worker, aplicar lote numa transação writer e voltar sinais
   ao thread do `PodcastLibrary` por conexão queued.
-- [ ] Rodar `tst_podcast`, medir wall-clock/heartbeat e commitar com
+- [x] Rodar `tst_podcast`, medir wall-clock/heartbeat e commitar com
   `perf(podcast): scan local episodes off the ui thread`.
 
 ### Task 4: Gate da fatia
