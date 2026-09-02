@@ -1,7 +1,6 @@
 pragma ComponentBehavior: Bound
 
 import QtQuick
-import QtQuick.Controls
 import QtQuick.Layouts
 import Melodarium.App
 
@@ -94,13 +93,13 @@ RowLayout {
         onClicked: autoMenu.popup(autoChip, 0, autoChip.height + Theme.marginXS)
     }
 
-    Menu {
+    MelodariumMenu {
         id: autoMenu
 
         Repeater {
             model: root.menuItens
 
-            MenuItem {
+            MelodariumMenuItem {
                 required property var modelData
                 text: modelData.label
                 onTriggered: root.chosen(modelData.key)

@@ -2,8 +2,7 @@ import QtQuick
 import QtQuick.Controls
 import Melodarium.App
 
-// A velocidade de fala como uma pílula discreta; a lista, porém, pertence à plataforma.
-// Popup.Native entrega foco, navegação por teclado, checkmarks e aparência ao menu do sistema.
+// Speech speed stays a discreet pill while its options share the application's menu surface.
 Rectangle {
     id: root
 
@@ -51,42 +50,41 @@ Rectangle {
         onClicked: root.openMenu()
     }
 
-    Menu {
+    MelodariumMenu {
         id: menu
         title: qsTr("Velocidade")
-        popupType: Popup.Native
 
-        MenuItem {
+        MelodariumMenuItem {
             text: root.formatSpeed(0.75)
             checkable: true
             checked: Math.abs(root.speed - 0.75) < 0.01
             onTriggered: root.speedPicked(0.75)
         }
-        MenuItem {
+        MelodariumMenuItem {
             text: root.formatSpeed(1.0)
             checkable: true
             checked: Math.abs(root.speed - 1.0) < 0.01
             onTriggered: root.speedPicked(1.0)
         }
-        MenuItem {
+        MelodariumMenuItem {
             text: root.formatSpeed(1.25)
             checkable: true
             checked: Math.abs(root.speed - 1.25) < 0.01
             onTriggered: root.speedPicked(1.25)
         }
-        MenuItem {
+        MelodariumMenuItem {
             text: root.formatSpeed(1.5)
             checkable: true
             checked: Math.abs(root.speed - 1.5) < 0.01
             onTriggered: root.speedPicked(1.5)
         }
-        MenuItem {
+        MelodariumMenuItem {
             text: root.formatSpeed(1.75)
             checkable: true
             checked: Math.abs(root.speed - 1.75) < 0.01
             onTriggered: root.speedPicked(1.75)
         }
-        MenuItem {
+        MelodariumMenuItem {
             text: root.formatSpeed(2.0)
             checkable: true
             checked: Math.abs(root.speed - 2.0) < 0.01

@@ -85,6 +85,9 @@ qt_add_qml_module(melodarium
         src/IconButton.qml
         src/IconRail.qml
         src/MelodariumButton.qml
+        src/MelodariumMenu.qml
+        src/MelodariumMenuItem.qml
+        src/MelodariumMenuSeparator.qml
         src/TrackRow.qml
         src/NowPlayingPanel.qml
         src/GlobalMiniPlayer.qml
