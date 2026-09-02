@@ -116,6 +116,16 @@ QString LibraryBrowser::clauseRecent()
         .arg(kAutoListLimit);
 }
 
+QString LibraryBrowser::clauseRecentlyPlayed()
+{
+    return QStringLiteral(
+               "t.removed_at IS NULL AND t.id IN ("
+               "SELECT track_id FROM track_stats WHERE last_played_at IS NOT NULL) "
+               "ORDER BY (SELECT last_played_at FROM track_stats WHERE track_id = t.id) DESC, "
+               "t.id ASC LIMIT %1")
+        .arg(kAutoListLimit);
+}
+
 QString LibraryBrowser::clauseMostPlayed()
 {
     return QStringLiteral(

@@ -279,6 +279,32 @@ private slots:
         QCOMPARE(scalar(sql), 1); // track 2: many plays, none recently
     }
 
+    void recentlyPlayedExcludesNeverPlayedTracks()
+    {
+        exec(QStringLiteral("UPDATE track_stats SET last_played_at = NULL"));
+        exec(QStringLiteral("UPDATE track_stats SET last_played_at = 100 WHERE track_id = 1"));
+
+        LibraryBrowser browser;
+        TrackListModel model;
+        model.loadFromQuery(browser.clauseRecentlyPlayed(), {});
+
+        const QVariantList expected{1};
+        QCOMPARE(model.allTrackIds(), expected);
+    }
+
+    void recentlyPlayedUsesLastPlaybackOrder()
+    {
+        exec(QStringLiteral("UPDATE track_stats SET last_played_at = 100 WHERE track_id = 1"));
+        exec(QStringLiteral("UPDATE track_stats SET last_played_at = 200 WHERE track_id = 2"));
+
+        LibraryBrowser browser;
+        TrackListModel model;
+        model.loadFromQuery(browser.clauseRecentlyPlayed(), {});
+
+        const QVariantList expected{2, 1};
+        QCOMPARE(model.allTrackIds(), expected);
+    }
+
     void toggleLikeFlipsAndPersists()
     {
         LibraryBrowser browser;

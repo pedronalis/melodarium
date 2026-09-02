@@ -30,6 +30,7 @@ public:
     Q_INVOKABLE QVariantList bindingsFor(int id);
 
     Q_INVOKABLE QString clauseRecent();
+    Q_INVOKABLE QString clauseRecentlyPlayed();
     Q_INVOKABLE QString clauseMostPlayed();
     Q_INVOKABLE QString clauseForgotten();
     Q_INVOKABLE QString clauseNeverPlayed();

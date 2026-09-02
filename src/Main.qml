@@ -394,7 +394,8 @@ Window {
 
     readonly property var filterTitles: ({
         "liked": qsTr("Curtidas"),
-        "recent": qsTr("Recentes"),
+        "recent": qsTr("Adicionadas recentemente"),
+        "recentlyPlayed": qsTr("Ouvidas recentemente"),
         "mostPlayed": qsTr("Mais tocadas"),
         "forgotten": qsTr("Esquecidas"),
         "never": qsTr("Nunca ouvi")
@@ -416,6 +417,8 @@ Window {
         case "collection": return { clause: CollectionManager.clauseForCollection(id),
                                    bindings: CollectionManager.bindingsForCollection(id) }
         case "recent":     return { clause: LibraryBrowser.clauseRecent(), bindings: [] }
+        case "recentlyPlayed": return { clause: LibraryBrowser.clauseRecentlyPlayed(),
+                                         bindings: [] }
         case "mostPlayed": return { clause: LibraryBrowser.clauseMostPlayed(), bindings: [] }
         case "forgotten":  return { clause: LibraryBrowser.clauseForgotten(), bindings: [] }
         case "never":      return { clause: LibraryBrowser.clauseNeverPlayed(), bindings: [] }
