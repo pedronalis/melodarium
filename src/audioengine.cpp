@@ -240,12 +240,30 @@ void AudioEngine::seek(double seconds)
 
 void AudioEngine::next()
 {
-    command({QStringLiteral("playlist-next"), QStringLiteral("weak")});
+    if (!m_mpv || m_queue.isEmpty())
+        return;
+
+    int64_t current = -1;
+    if (mpv_get_property(m_mpv, "playlist-pos", MPV_FORMAT_INT64, &current) < 0)
+        current = m_playlistPos;
+    const int target = current >= 0 && current < m_queue.size()
+                           ? (static_cast<int>(current) + 1) % m_queue.size()
+                           : 0;
+    command({QStringLiteral("playlist-play-index"), QString::number(target)});
 }
 
 void AudioEngine::previous()
 {
-    command({QStringLiteral("playlist-prev"), QStringLiteral("weak")});
+    if (!m_mpv || m_queue.isEmpty())
+        return;
+
+    int64_t current = -1;
+    if (mpv_get_property(m_mpv, "playlist-pos", MPV_FORMAT_INT64, &current) < 0)
+        current = m_playlistPos;
+    const int target = current >= 0 && current < m_queue.size()
+                           ? (static_cast<int>(current) + m_queue.size() - 1) % m_queue.size()
+                           : m_queue.size() - 1;
+    command({QStringLiteral("playlist-play-index"), QString::number(target)});
 }
 
 QString AudioEngine::savedCurrentFile() const
