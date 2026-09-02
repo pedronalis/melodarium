@@ -19,11 +19,24 @@ if ! command -v sqlite3 >/dev/null 2>&1; then
     exit 1
 fi
 if ! command -v xvfb-run >/dev/null 2>&1 || ! command -v xdotool >/dev/null 2>&1; then
-    echo "check-contextual-ui: Xvfb e xdotool são obrigatórios para testar o menu nativo"
+    echo "check-contextual-ui: Xvfb e xdotool são obrigatórios para testar o menu da aplicação"
     exit 1
 fi
 if ! command -v import >/dev/null 2>&1; then
-    echo "check-contextual-ui: ImageMagick é obrigatório para fotografar o menu nativo"
+    echo "check-contextual-ui: ImageMagick é obrigatório para fotografar o menu da aplicação"
+    exit 1
+fi
+
+SOURCE_ROOT=$(cd "$(dirname "$0")/.." && pwd)
+raw_menu_controls=$(rg -n \
+    '(^|[^A-Za-z0-9_])(Menu|MenuItem|MenuSeparator)[[:space:]]*\{' "$SOURCE_ROOT/src" \
+    --glob '*.qml' \
+    --glob '!MelodariumMenu.qml' \
+    --glob '!MelodariumMenuItem.qml' \
+    --glob '!MelodariumMenuSeparator.qml' || true)
+if [ -n "$raw_menu_controls" ]; then
+    echo "FALHA: dropdown fora dos componentes visuais do Melodarium"
+    printf '%s\n' "$raw_menu_controls"
     exit 1
 fi
 if ! python3 -c "import PIL" 2>/dev/null; then
@@ -242,14 +255,14 @@ episode_raw=$(XDG_DATA_HOME="$TMP/data" XDG_CONFIG_HOME="$TMP/config" \
               --no-search --sem-animacao --delay 1800 2>&1)
 episode_line=$(printf '%s\n' "$episode_raw" | grep -ao 'MEDIDA .*' | tail -1)
 for token in 'context=collections' 'mini=on' 'minilayout=fit' 'minicenter=fit' \
-             'minimode=podcast' 'speedmenu=native'; do
+             'minimode=podcast' 'speedmenu=qml'; do
     if ! printf '%s\n' "$episode_line" | grep -q "$token"; then
         echo "FALHA: Podcast no mini-player não publicou $token"
         echo "$episode_line"
         exit 1
     fi
 done
-echo "ok:    Podcast usa transporte próprio e prefere menu nativo"
+echo "ok:    Podcast usa transporte próprio e menu visual da aplicação"
 
 narrow_raw=$(XDG_DATA_HOME="$TMP/data" XDG_CONFIG_HOME="$TMP/config" \
              MELODIA_NULL_AO=1 QT_QPA_PLATFORM=offscreen \
@@ -266,8 +279,8 @@ for token in 'mini=on' 'minilayout=fit' 'minicenter=fit' 'minimode=music'; do
 done
 echo "ok:    mini-player cabe e permanece centrado em 720 px"
 
-native_log="$TMP/native-menu.log"
-native_shot="$TMP/native-menu.png"
+app_menu_log="$TMP/app-menu.log"
+app_menu_shot="$TMP/app-menu.png"
 xvfb-run -a -s '-screen 0 1100x700x24' bash -c '
     set -euo pipefail
     bin="$1"
@@ -283,6 +296,8 @@ xvfb-run -a -s '-screen 0 1100x700x24' bash -c '
     app_pid=$!
     sleep 2.8
     import -window root "$shot"
+    app_window=$(xdotool search --onlyvisible --name Melodarium | head -1)
+    xdotool windowfocus "$app_window"
     xdotool key Home
     sleep 0.15
     xdotool key Down
@@ -295,20 +310,32 @@ xvfb-run -a -s '-screen 0 1100x700x24' bash -c '
     sleep 0.15
     xdotool key Return
     wait "$app_pid"
-' _ "$BIN" "$TMP/data" "$TMP/config" "$native_log" "$native_shot"
+' _ "$BIN" "$TMP/data" "$TMP/config" "$app_menu_log" "$app_menu_shot"
 
-native_line=$(grep -ao 'MEDIDA .*' "$native_log" | tail -1)
-if ! printf '%s\n' "$native_line" | grep -q 'speedmenu=native' \
-   || ! printf '%s\n' "$native_line" | grep -q 'speed=1.50'; then
-    echo "FALHA: o menu nativo não escolheu 1,5× pelo teclado"
-    echo "$native_line"
+app_menu_line=$(grep -ao 'MEDIDA .*' "$app_menu_log" | tail -1)
+if ! printf '%s\n' "$app_menu_line" | grep -q 'speedmenu=qml' \
+   || ! printf '%s\n' "$app_menu_line" | grep -q 'speed=1.50'; then
+    echo "FALHA: o menu da aplicação não escolheu 1,5× pelo teclado"
+    echo "$app_menu_line"
     exit 1
 fi
-if [ ! -s "$native_shot" ]; then
-    echo "FALHA: o menu nativo não produziu captura externa"
+if [ ! -s "$app_menu_shot" ]; then
+    echo "FALHA: o menu da aplicação não produziu captura externa"
     exit 1
 fi
-echo "ok:    menu nativo escolhe 1,5× por interação real"
+python3 - "$app_menu_shot" <<'PY'
+import sys
+from PIL import Image
+
+image = Image.open(sys.argv[1]).convert("RGB")
+pixels = image.get_flattened_data() if hasattr(image, "get_flattened_data") else image.getdata()
+near_white = sum(1 for pixel in pixels if min(pixel) >= 235)
+if near_white > 5000:
+    print(f"FALHA: o dropdown ainda é uma superfície branca do sistema ({near_white} pixels)")
+    raise SystemExit(1)
+print(f"ok:    dropdown preserva a superfície escura da aplicação ({near_white} pixels claros)")
+PY
+echo "ok:    menu da aplicação escolhe 1,5× por interação real"
 
 dense_raw=$(XDG_DATA_HOME="$TMP/data" XDG_CONFIG_HOME="$TMP/config" \
             MELODIA_NULL_AO=1 QT_QPA_PLATFORM=offscreen \

@@ -1,7 +1,6 @@
 pragma ComponentBehavior: Bound
 
 import QtQuick
-import QtQuick.Controls
 import QtQuick.Dialogs
 import QtQuick.Layouts
 import Melodarium.App
@@ -172,13 +171,13 @@ Item {
                 onClicked: opmlMenu.popup(opmlChip, 0, opmlChip.height + Theme.marginXS)
             }
 
-            Menu {
+            MelodariumMenu {
                 id: opmlMenu
-                MenuItem {
+                MelodariumMenuItem {
                     text: qsTr("Importar assinaturas…")
                     onTriggered: importOpmlDialog.open()
                 }
-                MenuItem {
+                MelodariumMenuItem {
                     text: qsTr("Exportar assinaturas…")
                     onTriggered: exportOpmlDialog.open()
                 }
@@ -241,10 +240,10 @@ Item {
                 onClicked: showMenu.popup(showChip, 0, showChip.height + Theme.marginXS)
             }
 
-            Menu {
+            MelodariumMenu {
                 id: showMenu
 
-                MenuItem {
+                MelodariumMenuItem {
                     text: qsTr("Todos os programas")
                     onTriggered: root.showRequested(0)
                 }
@@ -252,7 +251,7 @@ Item {
                 Repeater {
                     model: root.shows
 
-                    MenuItem {
+                    MelodariumMenuItem {
                         required property var modelData
                         text: modelData.title
                         onTriggered: root.showRequested(modelData.id)

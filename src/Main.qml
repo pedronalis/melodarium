@@ -1,7 +1,6 @@
 pragma ComponentBehavior: Bound
 
 import QtQuick
-import QtQuick.Controls
 import QtQuick.Layouts
 import QtQuick.Window
 import Melodarium.App
@@ -1515,7 +1514,7 @@ Window {
     }
 
     // The single manual gesture: one click on the row's plus, one click on a collection.
-    Menu {
+    MelodariumMenu {
         id: collectMenu
 
         property int trackId: 0
@@ -1525,7 +1524,7 @@ Window {
 
         Instantiator {
             model: collectMenu.options
-            delegate: MenuItem {
+            delegate: MelodariumMenuItem {
                 required property var modelData
                 text: modelData.name
                 onTriggered: {
@@ -1541,7 +1540,7 @@ Window {
             onObjectRemoved: function (index, object) { collectMenu.removeItem(object) }
         }
 
-        MenuItem {
+        MelodariumMenuItem {
             text: qsTr("Nova coleção…")
             onTriggered: {
                 newCollectionForTrack.pendingTrackId = collectMenu.trackId

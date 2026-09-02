@@ -2,7 +2,7 @@ import QtQuick
 import QtQuick.Controls
 import Melodarium.App
 
-// One native menu serves both playback surfaces. The engine owns the countdown so switching
+// One application-styled menu serves both playback surfaces. The engine owns the countdown so switching
 // panes or hiding the mini-player never destroys an armed timer.
 IconButton {
     id: root
@@ -42,31 +42,30 @@ IconButton {
         color: Theme.cAccent
     }
 
-    Menu {
+    MelodariumMenu {
         id: menu
         title: qsTr("Timer de desligamento")
-        popupType: Popup.Native
 
-        MenuItem {
+        MelodariumMenuItem {
             text: qsTr("15 min")
             onTriggered: AudioEngine.startSleepTimer(15 * 60)
         }
-        MenuItem {
+        MelodariumMenuItem {
             text: qsTr("30 min")
             onTriggered: AudioEngine.startSleepTimer(30 * 60)
         }
-        MenuItem {
+        MelodariumMenuItem {
             text: qsTr("60 min")
             onTriggered: AudioEngine.startSleepTimer(60 * 60)
         }
-        MenuSeparator {}
-        MenuItem {
+        MelodariumMenuSeparator {}
+        MelodariumMenuItem {
             text: qsTr("Parar após esta faixa")
             checkable: true
             checked: AudioEngine.stopAfterCurrent
             onTriggered: AudioEngine.setStopAfterCurrent(checked)
         }
-        MenuItem {
+        MelodariumMenuItem {
             text: AudioEngine.sleepActive
                   ? qsTr("Cancelar timer (%1)").arg(
                         root.formatRemaining(AudioEngine.sleepRemainingSeconds))

@@ -1,7 +1,6 @@
 pragma ComponentBehavior: Bound
 
 import QtQuick
-import QtQuick.Controls
 import QtQuick.Layouts
 import Melodarium.App
 
@@ -302,7 +301,7 @@ Rectangle {
         Item { Layout.fillHeight: true }
     }
 
-    Menu {
+    MelodariumMenu {
         id: retentionMenu
 
         function apply(count) {
@@ -310,10 +309,10 @@ Rectangle {
                                          root.selectedShow.autoDownload, count)
         }
 
-        MenuItem { text: qsTr("Manter todos"); onTriggered: retentionMenu.apply(0) }
-        MenuItem { text: qsTr("Manter os 3 mais recentes"); onTriggered: retentionMenu.apply(3) }
-        MenuItem { text: qsTr("Manter os 5 mais recentes"); onTriggered: retentionMenu.apply(5) }
-        MenuItem { text: qsTr("Manter os 10 mais recentes"); onTriggered: retentionMenu.apply(10) }
+        MelodariumMenuItem { text: qsTr("Manter todos"); onTriggered: retentionMenu.apply(0) }
+        MelodariumMenuItem { text: qsTr("Manter os 3 mais recentes"); onTriggered: retentionMenu.apply(3) }
+        MelodariumMenuItem { text: qsTr("Manter os 5 mais recentes"); onTriggered: retentionMenu.apply(5) }
+        MelodariumMenuItem { text: qsTr("Manter os 10 mais recentes"); onTriggered: retentionMenu.apply(10) }
     }
 
     UnsubscribeDialog {
