@@ -6,7 +6,7 @@ import QtQuick.Layouts
 import Melodarium.App
 
 // A linha de filtros do desenho aprovado. UMA linha, sempre: o Pedro reprovou explicitamente
-// a versão que quebrava em duas fileiras de chips. Os quatro eixos automáticos recolhem num
+// a versão que quebrava em duas fileiras de chips. Os eixos automáticos recolhem num
 // chip com menu, empurrado para a direita, porque nove chips não cabem em ~650 px.
 RowLayout {
     id: root
@@ -41,10 +41,11 @@ RowLayout {
     readonly property var eixos: root.compact ? root.eixosCompactos : root.eixosLargos
 
     readonly property var automaticas: [
-        { key: "recent",    label: qsTr("Recentes") },
-        { key: "most",      label: qsTr("Mais tocadas") },
-        { key: "forgotten", label: qsTr("Esquecidas") },
-        { key: "never",     label: qsTr("Nunca ouvi") }
+        { key: "recent",          label: qsTr("Adicionadas recentemente") },
+        { key: "recentlyPlayed",  label: qsTr("Ouvidas recentemente") },
+        { key: "most",            label: qsTr("Mais tocadas") },
+        { key: "forgotten",       label: qsTr("Esquecidas") },
+        { key: "never",           label: qsTr("Nunca ouvi") }
     ]
 
     readonly property var recolhidos: root.compact
@@ -87,7 +88,8 @@ RowLayout {
         label: root.compact ? qsTr("Mais") : qsTr("Automáticas")
         glyph: Icons.get("chevron-right")
         glyphPointsDown: true
-        selected: ["recent", "most", "forgotten", "never"].indexOf(root.current) >= 0
+        selected: ["recent", "recentlyPlayed", "most", "forgotten", "never"]
+                      .indexOf(root.current) >= 0
                   || (root.compact && ["genres", "tags"].indexOf(root.current) >= 0)
         onClicked: autoMenu.popup(autoChip, 0, autoChip.height + Theme.marginXS)
     }
