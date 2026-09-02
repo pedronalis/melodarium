@@ -88,6 +88,90 @@ private slots:
         QVERIFY(fileSpy.count() >= 2);
     }
 
+    void nextWrapsFromTheLastEntryToTheFirst()
+    {
+        AudioEngine engine(nullptr, /*headlessAo=*/true);
+        QVERIFY(engine.isAvailable());
+
+        engine.pause();
+        engine.loadPlaylist({m_longTone, m_toneB}, 0);
+        QTRY_COMPARE_WITH_TIMEOUT(engine.playlistPos(), 0, 5000);
+        QTRY_COMPARE_WITH_TIMEOUT(engine.currentFile(), m_longTone, 5000);
+
+        engine.next();
+        QTRY_COMPARE_WITH_TIMEOUT(engine.playlistPos(), 1, 5000);
+        QTRY_COMPARE_WITH_TIMEOUT(engine.currentFile(), m_toneB, 5000);
+
+        engine.next();
+        QTRY_COMPARE_WITH_TIMEOUT(engine.playlistPos(), 0, 5000);
+        QTRY_COMPARE_WITH_TIMEOUT(engine.currentFile(), m_longTone, 5000);
+    }
+
+    void previousWrapsFromTheFirstEntryToTheLast()
+    {
+        AudioEngine engine(nullptr, /*headlessAo=*/true);
+        QVERIFY(engine.isAvailable());
+
+        engine.pause();
+        engine.loadPlaylist({m_longTone, m_toneB}, 0);
+        QTRY_COMPARE_WITH_TIMEOUT(engine.playlistPos(), 0, 5000);
+        QTRY_COMPARE_WITH_TIMEOUT(engine.currentFile(), m_longTone, 5000);
+
+        engine.previous();
+        QTRY_COMPARE_WITH_TIMEOUT(engine.playlistPos(), 1, 5000);
+        QTRY_COMPARE_WITH_TIMEOUT(engine.currentFile(), m_toneB, 5000);
+    }
+
+    void previousReturnsToTheEntrySelectedByNext()
+    {
+        AudioEngine engine(nullptr, /*headlessAo=*/true);
+        QVERIFY(engine.isAvailable());
+
+        engine.pause();
+        engine.loadPlaylist({m_longTone, m_toneB}, 0);
+        QTRY_COMPARE_WITH_TIMEOUT(engine.playlistPos(), 0, 5000);
+        QTRY_COMPARE_WITH_TIMEOUT(engine.currentFile(), m_longTone, 5000);
+
+        engine.next();
+        QTRY_COMPARE_WITH_TIMEOUT(engine.playlistPos(), 1, 5000);
+        QTRY_COMPARE_WITH_TIMEOUT(engine.currentFile(), m_toneB, 5000);
+        engine.previous();
+        QTRY_COMPARE_WITH_TIMEOUT(engine.playlistPos(), 0, 5000);
+        QTRY_COMPARE_WITH_TIMEOUT(engine.currentFile(), m_longTone, 5000);
+    }
+
+    void nextRestartsASingleEntryQueue()
+    {
+        AudioEngine engine(nullptr, /*headlessAo=*/true);
+        QVERIFY(engine.isAvailable());
+
+        engine.loadPlaylist({m_longTone}, 0);
+        QTRY_COMPARE_WITH_TIMEOUT(engine.currentFile(), m_longTone, 5000);
+        engine.seek(3.0);
+        QTRY_VERIFY_WITH_TIMEOUT(engine.position() > 2.5, 5000);
+        engine.pause();
+        QTRY_VERIFY_WITH_TIMEOUT(!engine.playing(), 5000);
+
+        engine.next();
+        QTRY_VERIFY_WITH_TIMEOUT(engine.position() < 0.5, 5000);
+    }
+
+    void previousRestartsASingleEntryQueue()
+    {
+        AudioEngine engine(nullptr, /*headlessAo=*/true);
+        QVERIFY(engine.isAvailable());
+
+        engine.loadPlaylist({m_longTone}, 0);
+        QTRY_COMPARE_WITH_TIMEOUT(engine.currentFile(), m_longTone, 5000);
+        engine.seek(3.0);
+        QTRY_VERIFY_WITH_TIMEOUT(engine.position() > 2.5, 5000);
+        engine.pause();
+        QTRY_VERIFY_WITH_TIMEOUT(!engine.playing(), 5000);
+
+        engine.previous();
+        QTRY_VERIFY_WITH_TIMEOUT(engine.position() < 0.5, 5000);
+    }
+
     void pauseTogglesPlayingState()
     {
         AudioEngine engine(nullptr, /*headlessAo=*/true);
@@ -688,7 +772,7 @@ private slots:
         engine.pause();
         engine.next();
         QTRY_COMPARE_WITH_TIMEOUT(engine.playlistPos(), 1, 5000);
-        QCOMPARE(engine.currentFile(), esperado);
+        QTRY_COMPARE_WITH_TIMEOUT(engine.currentFile(), esperado, 5000);
     }
 
     // "Tocar tudo em ordem aleatória" (a tela de boas-vindas) carrega a fila e SÓ ENTÃO liga

@@ -277,6 +277,12 @@ add_test(NAME tst_resume_queue
     COMMAND bash "${CMAKE_SOURCE_DIR}/tools/check-resume-queue.sh" "$<TARGET_FILE:melodarium>")
 set_tests_properties(tst_resume_queue PROPERTIES WORKING_DIRECTORY "${CMAKE_SOURCE_DIR}")
 
+add_test(NAME tst_transport_controls
+    COMMAND bash "${CMAKE_SOURCE_DIR}/tools/check-transport-controls.sh" "$<TARGET_FILE:melodarium>")
+set_tests_properties(tst_transport_controls PROPERTIES
+    WORKING_DIRECTORY "${CMAKE_SOURCE_DIR}"
+    TIMEOUT 45)
+
 add_test(NAME tst_contextual_ui
     COMMAND bash "${CMAKE_SOURCE_DIR}/tools/check-contextual-ui.sh" "$<TARGET_FILE:melodarium>")
 set_tests_properties(tst_contextual_ui PROPERTIES
