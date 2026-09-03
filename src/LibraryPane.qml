@@ -48,6 +48,12 @@ Item {
         chips.likedCount = LibraryBrowser.likedCount()
     }
 
+    // Only the window knows it is measuring, and the automatic menu lives two levels below.
+    // This relay is what lets `--open-auto-menu` open the dropdown through the click path.
+    function openAutoMenu() {
+        chips.openAutoMenu()
+    }
+
     function formatTotal(ms) {
         const minutes = Math.floor(ms / 60000)
         const hours = Math.floor(minutes / 60)

@@ -54,6 +54,12 @@ RowLayout {
 
     readonly property var menuItens: root.recolhidos.concat(root.automaticas)
 
+    // One opening path for both the click and the measurement: the gate photographs the very
+    // dropdown a person sees, at the same position, not a second look-alike assembly.
+    function openAutoMenu() {
+        autoMenu.popup(autoChip, 0, autoChip.height + Theme.marginXS)
+    }
+
     Repeater {
         model: root.eixos
 
@@ -90,7 +96,7 @@ RowLayout {
         selected: ["recent", "recentlyPlayed", "most", "forgotten", "never"]
                       .indexOf(root.current) >= 0
                   || (root.compact && ["genres", "tags"].indexOf(root.current) >= 0)
-        onClicked: autoMenu.popup(autoChip, 0, autoChip.height + Theme.marginXS)
+        onClicked: root.openAutoMenu()
     }
 
     MelodariumMenu {

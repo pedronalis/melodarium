@@ -116,6 +116,12 @@ Window {
     readonly property bool measureOpenSpeedMenu:
         Qt.application.arguments.indexOf("--open-speed-menu") >= 0
 
+    // `--open-auto-menu`: the sibling of the switch above, for the library's automatic menu.
+    // That dropdown only exists after a click on the "Automáticas" chip, and nothing clicks
+    // in a headless session — without this switch it could never be photographed.
+    readonly property bool measureOpenAutoMenu:
+        Qt.application.arguments.indexOf("--open-auto-menu") >= 0
+
     // `--delay <ms>`: quanto esperar antes de medir. Abrir um arquivo no mpv leva mais do que
     // montar a tela.
     readonly property int measureDelay: {
@@ -922,6 +928,12 @@ Window {
                 running: root.measureOpenSpeedMenu
                 interval: 1400
                 onTriggered: globalMiniPlayer.openSpeedMenu()
+            }
+
+            Timer {
+                running: root.measureOpenAutoMenu
+                interval: 1400
+                onTriggered: libraryPane.openAutoMenu()
             }
 
             // Start the transition only after mpv publishes the loaded file, then sample each

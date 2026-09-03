@@ -4,6 +4,7 @@ compile_commands.json
 *.user
 
 # Local development workspace
+.run_evidence/
 .claude/
 AGENTS.md
 CLAUDE.md
