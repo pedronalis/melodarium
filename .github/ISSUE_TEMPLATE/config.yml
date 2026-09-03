@@ -1,0 +1,8 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Questions and ideas / Perguntas e ideias
+    url: https://github.com/pedronalis/melodarium/discussions
+    about: Talk through an idea before turning it into a scoped issue. / Converse antes de transformar a ideia em issue.
+  - name: Private security report / Relato privado de segurança
+    url: https://github.com/pedronalis/melodarium/security/advisories/new
+    about: Never disclose a suspected vulnerability in a public issue. / Nunca divulgue uma possível vulnerabilidade em issue pública.

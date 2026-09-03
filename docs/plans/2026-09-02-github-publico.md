@@ -212,29 +212,29 @@ libmpv, CMake/Ninja, Flatpak e GitHub CLI.
   de Fedora/Wayland/yt-dlp.
 - Produces: jornada pública completa em ambos os idiomas, templates acionáveis e changelog 0.1.0.
 
-- [ ] **Step 1: Escrever README em inglês**
+- [x] **Step 1: Escrever README em inglês**
 
   Abrir com hero, seletor de idioma, proposta local-first, galeria e quick start; depois cobrir
   recursos, instalação Fedora, Flatpak local, arquitetura, dados/privacidade, testes, limitações,
   contribuição, segurança, roadmap e créditos sem prometer suporte inexistente.
 
-- [ ] **Step 2: Escrever a versão pt-BR com paridade estrutural**
+- [x] **Step 2: Escrever a versão pt-BR com paridade estrutural**
 
   Traduzir a mesma informação de forma natural, preservando comandos e identificadores técnicos.
 
-- [ ] **Step 3: Criar arquivos de comunidade**
+- [x] **Step 3: Criar arquivos de comunidade**
 
   Documentar ambiente, padrão de commit, gates, envio responsável de vulnerabilidade, convivência
   e release notes; issue forms e PR template devem aceitar inglês ou português explicitamente.
 
-- [ ] **Step 4: Validar links, YAML e paridade**
+- [x] **Step 4: Validar links, YAML e paridade**
 
   Run: `quiet-run bash tools/check-public-release.sh`
 
-  Expected: apenas o bloqueio de licença pode permanecer, identificado como
-  `PUBLIC_RELEASE_LICENSE_PENDING`.
+  Expected: apenas os bloqueios deliberados da Task 5 podem permanecer:
+  `.github/workflows/release.yml` e `PUBLIC_RELEASE_LICENSE_PENDING`.
 
-- [ ] **Step 5: Commitar o checkpoint**
+- [x] **Step 5: Commitar o checkpoint**
 
   Stage apenas documentação/comunidade e ledger; commitar com
   `docs: launch the bilingual GitHub experience`.
