@@ -1,0 +1,26 @@
+changelog:
+  exclude:
+    labels:
+      - skip-changelog
+    authors:
+      - dependabot
+  categories:
+    - title: "Breaking changes / Mudanças incompatíveis"
+      labels:
+        - breaking-change
+    - title: "Features / Recursos"
+      labels:
+        - enhancement
+        - feature
+    - title: "Fixes / Correções"
+      labels:
+        - bug
+        - fix
+    - title: "Documentation and tooling / Documentação e ferramentas"
+      labels:
+        - documentation
+        - tooling
+        - dependencies
+    - title: "Other changes / Outras mudanças"
+      labels:
+        - "*"

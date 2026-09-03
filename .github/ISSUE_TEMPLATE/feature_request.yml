@@ -1,0 +1,63 @@
+name: Feature request / Pedido de recurso
+description: Propose a focused improvement in English or Portuguese.
+title: "[Feature]: "
+labels:
+  - enhancement
+  - needs-triage
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Melodarium is local-first and deliberately focused. Explain the listening problem before
+        the interface solution. English and Portuguese are equally welcome.
+
+        O Melodarium é local-first e intencionalmente focado. Explique o problema de escuta antes
+        da solução de interface. Português e inglês são igualmente bem-vindos.
+
+  - type: textarea
+    id: problem
+    attributes:
+      label: Listening problem / Problema de escuta
+      description: What cannot be done today, and who does it affect?
+    validations:
+      required: true
+
+  - type: textarea
+    id: outcome
+    attributes:
+      label: Desired outcome / Resultado desejado
+      description: Describe observable behavior, not just a button or screen.
+    validations:
+      required: true
+
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives considered / Alternativas consideradas
+      description: What do you do today, and why is it insufficient?
+
+  - type: dropdown
+    id: area
+    attributes:
+      label: Area / Área
+      options:
+        - Music library / Biblioteca de música
+        - Playback and queue / Reprodução e fila
+        - Podcasts
+        - Collections and tags / Coleções e tags
+        - Search / Busca
+        - Accessibility / Acessibilidade
+        - Packaging and platform / Pacote e plataforma
+        - Documentation / Documentação
+    validations:
+      required: true
+
+  - type: checkboxes
+    id: principles
+    attributes:
+      label: Project fit / Aderência ao projeto
+      options:
+        - label: This can work without an account or telemetry. / Pode funcionar sem conta ou telemetria.
+          required: true
+        - label: I searched existing issues and discussions. / Procurei nas issues e discussões existentes.
+          required: true

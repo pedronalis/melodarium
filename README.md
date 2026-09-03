@@ -1,179 +1,206 @@
-# melodarium
+<div align="center">
+  <img src="docs/assets/melodarium-hero.png" alt="Melodarium — local music and podcast player running on Linux" width="100%">
 
-Player local de música e podcast em Qt6/QML, com a estética do
-[Noctalia](https://github.com/noctalia-dev/noctalia-shell): paleta lida do `colors.json` do
-usuário, tipografia Inter e ícones Tabler. Roda igual sem o Noctalia instalado — toda cor tem
-fallback embutido.
+  <p><strong>English</strong> · <a href="README.pt-BR.md">Português (Brasil)</a></p>
 
-## Dependências
+  <p>
+    <a href="https://github.com/pedronalis/melodarium/actions/workflows/ci.yml"><img alt="CI" src="https://github.com/pedronalis/melodarium/actions/workflows/ci.yml/badge.svg?branch=main"></a>
+    <img alt="Qt 6.5+" src="https://img.shields.io/badge/Qt-6.5%2B-41CD52?logo=qt&logoColor=white">
+    <img alt="Linux" src="https://img.shields.io/badge/platform-Linux-FCC624?logo=linux&logoColor=111111">
+    <img alt="Preview" src="https://img.shields.io/badge/status-preview-c084fc">
+  </p>
 
-No Fedora 43, o pacote de desenvolvimento atual do libmpv é `mpv-devel` (ele fornece o nome
-virtual histórico `mpv-libs-devel`). Para compilar e executar:
+  <p><strong>Your music. Your podcasts. Your files.</strong><br>
+  A local-first desktop player built with Qt 6, QML and libmpv.</p>
+
+  <p><a href="#see-it-running">See it</a> · <a href="#quick-start-on-fedora">Build it</a> · <a href="#flatpak">Flatpak</a> · <a href="CONTRIBUTING.md">Contribute</a></p>
+</div>
+
+> [!IMPORTANT]
+> Melodarium is an early Linux preview, developed and verified on Fedora 43 with Wayland/Hyprland.
+> The source is public, but the project license is still being selected; until a `LICENSE` file is
+> published, no permission to copy, modify or redistribute is granted.
+
+## A library, not a feed
+
+Melodarium is for people who still keep music files, care about album context and want podcasts
+without turning their listening history into somebody else's dataset. It scans local folders,
+keeps its catalog in SQLite and hands playback to libmpv. There is no account, cloud library or
+telemetry.
+
+- Browse every track or move through artists, albums, genres, tags and smart views.
+- Play lossless files without forcing a sample rate or sample format.
+- Build ordered collections, edit the live queue and resume the previous music session.
+- Subscribe to RSS podcasts, download episodes and resume them independently from music.
+- Search tracks, albums, artists, collections, shows and episodes from one keyboard-first overlay.
+- Follow the desktop through MPRIS, media keys and the Noctalia color scheme when available.
+- Back up and restore the catalog through a versioned, hash-checked bundle.
+
+## See it running
+
+| Now playing | Full library |
+|:--:|:--:|
+| <img src="docs/assets/screenshots/now-playing.png" alt="Melodarium playing Night Bloom from an album view" width="100%"> | <img src="docs/assets/screenshots/library.png" alt="Melodarium full local music library" width="100%"> |
+
+| Collections | Podcasts |
+|:--:|:--:|
+| <img src="docs/assets/screenshots/collections.png" alt="An ordered collection with the global mini player" width="100%"> | <img src="docs/assets/screenshots/podcasts.png" alt="Podcast episodes and resume panel" width="100%"> |
+
+<p align="center">
+  <img src="docs/assets/screenshots/search.png" alt="Keyboard-first search across music, collections and podcasts" width="74%">
+</p>
+
+These are not design mockups. Every image is saved by the running QML scene through
+`grabToImage`, using a disposable XDG environment, generated FLAC audio, an isolated SQLite
+database and original synthetic artwork. Recreate the complete gallery with:
+
+```bash
+bash tools/capture-readme-gallery.sh ./build/melodarium
+```
+
+The script never reads your real Melodarium data or music library.
+
+## Quick start on Fedora
+
+Melodarium currently targets Linux. Fedora 43 is the reference environment; other distributions
+may work when they provide Qt 6.5+, libmpv and TagLib development packages.
 
 ```bash
 sudo dnf install cmake ninja-build gcc-c++ \
   qt6-qtbase-devel qt6-qtdeclarative-devel \
   mpv-devel taglib-devel \
   rsms-inter-fonts jetbrains-mono-fonts
-```
 
-Inter é a fonte da interface e JetBrains Mono é usada para metadados técnicos. Há fallbacks, mas
-instalar as duas preserva a geometria e a aparência verificadas pelos gates. Para a suíte e todos
-os gates locais:
-
-```bash
-sudo dnf install ImageMagick appstream dbus-daemon desktop-file-utils \
-  ffmpeg-free flac flatpak-builder playerctl python3-pillow python3-pyyaml \
-  ripgrep sqlite xdotool xorg-x11-server-Xvfb
-```
-
-## Build
-
-```bash
-cmake -B build -G Ninja
+git clone https://github.com/pedronalis/melodarium.git
+cd melodarium
+cmake -S . -B build -G Ninja
 cmake --build build
 ./build/melodarium
 ```
 
-Instalação nativa em um prefixo do usuário:
+Install it for the current user with:
 
 ```bash
 cmake --install build --prefix "$HOME/.local"
 ```
 
-Isso instala o binário, a entrada `.desktop`, os metadados AppStream e o ícone Freedesktop.
+This installs the executable, desktop entry, AppStream metadata and Freedesktop icon.
 
-## Flatpak local
+## Flatpak
 
-O manifesto usa KDE/Qt 6.9 e fixa libass, libplacebo, libmpv 0.41.0 e TagLib 2.3.1 por tag e
-commit. Ele não instala nem publica nada por conta própria:
+The repository includes a pinned Flatpak manifest based on KDE/Qt 6.9. Until signed release
+bundles are published, build it locally:
 
 ```bash
 flatpak install --user flathub org.kde.Sdk//6.9
-flatpak-builder --force-clean /tmp/melodarium-flatpak-build \
+flatpak-builder --user --force-clean /tmp/melodarium-flatpak-build \
   packaging/io.github.pedronalis.melodarium.yml
 flatpak-builder --run /tmp/melodarium-flatpak-build \
   packaging/io.github.pedronalis.melodarium.yml melodarium
 ```
 
-O sandbox recebe áudio, Wayland com fallback X11, rede, MPRIS, aceleração gráfica e leitura da
-pasta XDG de música; seleções fora dela dependem da permissão persistente do portal. O manifesto
-não empacota `yt-dlp`: RSS e mídia direta funcionam, mas downloads que exigem o executável externo
-ficam indisponíveis no Flatpak atual.
+The sandbox receives audio, graphics acceleration, network access for podcast feeds/media,
+Wayland with X11 fallback, MPRIS and read-only access to the XDG Music directory. Folders selected
+outside it use the persistent document portal permission.
 
-## Testes
+> [!NOTE]
+> The Flatpak does not bundle `yt-dlp`. Podcast RSS and direct media URLs work; YouTube downloads
+> that depend on an external `yt-dlp` executable are currently unavailable inside the sandbox.
+
+## What is inside
+
+| Area | Implementation |
+|---|---|
+| Interface | Qt Quick/QML components, responsive from 720×700 upward |
+| Playback | libmpv, queue persistence, shuffle/repeat, sleep timer and ReplayGain |
+| Library | TagLib scanner, live folder watcher, SQLite catalog and full-text search |
+| Artwork | Asynchronous, content-addressed cover cache with embedded and sibling art |
+| Podcasts | RSS/Atom parsing, episode downloads, resume state, OPML import/export |
+| Desktop | MPRIS service, media keys, `.desktop`, AppStream and Freedesktop icon |
+| Portability | M3U export and validated `.melodarium-backup` bundles |
+
+The QML layer owns presentation and interaction. C++ services expose narrow QML singletons for
+playback, data, scanning, downloads, artwork and portability. SQLite stays local; libmpv owns the
+audio lifecycle; network access is only used by features that inherently need it.
+
+## Audio behavior
+
+Melodarium does not force an output sample rate or sample format. A 24-bit/192 kHz FLAC reaches
+libmpv unchanged by the application; the system audio graph may still resample it. Gapless mode
+defaults to mpv's `weak` policy, which preserves same-format album transitions without silently
+resampling format changes.
+
+Exclusive output and aggressive gapless are explicit preferences because both have system-wide
+or signal-path consequences. ReplayGain starts disabled and only acts when the file contains the
+relevant tags. YouTube audio is marked as compressed and is never presented as lossless.
+
+## Local data and privacy
+
+Native installs follow the XDG base directories:
+
+- library database, podcasts and downloads: `$XDG_DATA_HOME/melodarium/melodarium/`;
+- preferences: `$XDG_CONFIG_HOME/melodarium/melodarium.conf`;
+- artwork cache: `$XDG_CACHE_HOME/melodarium/melodarium/covers/`.
+
+Without explicit XDG variables, Qt maps those to `~/.local/share`, `~/.config` and `~/.cache`.
+Flatpak data lives below `~/.var/app/io.github.pedronalis.melodarium/`. A first-run migration keeps
+data created under the former application name, `melodia`.
+
+Do not copy an open SQLite database by hand. Use **Settings → Backup and restore**; restoration
+checks the bundle version, hashes, SQLite integrity and available space before swapping data.
+
+## Quality gates
+
+CI builds in Fedora 43, proves that tests were discovered, runs the C++/Qt suite, QML lint and
+deterministic UI checks. A green compiler alone is not accepted: the repository also catches
+orphaned QML, layout drift, wrong palette pixels, inaccessible controls and unreachable actions.
 
 ```bash
+sudo dnf install ImageMagick appstream dbus-daemon desktop-file-utils \
+  ffmpeg-free flac flatpak-builder playerctl python3-pillow python3-pyyaml \
+  ripgrep sqlite xdotool xorg-x11-server-Xvfb
+
+cmake -S . -B build -G Ninja
+cmake --build build
 bash tools/check-test-floor.sh 25
 ctest --test-dir build --output-on-failure
 cmake --build build --target all_qmllint
 bash tools/check-orfaos.sh
-bash tools/check-layout.sh
 bash tools/check-fidelidade.sh
+bash tools/check-public-release.sh
 ```
 
-O workflow em `.github/workflows/ci.yml` reproduz o build em Fedora 43, exige pelo menos 25 testes
-descobertos, roda 35 alvos CTest e os gates determinísticos. Em falha, anexa os logs do job; não
-faz push, release nem publicação.
+The v0.1.0 candidate contains 35+ registered test targets. The floor check prevents CTest's
+misleading `0 failures` result from passing when zero tests were discovered.
 
-## Controles e recursos
+## Current limits
 
-- `Ctrl+K` ou `Ctrl+F` foca a busca; teclas Play/Pause, Próxima e Anterior do teclado seguem
-  MPRIS. Os controles principais também respondem a Tab, Espaço, Enter e Escape.
-- A fila permite tocar a seguir, remover, mover e limpar as próximas entradas sem reiniciar a
-  faixa atual. O player e o mini-player oferecem timer de 15/30/60 minutos e “parar após esta”.
-- Arrastar arquivo, pasta, feed ou URL sobre a janela mostra a ação antes de executar. Downloads e
-  assinaturas continuam exigindo confirmação.
-- Podcasts suportam cancelar download, desassinar mantendo ou apagando arquivos, auto-download
-  opt-in e retenção por feed (`0` significa ilimitada).
-- Preferências incluem ReplayGain, saída exclusiva, gapless agressivo, alto contraste e movimento
-  reduzido. Erros de banco, scan, playback, feed e download aparecem na própria interface.
+- The interface text is currently pt-BR; repository documentation and community support are
+  available in English and Portuguese.
+- Linux is the only tested platform. Wayland/Hyprland is primary; X11 is a supported fallback.
+- There is no Flathub listing yet, and release bundles are not signed.
+- YouTube support uses the `yt-dlp` already installed on a native host and never ships it.
+- Several visual and interaction gates still require a human pass before the preview is called
+  stable.
 
-## Importação, exportação e backup
+## Community
 
-- Assinaturas de podcast entram e saem em OPML; duplicatas e entradas inválidas são resumidas.
-- Coleções exportam M3U UTF-8 com caminhos absolutos na ordem manual. Faixas ausentes são ignoradas
-  e contabilizadas.
-- Preferências → Backup e restauração cria um `.melodarium-backup` versionado. Antes de restaurar,
-  o app valida versão, hashes, integridade SQLite e espaço; preserva o estado atual em um bundle de
-  retorno e pede reinício após a troca.
+Bug reports and ideas are welcome in either English or Portuguese. Start with the issue forms;
+for implementation details, read [CONTRIBUTING.md](CONTRIBUTING.md). Please report security issues
+privately as described in [SECURITY.md](SECURITY.md), and follow the
+[Code of Conduct](CODE_OF_CONDUCT.md).
 
-Não edite nem copie o banco aberto à mão. Para migração entre máquinas, use o bundle da interface.
+The project is publicly visible while its license is being selected. See the notice at the top of
+this file before using or redistributing the code.
 
-## Dados locais
+## Credits
 
-O app segue XDG. Na instalação nativa, os principais caminhos são:
+- Visual direction inspired by [Noctalia](https://github.com/noctalia-dev/noctalia-shell), while
+  remaining fully usable without it.
+- Playback by [mpv/libmpv](https://mpv.io/) and metadata through
+  [TagLib](https://taglib.org/).
+- The bundled Tabler icon font is MIT-licensed; its notice lives in
+  [`assets/fonts/tabler-icons-license.txt`](assets/fonts/tabler-icons-license.txt).
+- Interface type uses Inter and technical metadata uses JetBrains Mono when installed.
 
-- banco, podcasts e downloads: `$XDG_DATA_HOME/melodarium/melodarium/`;
-- preferências: `$XDG_CONFIG_HOME/melodarium/melodarium.conf`;
-- capas: `$XDG_CACHE_HOME/melodarium/melodarium/covers/`.
-
-Quando as variáveis não existem, Qt usa `~/.local/share`, `~/.config` e `~/.cache`. No Flatpak,
-essas bases ficam sob `~/.var/app/io.github.pedronalis.melodarium/`. Na primeira abertura, a
-migração do nome antigo preserva biblioteca, capas, downloads e podcasts.
-
-## Modo de desenvolvimento da tela
-
-Recarrega o QML a cada salvamento, sem recompilar o C++:
-
-```bash
-MELODIA_DEV_QML=$PWD/src/Main.qml ./build/melodarium
-```
-
-Os tipos C++ continuam disponíveis porque estão linkados estaticamente no binário; só o texto
-QML é relido do disco.
-
-## Ver `qDebug` e `console.log`
-
-O Fedora instala `/usr/share/qt6/qtlogging.ini` com `*.debug=false` e manda o resto para o
-journald — sem as duas variáveis abaixo, todo log de debug some sem erro nenhum:
-
-```bash
-QT_LOGGING_RULES="*.debug=true" QT_FORCE_STDERR_LOGGING=1 ./build/melodarium
-```
-
-## Qualidade de áudio
-
-O motor é o libmpv, e as opções abaixo existem para manter o sinal intacto do arquivo até a
-placa. O que o melodarium garante e o que não depende dele:
-
-- **Nenhuma conversão de taxa ou de formato de amostra é forçada.** As opções do mpv que
-  fixariam taxa e formato ficam deliberadamente sem valor: basta setar qualquer uma delas
-  para o `swresample` passar a converter *todas* as faixas para aquele valor. É isso que faz
-  um FLAC 24 bit/192 kHz chegar ao dispositivo como está no arquivo.
-- **`gapless-audio` fica em `weak`,** o padrão do mpv. Nesse modo o dispositivo continua
-  aberto entre faixas de mesmo formato — o caso do álbum contínuo — e nunca há resample
-  escondido. `setGaplessAggressive(true)` troca para `yes`, que mantém o dispositivo aberto
-  também quando o formato muda e, para conseguir isso, **reamostra** as faixas seguintes.
-  Por isso `yes` não é padrão.
-- **`audio-exclusive` não é padrão.** Ligado (`setExclusiveOutput(true)`), o melodarium toma o
-  dispositivo para si e **silencia todo o resto do sistema** enquanto houver arquivo
-  carregado. É uma escolha do usuário, nunca um default.
-- **Limite honesto:** mesmo em modo exclusivo, quem reamostra pode ser o PipeWire. Se o grafo
-  estiver fixo numa taxa (`default.clock.rate` no `pipewire.conf`), a conversão acontece fora
-  do melodarium, e nenhuma opção daqui a evita — é configuração do sistema.
-- **ReplayGain** nasce desligado; `setReplayGainMode("track")` ou `"album"` liga, e só tem
-  efeito quando o arquivo traz as tags.
-
-## Baixar do YouTube
-
-- **O melodarium não distribui o baixador.** Ele chama por processo o `yt-dlp` que já estiver
-  instalado na sua máquina, e não faz nada se não houver nenhum — a tela diz isso em vez de
-  falhar em silêncio. Instale pelo gerenciador de pacotes da sua distro.
-- **O áudio do YouTube é comprimido** (Opus, ~160 kbps) e **nunca** será alta qualidade. Ele
-  convive com os arquivos de verdade na mesma biblioteca, e a interface marca a origem com um
-  selo "YouTube" na linha da faixa: o app não finge que as duas qualidades são a mesma coisa.
-  Pela mesma razão o download pede `--audio-format best`, que **não** reencoda — converter para
-  MP3 perderia qualidade uma segunda vez, de graça.
-- **`--embed-thumbnail` exige `ffmpeg`.** Quando o `ffmpeg` não está no `PATH` herdado (o caso
-  típico de um app aberto por atalho `.desktop`), o melodarium procura nos lugares usuais e passa
-  `--ffmpeg-location` explicitamente.
-- **Qual `yt-dlp` respondeu.** Esta máquina tem dois instalados — o do `PATH` é o do Homebrew
-  (mais antigo) e o do sistema é o do Fedora, em `/usr/bin`. O melodarium usa o do `PATH`, que é o
-  que o usuário espera, e **mostra a versão encontrada** na tela de adicionar link: no dia em
-  que uma das duas quebrar, saber qual respondeu economiza a hora de depuração.
-
-## Licenças de terceiros
-
-A fonte de ícones Tabler (`assets/fonts/noctalia-tabler-icons.ttf`) é distribuída sob licença
-MIT — o texto acompanha o arquivo em `assets/fonts/tabler-icons-license.txt`.
+<div align="center"><sub>Built in Brazil for people who still own their listening.</sub></div>

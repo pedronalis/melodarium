@@ -1,0 +1,206 @@
+<div align="center">
+  <img src="docs/assets/melodarium-hero.png" alt="Melodarium — player local de música e podcast rodando no Linux" width="100%">
+
+  <p><a href="README.md">English</a> · <strong>Português (Brasil)</strong></p>
+
+  <p>
+    <a href="https://github.com/pedronalis/melodarium/actions/workflows/ci.yml"><img alt="CI" src="https://github.com/pedronalis/melodarium/actions/workflows/ci.yml/badge.svg?branch=main"></a>
+    <img alt="Qt 6.5+" src="https://img.shields.io/badge/Qt-6.5%2B-41CD52?logo=qt&logoColor=white">
+    <img alt="Linux" src="https://img.shields.io/badge/plataforma-Linux-FCC624?logo=linux&logoColor=111111">
+    <img alt="Preview" src="https://img.shields.io/badge/status-preview-c084fc">
+  </p>
+
+  <p><strong>Sua música. Seus podcasts. Seus arquivos.</strong><br>
+  Um player desktop local-first feito com Qt 6, QML e libmpv.</p>
+
+  <p><a href="#veja-o-app-rodando">Veja</a> · <a href="#começo-rápido-no-fedora">Compile</a> · <a href="#flatpak">Flatpak</a> · <a href="CONTRIBUTING.pt-BR.md">Contribua</a></p>
+</div>
+
+> [!IMPORTANT]
+> O Melodarium é um preview inicial para Linux, desenvolvido e verificado no Fedora 43 com
+> Wayland/Hyprland. O código está público, mas a licença do projeto ainda está sendo escolhida;
+> até a publicação de um arquivo `LICENSE`, não há permissão para copiar, modificar ou redistribuir.
+
+## Uma biblioteca, não um feed
+
+O Melodarium é para quem ainda guarda arquivos de música, valoriza o contexto de um álbum e quer
+ouvir podcasts sem transformar o próprio histórico em dataset de terceiros. Ele varre pastas
+locais, mantém o catálogo em SQLite e entrega a reprodução ao libmpv. Não há conta, biblioteca na
+nuvem ou telemetria.
+
+- Navegue por todas as faixas ou atravesse artistas, álbuns, gêneros, tags e visões inteligentes.
+- Reproduza arquivos lossless sem forçar taxa ou formato de amostra.
+- Monte coleções ordenadas, edite a fila ao vivo e retome a sessão musical anterior.
+- Assine podcasts RSS, baixe episódios e retome cada um sem misturar seu estado com o da música.
+- Busque faixas, álbuns, artistas, coleções, programas e episódios num único overlay pelo teclado.
+- Controle pelo desktop com MPRIS, teclas de mídia e a paleta do Noctalia quando disponível.
+- Faça backup e restaure o catálogo por um bundle versionado e verificado por hashes.
+
+## Veja o app rodando
+
+| Tocando agora | Biblioteca inteira |
+|:--:|:--:|
+| <img src="docs/assets/screenshots/now-playing.png" alt="Melodarium tocando Night Bloom na visão de álbum" width="100%"> | <img src="docs/assets/screenshots/library.png" alt="Biblioteca local completa no Melodarium" width="100%"> |
+
+| Coleções | Podcasts |
+|:--:|:--:|
+| <img src="docs/assets/screenshots/collections.png" alt="Coleção ordenada com o mini-player global" width="100%"> | <img src="docs/assets/screenshots/podcasts.png" alt="Episódios de podcast e painel para continuar ouvindo" width="100%"> |
+
+<p align="center">
+  <img src="docs/assets/screenshots/search.png" alt="Busca pelo teclado entre músicas, coleções e podcasts" width="74%">
+</p>
+
+Essas imagens não são mockups do design. Cada uma é salva pela cena QML em execução via
+`grabToImage`, usando ambiente XDG descartável, áudio FLAC gerado, banco SQLite isolado e capas
+sintéticas originais. Recrie a galeria inteira com:
+
+```bash
+bash tools/capture-readme-gallery.sh ./build/melodarium
+```
+
+O script nunca lê seus dados reais do Melodarium nem sua biblioteca de música.
+
+## Começo rápido no Fedora
+
+O Melodarium hoje mira Linux. O Fedora 43 é o ambiente de referência; outras distribuições podem
+funcionar quando oferecem Qt 6.5+, libmpv e os pacotes de desenvolvimento do TagLib.
+
+```bash
+sudo dnf install cmake ninja-build gcc-c++ \
+  qt6-qtbase-devel qt6-qtdeclarative-devel \
+  mpv-devel taglib-devel \
+  rsms-inter-fonts jetbrains-mono-fonts
+
+git clone https://github.com/pedronalis/melodarium.git
+cd melodarium
+cmake -S . -B build -G Ninja
+cmake --build build
+./build/melodarium
+```
+
+Instale para o usuário atual com:
+
+```bash
+cmake --install build --prefix "$HOME/.local"
+```
+
+Isso instala o executável, a entrada do menu, os metadados AppStream e o ícone Freedesktop.
+
+## Flatpak
+
+O repositório inclui um manifesto Flatpak fixado sobre KDE/Qt 6.9. Enquanto os bundles assinados
+de release não são publicados, compile localmente:
+
+```bash
+flatpak install --user flathub org.kde.Sdk//6.9
+flatpak-builder --user --force-clean /tmp/melodarium-flatpak-build \
+  packaging/io.github.pedronalis.melodarium.yml
+flatpak-builder --run /tmp/melodarium-flatpak-build \
+  packaging/io.github.pedronalis.melodarium.yml melodarium
+```
+
+O sandbox recebe áudio, aceleração gráfica, rede para feeds/mídia de podcasts, Wayland com fallback
+X11, MPRIS e leitura da pasta XDG de música. Pastas escolhidas fora dela usam a permissão persistente
+do portal de documentos.
+
+> [!NOTE]
+> O Flatpak não empacota `yt-dlp`. RSS de podcasts e URLs diretas de mídia funcionam; downloads do
+> YouTube que dependem de um `yt-dlp` externo ainda não ficam disponíveis dentro do sandbox.
+
+## O que existe por dentro
+
+| Área | Implementação |
+|---|---|
+| Interface | Componentes Qt Quick/QML, responsivos a partir de 720×700 |
+| Reprodução | libmpv, fila persistente, aleatório/repetir, timer e ReplayGain |
+| Biblioteca | Scanner TagLib, observação ao vivo da pasta, catálogo SQLite e busca textual |
+| Capas | Cache assíncrono endereçado por conteúdo, com arte embutida ou vizinha ao arquivo |
+| Podcasts | RSS/Atom, downloads, retomada por episódio e importação/exportação OPML |
+| Desktop | Serviço MPRIS, teclas de mídia, `.desktop`, AppStream e ícone Freedesktop |
+| Portabilidade | Exportação M3U e bundles `.melodarium-backup` validados |
+
+A camada QML cuida da apresentação e da interação. Serviços C++ expõem singletons estreitos para
+reprodução, dados, varredura, downloads, capas e portabilidade. O SQLite permanece local; o libmpv
+controla o ciclo de áudio; a rede só entra nos recursos que dependem dela por natureza.
+
+## Comportamento do áudio
+
+O Melodarium não força taxa de saída nem formato de amostra. Um FLAC 24-bit/192 kHz chega ao libmpv
+sem conversão imposta pelo aplicativo; o grafo de áudio do sistema ainda pode reamostrar. O gapless
+nasce na política `weak` do mpv, preservando transições de álbuns com o mesmo formato sem reamostrar
+silenciosamente quando o formato muda.
+
+Saída exclusiva e gapless agressivo são preferências explícitas porque têm consequências no sistema
+inteiro ou no caminho do sinal. ReplayGain nasce desligado e só age quando a faixa traz as tags. Áudio
+do YouTube aparece marcado como comprimido e nunca é vendido como lossless.
+
+## Dados locais e privacidade
+
+Instalações nativas seguem os diretórios-base XDG:
+
+- banco da biblioteca, podcasts e downloads: `$XDG_DATA_HOME/melodarium/melodarium/`;
+- preferências: `$XDG_CONFIG_HOME/melodarium/melodarium.conf`;
+- cache de capas: `$XDG_CACHE_HOME/melodarium/melodarium/covers/`.
+
+Sem variáveis XDG explícitas, o Qt mapeia isso para `~/.local/share`, `~/.config` e `~/.cache`. No
+Flatpak, os dados ficam sob `~/.var/app/io.github.pedronalis.melodarium/`. Uma migração na primeira
+abertura preserva dados criados com o nome anterior do aplicativo, `melodia`.
+
+Não copie manualmente um banco SQLite aberto. Use **Ajustes → Backup e restauração**; a restauração
+confere versão do bundle, hashes, integridade SQLite e espaço livre antes de trocar os dados.
+
+## Gates de qualidade
+
+A CI compila no Fedora 43, prova que testes foram descobertos, executa a suíte C++/Qt, lint QML e
+gates determinísticos de UI. Compilador verde não basta: o repositório também detecta QML órfão,
+desvio de layout, pixels com paleta errada, controles inacessíveis e ações sem caminho de uso.
+
+```bash
+sudo dnf install ImageMagick appstream dbus-daemon desktop-file-utils \
+  ffmpeg-free flac flatpak-builder playerctl python3-pillow python3-pyyaml \
+  ripgrep sqlite xdotool xorg-x11-server-Xvfb
+
+cmake -S . -B build -G Ninja
+cmake --build build
+bash tools/check-test-floor.sh 25
+ctest --test-dir build --output-on-failure
+cmake --build build --target all_qmllint
+bash tools/check-orfaos.sh
+bash tools/check-fidelidade.sh
+bash tools/check-public-release.sh
+```
+
+O candidato a v0.1.0 contém 35+ alvos de teste registrados. O piso impede o resultado enganoso
+`0 failures` do CTest de passar quando nenhum teste foi descoberto.
+
+## Limites atuais
+
+- O texto da interface ainda está em pt-BR; a documentação e o suporte comunitário do repositório
+  estão disponíveis em inglês e português.
+- Linux é a única plataforma testada. Wayland/Hyprland é o alvo principal; X11 é fallback suportado.
+- Ainda não há listagem no Flathub, e os bundles de release não são assinados.
+- O suporte ao YouTube usa o `yt-dlp` já instalado no host nativo e nunca o distribui.
+- Alguns gates visuais e de interação ainda pedem uma passagem humana antes de chamar o preview de
+  estável.
+
+## Comunidade
+
+Relatos de bug e ideias são bem-vindos em português ou inglês. Comece pelos formulários de issue;
+para detalhes de implementação, leia [CONTRIBUTING.pt-BR.md](CONTRIBUTING.pt-BR.md). Vulnerabilidades
+devem ser relatadas em privado conforme [SECURITY.md](SECURITY.md), respeitando o
+[Código de Conduta](CODE_OF_CONDUCT.md).
+
+O projeto está visível publicamente enquanto a licença é escolhida. Leia o aviso no topo deste
+arquivo antes de usar ou redistribuir o código.
+
+## Créditos
+
+- Direção visual inspirada pelo [Noctalia](https://github.com/noctalia-dev/noctalia-shell), sem
+  depender dele para funcionar.
+- Reprodução por [mpv/libmpv](https://mpv.io/) e metadados por
+  [TagLib](https://taglib.org/).
+- A fonte de ícones Tabler incluída usa licença MIT; o aviso está em
+  [`assets/fonts/tabler-icons-license.txt`](assets/fonts/tabler-icons-license.txt).
+- A interface usa Inter e os metadados técnicos usam JetBrains Mono quando instaladas.
+
+<div align="center"><sub>Feito no Brasil para quem ainda é dono daquilo que ouve.</sub></div>
