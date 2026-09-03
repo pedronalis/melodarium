@@ -1,65 +1,47 @@
 # Handoff — melodarium
 
-> Atualizado: 2026-09-01 · branch: `wip/2026-08-31-ui-contextual-fecho` · lote longo colhido
+> Atualizado: 2026-09-03 · branch: `wip/2026-08-31-ui-contextual-fecho` · lançamento público em preparação
 
 ## Estado
 
-- O lote mecânico dos planos de performance, refresh/background, erros/acessibilidade,
-  fila/timer/drop, podcast/portabilidade e CI/distribuição está implementado e commitado.
-- HEAD de entrada desta colheita: `e6dc9b4` (`docs: record batch verification and blockers`).
-- `docs/plans/2026-09-01-ci-e-distribuicao.md` está `concluido`: construção Flatpak limpa e
-  RUN_GATE 17/17 passaram.
-- `docs/plans/2026-09-01-refresh-e-trabalho-background.md` está `concluido`. Os planos com
-  `decisao-humana: sim` continuam `em-execucao`, com checkboxes visuais intactos.
-- Repo continua privado. Não houve push, PR, release, publicação ou mudança de visibilidade.
-- Dados/config/cache reais do Melodarium não foram alterados; provas destrutivas usaram XDG/tmp.
-  Com autorização, o SDK KDE 6.9 entrou no Flatpak do usuário e sete pacotes de build oficiais
-  foram instalados no Fedora.
+- O GitHub `pedronalis/melodarium` já está público, mas `origin/main` ainda aponta para a versão
+  antiga. O lançamento preparado localmente é ancestral direto desse `main` e será publicado sem
+  PR, conforme a regra do projeto.
+- A superfície pública está bilíngue: `README.md` em inglês, `README.pt-BR.md` em português,
+  documentação de contribuição nos dois idiomas, arquivos de comunidade, issue forms, changelog,
+  notas da `v0.1.0` e workflow de release Flatpak.
+- O projeto foi licenciado por decisão explícita do Pedro sob `GPL-3.0-only`; o texto canônico está
+  em `LICENSE` e o AppStream usa o mesmo SPDX.
+- Cinco prints de 1100×700 vieram do binário/QML real via `grabToImage`, usando XDG, banco, FLACs e
+  capas sintéticas descartáveis. O hero 1280×640 compõe três dessas capturas reais.
+- Seis mudanças locais de outra fatia continuam preservadas e fora de todos os commits do
+  lançamento: `src/audioengine.{h,cpp}`, `tests/CMakeLists.txt`, `tests/tst_audioengine.cpp`,
+  `docs/solutions/ui/2026-09-02-recarregar-a-mesma-fila-nao-notifica.md` e
+  `tools/check-track-click.sh`.
 
-## Commits do lote
+## Commits do lançamento
 
-- Performance/refresh: `20ef673`, `47f8619`, `e2e0893`, `30c26b4`, `fdd06a4`, `cebc6d0`,
-  `b200bd5`.
-- Erros/acessibilidade/QML: `8fd3469`, `a8c70c4`, `7174817`, `2cb736d`.
-- Fila/timer/entrada: `5d700aa`, `7ccd607`, `11349af`, `10aadf4`.
-- Podcast/portabilidade: `3b4b11a`, `db21194`, `2e9d537`, `113d8f2`.
-- Distribuição/CI/docs: `269e404`, `40dca7a`, `31fc283`, `42b46b4`, `e6dc9b4` e o commit de
-  fechamento Flatpak desta colheita.
+- `2453f07` — gate da superfície pública ligado à CI.
+- `8716196` — capturador reproduzível e cinco prints reais.
+- `aec2f1d` — filosofia “Arquivo Noturno” e hero público.
+- `edff3a8` — READMEs bilíngues e contrato de comunidade.
+- `bb5070d` — workflow e notas da release Flatpak.
+- `353c073` — GPL-3.0-only, AppStream e documentação legal/distribuição.
 
-## Arquivos e decisões centrais
+## Verificação do candidato
 
-- Motor/dados: `src/audioengine.{h,cpp}`, `src/database.{h,cpp}`, `src/librarywatcher.{h,cpp}`,
-  `src/libraryscanner.cpp`, `src/podcastlibrary.{h,cpp}`, `src/portabilityservice.{h,cpp}`,
-  `src/droprouter.{h,cpp}` e `src/folderbrowser.cpp`.
-- UI: fila editável, `SleepControl.qml`, `DropOverlay.qml`, avisos, acessibilidade, preferências,
-  políticas de podcast, OPML/M3U e `BackupRestoreDialog.qml`; cores continuam vindo de `Theme` e
-  dimensões continuam respeitando `Theme.uiScale`.
-- Testes/gates: 35 alvos em `tests/`; novos gates de piso, fila, drop, portabilidade, pacote,
-  acessibilidade e avisos em `tools/`; gates visuais existentes preservados.
-- Empacotamento: QTP0004 explícito, GNU install layout, desktop/AppStream/ícone, manifesto
-  `packaging/io.github.pedronalis.melodarium.yml` e CI Fedora em `.github/workflows/ci.yml`.
-- O manifesto fixa KDE/Qt 6.9, libass, libplacebo, libmpv 0.41.0 e TagLib 2.3.1. O módulo mpv
-  explicita `plain-gl` para sobreviver a `auto_features=disabled`; o gate de pacote protege esse
-  contrato. Metadados do projeto permanecem `LicenseRef-proprietary`; `metadata_license` do
-  AppStream é `FSFAP`, como o validador oficial exige para o próprio XML.
-- O Flatpak atual não empacota `yt-dlp`; downloads dependentes desse executável ficam limitados.
-  RSS e URLs de mídia direta continuam cobertos pela rede do sandbox.
-- `migrarDoNomeAntigo()` foi preservado. Migrações publicadas não foram reescritas.
-
-## Verificação final
-
-- Build limpo: `quiet-run cmake -B build -G Ninja` PASS; `quiet-run cmake --build build` PASS,
-  279 passos. Build anterior preservado em `/tmp/melodarium-build-backup.NIJf3B/build`.
-- Piso: `tools/check-test-floor.sh 25` PASS, `Total Tests: 35`.
-- CTest limpo: 35/35 PASS, 0 falhas, 118,63 s.
-- Fedora 43 descartável: configuração/build PASS, 35/35 PASS (121,85 s), qmllint e todos os
-  gates determinísticos PASS. O snapshot veio de `git archive`, então o `git diff --check` foi
-  validado no worktree real.
-- Flatpak limpo: `flatpak-builder --user --force-clean` PASS; os quatro módulos externos e o app
-  compilaram, AppStream compôs e desktop/ícone/metainfo foram exportados.
-- RUN_GATE 17/17 PASS depois da correção: configure, build, piso 35/25, CTest 35/35 em 121 s,
-  `all_qmllint`, contextual, órfãos, layout, fidelidade, list reuse, acessibilidade, notices,
-  queue editing, drop, portabilidade, pacote e `git diff --check`.
+- Auditoria Gitleaks da árvore e do histórico: 304 commits e aproximadamente 5,97 MB examinados,
+  zero vazamentos encontrados.
+- Worktree destacado em `353c073`: configure PASS; build Ninja PASS (285 passos); piso PASS com
+  36 testes descobertos; CTest 36/36 PASS em 136,89 s.
+- `all_qmllint`, `check-orfaos.sh`, `check-fidelidade.sh`, verificação da galeria,
+  `check-public-release.sh`, `check-package.sh`, AppStream pedantic e `actionlint` passaram.
+- Flatpak limpo: quatro dependências fixadas e o app compilaram em 151 s. Bundle de 3.633.208
+  bytes, checksum SHA-256 verificado e reimportação OSTree confirmada em
+  `app/io.github.pedronalis.melodarium/x86_64/0.1.0`, com binário executável e runtime KDE 6.9.
+- GitNexus contra `main`: risco `critical` por causa do grande lote acumulado — 503 símbolos e 16
+  fluxos afetados em 50 commits. Não é risco introduzido pela documentação; todo o produto novo
+  desde o `main` público faz parte do lançamento e passou pelos gates acima.
 
 ## Gates humanos ainda abertos
 
@@ -73,8 +55,8 @@
 
 ## Próxima ação única
 
-- Abrir o app para Pedro validar na tela o halo em reprodução; isso fecha o gate humano mais
-  antigo, `2026-08-30-perf-render-fila`, antes dos demais percursos manuais.
+- Publicar o checkpoint em `main`, configurar metadados e segurança do GitHub, criar `v0.1.0`,
+  observar CI/release e registrar aqui os URLs e resultados finais.
 
 ## Perigos
 

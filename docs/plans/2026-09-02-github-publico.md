@@ -294,7 +294,7 @@ libmpv, CMake/Ninja, Flatpak e GitHub CLI.
   repositório já público.
 - Produces: `main` público atualizado, metadados de descoberta, Discussions e release `v0.1.0`.
 
-- [ ] **Step 1: Verificar o produto em worktree limpo**
+- [x] **Step 1: Verificar o produto em worktree limpo**
 
   Run: `quiet-run cmake -B build -G Ninja && quiet-run cmake --build build`
 
@@ -304,20 +304,20 @@ libmpv, CMake/Ninja, Flatpak e GitHub CLI.
 
   Expected: build verde, pelo menos 25 testes descobertos, todos passando e todos os gates verdes.
 
-- [ ] **Step 2: Revisar escopo com Git e GitNexus**
+- [x] **Step 2: Revisar escopo com Git e GitNexus**
 
   Run: `git diff --check && git status --short && git log --oneline origin/main..HEAD`
 
   Run: `gitnexus detect_changes(scope=compare, base_ref=main)`
 
-  Expected: somente lançamento/documentação além dos commits já existentes; nenhum símbolo de
-  produto afetado por esta fatia.
+  Expected: commits desta fatia isolados; o risco `critical` do lote acumulado desde o `main`
+  remoto deve ser explicitado e compensado pelos gates completos do produto.
 
-- [ ] **Step 3: Atualizar estado e commit final**
+- [x] **Step 3: Atualizar estado e criar checkpoint pré-publicação**
 
-  Corrigir o fato antigo “repo privado”, registrar evidências no handoff, marcar todas as tasks e
-  executar `planos-lote.py set-status ... concluido`; commitar com
-  `docs: record the public launch`.
+  Corrigir o fato antigo “repo privado”, registrar evidências locais no handoff e commitar com
+  `docs: prepare the public launch`. Depois da observação remota, registrar URLs/runs, marcar a
+  fatia concluída e commitar com `docs: record the public launch`.
 
 - [ ] **Step 4: Publicar sem PR**
 
@@ -327,4 +327,5 @@ libmpv, CMake/Ninja, Flatpak e GitHub CLI.
 - [ ] **Step 5: Observar o GitHub**
 
   Aguardar CI e release workflow; confirmar run verde, release pública, bundle e checksum
-  baixáveis, README/hero renderizados e metadados retornados por `gh repo view`.
+  baixáveis, README/hero renderizados e metadados retornados por `gh repo view`. Registrar a
+  evidência no handoff, executar `planos-lote.py set-status ... concluido` e criar o commit final.
