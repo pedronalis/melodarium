@@ -53,6 +53,12 @@ for key, expected in required_top_level.items():
     if manifest.get(key) != expected:
         raise SystemExit(f"FLATPAK_MANIFEST_INVALID {key}={manifest.get(key)!r}")
 
+build_options = manifest.get("build-options", {})
+if build_options.get("libdir") != "/app/lib":
+    raise SystemExit(
+        "FLATPAK_LIBDIR_NOT_PORTABLE build-options.libdir must be /app/lib"
+    )
+
 finish_args = set(manifest.get("finish-args", []))
 required_permissions = {
     "--share=network",

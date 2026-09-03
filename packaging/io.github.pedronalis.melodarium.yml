@@ -4,6 +4,9 @@ runtime-version: '6.9'
 sdk: org.kde.Sdk
 command: melodarium
 
+build-options:
+  libdir: /app/lib
+
 finish-args:
   - --share=ipc
   - --share=network
