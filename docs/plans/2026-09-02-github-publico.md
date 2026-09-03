@@ -126,30 +126,30 @@ libmpv, CMake/Ninja, Flatpak e GitHub CLI.
   aplicativo.
 - Produces: cinco PNGs 1100×700 capturados pelo QML real, com catálogo fictício e arte original.
 
-- [ ] **Step 1: Escrever o capturador com autovalidação vermelha**
+- [x] **Step 1: Escrever o capturador com autovalidação vermelha**
 
   O script deve recusar binário ausente, dependências ausentes, erro QML, captura vazia, dimensão
   diferente de 1100×700 ou imagem quase uniforme. Deve criar FLACs curtos, quatro capas originais,
   artistas/álbuns/faixas, tags, coleções e episódios somente sob um XDG temporário.
 
-- [ ] **Step 2: Provar que a validação detecta ausência de artefato**
+- [x] **Step 2: Provar que a validação detecta ausência de artefato**
 
   Run: `quiet-run env MELODARIUM_GALLERY_VERIFY_ONLY=1 bash tools/capture-readme-gallery.sh`
 
   Expected: falha nomeando os PNGs ausentes.
 
-- [ ] **Step 3: Gerar as capturas pelo binário real**
+- [x] **Step 3: Gerar as capturas pelo binário real**
 
   Run: `quiet-run bash tools/capture-readme-gallery.sh ./build/melodarium`
 
   Expected: cinco linhas `GALLERY_CAPTURE_OK`, nenhuma leitura de XDG real e nenhum erro QML.
 
-- [ ] **Step 4: Inspecionar visualmente a galeria**
+- [x] **Step 4: Inspecionar visualmente a galeria**
 
   Montar contact sheet em `/tmp`, abrir as cinco imagens e conferir legibilidade, variedade de
   estados, ausência de caminhos pessoais e coerência com a UI atual.
 
-- [ ] **Step 5: Commitar o checkpoint**
+- [x] **Step 5: Commitar o checkpoint**
 
   Stage apenas o script, os cinco PNGs e este ledger; commitar com
   `docs: capture the real application gallery`.
