@@ -6,11 +6,17 @@ SOURCE_ROOT=$(cd "$(dirname "$0")/.." && pwd)
 cd "$SOURCE_ROOT" || exit 1
 
 failed=0
+inside_git_repository=1
 
 fail() {
     echo "$1"
     failed=1
 }
+
+if ! git rev-parse --is-inside-work-tree >/dev/null 2>&1; then
+    fail "PUBLIC_RELEASE_GIT_REPOSITORY checkout does not contain Git metadata"
+    inside_git_repository=0
+fi
 
 required_files=(
     LICENSE
@@ -45,6 +51,18 @@ for path in "${required_files[@]}" "${gallery_files[@]}"; do
         fail "PUBLIC_RELEASE_MISSING $path"
     fi
 done
+
+ci_workflow=".github/workflows/ci.yml"
+if [ -s "$ci_workflow" ]; then
+    checkout_line=$(rg -n 'uses: actions/checkout@' "$ci_workflow" \
+        | head -n 1 | cut -d: -f1)
+    git_install_line=$(rg -n 'run: dnf install -y git' "$ci_workflow" \
+        | head -n 1 | cut -d: -f1)
+    if [ -z "$checkout_line" ] || [ -z "$git_install_line" ] \
+            || [ "$git_install_line" -ge "$checkout_line" ]; then
+        fail "PUBLIC_RELEASE_CI_GIT_BEFORE_CHECKOUT Git must be installed before actions/checkout"
+    fi
+fi
 
 if [ -s LICENSE ]; then
     if ! rg -Fq 'GNU GENERAL PUBLIC LICENSE' LICENSE \
@@ -98,7 +116,8 @@ if [ -s README.pt-BR.md ] && rg -n \
 fi
 
 secret_pattern='gh[pousr]_[A-Za-z0-9_]{30,}|github_pat_[A-Za-z0-9_]{20,}|AKIA[0-9A-Z]{16}|sk-[A-Za-z0-9]{48}|sk-(proj|svcacct)-[A-Za-z0-9_-]{20,}|xox[baprs]-[A-Za-z0-9-]{10,}|-----BEGIN (RSA |EC |OPENSSH |DSA )?PRIVATE KEY-----'
-if git grep -I -E -q "$secret_pattern" -- . ':!tools/check-public-release.sh'; then
+if [ "$inside_git_repository" -eq 1 ] \
+        && git grep -I -E -q "$secret_pattern" -- . ':!tools/check-public-release.sh'; then
     fail "PUBLIC_RELEASE_SECRET_PATTERN tracked tree contains a credential-shaped value"
 fi
 
