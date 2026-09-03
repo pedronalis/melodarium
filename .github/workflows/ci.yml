@@ -48,7 +48,7 @@ jobs:
           dnf clean all
 
       - name: Restore compiler cache
-        uses: actions/cache@v4
+        uses: actions/cache@v6
         with:
           path: /root/.cache/ccache
           key: ${{ runner.os }}-fedora43-ccache-${{ hashFiles('CMakeLists.txt', 'src/**', 'tests/**') }}
