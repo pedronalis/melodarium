@@ -600,8 +600,9 @@ private slots:
             QVERIFY(engine.isAvailable());
             engine.loadPlaylist({m_toneA, m_longTone, m_toneB}, 1);
             QTRY_COMPARE_WITH_TIMEOUT(engine.currentFile(), m_longTone, 5000);
+            QTRY_VERIFY_WITH_TIMEOUT(engine.duration() > 0.0, 10000);
             engine.seek(6.0);
-            QTRY_VERIFY_WITH_TIMEOUT(engine.position() > 5.0, 5000);
+            QTRY_VERIFY_WITH_TIMEOUT(engine.position() > 5.0, 10000);
             engine.pause();
         }
 
