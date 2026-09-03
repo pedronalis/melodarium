@@ -61,6 +61,7 @@ libmpv, CMake/Ninja, Flatpak e GitHub CLI.
   manutenção da comunidade.
 - Modify: `.github/workflows/ci.yml`; create: `.github/workflows/release.yml` — gate da superfície
   pública e pacote Flatpak anexado a tags `v*`.
+- Create: `docs/releases/0.1.0.md` — notas bilíngues usadas pela primeira GitHub Release.
 - Create after Pedro's decision: `LICENSE`; modify:
   `data/io.github.pedronalis.melodarium.metainfo.xml` — direitos coerentes em arquivo e AppStream.
 - Modify: `AGENTS.md`, `CLAUDE.md`, `handoff.md` — estado público e evidência do lançamento.
@@ -247,6 +248,7 @@ libmpv, CMake/Ninja, Flatpak e GitHub CLI.
 - Create: `LICENSE`
 - Modify: `data/io.github.pedronalis.melodarium.metainfo.xml`
 - Create: `.github/workflows/release.yml`
+- Create: `docs/releases/0.1.0.md`
 - Modify: `README.md`
 - Modify: `README.pt-BR.md`
 - Modify: `CHANGELOG.md`
@@ -262,7 +264,7 @@ libmpv, CMake/Ninja, Flatpak e GitHub CLI.
   Usar exatamente GPL-3.0, MIT ou texto proprietário/source-available escolhido por Pedro;
   atualizar `project_license`, badges e linguagem dos READMEs sem alterar licenças de terceiros.
 
-- [ ] **Step 2: Criar workflow de tag**
+- [x] **Step 2: Criar workflow de tag**
 
   Em tags `v*`, instalar KDE SDK 6.9, construir o manifesto limpo, exportar repositório Flatpak,
   gerar `melodarium-<tag>-x86_64.flatpak` + `.sha256` e anexar ambos à release com `gh`.
