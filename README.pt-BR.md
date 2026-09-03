@@ -38,17 +38,13 @@ nuvem ou telemetria.
 
 ## Veja o app rodando
 
-| Tocando agora | Biblioteca inteira |
+| Tocando agora | Coleções |
 |:--:|:--:|
-| <img src="docs/assets/screenshots/now-playing.png" alt="Melodarium tocando Night Bloom na visão de álbum" width="100%"> | <img src="docs/assets/screenshots/library.png" alt="Biblioteca local completa no Melodarium" width="100%"> |
+| <img src="docs/assets/screenshots/now-playing.png" alt="Melodarium tocando Night Bloom na visão de álbum" width="100%"> | <img src="docs/assets/screenshots/collections.png" alt="Coleção ordenada com o mini-player global" width="100%"> |
 
-| Coleções | Podcasts |
+| Podcasts | Busca |
 |:--:|:--:|
-| <img src="docs/assets/screenshots/collections.png" alt="Coleção ordenada com o mini-player global" width="100%"> | <img src="docs/assets/screenshots/podcasts.png" alt="Episódios de podcast e painel para continuar ouvindo" width="100%"> |
-
-<p align="center">
-  <img src="docs/assets/screenshots/search.png" alt="Busca pelo teclado entre músicas, coleções e podcasts" width="74%">
-</p>
+| <img src="docs/assets/screenshots/podcasts.png" alt="Episódios de podcast e painel para continuar ouvindo" width="100%"> | <img src="docs/assets/screenshots/search.png" alt="Busca pelo teclado entre músicas, coleções e podcasts" width="100%"> |
 
 Essas imagens não são mockups do design. Cada uma foi salva pelo aplicativo QML atual usando
 catálogo descartável, áudio FLAC gerado e capas sintéticas originais.

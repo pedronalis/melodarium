@@ -38,17 +38,13 @@ telemetry.
 
 ## See it running
 
-| Now playing | Full library |
+| Now playing | Collections |
 |:--:|:--:|
-| <img src="docs/assets/screenshots/now-playing.png" alt="Melodarium playing Night Bloom from an album view" width="100%"> | <img src="docs/assets/screenshots/library.png" alt="Melodarium full local music library" width="100%"> |
+| <img src="docs/assets/screenshots/now-playing.png" alt="Melodarium playing Night Bloom from an album view" width="100%"> | <img src="docs/assets/screenshots/collections.png" alt="An ordered collection with the global mini player" width="100%"> |
 
-| Collections | Podcasts |
+| Podcasts | Search |
 |:--:|:--:|
-| <img src="docs/assets/screenshots/collections.png" alt="An ordered collection with the global mini player" width="100%"> | <img src="docs/assets/screenshots/podcasts.png" alt="Podcast episodes and resume panel" width="100%"> |
-
-<p align="center">
-  <img src="docs/assets/screenshots/search.png" alt="Keyboard-first search across music, collections and podcasts" width="74%">
-</p>
+| <img src="docs/assets/screenshots/podcasts.png" alt="Podcast episodes and resume panel" width="100%"> | <img src="docs/assets/screenshots/search.png" alt="Keyboard-first search across music, collections and podcasts" width="100%"> |
 
 These are not design mockups. Every image was saved by the current QML application using a
 disposable catalog, generated FLAC audio and original synthetic artwork.
