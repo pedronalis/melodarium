@@ -167,23 +167,23 @@ libmpv, CMake/Ninja, Flatpak e GitHub CLI.
 - Consumes: as capturas reais da Task 2, o ícone Freedesktop e fontes locais licenciadas.
 - Produces: manifesto visual e hero 1280×640 adequado ao topo do README e ao social preview.
 
-- [ ] **Step 1: Registrar a filosofia visual**
+- [x] **Step 1: Registrar a filosofia visual**
 
   Definir uma estética “arquivo noturno”: espaço preto, escada de cinzas, ritmo de waveform e
   pequenos acentos espectrais; texto mínimo, sem imitar artista ou marca externa.
 
-- [ ] **Step 2: Compor o hero com material real**
+- [x] **Step 2: Compor o hero com material real**
 
   Usar uma captura principal e duas secundárias, recortadas sem deformação, com profundidade
   discreta; limitar texto a `MELODARIUM`, `LOCAL MUSIC · PODCASTS · YOUR FILES` e `Qt · QML · mpv`.
 
-- [ ] **Step 3: Refinar e verificar pixels**
+- [x] **Step 3: Refinar e verificar pixels**
 
   Run: `identify -format '%wx%h' docs/assets/melodarium-hero.png`
 
   Expected: `1280x640`; inspeção visual confirma margens, nitidez e ausência de sobreposição.
 
-- [ ] **Step 4: Commitar o checkpoint**
+- [x] **Step 4: Commitar o checkpoint**
 
   Stage apenas filosofia, hero e ledger; commitar com `docs: give Melodarium a public visual identity`.
 
