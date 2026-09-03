@@ -33,6 +33,8 @@ QtObject {
         "clock": "",
         "star": "",
         "download": "",
+        "pencil": "",
+        "trash": "",
         "rss": "",
         "settings": "",
         "close": "",

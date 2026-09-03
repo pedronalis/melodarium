@@ -205,5 +205,7 @@ install(FILES data/icons/hicolor/scalable/apps/${MELODARIUM_APP_ID}.svg
     DESTINATION ${CMAKE_INSTALL_DATADIR}/icons/hicolor/scalable/apps
 )
 
-enable_testing()
-add_subdirectory(tests)
+if(EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/tests/CMakeLists.txt")
+    enable_testing()
+    add_subdirectory(tests)
+endif()

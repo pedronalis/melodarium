@@ -36,6 +36,7 @@ struct KnownTrack {
     qint64 mtime = 0;
     qint64 size = 0;
     QString contentHash;
+    bool titleMissing = false;
 };
 
 // Resolves a name to a row id in a lookup table, inserting it when new.
@@ -138,13 +139,15 @@ void LibraryScanner::run(const QString &rootPath, const QString &dbPath)
         {
             QSqlQuery q(db);
             q.exec(QStringLiteral(
-                "SELECT id, path, mtime, size, content_hash FROM tracks WHERE removed_at IS NULL"));
+                "SELECT id, path, mtime, size, content_hash, IFNULL(title, '') = '' "
+                "FROM tracks WHERE removed_at IS NULL"));
             while (q.next()) {
                 KnownTrack k;
                 k.id = q.value(0).toInt();
                 k.mtime = q.value(2).toLongLong();
                 k.size = q.value(3).toLongLong();
                 k.contentHash = q.value(4).toString();
+                k.titleMissing = q.value(5).toBool();
                 known.insert(q.value(1).toString(), k);
             }
         }
@@ -179,11 +182,18 @@ void LibraryScanner::run(const QString &rootPath, const QString &dbPath)
             const QFileInfo info(path);
 
             const auto knownIt = known.constFind(path);
+            QString currentContentHash;
             if (knownIt != known.constEnd() && knownIt->mtime == info.lastModified().toSecsSinceEpoch()
                 && knownIt->size == info.size()) {
-                if (i % 50 == 0)
-                    emit progress(i, files.size());
-                continue; // unchanged: never opened with TagLib
+                // A missing title can be stale even when coarse mtime and file size match.
+                // Only these suspicious rows pay for the sampled hash comparison.
+                if (knownIt->titleMissing)
+                    currentContentHash = TagReader::computeContentHash(path);
+                if (!knownIt->titleMissing || currentContentHash == knownIt->contentHash) {
+                    if (i % 50 == 0)
+                        emit progress(i, files.size());
+                    continue; // unchanged: never opened with TagLib
+                }
             }
 
             TrackRecord r = TagReader::read(path);
@@ -192,7 +202,9 @@ void LibraryScanner::run(const QString &rootPath, const QString &dbPath)
                     emit progress(i, files.size());
                 continue; // corrupt or unsupported: skip this one, never abort the batch
             }
-            r.contentHash = TagReader::computeContentHash(path);
+            r.contentHash = currentContentHash.isEmpty()
+                                ? TagReader::computeContentHash(path)
+                                : currentContentHash;
 
             const int artistId = idFor(db, QStringLiteral("artists"), r.artist);
             const int albumArtistId = idFor(db, QStringLiteral("artists"), r.albumArtist);

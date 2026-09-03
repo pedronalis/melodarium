@@ -239,15 +239,6 @@ Item {
 
                 Item { Layout.fillWidth: true }
 
-                IconButton {
-                    Layout.preferredWidth: Math.round(22 * Theme.uiScale)
-                    Layout.preferredHeight: 22
-                    icon: "playlist"
-                    size: Theme.fontSizeS
-                    tooltip: qsTr("exportar coleção como M3U")
-                    onClicked: exportM3uDialog.open()
-                }
-
                 // Baixar só faz sentido com uma coleção aberta: o arquivo tem de cair em algum
                 // lugar, e o lugar é a coleção que o usuário está olhando.
                 IconButton {
@@ -265,7 +256,7 @@ Item {
                 IconButton {
                     Layout.preferredWidth: Math.round(22 * Theme.uiScale)
                     Layout.preferredHeight: 22
-                    icon: "history"
+                    icon: "pencil"
                     size: Theme.fontSizeS
                     tooltip: qsTr("renomear")
                     onClicked: {
@@ -279,7 +270,7 @@ Item {
                     id: deleteButton
                     Layout.preferredWidth: Math.round(22 * Theme.uiScale)
                     Layout.preferredHeight: 22
-                    icon: "close"
+                    icon: "trash"
                     size: Theme.fontSizeS
                     tooltip: qsTr("apagar coleção")
                     onClicked: {

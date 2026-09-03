@@ -45,14 +45,7 @@ jobs:
           sudo apt-get install --yes \
             appstream \
             flatpak \
-            flatpak-builder \
-            python3-pil \
-            python3-yaml \
-            ripgrep
-
-      - name: Validate public release surface
-        shell: bash
-        run: bash tools/check-public-release.sh
+            flatpak-builder
 
       - name: Configure Flatpak build runtime
         run: |

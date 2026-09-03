@@ -4,6 +4,7 @@
 #include "podcastscope.h"
 
 #include <QDateTime>
+#include <QFileInfo>
 #include <QLocale>
 #include <QRegularExpression>
 #include <QSqlDatabase>
@@ -225,7 +226,9 @@ QVariantMap LibraryBrowser::trackForPath(const QString &path)
 
     out.insert(QStringLiteral("path"), path);
     out.insert(QStringLiteral("id"), q.value(0).toInt());
-    out.insert(QStringLiteral("title"), q.value(1).toString());
+    const QString title = q.value(1).toString();
+    out.insert(QStringLiteral("title"),
+               title.isEmpty() ? QFileInfo(path).completeBaseName() : title);
     out.insert(QStringLiteral("artist"), q.value(2).toString());
     out.insert(QStringLiteral("album"), q.value(3).toString());
     out.insert(QStringLiteral("albumId"), q.value(4).toInt());

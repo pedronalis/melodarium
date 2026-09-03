@@ -2,3 +2,26 @@ build/
 .cache/
 compile_commands.json
 *.user
+
+# Local development workspace
+.claude/
+AGENTS.md
+CLAUDE.md
+handoff.md
+design/
+tests/
+tools/
+docs/auditoria-completude.md
+docs/brand/
+docs/plans/
+docs/solutions/
+docs/specs/
+docs/telas/
+.github/ISSUE_TEMPLATE/
+.github/PULL_REQUEST_TEMPLATE.md
+.github/dependabot.yml
+.github/workflows/ci.yml
+CONTRIBUTING.md
+CONTRIBUTING.pt-BR.md
+SECURITY.md
+CODE_OF_CONDUCT.md

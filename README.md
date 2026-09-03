@@ -4,7 +4,6 @@
   <p><strong>English</strong> · <a href="README.pt-BR.md">Português (Brasil)</a></p>
 
   <p>
-    <a href="https://github.com/pedronalis/melodarium/actions/workflows/ci.yml"><img alt="CI" src="https://github.com/pedronalis/melodarium/actions/workflows/ci.yml/badge.svg?branch=main"></a>
     <img alt="Qt 6.5+" src="https://img.shields.io/badge/Qt-6.5%2B-41CD52?logo=qt&logoColor=white">
     <img alt="Linux" src="https://img.shields.io/badge/platform-Linux-FCC624?logo=linux&logoColor=111111">
     <a href="LICENSE"><img alt="License: GPL-3.0-only" src="https://img.shields.io/badge/license-GPL--3.0--only-a78bfa"></a>
@@ -14,7 +13,7 @@
   <p><strong>Your music. Your podcasts. Your files.</strong><br>
   A local-first desktop player built with Qt 6, QML and libmpv.</p>
 
-  <p><a href="#see-it-running">See it</a> · <a href="#quick-start-on-fedora">Build it</a> · <a href="#flatpak">Flatpak</a> · <a href="CONTRIBUTING.md">Contribute</a></p>
+  <p><a href="#see-it-running">See it</a> · <a href="#quick-start-on-fedora">Build it</a> · <a href="#flatpak">Flatpak</a></p>
 </div>
 
 > [!IMPORTANT]
@@ -51,15 +50,8 @@ telemetry.
   <img src="docs/assets/screenshots/search.png" alt="Keyboard-first search across music, collections and podcasts" width="74%">
 </p>
 
-These are not design mockups. Every image is saved by the running QML scene through
-`grabToImage`, using a disposable XDG environment, generated FLAC audio, an isolated SQLite
-database and original synthetic artwork. Recreate the complete gallery with:
-
-```bash
-bash tools/capture-readme-gallery.sh ./build/melodarium
-```
-
-The script never reads your real Melodarium data or music library.
+These are not design mockups. Every image was saved by the current QML application using a
+disposable catalog, generated FLAC audio and original synthetic artwork.
 
 ## Quick start on Fedora
 
@@ -158,30 +150,6 @@ data created under the former application name, `melodia`.
 Do not copy an open SQLite database by hand. Use **Settings → Backup and restore**; restoration
 checks the bundle version, hashes, SQLite integrity and available space before swapping data.
 
-## Quality gates
-
-CI builds in Fedora 43, proves that tests were discovered, runs the C++/Qt suite, QML lint and
-deterministic UI checks. A green compiler alone is not accepted: the repository also catches
-orphaned QML, layout drift, wrong palette pixels, inaccessible controls and unreachable actions.
-
-```bash
-sudo dnf install ImageMagick appstream dbus-daemon desktop-file-utils \
-  ffmpeg-free flac flatpak-builder playerctl python3-pillow python3-pyyaml \
-  ripgrep sqlite xdotool xorg-x11-server-Xvfb
-
-cmake -S . -B build -G Ninja
-cmake --build build
-bash tools/check-test-floor.sh 25
-ctest --test-dir build --output-on-failure
-cmake --build build --target all_qmllint
-bash tools/check-orfaos.sh
-bash tools/check-fidelidade.sh
-bash tools/check-public-release.sh
-```
-
-The v0.1.0 candidate contains 35+ registered test targets. The floor check prevents CTest's
-misleading `0 failures` result from passing when zero tests were discovered.
-
 ## Current limits
 
 - The interface text is currently pt-BR; repository documentation and community support are
@@ -190,15 +158,8 @@ misleading `0 failures` result from passing when zero tests were discovered.
 - There is no Flathub listing yet. Release bundles carry a checksum and GitHub provenance
   attestation, but are not signed with a long-lived project key.
 - YouTube support uses the `yt-dlp` already installed on a native host and never ships it.
-- Several visual and interaction gates still require a human pass before the preview is called
-  stable.
 
-## Community
-
-Bug reports and ideas are welcome in either English or Portuguese. Start with the issue forms;
-for implementation details, read [CONTRIBUTING.md](CONTRIBUTING.md). Please report security issues
-privately as described in [SECURITY.md](SECURITY.md), and follow the
-[Code of Conduct](CODE_OF_CONDUCT.md).
+## License
 
 Melodarium is free software under the
 [GNU General Public License v3.0 only](LICENSE) (`GPL-3.0-only`). By contributing, you agree to

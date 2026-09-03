@@ -4,7 +4,6 @@
   <p><a href="README.md">English</a> · <strong>Português (Brasil)</strong></p>
 
   <p>
-    <a href="https://github.com/pedronalis/melodarium/actions/workflows/ci.yml"><img alt="CI" src="https://github.com/pedronalis/melodarium/actions/workflows/ci.yml/badge.svg?branch=main"></a>
     <img alt="Qt 6.5+" src="https://img.shields.io/badge/Qt-6.5%2B-41CD52?logo=qt&logoColor=white">
     <img alt="Linux" src="https://img.shields.io/badge/plataforma-Linux-FCC624?logo=linux&logoColor=111111">
     <a href="LICENSE"><img alt="Licença: GPL-3.0-only" src="https://img.shields.io/badge/licen%C3%A7a-GPL--3.0--only-a78bfa"></a>
@@ -14,7 +13,7 @@
   <p><strong>Sua música. Seus podcasts. Seus arquivos.</strong><br>
   Um player desktop local-first feito com Qt 6, QML e libmpv.</p>
 
-  <p><a href="#veja-o-app-rodando">Veja</a> · <a href="#começo-rápido-no-fedora">Compile</a> · <a href="#flatpak">Flatpak</a> · <a href="CONTRIBUTING.pt-BR.md">Contribua</a></p>
+  <p><a href="#veja-o-app-rodando">Veja</a> · <a href="#começo-rápido-no-fedora">Compile</a> · <a href="#flatpak">Flatpak</a></p>
 </div>
 
 > [!IMPORTANT]
@@ -51,15 +50,8 @@ nuvem ou telemetria.
   <img src="docs/assets/screenshots/search.png" alt="Busca pelo teclado entre músicas, coleções e podcasts" width="74%">
 </p>
 
-Essas imagens não são mockups do design. Cada uma é salva pela cena QML em execução via
-`grabToImage`, usando ambiente XDG descartável, áudio FLAC gerado, banco SQLite isolado e capas
-sintéticas originais. Recrie a galeria inteira com:
-
-```bash
-bash tools/capture-readme-gallery.sh ./build/melodarium
-```
-
-O script nunca lê seus dados reais do Melodarium nem sua biblioteca de música.
+Essas imagens não são mockups do design. Cada uma foi salva pelo aplicativo QML atual usando
+catálogo descartável, áudio FLAC gerado e capas sintéticas originais.
 
 ## Começo rápido no Fedora
 
@@ -158,30 +150,6 @@ abertura preserva dados criados com o nome anterior do aplicativo, `melodia`.
 Não copie manualmente um banco SQLite aberto. Use **Ajustes → Backup e restauração**; a restauração
 confere versão do bundle, hashes, integridade SQLite e espaço livre antes de trocar os dados.
 
-## Gates de qualidade
-
-A CI compila no Fedora 43, prova que testes foram descobertos, executa a suíte C++/Qt, lint QML e
-gates determinísticos de UI. Compilador verde não basta: o repositório também detecta QML órfão,
-desvio de layout, pixels com paleta errada, controles inacessíveis e ações sem caminho de uso.
-
-```bash
-sudo dnf install ImageMagick appstream dbus-daemon desktop-file-utils \
-  ffmpeg-free flac flatpak-builder playerctl python3-pillow python3-pyyaml \
-  ripgrep sqlite xdotool xorg-x11-server-Xvfb
-
-cmake -S . -B build -G Ninja
-cmake --build build
-bash tools/check-test-floor.sh 25
-ctest --test-dir build --output-on-failure
-cmake --build build --target all_qmllint
-bash tools/check-orfaos.sh
-bash tools/check-fidelidade.sh
-bash tools/check-public-release.sh
-```
-
-O candidato a v0.1.0 contém 35+ alvos de teste registrados. O piso impede o resultado enganoso
-`0 failures` do CTest de passar quando nenhum teste foi descoberto.
-
 ## Limites atuais
 
 - O texto da interface ainda está em pt-BR; a documentação e o suporte comunitário do repositório
@@ -190,15 +158,8 @@ O candidato a v0.1.0 contém 35+ alvos de teste registrados. O piso impede o res
 - Ainda não há listagem no Flathub. Os bundles de release têm checksum e atestado de proveniência
   do GitHub, mas não são assinados com uma chave duradoura do projeto.
 - O suporte ao YouTube usa o `yt-dlp` já instalado no host nativo e nunca o distribui.
-- Alguns gates visuais e de interação ainda pedem uma passagem humana antes de chamar o preview de
-  estável.
 
-## Comunidade
-
-Relatos de bug e ideias são bem-vindos em português ou inglês. Comece pelos formulários de issue;
-para detalhes de implementação, leia [CONTRIBUTING.pt-BR.md](CONTRIBUTING.pt-BR.md). Vulnerabilidades
-devem ser relatadas em privado conforme [SECURITY.md](SECURITY.md), respeitando o
-[Código de Conduta](CODE_OF_CONDUCT.md).
+## Licença
 
 O Melodarium é software livre sob a
 [GNU General Public License v3.0 somente](LICENSE) (`GPL-3.0-only`). Ao contribuir, você concorda
