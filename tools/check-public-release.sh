@@ -58,9 +58,19 @@ if [ -s "$ci_workflow" ]; then
         | head -n 1 | cut -d: -f1)
     git_install_line=$(rg -n 'run: dnf install -y git' "$ci_workflow" \
         | head -n 1 | cut -d: -f1)
+    safe_directory_line=$(rg -nF \
+        'run: git config --global --add safe.directory "$GITHUB_WORKSPACE"' \
+        "$ci_workflow" | head -n 1 | cut -d: -f1)
+    gate_line=$(rg -n 'name: Build and run deterministic gates' "$ci_workflow" \
+        | head -n 1 | cut -d: -f1)
     if [ -z "$checkout_line" ] || [ -z "$git_install_line" ] \
             || [ "$git_install_line" -ge "$checkout_line" ]; then
         fail "PUBLIC_RELEASE_CI_GIT_BEFORE_CHECKOUT Git must be installed before actions/checkout"
+    fi
+    if [ -z "$safe_directory_line" ] || [ -z "$gate_line" ] \
+            || [ "$safe_directory_line" -le "$checkout_line" ] \
+            || [ "$safe_directory_line" -ge "$gate_line" ]; then
+        fail "PUBLIC_RELEASE_CI_SAFE_DIRECTORY Git must trust GITHUB_WORKSPACE before repository gates"
     fi
 fi
 

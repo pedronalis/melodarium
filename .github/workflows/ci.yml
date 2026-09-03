@@ -20,6 +20,9 @@ jobs:
       - name: Check out source
         uses: actions/checkout@v4
 
+      - name: Trust checked-out repository
+        run: git config --global --add safe.directory "$GITHUB_WORKSPACE"
+
       - name: Install Fedora dependencies
         run: |
           dnf install -y \
