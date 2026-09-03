@@ -152,7 +152,7 @@ check_motion() {
                  QT_LOGGING_RULES="*.debug=true" QT_FORCE_STDERR_LOGGING=1 \
                  timeout 30 "$BIN" --measure 1100 --pane "$pane" \
                  --play-track "$TMP/faixa.wav" --measure-volume 100 \
-                 --measure-mini-motion --no-search --delay 2200 2>&1)
+                 --measure-mini-motion --no-search --delay 5000 2>&1)
     motion_line=$(printf '%s\n' "$motion_raw" | grep -ao 'MOTION .*' | tail -1 || true)
     if [ -z "$motion_line" ]; then
         echo "FALHA: a entrada de $pane não publicou amostras MOTION"

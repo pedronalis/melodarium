@@ -924,52 +924,58 @@ Window {
                 onTriggered: globalMiniPlayer.openSpeedMenu()
             }
 
+            // Start the transition only after mpv publishes the loaded file, then sample each
+            // visual phase as it actually happens. Fixed wall-clock samples race slow CI hosts.
             Timer {
-                running: root.measureMiniMotion
-                interval: 900
-                onTriggered: {
-                    root.motionMiniStart = globalMiniHost.height
-                    if (root.measurePane === "podcast")
-                        root.podcastPaneLoaded = true
-                    else
-                        root.collectionsPaneLoaded = true
-                    root.measureSectionOverride = root.measurePane
-                }
-            }
+                id: miniMotionSampler
+                property int phase: 0
 
-            Timer {
                 running: root.measureMiniMotion
-                interval: 1000
+                interval: 12
+                repeat: true
                 onTriggered: {
-                    root.motionMiniMid = globalMiniHost.height
-                }
-            }
+                    if (miniMotionSampler.phase === 0) {
+                        if (AudioEngine.currentFile === "")
+                            return
+                        root.motionMiniStart = globalMiniHost.height
+                        if (root.measurePane === "podcast")
+                            root.podcastPaneLoaded = true
+                        else
+                            root.collectionsPaneLoaded = true
+                        root.measureSectionOverride = root.measurePane
+                        miniMotionSampler.phase = 1
+                        return
+                    }
 
-            Timer {
-                running: root.measureMiniMotion
-                interval: 1140
-                onTriggered: {
-                    root.motionMiniRaised = globalMiniHost.height
-                    root.motionPageBefore = pane.opacity
-                    root.motionPlayerBefore = globalMiniPlayer.contentReveal
-                }
-            }
+                    if (miniMotionSampler.phase === 1) {
+                        const target = globalMiniPlayer.implicitHeight
+                        const current = globalMiniHost.height
+                        if (root.motionMiniMid <= 1
+                                && current > 1 && current < target - 1) {
+                            root.motionMiniMid = current
+                            return
+                        }
+                        if (root.motionMiniMid <= 1 || current < target - 2
+                                || current <= root.motionMiniMid + 1)
+                            return
+                        root.motionMiniRaised = current
+                        root.motionPageBefore = pane.opacity
+                        root.motionPlayerBefore = globalMiniPlayer.contentReveal
+                        miniMotionSampler.phase = 2
+                        return
+                    }
 
-            Timer {
-                running: root.measureMiniMotion
-                interval: 1250
-                onTriggered: {
-                    root.motionPageMid = pane.opacity
-                    root.motionPlayerMid = globalMiniPlayer.contentReveal
-                }
-            }
-
-            Timer {
-                running: root.measureMiniMotion
-                interval: 1400
-                onTriggered: {
+                    const reveal = globalMiniPlayer.contentReveal
+                    if (root.motionPlayerMid <= 0.05
+                            && reveal > 0.05 && reveal < 0.98) {
+                        root.motionPageMid = pane.opacity
+                        root.motionPlayerMid = reveal
+                        return
+                    }
+                    if (root.motionPlayerMid <= 0.05 || reveal < 0.99)
+                        return
                     root.motionPageEnd = pane.opacity
-                    root.motionPlayerEnd = globalMiniPlayer.contentReveal
+                    root.motionPlayerEnd = reveal
                     console.log("MOTION miniStart=" + root.motionMiniStart.toFixed(2)
                                 + " miniMid=" + root.motionMiniMid.toFixed(2)
                                 + " miniRaised=" + root.motionMiniRaised.toFixed(2)
@@ -982,6 +988,8 @@ Window {
                                 + " playerEnd=" + root.motionPlayerEnd.toFixed(3)
                                 + " barDuration=" + root.miniBarTransitionDuration
                                 + " contentDuration=" + root.contentTransitionDuration)
+                    miniMotionSampler.stop()
+                    Qt.quit()
                 }
             }
 
