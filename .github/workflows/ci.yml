@@ -14,6 +14,9 @@ jobs:
     container: fedora:43
 
     steps:
+      - name: Install Git for repository checkout
+        run: dnf install -y git
+
       - name: Check out source
         uses: actions/checkout@v4
 
@@ -30,7 +33,6 @@ jobs:
             flac \
             flatpak-builder \
             gcc-c++ \
-            git \
             jetbrains-mono-fonts \
             mpv-devel \
             ninja-build \
