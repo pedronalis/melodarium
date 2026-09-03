@@ -1,0 +1,97 @@
+name: Release Flatpak
+
+on:
+  push:
+    tags:
+      - "v*"
+
+permissions:
+  contents: write
+  id-token: write
+  attestations: write
+
+concurrency:
+  group: release-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  flatpak:
+    name: Build and publish x86_64 Flatpak
+    runs-on: ubuntu-24.04
+    timeout-minutes: 90
+
+    steps:
+      - name: Check out the tagged source
+        uses: actions/checkout@v4
+
+      - name: Validate tag and public release surface
+        shell: bash
+        run: |
+          set -euo pipefail
+          version="${GITHUB_REF_NAME#v}"
+          if [ -z "$version" ] || [ "$version" = "$GITHUB_REF_NAME" ]; then
+            echo "Release tags must use the v<semver> form"
+            exit 1
+          fi
+          if ! grep -Fq "<release version=\"$version\"" \
+              data/io.github.pedronalis.melodarium.metainfo.xml; then
+            echo "AppStream metadata does not declare release $version"
+            exit 1
+          fi
+          bash tools/check-public-release.sh
+
+      - name: Install Flatpak build tools
+        run: |
+          sudo apt-get update
+          sudo apt-get install --yes appstream flatpak flatpak-builder
+          flatpak remote-add --user --if-not-exists flathub \
+            https://dl.flathub.org/repo/flathub.flatpakrepo
+          flatpak install --user --noninteractive --or-update flathub \
+            org.kde.Platform//6.9 org.kde.Sdk//6.9
+
+      - name: Build the Flatpak repository and bundle
+        shell: bash
+        run: |
+          set -euo pipefail
+          version="${GITHUB_REF_NAME#v}"
+          app_id="io.github.pedronalis.melodarium"
+          build_dir="$RUNNER_TEMP/melodarium-flatpak-build"
+          state_dir="$RUNNER_TEMP/melodarium-flatpak-state"
+          repo_dir="$RUNNER_TEMP/melodarium-flatpak-repo"
+          bundle_name="melodarium-${GITHUB_REF_NAME}-x86_64.flatpak"
+
+          appstreamcli validate --pedantic \
+            data/io.github.pedronalis.melodarium.metainfo.xml
+          flatpak-builder --user --force-clean \
+            --state-dir="$state_dir" \
+            --repo="$repo_dir" \
+            --default-branch="$version" \
+            "$build_dir" packaging/io.github.pedronalis.melodarium.yml
+
+          mkdir -p dist
+          flatpak build-bundle \
+            --runtime-repo=https://dl.flathub.org/repo/flathub.flatpakrepo \
+            "$repo_dir" "dist/$bundle_name" "$app_id" "$version"
+          (cd dist && sha256sum "$bundle_name" >"$bundle_name.sha256")
+
+      - name: Attest bundle provenance
+        uses: actions/attest@v4
+        with:
+          subject-path: dist/*.flatpak
+
+      - name: Publish GitHub release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          version="${GITHUB_REF_NAME#v}"
+          notes="docs/releases/$version.md"
+          args=(release create "$GITHUB_REF_NAME" dist/*.flatpak dist/*.sha256
+                --verify-tag --title "Melodarium $GITHUB_REF_NAME")
+          if [ -s "$notes" ]; then
+            args+=(--notes-file "$notes")
+          else
+            args+=(--generate-notes)
+          fi
+          gh "${args[@]}"
