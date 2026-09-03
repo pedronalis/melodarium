@@ -1,7 +1,7 @@
 ---
 slug: github-publico
 feature: melodarium
-status: em-execucao
+status: concluido
 depende-de: [ci-e-distribuicao]
 decisao-humana: sim
 spec: pedido do Pedro em 2026-09-02 para preparar e disponibilizar o repositório publicamente
@@ -319,12 +319,12 @@ libmpv, CMake/Ninja, Flatpak e GitHub CLI.
   `docs: prepare the public launch`. Depois da observação remota, registrar URLs/runs, marcar a
   fatia concluída e commitar com `docs: record the public launch`.
 
-- [ ] **Step 4: Publicar sem PR**
+- [x] **Step 4: Publicar sem PR**
 
   Confirmar que `origin/main` é ancestral de `HEAD`; atualizar `main`, fazer push direto, definir
   descrição/tópicos/homepage e habilitar Discussions. Criar e enviar a tag anotada `v0.1.0`.
 
-- [ ] **Step 5: Observar o GitHub**
+- [x] **Step 5: Observar o GitHub**
 
   Aguardar CI e release workflow; confirmar run verde, release pública, bundle e checksum
   baixáveis, README/hero renderizados e metadados retornados por `gh repo view`. Registrar a
