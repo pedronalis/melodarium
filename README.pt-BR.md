@@ -1,6 +1,8 @@
 <div align="center">
   <img src="docs/assets/melodarium-hero.png" alt="Melodarium — player local de música e podcast rodando no Linux" width="100%">
 
+  <h1>Melodarium</h1>
+
   <p><a href="README.md">English</a> · <strong>Português (Brasil)</strong></p>
 
   <p>
@@ -10,10 +12,10 @@
     <img alt="Preview" src="https://img.shields.io/badge/status-preview-c084fc">
   </p>
 
-  <p><strong>Sua música. Seus podcasts. Seus arquivos.</strong><br>
-  Um player desktop local-first feito com Qt 6, QML e libmpv.</p>
+  <p><strong>Um player local-first de música e podcasts para Linux, focado em privacidade.</strong><br>
+  Navegue pela sua biblioteca, acompanhe podcasts RSS e reproduza tudo pelo libmpv.</p>
 
-  <p><a href="#veja-o-app-rodando">Veja</a> · <a href="#começo-rápido-no-fedora">Compile</a> · <a href="#flatpak">Flatpak</a></p>
+  <p><a href="https://github.com/pedronalis/melodarium/releases/latest"><strong>Última release</strong></a> · <a href="#veja-o-app-rodando">Capturas de tela</a> · <a href="#começo-rápido-no-fedora">Compile do código-fonte</a> · <a href="#flatpak">Flatpak</a></p>
 </div>
 
 > [!IMPORTANT]
@@ -21,12 +23,26 @@
 > Wayland/Hyprland. O projeto é software livre sob `GPL-3.0-only`; espere mudanças incompatíveis
 > enquanto a primeira versão estável ainda toma forma.
 
-## Uma biblioteca, não um feed
+## Melodarium em resumo
+
+| | |
+|---|---|
+| Ideal para | Bibliotecas pessoais de música local e podcasts RSS |
+| Plataforma | Linux; Fedora 43 com Wayland é o ambiente de referência, com fallback X11 |
+| Áudio | Reprodução pelo libmpv sem taxa ou formato de amostra forçado pelo aplicativo |
+| Armazenamento | Catálogo SQLite local; sem conta, biblioteca na nuvem ou telemetria |
+| Tecnologias | Qt 6, QML, C++20, libmpv e TagLib |
+| Distribuição | Compilação do código-fonte e bundle Flatpak x86_64 em preview |
+| Licença | Software livre e de código aberto sob `GPL-3.0-only` |
+
+## Por que Melodarium: uma biblioteca, não um feed
 
 O Melodarium é para quem ainda guarda arquivos de música, valoriza o contexto de um álbum e quer
 ouvir podcasts sem transformar o próprio histórico em dataset de terceiros. Ele varre pastas
 locais, mantém o catálogo em SQLite e entrega a reprodução ao libmpv. Não há conta, biblioteca na
 nuvem ou telemetria.
+
+### Principais recursos
 
 - Navegue por todas as faixas ou atravesse artistas, álbuns, gêneros, tags e visões inteligentes.
 - Reproduza arquivos lossless sem forçar taxa ou formato de amostra.
@@ -154,6 +170,29 @@ confere versão do bundle, hashes, integridade SQLite e espaço livre antes de t
 - Ainda não há listagem no Flathub. Os bundles de release têm checksum e atestado de proveniência
   do GitHub, mas não são assinados com uma chave duradoura do projeto.
 - O suporte ao YouTube usa o `yt-dlp` já instalado no host nativo e nunca o distribui.
+
+## Perguntas frequentes
+
+### O Melodarium é um serviço de streaming ou cliente do Spotify?
+
+Não. O Melodarium reproduz arquivos sob seu controle e acompanha feeds abertos de podcast em
+RSS/Atom. Ele não exige conta e não fornece um catálogo de música na nuvem.
+
+### O Melodarium funciona offline?
+
+Músicas locais e episódios de podcast já baixados funcionam offline. A rede só é necessária para
+atualizar feeds, baixar mídia remota ou usar recursos baseados numa URL externa.
+
+### O Melodarium reproduz FLAC e áudio lossless?
+
+Sim. O Melodarium delega a reprodução ao libmpv e não força taxa ou formato de amostra na saída. O
+grafo de áudio do sistema operacional ainda pode reamostrar o sinal.
+
+### Onde o Melodarium armazena seus dados?
+
+O catálogo e os downloads permanecem nos diretórios XDG do usuário ou no diretório de dados
+específico do Flatpak. Os caminhos exatos e o procedimento seguro de backup estão documentados em
+[Dados locais e privacidade](#dados-locais-e-privacidade).
 
 ## Licença
 

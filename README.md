@@ -1,6 +1,8 @@
 <div align="center">
   <img src="docs/assets/melodarium-hero.png" alt="Melodarium — local music and podcast player running on Linux" width="100%">
 
+  <h1>Melodarium</h1>
+
   <p><strong>English</strong> · <a href="README.pt-BR.md">Português (Brasil)</a></p>
 
   <p>
@@ -10,10 +12,10 @@
     <img alt="Preview" src="https://img.shields.io/badge/status-preview-c084fc">
   </p>
 
-  <p><strong>Your music. Your podcasts. Your files.</strong><br>
-  A local-first desktop player built with Qt 6, QML and libmpv.</p>
+  <p><strong>A privacy-first, local-first music and podcast player for Linux.</strong><br>
+  Browse your own library, follow RSS podcasts and play everything through libmpv.</p>
 
-  <p><a href="#see-it-running">See it</a> · <a href="#quick-start-on-fedora">Build it</a> · <a href="#flatpak">Flatpak</a></p>
+  <p><a href="https://github.com/pedronalis/melodarium/releases/latest"><strong>Latest release</strong></a> · <a href="#see-it-running">Screenshots</a> · <a href="#quick-start-on-fedora">Build from source</a> · <a href="#flatpak">Flatpak</a></p>
 </div>
 
 > [!IMPORTANT]
@@ -21,12 +23,26 @@
 > The project is free software released under `GPL-3.0-only`; expect breaking changes while the
 > first stable release is still taking shape.
 
-## A library, not a feed
+## Melodarium at a glance
+
+| | |
+|---|---|
+| Best for | Personal local music libraries and RSS podcasts |
+| Platform | Linux; Fedora 43 with Wayland is the reference environment, with X11 fallback |
+| Audio | libmpv playback without an application-forced sample rate or sample format |
+| Storage | Local SQLite catalog; no account, cloud library or telemetry |
+| Stack | Qt 6, QML, C++20, libmpv and TagLib |
+| Distribution | Source build and an x86_64 Flatpak preview bundle |
+| License | Free and open-source software under `GPL-3.0-only` |
+
+## Why Melodarium: a library, not a feed
 
 Melodarium is for people who still keep music files, care about album context and want podcasts
 without turning their listening history into somebody else's dataset. It scans local folders,
 keeps its catalog in SQLite and hands playback to libmpv. There is no account, cloud library or
 telemetry.
+
+### Key features
 
 - Browse every track or move through artists, albums, genres, tags and smart views.
 - Play lossless files without forcing a sample rate or sample format.
@@ -154,6 +170,29 @@ checks the bundle version, hashes, SQLite integrity and available space before s
 - There is no Flathub listing yet. Release bundles carry a checksum and GitHub provenance
   attestation, but are not signed with a long-lived project key.
 - YouTube support uses the `yt-dlp` already installed on a native host and never ships it.
+
+## Frequently asked questions
+
+### Is Melodarium a streaming service or Spotify client?
+
+No. Melodarium plays files you control and follows open RSS/Atom podcast feeds. It does not require
+an account and does not provide a cloud music catalog.
+
+### Does Melodarium work offline?
+
+Local music and downloaded podcast episodes work offline. Network access is only needed to refresh
+feeds, download remote media or use features backed by an external URL.
+
+### Does Melodarium support FLAC and lossless audio?
+
+Yes. Melodarium delegates playback to libmpv and does not force an output sample rate or sample
+format. The operating-system audio graph can still resample the signal.
+
+### Where does Melodarium store its data?
+
+The catalog and downloads stay in XDG user directories, or inside the app-specific Flatpak data
+directory. The exact paths and safe backup procedure are documented in
+[Local data and privacy](#local-data-and-privacy).
 
 ## License
 

@@ -8,19 +8,79 @@
   <summary xml:lang="pt-BR">Player local de música e podcast</summary>
   <description>
     <p>
-      Melodarium plays a local music library through libmpv and keeps playlists, tags,
-      playback history and podcast subscriptions in a local SQLite database.
+      Melodarium is a privacy-first, local-first music and podcast player for Linux. It plays
+      your own music library through libmpv and follows open RSS and Atom podcast feeds.
     </p>
     <p xml:lang="pt-BR">
-      O Melodarium toca uma biblioteca local pelo libmpv e mantém playlists, tags,
-      histórico e assinaturas de podcast em um banco SQLite local.
+      O Melodarium é um player local-first de música e podcasts para Linux, focado em
+      privacidade. Ele
+      reproduz sua biblioteca pelo libmpv e acompanha feeds abertos de podcast em RSS e Atom.
+    </p>
+    <p>
+      Browse tracks by artist, album, genre or tag; build ordered collections; manage a
+      persistent queue; download podcast episodes; and control playback through MPRIS.
+    </p>
+    <p xml:lang="pt-BR">
+      Navegue por artista, álbum, gênero ou tag; monte coleções ordenadas; gerencie uma fila
+      persistente; baixe episódios de podcast; e controle a reprodução pelo MPRIS.
+    </p>
+    <p>
+      The catalog, listening history and subscriptions stay in a local SQLite database.
+      Melodarium has no account, cloud library or telemetry.
+    </p>
+    <p xml:lang="pt-BR">
+      O catálogo, o histórico e as assinaturas ficam em um banco SQLite local. O Melodarium
+      não tem conta, biblioteca na nuvem ou telemetria.
     </p>
   </description>
+  <keywords>
+    <keyword>music</keyword>
+    <keyword>audio</keyword>
+    <keyword>podcast</keyword>
+    <keyword>RSS</keyword>
+    <keyword>library</keyword>
+    <keyword>playlist</keyword>
+    <keyword>collection</keyword>
+    <keyword>lossless</keyword>
+    <keyword xml:lang="pt-BR">música</keyword>
+    <keyword xml:lang="pt-BR">áudio</keyword>
+    <keyword xml:lang="pt-BR">podcast</keyword>
+    <keyword xml:lang="pt-BR">RSS</keyword>
+    <keyword xml:lang="pt-BR">biblioteca</keyword>
+    <keyword xml:lang="pt-BR">lista de reprodução</keyword>
+    <keyword xml:lang="pt-BR">coleção</keyword>
+    <keyword xml:lang="pt-BR">lossless</keyword>
+  </keywords>
   <launchable type="desktop-id">io.github.pedronalis.melodarium.desktop</launchable>
   <developer id="io.github.pedronalis">
     <name>Pedro Nalis</name>
   </developer>
   <url type="homepage">https://github.com/pedronalis/melodarium</url>
+  <url type="bugtracker">https://github.com/pedronalis/melodarium/issues</url>
+  <url type="vcs-browser">https://github.com/pedronalis/melodarium</url>
+  <url type="help">https://github.com/pedronalis/melodarium#readme</url>
+  <screenshots>
+    <screenshot type="default">
+      <image type="source" width="1100" height="700">https://raw.githubusercontent.com/pedronalis/melodarium/main/docs/assets/screenshots/now-playing.png</image>
+      <caption>Browse a local music library while controlling playback</caption>
+      <caption xml:lang="pt-BR">Navegue pela biblioteca local enquanto controla a reprodução</caption>
+    </screenshot>
+    <screenshot>
+      <image type="source" width="1100" height="700">https://raw.githubusercontent.com/pedronalis/melodarium/main/docs/assets/screenshots/collections.png</image>
+      <caption>Build and play ordered music collections</caption>
+      <caption xml:lang="pt-BR">Monte e reproduza coleções de música ordenadas</caption>
+    </screenshot>
+    <screenshot>
+      <image type="source" width="1100" height="700">https://raw.githubusercontent.com/pedronalis/melodarium/main/docs/assets/screenshots/podcasts.png</image>
+      <caption>Follow RSS podcasts and resume downloaded episodes</caption>
+      <caption xml:lang="pt-BR">Acompanhe podcasts RSS e retome episódios baixados</caption>
+    </screenshot>
+    <screenshot>
+      <image type="source" width="1100" height="700">https://raw.githubusercontent.com/pedronalis/melodarium/main/docs/assets/screenshots/search.png</image>
+      <caption>Search music, collections and podcasts from one overlay</caption>
+      <caption xml:lang="pt-BR">Busque músicas, coleções e podcasts em um único painel</caption>
+    </screenshot>
+  </screenshots>
   <provides>
     <binary>melodarium</binary>
   </provides>
@@ -31,6 +91,12 @@
   </categories>
   <content_rating type="oars-1.1" />
   <releases>
-    <release version="0.1.0" date="2026-09-03" />
+    <release version="0.1.0" date="2026-09-03" type="development">
+      <url>https://github.com/pedronalis/melodarium/releases/tag/v0.1.0</url>
+      <description>
+        <p>First public preview with local music, ordered collections, podcasts and Flatpak distribution.</p>
+        <p xml:lang="pt-BR">Primeiro preview público com música local, coleções ordenadas, podcasts e distribuição Flatpak.</p>
+      </description>
+    </release>
   </releases>
 </component>

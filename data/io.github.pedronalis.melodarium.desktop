@@ -1,14 +1,14 @@
 [Desktop Entry]
 Type=Application
 Name=Melodarium
-GenericName=Music and Podcast Player
-GenericName[pt_BR]=Player de música e podcast
-Comment=Play a local music library and follow podcasts
-Comment[pt_BR]=Ouça sua biblioteca local e acompanhe podcasts
+GenericName=Local Music and Podcast Player
+GenericName[pt_BR]=Player local de música e podcasts
+Comment=Play local music and RSS podcasts without an account or telemetry
+Comment[pt_BR]=Ouça músicas locais e podcasts RSS sem conta ou telemetria
 Exec=melodarium
 Icon=io.github.pedronalis.melodarium
 Terminal=false
 StartupNotify=true
 Categories=AudioVideo;Audio;Player;
-Keywords=music;audio;podcast;playlist;mpv;
-Keywords[pt_BR]=música;áudio;podcast;playlist;mpv;
+Keywords=music;audio;podcast;RSS;playlist;collection;library;lossless;FLAC;mpv;
+Keywords[pt_BR]=música;áudio;podcast;RSS;lista de reprodução;coleção;biblioteca;lossless;FLAC;mpv;
