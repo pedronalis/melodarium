@@ -89,6 +89,7 @@ jobs:
           run_logged drop bash tools/check-drop.sh ./build/melodarium
           run_logged portability bash tools/check-portability.sh ./build/melodarium
           run_logged package bash tools/check-package.sh
+          run_logged public-release bash tools/check-public-release.sh
           run_logged diff-check git diff --check
 
       - name: Upload failure diagnostics
