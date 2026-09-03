@@ -14,7 +14,7 @@ Todas as mudanças públicas relevantes são registradas aqui. O projeto passa a
 - Preparada a vitrine pública bilíngue, a galeria reproduzível do app real e os arquivos de
   comunidade.
 
-## [0.1.0] - 2026-09-02
+## [0.1.0] - 2026-09-03
 
 ### Added / Adicionado
 

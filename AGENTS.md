@@ -37,9 +37,8 @@ nunca das 16 chaves do tema do sistema: elas não têm os degraus que o desenho 
 
 ## Fronteiras
 
-- Repo em `pedronalis/melodarium`, **privado**. Push em `main` liberado; **abrir ao público
-  continua sendo decisão do Pedro** — o spec pede aberto, e o nome já saiu do `/batiza`
-  (melodarium, 2026-08-28), então o que faltava para abrir já não falta.
+- Repo em `pedronalis/melodarium`, **público** e licenciado sob `GPL-3.0-only`. Push direto em
+  `main` está liberado; não mudar visibilidade nem licença sem decisão explícita do Pedro.
 - O nome anterior era `melodia`. `migrarDoNomeAntigo()` em `main.cpp` traz biblioteca, capas,
   downloads e podcasts do caminho antigo na primeira abertura — **não remova** enquanto houver
   chance de alguém abrir com dados velhos. Nome de lote histórico (`melodia-religa`,
