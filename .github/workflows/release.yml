@@ -24,7 +24,7 @@ jobs:
       - name: Check out the tagged source
         uses: actions/checkout@v7
 
-      - name: Validate tag and public release surface
+      - name: Validate release tag
         shell: bash
         run: |
           set -euo pipefail
@@ -38,12 +38,24 @@ jobs:
             echo "AppStream metadata does not declare release $version"
             exit 1
           fi
-          bash tools/check-public-release.sh
 
-      - name: Install Flatpak build tools
+      - name: Install release tooling
         run: |
           sudo apt-get update
-          sudo apt-get install --yes appstream flatpak flatpak-builder
+          sudo apt-get install --yes \
+            appstream \
+            flatpak \
+            flatpak-builder \
+            python3-pil \
+            python3-yaml \
+            ripgrep
+
+      - name: Validate public release surface
+        shell: bash
+        run: bash tools/check-public-release.sh
+
+      - name: Configure Flatpak build runtime
+        run: |
           flatpak remote-add --user --if-not-exists flathub \
             https://dl.flathub.org/repo/flathub.flatpakrepo
           flatpak install --user --noninteractive --or-update flathub \
