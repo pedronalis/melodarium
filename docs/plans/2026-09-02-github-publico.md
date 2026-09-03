@@ -35,8 +35,7 @@ libmpv, CMake/Ninja, Flatpak e GitHub CLI.
 - “Captura real” significa pixels salvos por `Main.qml` via `grabToImage` no binário compilado;
   mockups de `design/*.dc.html` não entram na galeria pública.
 - README e contribuição têm versões completas em inglês e pt-BR, ligadas por seletor no topo.
-- Não afirmar “open source” nem criar licença até Pedro escolher explicitamente GPL-3.0, MIT ou
-  proprietário/source-available. A publicação da release depende dessa decisão humana.
+- Aplicar a decisão explícita de Pedro por `GPL-3.0-only`, sem alterar licenças de terceiros.
 - O estado público real do GitHub deve substituir a informação antiga de que o repo é privado.
 - Nunca abrir PR. O destino final autorizado é `main`, após todos os gates e uma revisão do diff.
 - Build e testes passam por `quiet-run`; CTest precisa descobrir pelo menos 25 alvos antes de a
@@ -62,7 +61,7 @@ libmpv, CMake/Ninja, Flatpak e GitHub CLI.
 - Modify: `.github/workflows/ci.yml`; create: `.github/workflows/release.yml` — gate da superfície
   pública e pacote Flatpak anexado a tags `v*`.
 - Create: `docs/releases/0.1.0.md` — notas bilíngues usadas pela primeira GitHub Release.
-- Create after Pedro's decision: `LICENSE`; modify:
+- Create: `LICENSE`; modify:
   `data/io.github.pedronalis.melodarium.metainfo.xml` — direitos coerentes em arquivo e AppStream.
 - Modify: `AGENTS.md`, `CLAUDE.md`, `handoff.md` — estado público e evidência do lançamento.
 
@@ -259,7 +258,7 @@ libmpv, CMake/Ninja, Flatpak e GitHub CLI.
 - Produces: direitos coerentes, workflow que constrói um bundle `.flatpak` e checksum SHA-256,
   e uma GitHub Release com notas bilíngues.
 
-- [ ] **Step 1: Aplicar a decisão de licença**
+- [x] **Step 1: Aplicar a decisão de licença**
 
   Usar exatamente GPL-3.0, MIT ou texto proprietário/source-available escolhido por Pedro;
   atualizar `project_license`, badges e linguagem dos READMEs sem alterar licenças de terceiros.
@@ -269,13 +268,13 @@ libmpv, CMake/Ninja, Flatpak e GitHub CLI.
   Em tags `v*`, instalar KDE SDK 6.9, construir o manifesto limpo, exportar repositório Flatpak,
   gerar `melodarium-<tag>-x86_64.flatpak` + `.sha256` e anexar ambos à release com `gh`.
 
-- [ ] **Step 3: Validar workflow e contrato legal**
+- [x] **Step 3: Validar workflow e contrato legal**
 
   Run: `quiet-run bash tools/check-public-release.sh && appstreamcli validate --pedantic data/io.github.pedronalis.melodarium.metainfo.xml`
 
   Expected: gate completo e AppStream sem erro.
 
-- [ ] **Step 4: Commitar o checkpoint**
+- [x] **Step 4: Commitar o checkpoint**
 
   Stage apenas arquivos legais/release e ledger; commitar com
   `build: publish verifiable Flatpak releases`.

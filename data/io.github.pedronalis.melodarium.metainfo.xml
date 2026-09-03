@@ -2,7 +2,7 @@
 <component type="desktop-application">
   <id>io.github.pedronalis.melodarium</id>
   <metadata_license>FSFAP</metadata_license>
-  <project_license>LicenseRef-proprietary</project_license>
+  <project_license>GPL-3.0-only</project_license>
   <name>Melodarium</name>
   <summary>Local music and podcast player</summary>
   <summary xml:lang="pt-BR">Player local de música e podcast</summary>
@@ -31,6 +31,6 @@
   </categories>
   <content_rating type="oars-1.1" />
   <releases>
-    <release version="0.1.0" date="2026-09-01" />
+    <release version="0.1.0" date="2026-09-02" />
   </releases>
 </component>
