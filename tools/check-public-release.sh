@@ -13,6 +13,7 @@ fail() {
 }
 
 required_files=(
+    LICENSE
     README.md
     README.pt-BR.md
     CONTRIBUTING.md
@@ -45,12 +46,32 @@ for path in "${required_files[@]}" "${gallery_files[@]}"; do
     fi
 done
 
-if [ ! -s LICENSE ]; then
-    fail "PUBLIC_RELEASE_LICENSE_PENDING LICENSE"
-elif rg -q '<project_license>LicenseRef-proprietary</project_license>' \
-        data/io.github.pedronalis.melodarium.metainfo.xml; then
-    fail "PUBLIC_RELEASE_LICENSE_MISMATCH AppStream is still proprietary"
+if [ -s LICENSE ]; then
+    if ! rg -Fq 'GNU GENERAL PUBLIC LICENSE' LICENSE \
+            || ! rg -Fq 'Version 3, 29 June 2007' LICENSE; then
+        fail "PUBLIC_RELEASE_LICENSE_TEXT LICENSE is not canonical GPLv3 text"
+    fi
 fi
+
+if ! rg -Fq '<project_license>GPL-3.0-only</project_license>' \
+        data/io.github.pedronalis.melodarium.metainfo.xml; then
+    fail "PUBLIC_RELEASE_LICENSE_MISMATCH AppStream is not GPL-3.0-only"
+fi
+
+license_docs=(
+    README.md
+    README.pt-BR.md
+    CONTRIBUTING.md
+    CONTRIBUTING.pt-BR.md
+    CHANGELOG.md
+    docs/releases/0.1.0.md
+)
+
+for path in "${license_docs[@]}"; do
+    if [ -s "$path" ] && ! rg -Fq 'GPL-3.0-only' "$path"; then
+        fail "PUBLIC_RELEASE_LICENSE_DOC $path does not name GPL-3.0-only"
+    fi
+done
 
 if [ -s README.md ] && ! rg -Fq 'README.pt-BR.md' README.md; then
     fail "PUBLIC_RELEASE_LANGUAGE_LINK README.md does not link to pt-BR"

@@ -7,6 +7,7 @@
     <a href="https://github.com/pedronalis/melodarium/actions/workflows/ci.yml"><img alt="CI" src="https://github.com/pedronalis/melodarium/actions/workflows/ci.yml/badge.svg?branch=main"></a>
     <img alt="Qt 6.5+" src="https://img.shields.io/badge/Qt-6.5%2B-41CD52?logo=qt&logoColor=white">
     <img alt="Linux" src="https://img.shields.io/badge/plataforma-Linux-FCC624?logo=linux&logoColor=111111">
+    <a href="LICENSE"><img alt="Licença: GPL-3.0-only" src="https://img.shields.io/badge/licen%C3%A7a-GPL--3.0--only-a78bfa"></a>
     <img alt="Preview" src="https://img.shields.io/badge/status-preview-c084fc">
   </p>
 
@@ -18,8 +19,8 @@
 
 > [!IMPORTANT]
 > O Melodarium é um preview inicial para Linux, desenvolvido e verificado no Fedora 43 com
-> Wayland/Hyprland. O código está público, mas a licença do projeto ainda está sendo escolhida;
-> até a publicação de um arquivo `LICENSE`, não há permissão para copiar, modificar ou redistribuir.
+> Wayland/Hyprland. O projeto é software livre sob `GPL-3.0-only`; espere mudanças incompatíveis
+> enquanto a primeira versão estável ainda toma forma.
 
 ## Uma biblioteca, não um feed
 
@@ -88,8 +89,16 @@ Isso instala o executável, a entrada do menu, os metadados AppStream e o ícone
 
 ## Flatpak
 
-O repositório inclui um manifesto Flatpak fixado sobre KDE/Qt 6.9. Enquanto os bundles assinados
-de release não são publicados, compile localmente:
+Releases marcadas publicam um bundle Flatpak x86_64, checksum SHA-256 e atestado de proveniência
+do GitHub na [página de Releases](https://github.com/pedronalis/melodarium/releases). Baixe o
+bundle e o checksum no mesmo diretório e execute:
+
+```bash
+sha256sum -c melodarium-v0.1.0-x86_64.flatpak.sha256
+flatpak install --user ./melodarium-v0.1.0-x86_64.flatpak
+```
+
+O repositório também inclui um manifesto Flatpak fixado sobre KDE/Qt 6.9 para builds locais:
 
 ```bash
 flatpak install --user flathub org.kde.Sdk//6.9
@@ -178,7 +187,8 @@ O candidato a v0.1.0 contém 35+ alvos de teste registrados. O piso impede o res
 - O texto da interface ainda está em pt-BR; a documentação e o suporte comunitário do repositório
   estão disponíveis em inglês e português.
 - Linux é a única plataforma testada. Wayland/Hyprland é o alvo principal; X11 é fallback suportado.
-- Ainda não há listagem no Flathub, e os bundles de release não são assinados.
+- Ainda não há listagem no Flathub. Os bundles de release têm checksum e atestado de proveniência
+  do GitHub, mas não são assinados com uma chave duradoura do projeto.
 - O suporte ao YouTube usa o `yt-dlp` já instalado no host nativo e nunca o distribui.
 - Alguns gates visuais e de interação ainda pedem uma passagem humana antes de chamar o preview de
   estável.
@@ -190,8 +200,9 @@ para detalhes de implementação, leia [CONTRIBUTING.pt-BR.md](CONTRIBUTING.pt-B
 devem ser relatadas em privado conforme [SECURITY.md](SECURITY.md), respeitando o
 [Código de Conduta](CODE_OF_CONDUCT.md).
 
-O projeto está visível publicamente enquanto a licença é escolhida. Leia o aviso no topo deste
-arquivo antes de usar ou redistribuir o código.
+O Melodarium é software livre sob a
+[GNU General Public License v3.0 somente](LICENSE) (`GPL-3.0-only`). Ao contribuir, você concorda
+em licenciar sua contribuição sob os mesmos termos.
 
 ## Créditos
 

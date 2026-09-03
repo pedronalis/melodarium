@@ -7,8 +7,8 @@ e código são bem-vindos em português ou inglês. O Melodarium ainda é um pre
 então mudanças pequenas e bem provadas são muito mais fáceis de revisar que reescritas amplas.
 
 > [!IMPORTANT]
-> A licença do projeto ainda está sendo escolhida. Até a publicação de `LICENSE`, contribua por
-> issues e discussões de design/diagnóstico em vez de enviar código para inclusão no projeto.
+> O Melodarium usa a licença `GPL-3.0-only`. Ao enviar uma contribuição para inclusão, você
+> concorda em licenciá-la sob os mesmos termos. Leia o texto completo em [LICENSE](LICENSE).
 
 ## Antes de começar
 

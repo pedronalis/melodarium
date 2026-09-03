@@ -7,8 +7,8 @@ are welcome in English or Portuguese. Melodarium is still an early Linux preview
 well-proven changes are much easier to review than broad rewrites.
 
 > [!IMPORTANT]
-> The project license is still being selected. Until `LICENSE` is published, please contribute
-> through issues and design/diagnostic discussion rather than submitting code for inclusion.
+> Melodarium is licensed under `GPL-3.0-only`. By submitting a contribution for inclusion, you
+> agree to license it under the same terms. See [LICENSE](LICENSE) for the complete text.
 
 ## Before you start
 

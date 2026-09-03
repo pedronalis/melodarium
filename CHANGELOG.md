@@ -30,6 +30,10 @@ Todas as mudanças públicas relevantes são registradas aqui. O projeto passa a
 - CI Fedora com 35+ alvos de teste, lint QML e gates determinísticos visuais/de interação.
 - Native GNU install metadata and a reproducible KDE/Qt 6.9 Flatpak manifest.
 - Metadados de instalação GNU nativa e manifesto Flatpak KDE/Qt 6.9 reproduzível.
+- Bilingual public documentation, reproducible real-app screenshots and verifiable Flatpak
+  release automation under `GPL-3.0-only`.
+- Documentação pública bilíngue, prints reproduzíveis do app real e automação verificável de
+  releases Flatpak sob `GPL-3.0-only`.
 
 [Unreleased]: https://github.com/pedronalis/melodarium/compare/v0.1.0...HEAD
 [0.1.0]: https://github.com/pedronalis/melodarium/releases/tag/v0.1.0
