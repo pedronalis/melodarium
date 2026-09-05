@@ -158,7 +158,6 @@ private:
     double m_volume = 100.0;
     QString m_currentFile;
     int m_playlistPos = -1;
-    int m_pendingStartIndex = -1;
     double m_speed = 1.0;
     double m_podcastSpeed = 1.0;
     bool m_podcastMode = false;

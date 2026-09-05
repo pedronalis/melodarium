@@ -22,7 +22,6 @@ enum PropertyId : uint64_t {
     PROP_PATH = 4,
     PROP_PLAYLIST_POS = 5,
     PROP_SPEED = 6,
-    PROP_PLAYLIST_COUNT = 7,
 };
 
 constexpr auto kSavedQueueKey = "playback/queue";
@@ -163,7 +162,6 @@ AudioEngine::AudioEngine(QObject *parent, bool headlessAo)
     mpv_observe_property(m_mpv, PROP_PATH, "path", MPV_FORMAT_STRING);
     mpv_observe_property(m_mpv, PROP_PLAYLIST_POS, "playlist-pos", MPV_FORMAT_INT64);
     mpv_observe_property(m_mpv, PROP_SPEED, "speed", MPV_FORMAT_DOUBLE);
-    mpv_observe_property(m_mpv, PROP_PLAYLIST_COUNT, "playlist-count", MPV_FORMAT_INT64);
     mpv_set_wakeup_callback(m_mpv, &AudioEngine::wakeup, this);
 }
 
@@ -354,11 +352,16 @@ void AudioEngine::loadPlaylist(const QStringList &files, int startIndex, bool re
         contents += '\n';
     }
 
+    // Set the start index before loadlist: a later playlist-play-index races mpv's queued
+    // startup of the first entry. Waiting for playlist-count also fails when reloading the
+    // same queue, because its unchanged size produces no property notification. Keep this
+    // option set until mpv consumes it, and overwrite it for every playlist load.
     bool loadedAsPlaylist = false;
-    m_pendingStartIndex = boundedStart > 0 ? boundedStart : -1;
     if (playlist.open()
         && playlist.write(contents) == contents.size()
         && playlist.flush()) {
+        const QByteArray start = QByteArray::number(boundedStart);
+        mpv_set_property_string(m_mpv, "playlist-start", start.constData());
         loadedAsPlaylist = command({QStringLiteral("loadlist"), playlist.fileName(),
                                     QStringLiteral("replace")});
     }
@@ -366,7 +369,6 @@ void AudioEngine::loadPlaylist(const QStringList &files, int startIndex, bool re
     // A temporary directory can be unavailable under an unusually restricted runtime.
     // Preserve correctness there; the normal path remains a single validated mpv command.
     if (!loadedAsPlaylist) {
-        m_pendingStartIndex = -1;
         for (int i = 0; i < files.size(); ++i) {
             const QString mode = i == 0 ? QStringLiteral("replace")
                                         : QStringLiteral("append");
@@ -806,15 +808,6 @@ void AudioEngine::handleEvent(mpv_event *event)
             m_speed = *static_cast<double *>(prop->data);
             emit speedChanged();
             break;
-        case PROP_PLAYLIST_COUNT: {
-            const int count = static_cast<int>(*static_cast<int64_t *>(prop->data));
-            if (m_pendingStartIndex >= 0 && count > m_pendingStartIndex) {
-                const int target = m_pendingStartIndex;
-                m_pendingStartIndex = -1;
-                command({QStringLiteral("playlist-play-index"), QString::number(target)});
-            }
-            break;
-        }
         default:
             break;
         }
